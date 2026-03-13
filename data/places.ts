@@ -15,6 +15,58 @@ export type Place = {
 
 export const places: Place[] = [
   {
+    slug: "maison-millet",
+    name: "Maison Millet",
+    location: "Grande Rue, Barbizon",
+    shortDescription: "The former home of Jean‑François Millet, now a quiet landmark on the village street.",
+    description:
+      "The house where Jean‑François Millet lived and worked for over twenty years still stands on the Grande Rue. Its garden, studio, and modest rooms suggest a life spent between domestic rhythms and the surrounding fields. More home than monument, it remains one of the few places in Barbizon where a painter's daily scale is still legible.",
+    history:
+      "Millet arrived in Barbizon in 1849 and stayed until his death in 1875, producing some of his most important work here. The house became a site of pilgrimage for artists and critics in the late nineteenth century, and later a protected landmark.",
+    heroImage: "/images/places/maison-millet.jpg",
+    category: "Studio",
+    latitude: 48.4462,
+    longitude: 2.6074
+  },
+  {
+    slug: "auberge-ganne",
+    name: "Auberge Ganne",
+    location: "Grande Rue, Barbizon",
+    shortDescription: "An inn turned museum, where walls once held sketches and evening conversations.",
+    description:
+      "The Auberge Ganne was the social centre of the Barbizon School: a country inn where painters lodged cheaply, argued about light and technique, and left sketches on the walls in lieu of payment. Today it functions as a museum, with those painted walls still visible behind glass.",
+    history:
+      "Père Ganne began hosting artists in the 1830s, accepting paintings as payment. The inn became a gathering place for Millet, Rousseau, Diaz, and their circle. Restored and reopened as a museum in the late twentieth century, it is now one of the best-preserved records of how the Barbizon painters actually lived.",
+    heroImage: "/images/places/auberge-ganne.jpg",
+    category: "Museum",
+    latitude: 48.4458,
+    longitude: 2.6068
+  },
+  {
+    slug: "grande-rue",
+    name: "Grande Rue",
+    location: "Barbizon village centre",
+    shortDescription: "The main street as a long, slow axis between stone houses and forest air.",
+    description:
+      "The Grande Rue runs the length of Barbizon from the edge of the forest to the open farmland beyond, passing studios, inns, and stone walls along the way. Walking it slowly reveals the village's rhythm: closed gates and open gardens, the smell of stone in the morning, the sound of the forest at either end.",
+    heroImage: "/images/places/grande-rue.jpg",
+    category: "Walk",
+    latitude: 48.4455,
+    longitude: 2.607
+  },
+  {
+    slug: "forest-entrance",
+    name: "Forest Entrance",
+    location: "Barbizon, edge of Fontainebleau",
+    shortDescription: "Where village paving gives way to sand paths, rock, and filtered light.",
+    description:
+      "At the end of the village, the cobblestones give way to sand and the light changes. The Fontainebleau forest begins here without fanfare: a shift in surface underfoot, the first rocks appearing between the trees, a quieter air. This threshold was the daily destination of the Barbizon painters.",
+    heroImage: "/images/places/forest-entrance.jpg",
+    category: "Landscape",
+    latitude: 48.4448,
+    longitude: 2.6055
+  },
+  {
     slug: "atelier-rouge",
     name: "Atelier Rouge",
     location: "Forest edge, Barbizon",

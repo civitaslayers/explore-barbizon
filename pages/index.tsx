@@ -4,24 +4,28 @@ import { type NextPage } from "next";
 
 const featuredPlaces = [
   {
+    slug: "maison-millet",
     name: "Maison Millet",
     description: "The former home of Jean‑François Millet, now a quiet landmark on the village street.",
-    image: "/images/maison-millet.jpg"
+    image: "/images/places/maison-millet.jpg"
   },
   {
+    slug: "auberge-ganne",
     name: "Auberge Ganne",
     description: "An inn turned museum, where walls once held sketches and evening conversations.",
-    image: "/images/auberge-ganne.jpg"
+    image: "/images/places/auberge-ganne.jpg"
   },
   {
+    slug: "grande-rue",
     name: "Grande Rue",
     description: "The main street as a long, slow axis between stone houses and forest air.",
-    image: "/images/grande-rue.jpg"
+    image: "/images/places/grande-rue.jpg"
   },
   {
+    slug: "forest-entrance",
     name: "Forest Entrance",
     description: "Where village paving gives way to sand paths, rock, and filtered light.",
-    image: "/images/forest-entrance.jpg"
+    image: "/images/places/forest-entrance.jpg"
   }
 ];
 
@@ -176,8 +180,9 @@ const HomePage: NextPage = () => {
 
           <div className="grid gap-6 md:grid-cols-4">
             {featuredPlaces.map((place) => (
-              <article
-                key={place.name}
+              <Link
+                key={place.slug}
+                href={`/places/${place.slug}`}
                 className="group card card-hover flex flex-col overflow-hidden"
               >
                 <div
@@ -192,7 +197,7 @@ const HomePage: NextPage = () => {
                     {place.description}
                   </p>
                 </div>
-              </article>
+              </Link>
             ))}
           </div>
         </section>

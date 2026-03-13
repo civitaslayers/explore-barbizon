@@ -1,11 +1,23 @@
+import { useState } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 type LayoutProps = {
   children: ReactNode;
 };
 
+const navLinks = [
+  { href: "/map", label: "Explore Map" },
+  { href: "/places", label: "Places" },
+  { href: "/stories", label: "Stories" },
+  { href: "/plan-your-visit", label: "Plan Your Visit" },
+];
+
 export function Layout({ children }: LayoutProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const { pathname } = useRouter();
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-30 border-b border-ink/10 bg-cream/80 backdrop-blur-md">
@@ -13,24 +25,57 @@ export function Layout({ children }: LayoutProps) {
           <Link
             href="/"
             className="font-serif text-xs uppercase tracking-[0.26em] text-ink md:text-sm"
+            onClick={() => setMenuOpen(false)}
           >
             Explore Barbizon
           </Link>
+
+          {/* Desktop nav */}
           <nav className="hidden items-center gap-8 md:flex">
-            <Link href="/map" className="nav-link">
-              Explore Map
-            </Link>
-            <Link href="/places" className="nav-link">
-              Places
-            </Link>
-            <Link href="/stories" className="nav-link">
-              Stories
-            </Link>
-            <Link href="/plan-your-visit" className="nav-link">
-              Plan Your Visit
-            </Link>
+            {navLinks.map(({ href, label }) => (
+              <Link key={href} href={href} className="nav-link">
+                {label}
+              </Link>
+            ))}
           </nav>
+
+          {/* Mobile hamburger */}
+          <button
+            className="flex flex-col items-end gap-[5px] p-1 md:hidden"
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+          >
+            <span
+              className={`block h-px w-5 bg-ink transition-all duration-200 ease-soft ${menuOpen ? "translate-y-[7px] -rotate-45" : ""}`}
+            />
+            <span
+              className={`block h-px bg-ink transition-all duration-200 ease-soft ${menuOpen ? "w-5 opacity-0" : "w-3.5"}`}
+            />
+            <span
+              className={`block h-px w-5 bg-ink transition-all duration-200 ease-soft ${menuOpen ? "-translate-y-[7px] rotate-45" : ""}`}
+            />
+          </button>
         </div>
+
+        {/* Mobile nav panel */}
+        {menuOpen && (
+          <nav className="border-t border-ink/10 bg-cream/95 px-6 py-5 md:hidden">
+            <ul className="flex flex-col gap-5">
+              {navLinks.map(({ href, label }) => (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    className={`text-[11px] uppercase tracking-[0.3em] no-underline transition-colors duration-200 ${pathname === href ? "text-ink" : "text-ink/50 hover:text-ink"}`}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
       </header>
 
       <main className="flex-1">
