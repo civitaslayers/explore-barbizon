@@ -35,7 +35,16 @@ const HomePage: NextPage = () => {
       <div className="section-stack">
         {/* 1. HERO SECTION */}
         <section className="relative -mx-4 flex min-h-[78vh] items-center overflow-hidden rounded-[2.25rem] bg-ink px-4 py-14 md:-mx-8 md:px-10 md:py-20">
-          <div className="pointer-events-none absolute inset-0 bg-[url('/images/hero-barbizon.jpg')] bg-cover bg-center opacity-85 mix-blend-multiply" />
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            poster="/images/hero-barbizon.jpg"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-85 mix-blend-multiply"
+          >
+            <source src="/videos/hero-barbizon.mp4" type="video/mp4" />
+          </video>
           <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/60 to-ink/25" />
 
           <div className="fade-in-hero relative z-10 max-w-xl space-y-7 text-cream md:max-w-2xl">
@@ -45,10 +54,6 @@ const HomePage: NextPage = () => {
             <h1 className="heading-xl text-cream">
               Explore Barbizon
             </h1>
-            <p className="text-sm leading-relaxed text-cream/80 md:text-base md:leading-relaxed">
-              An insider&apos;s guide to art, forest, and village life at the edge
-              of Fontainebleau.
-            </p>
             <div className="flex flex-wrap gap-3 pt-2">
               <Link
                 href="/map"
@@ -57,10 +62,10 @@ const HomePage: NextPage = () => {
                 Explore the Map
               </Link>
               <Link
-                href="/plan-your-visit"
+                href="/places"
                 className="btn btn-secondary border-cream/70 text-cream/90 hover:bg-cream/10"
               >
-                Plan Your Visit
+                Discover the Village
               </Link>
             </div>
           </div>
@@ -202,15 +207,9 @@ const HomePage: NextPage = () => {
               A quiet cartography in progress.
             </h2>
           </header>
-          <div className="space-y-4">
-            <div className="card flex h-64 items-center justify-center border-dashed border-ink/25 bg-[radial-gradient(circle_at_top,_#f5f1e8,_#d6d0c3)] px-8 text-center text-xs leading-relaxed text-ink/60 md:text-sm">
-              Future interactive map of Barbizon with layered views of studios,
-              paths, and clearings.
-            </div>
-            <Link href="/map" className="btn btn-secondary text-[11px]">
-              Open the Interactive Map
-            </Link>
-          </div>
+          <Link href="/map" className="btn btn-secondary text-[11px]">
+            Open the Interactive Map
+          </Link>
         </section>
 
         {/* 6. BARBIZON THROUGH TIME */}
@@ -229,12 +228,6 @@ const HomePage: NextPage = () => {
               draw on historical postcards, guidebooks, and archival images. The
               village has been looked at and described for over a century; this
               project gathers some of those ways of seeing.
-            </p>
-            <p>
-              In future iterations, this section will become a small reading
-              room of images and texts: early tourist cards, studio interiors,
-              and fragments from artists&apos; letters that fix particular corners
-              of the village in time.
             </p>
           </div>
         </section>
