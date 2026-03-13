@@ -6,8 +6,8 @@ export type Place = {
   location: string;
   shortDescription: string;
   description: string;
-  history?: string;
-  heroImage?: string;
+  history: string | null;
+  heroImage: string | null;
   category: PlaceCategory;
   latitude: number;
   longitude: number;
@@ -49,6 +49,7 @@ export const places: Place[] = [
     shortDescription: "The main street as a long, slow axis between stone houses and forest air.",
     description:
       "The Grande Rue runs the length of Barbizon from the edge of the forest to the open farmland beyond, passing studios, inns, and stone walls along the way. Walking it slowly reveals the village's rhythm: closed gates and open gardens, the smell of stone in the morning, the sound of the forest at either end.",
+    history: null,
     heroImage: "/images/places/grande-rue.jpg",
     category: "Walk",
     latitude: 48.4455,
@@ -61,6 +62,7 @@ export const places: Place[] = [
     shortDescription: "Where village paving gives way to sand paths, rock, and filtered light.",
     description:
       "At the end of the village, the cobblestones give way to sand and the light changes. The Fontainebleau forest begins here without fanfare: a shift in surface underfoot, the first rocks appearing between the trees, a quieter air. This threshold was the daily destination of the Barbizon painters.",
+    history: null,
     heroImage: "/images/places/forest-entrance.jpg",
     category: "Landscape",
     latitude: 48.4448,

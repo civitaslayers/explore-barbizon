@@ -21,8 +21,9 @@ Update this file whenever work is completed or blockers are resolved.
 ## Next
 *Unblocked after Now tasks or after a specific blocker is resolved.*
 
-- [ ] Wire Supabase: install `@supabase/supabase-js`, create `lib/supabase.ts` *(needs anon key)*
-- [ ] Replace `data/places.ts` with live Supabase query to `locations` *(needs anon key)*
+- [x] Wire Supabase: install `@supabase/supabase-js`, create `lib/supabase.ts` ✓
+- [x] Replace `data/places.ts` with live Supabase query to `locations` (ISR + static fallback) ✓
+- [ ] Seed `locations` table in Supabase with 7 entries from `data/places.ts` *(needs anon key in .env.local to verify)*
 - [ ] Replace `data/tours.ts` with live Supabase query to `tours` + `tour_stops` *(needs anon key)*
 - [ ] Schema migration: create `artists` + `artist_locations` tables
 - [ ] Schema migration: create `visual_works` + `visual_work_locations` tables

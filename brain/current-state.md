@@ -6,7 +6,7 @@ Last updated: 2026-03-13
 
 ## Status
 
-Visual shell partially built. Schema fully designed but not yet migrated. No live Supabase connection in frontend. Blocked on media assets and Supabase anon key. Dev environment is now fully configured for autonomous AI development.
+Visual shell partially built. Supabase SDK installed and integrated with ISR + static fallback pattern. Schema fully designed but not yet migrated. Live data queries ready — blocked on `.env.local` anon key and media assets. Dev environment fully configured for autonomous AI development.
 
 ---
 
@@ -23,6 +23,10 @@ Visual shell partially built. Schema fully designed but not yet migrated. No liv
 - Schema: live Supabase schema documented (7 tables) in `docs/schema-reference.md` Part 1
 - Schema: proposed Civitas target schema documented in `docs/schema-reference.md` Part 2
 - `visual_works` + `visual_work_locations` geo model finalised
+- Supabase SDK: `@supabase/supabase-js` installed, `lib/supabase.ts` with typed helpers + `toPlace()` adapter
+- `pages/places/index.tsx` + `[slug].tsx`: ISR with live Supabase queries + static fallback
+- ESLint: migrated to flat config (`eslint.config.mjs`), `npm run lint` clean on ESLint 9 / Next.js 16
+- `tsconfig.json`: removed non-existent `jest` type reference, `tsc --noEmit` clean
 
 ---
 

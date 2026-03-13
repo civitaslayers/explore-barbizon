@@ -65,9 +65,9 @@ function toPlace(row: LocationRow): Place {
     shortDescription: row.short_description ?? "",
     description: row.full_description ?? "",
     // narrative maps to the history/context field on the place page
-    history: row.narrative ?? undefined,
-    // heroImage comes from the media table (not yet wired); pages handle undefined
-    heroImage: undefined,
+    history: row.narrative ?? null,
+    // heroImage comes from the media table (not yet wired); pages handle null
+    heroImage: null,
     // category comes from the joined categories.name — cast to PlaceCategory
     category: (row.categories?.name ?? "Studio") as PlaceCategory,
     latitude: row.latitude,
