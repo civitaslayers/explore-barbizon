@@ -1,26 +1,28 @@
-# Civitas Layers — Claude Guide
+# Claude Code Operating Guide
 
-Before working on the project read:
-
+Read these files before making meaningful changes:
 1. MAIN_BRAIN.md
 2. brain/current-state.md
 3. brain/decisions.md
 4. docs/schema-reference.md
-5. docs/frontend-workflow.md
+5. docs/design-direction.md
+6. docs/frontend-workflow.md
 
-Project goal:
-Build a geo-narrative platform for heritage towns.
+Project:
+Explore Barbizon / Civitas Layers
 
-Current prototype:
-ExploreBarbizon.
+Goal:
+Build a geo-narrative platform for heritage towns, starting with Barbizon.
 
-Tech stack:
-Next.js
-Supabase
-Mapbox
-Tailwind
+Core stack:
+- Next.js
+- Supabase
+- Mapbox
+- Tailwind
+- Webflow as editorial shell where relevant
 
-Guidelines:
-Prefer incremental refinement.
-Avoid rewriting working sections unnecessarily.
-Maintain a calm, elegant editorial aesthetic.
+Working style:
+- Prefer refinement over unnecessary rewrites
+- Preserve elegant, visual-first, editorial direction
+- Avoid generic SaaS aesthetics
+- Update brain files when architecture, workflow, or priorities change

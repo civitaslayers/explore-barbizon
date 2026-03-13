@@ -1,10 +1,16 @@
 # Current State
 
-Repo initialized
-GitHub connected
-Project brain structure created
+## Built
+- Local project exists
+- GitHub repo connected
+- Brain/docs structure created
 
-Next steps:
-- connect Claude Code
-- refine homepage
-- connect Supabase data
+## In progress
+- Populate project brain
+- Set up Claude Code
+- Refine homepage and workflow
+
+## Next
+- Install Claude Code
+- Run first repo-reading session
+- Confirm priorities and missing docs
