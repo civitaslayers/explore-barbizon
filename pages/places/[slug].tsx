@@ -2,6 +2,7 @@ import Head from "next/head";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 import { getAllPlaces, type Place } from "@/data/places";
+import { getPublishedLocations, getPublishedSlugs } from "@/lib/supabase";
 
 type PlacePageProps = {
   place: Place;
@@ -181,15 +182,16 @@ const PlacePage: NextPage<PlacePageProps> = ({
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const places = getAllPlaces();
-  const paths = places.map((place) => ({
-    params: { slug: place.slug }
-  }));
-
-  return {
-    paths,
-    fallback: false
-  };
+  try {
+    const slugs = await getPublishedSlugs();
+    const paths = slugs.map((slug) => ({ params: { slug } }));
+    // blocking: new Supabase slugs get generated on first request
+    return { paths, fallback: "blocking" };
+  } catch {
+    // Supabase unavailable — pre-render only the known static slugs
+    const paths = getAllPlaces().map((p) => ({ params: { slug: p.slug } }));
+    return { paths, fallback: false };
+  }
 };
 
 export const getStaticProps: GetStaticProps<PlacePageProps> = async ({
@@ -200,32 +202,39 @@ export const getStaticProps: GetStaticProps<PlacePageProps> = async ({
     return { notFound: true };
   }
 
-  const allPlaces = getAllPlaces();
-  const place = allPlaces.find((p) => p.slug === slug);
+  try {
+    // Fetch all published locations once; derive related + nearby from the set
+    const allPlaces = await getPublishedLocations();
+    const place = allPlaces.find((p) => p.slug === slug);
 
-  if (!place) {
-    return { notFound: true };
+    if (!place) return { notFound: true };
+
+    const relatedPlaces = allPlaces
+      .filter((p) => p.slug !== slug && p.category === place.category)
+      .slice(0, 3);
+
+    const nearbyPlaces = allPlaces
+      .filter((p) => p.slug !== slug && p.category !== place.category)
+      .slice(0, 3);
+
+    return { props: { place, relatedPlaces, nearbyPlaces }, revalidate: 60 };
+  } catch {
+    // Supabase unavailable — fall back to static data
+    const allPlaces = getAllPlaces();
+    const place = allPlaces.find((p) => p.slug === slug);
+
+    if (!place) return { notFound: true };
+
+    const relatedPlaces = allPlaces
+      .filter((p) => p.slug !== slug && p.category === place.category)
+      .slice(0, 3);
+
+    const nearbyPlaces = allPlaces
+      .filter((p) => p.slug !== slug && p.category !== place.category)
+      .slice(0, 3);
+
+    return { props: { place, relatedPlaces, nearbyPlaces }, revalidate: 60 };
   }
-
-  const relatedPlaces = allPlaces
-    .filter(
-      (p) => p.slug !== place.slug && p.category === place.category
-    )
-    .slice(0, 3);
-
-  const nearbyPlaces = allPlaces
-    .filter(
-      (p) => p.slug !== place.slug && p.category !== place.category
-    )
-    .slice(0, 3);
-
-  return {
-    props: {
-      place,
-      relatedPlaces,
-      nearbyPlaces
-    }
-  };
 };
 
 export default PlacePage;

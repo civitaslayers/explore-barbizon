@@ -6,9 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint ."
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.99.1",
     "next": "latest",
     "react": "latest",
     "react-dom": "latest"

@@ -2,6 +2,7 @@ import Head from "next/head";
 import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 import { getAllPlaces, type Place } from "@/data/places";
+import { getPublishedLocations } from "@/lib/supabase";
 
 type PlacesIndexProps = {
   places: Place[];
@@ -57,12 +58,13 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({ places }) => {
 };
 
 export const getStaticProps: GetStaticProps<PlacesIndexProps> = async () => {
-  const places = getAllPlaces();
-  return {
-    props: {
-      places
-    }
-  };
+  try {
+    const places = await getPublishedLocations();
+    return { props: { places }, revalidate: 60 };
+  } catch {
+    // Supabase unavailable or not configured — use static fallback
+    return { props: { places: getAllPlaces() }, revalidate: 60 };
+  }
 };
 
 export default PlacesIndexPage;
