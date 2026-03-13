@@ -13,7 +13,8 @@
       "Bash(git add *)",
       "Bash(git log *)",
       "Bash(git commit *)",
-      "Bash(git push)"
+      "Bash(git push)",
+      "Bash(bash .claude/hooks/*)"
     ],
     "deny": [
       "Read(./.env)",
@@ -32,6 +33,17 @@
           {
             "type": "command",
             "command": "bash .claude/hooks/session-start.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "git commit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/pre-commit-check.sh"
           }
         ]
       }

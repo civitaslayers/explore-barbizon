@@ -6,23 +6,23 @@ Last updated: 2026-03-13
 
 ## Status
 
-Visual shell partially done. Schema designed but not yet implemented. No live data connection. Blocked on assets and Supabase anon key.
+Visual shell partially built. Schema fully designed but not yet migrated. No live Supabase connection in frontend. Blocked on media assets and Supabase anon key. Dev environment is now fully configured for autonomous AI development.
 
 ---
 
 ## Last Completed
 
-- All brain/ and docs/ files populated (no more stubs)
-- Homepage hero: `<video>` element in place (code done, asset missing)
-- Homepage: hero text stripped to eyebrow + H1 + two CTAs
-- Homepage: second CTA → "Discover the Village" → /places
-- Homepage: empty map placeholder and WIP copy removed
+- Persistent AI dev environment: settings.json, hooks, agents, slash commands all configured
+- `brain/task-queue.md` created and seeded (Now / Next / Later / Blocked)
+- `/next-task`, `/update-brain`, `/schema-check`, `/ship-feature` commands available
+- 4 agents: civitas-architect, civitas-implementer, civitas-content-ops, civitas-release-checker
+- Homepage hero: `<video autoPlay muted loop playsInline>` (asset still needed)
+- Homepage: text stripped, CTAs fixed, map placeholder removed, WIP copy removed
 - Navigation: mobile hamburger with animated X and active route state
-- Featured place cards: wrapped in `<Link>`, all four have slugs and data entries
-- `data/places.ts`: 7 entries (maison-millet, auberge-ganne, grande-rue, forest-entrance, atelier-rouge, sentier-des-peintres, musee-de-barbizon)
-- Schema: live Supabase schema pulled and documented in `docs/schema-reference.md` Part 1
+- Featured place cards: `<Link>` with slugs, 7 entries in `data/places.ts`
+- Schema: live Supabase schema documented (7 tables) in `docs/schema-reference.md` Part 1
 - Schema: proposed Civitas target schema documented in `docs/schema-reference.md` Part 2
-- `visual_works` + `visual_work_locations` model finalised (replaces `paintings`)
+- `visual_works` + `visual_work_locations` geo model finalised
 
 ---
 
@@ -30,35 +30,24 @@ Visual shell partially done. Schema designed but not yet implemented. No live da
 
 | Blocker | Needed for |
 |---|---|
-| `/public/videos/hero-barbizon.mp4` missing | Hero video to render |
-| `/public/images/places/*.jpg` missing | Place cards to show images |
-| Supabase `anon` key not in `.env.local` | Any live data connection |
+| `/public/videos/hero-barbizon.mp4` | Hero video renders |
+| `/public/images/places/*.jpg` (7 files) | Place card images render |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` in `.env.local` | All live data queries |
 
 ---
 
-## Next Tasks (in order)
+## Next Tasks
 
-1. **Add real assets** — drop video into `public/videos/`, images into `public/images/places/`
-2. **Wire Supabase** — add anon key to `.env.local`, install `@supabase/supabase-js`, create `lib/supabase.ts`, replace `data/places.ts` with live query
-3. **Run schema migrations** — in order: `tours` additions → `stories` → `artists` → `visual_works` → `routes` → `layers` (see `docs/schema-reference.md`)
-4. **Visual refinement pass** — cards, large-screen width, place page (`pages/places/[slug].tsx`)
-5. **Dashboard v1** — login, overview, locations list, single location editor
+See `brain/task-queue.md` for the full ordered queue. Top unblocked items:
+
+1. Visual refinement — card design, large-screen layout width
+2. Place page refinement (`pages/places/[slug].tsx`)
+3. Schema migration — add `is_published`, `tour_type`, `difficulty` to `tours`
 
 ---
 
 ## Next Session Starting Point
 
-Start at blocker resolution. If assets are available, add them to `public/` and verify the hero and place cards render. If the Supabase anon key is available, begin data integration (step 2 above). Otherwise, move to visual refinement or schema migrations.
-
----
-
-## Key files
-
-| Purpose | File |
-|---|---|
-| Master orientation | `MAIN_BRAIN.md` |
-| Live + proposed schema | `docs/schema-reference.md` |
-| What to do next (detailed) | `docs/execution-queue.md` |
-| Decision log | `brain/decisions.md` |
-| Stack + Supabase details | `brain/architecture-summary.md` |
-| MVP checklist | `brain/roadmap.md` |
+Run `/next-task` to identify the top unblocked item.
+If assets are now available, add them to `public/` and verify hero + place cards render.
+If the Supabase anon key is available, begin data integration (task-queue Next section).
