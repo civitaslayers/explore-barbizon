@@ -195,10 +195,10 @@ All proposed tables are additive. No existing columns or IDs should be altered.
 
 1. `locations` stays as the core spatial anchor. Do not rename it at the database level. The product layer can call them "places."
 2. `stories` is a new first-class editorial table, not a text field on locations.
-3. `artists` and `paintings` form the cultural archive layer — linked but independent.
+3. `artists` and `visual_works` form the cultural archive layer — linked but independent. `visual_works` replaces the narrower `paintings` concept and covers paintings, postcards, photographs, engravings, drawings, and any similar archival imagery.
 4. `routes` is separated from `tours`: a route is a geographic artifact (GeoJSON path), a tour is an editorial product with narrative and stops. A tour may reference a route or not.
 5. `layers` becomes a proper table, replacing the `categories.layer` text field. This enables full layer management: visibility, ordering, map styling.
-6. Paintings require a `geo_confidence` field because exact painting-to-location coordinates are unreliable and require real historical research.
+6. Historic visual material must never require exact coordinates. Geographic attribution for visual works is handled entirely through a junction table (`visual_work_locations`) with explicit `relation_type`, `geo_confidence`, and `notes` fields. No coordinates are stored on `visual_works` itself.
 7. No breaking changes to existing tables. New columns added to existing tables are nullable.
 
 ---
@@ -260,30 +260,61 @@ Junction: **`artist_locations`** (where they lived, worked, or are commemorated)
 
 ---
 
-### Proposed: `paintings`
+### Proposed: `visual_works`
 
-Artworks with optional geographic attribution. Geo data must be treated carefully.
+Archival and historical visual material of any kind: paintings, postcards, photographs, engravings, drawings, prints, illustrations. Geographic attribution is handled entirely through `visual_work_locations` — no coordinates live on this table.
 
 | Column | Type | Notes |
 |---|---|---|
 | id | uuid PK | uuid_generate_v4() |
 | slug | text NOT NULL UNIQUE | |
 | title | text NOT NULL | |
-| artist_id | uuid FK → artists.id | Nullable — unknown attribution |
-| year_circa | text | Free text: "c. 1856", "1850–1855" |
-| medium | text | e.g. "Oil on canvas" |
+| work_type | text NOT NULL | 'painting', 'postcard', 'photograph', 'engraving', 'drawing', 'print', 'illustration' |
+| artist_id | uuid FK → artists.id | Nullable — unknown or uncredited attribution |
+| year_circa | text | Free text: "c. 1856", "1850–1855", "early 20th century" |
+| medium | text | e.g. "Oil on canvas", "Albumen print" |
 | dimensions | text | e.g. "46 × 55 cm" |
-| current_location | text | Museum or collection name |
-| image_url | text | |
-| location_id | uuid FK → locations.id | Where it was painted — nullable |
-| latitude | double precision | Approximate pin — nullable |
-| longitude | double precision | Approximate pin — nullable |
-| geo_confidence | text | 'exact', 'approximate', 'uncertain', 'unknown' |
-| source_notes | text | Research provenance and caveats |
+| current_location | text | Museum, collection, or archive holding the original |
+| image_url | text | Reproduction or scan |
+| description | text | What the work depicts |
+| source | text | Where this record or image was sourced from |
 | is_published | boolean | default false |
 | created_at | timestamptz | default now() |
 
-**Important:** `geo_confidence` is required on any row with coordinates. The Barbizon mosaics are not reliable exact painting coordinates. Do not populate `latitude`/`longitude` without historical source verification. Postcards are a more tractable starting point than paintings for geo-attribution.
+---
+
+### Proposed: `visual_work_locations`
+
+Junction table linking visual works to one or more places. This is the only place geographic interpretation lives. A single work may have multiple location associations with different confidence levels.
+
+| Column | Type | Notes |
+|---|---|---|
+| id | uuid PK | uuid_generate_v4() |
+| visual_work_id | uuid FK → visual_works.id | |
+| location_id | uuid FK → locations.id | |
+| relation_type | text NOT NULL | See values below |
+| geo_confidence | text NOT NULL | See values below |
+| notes | text | Research notes, source references, interpretive reasoning |
+
+**`relation_type` values**
+
+| Value | Meaning |
+|---|---|
+| `depicts` | The work shows this place as its subject |
+| `created_at` | The work was physically made at this location |
+| `subject_of` | The place is the named subject of the work (e.g. a titled postcard) |
+| `associated_with` | A looser historical or contextual association, not directly depicted |
+
+**`geo_confidence` values**
+
+| Value | Meaning |
+|---|---|
+| `exact` | Location is documented — a dated record, inscription, or equivalent source confirms it |
+| `approximate` | Location is identifiable within a known area but not pinpointed |
+| `interpretive` | Location is inferred from visual content (landmarks, vegetation, light direction) — no documentary source |
+| `unknown` | No reliable basis for a geographic association; recorded for archival completeness only |
+
+**Important:** The Barbizon mosaics are not reliable exact painting coordinates. Any row derived from mosaic positions should use `geo_confidence = 'interpretive'` or `'unknown'`, not `'exact'` or `'approximate'`. Postcards with printed place names are a stronger starting point for `'approximate'` or `'exact'` attribution.
 
 ---
 
@@ -349,13 +380,15 @@ towns
  │    ├── media (via location_id)
  │    ├── story_locations (junction)
  │    ├── artist_locations (junction)
- │    ├── paintings (via location_id, optional)
+ │    ├── visual_work_locations (junction) ← geo interpretation lives here
  │    └── tour_stops (via location_id)
  ├── tours (via town_id)
  │    ├── tour_stops (via tour_id)
  │    └── routes (via tour_id, optional)
  ├── stories (via town_id)
  ├── artists (no direct town_id — scoped via artist_locations)
+ ├── visual_works (no direct town_id — scoped via visual_work_locations)
+ │    └── visual_work_locations (junction → locations)
  └── layers (via town_id)
 ```
 
@@ -366,6 +399,6 @@ towns
 1. Add `is_published`, `tour_type`, `difficulty` to `tours` — safe, additive
 2. Create `stories` + `story_locations` — no impact on existing tables
 3. Create `artists` + `artist_locations` — no impact on existing tables
-4. Create `paintings` — requires `artists` to exist first
+4. Create `visual_works` + `visual_work_locations` — requires `artists` to exist first; no coordinates required at any stage
 5. Create `routes` — requires `tours` to exist (already does)
 6. Create `layers` and migrate `categories.layer` text → `layer_id` FK — this is the one breaking change; sequence last
