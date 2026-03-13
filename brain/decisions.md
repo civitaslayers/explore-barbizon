@@ -6,9 +6,16 @@ Add new entries at the top.
 ---
 
 ## 2026-03-13
+**Decision:** Use `visual_works` + `visual_work_locations` instead of a `paintings` table with direct coordinates.
+**Reason:** Historic visual material (paintings, postcards, photographs, engravings) cannot reliably be assigned exact coordinates. Geo interpretation must be explicit about its confidence level and the nature of the relationship. The Barbizon mosaics are not reliable exact painting locations.
+**Consequence:** `visual_works` covers all archival image types. Geographic attribution is handled entirely through the `visual_work_locations` junction table with `relation_type`, `geo_confidence` (`exact`/`approximate`/`interpretive`/`unknown`), and `notes`. No coordinates are stored on the work itself. Any row derived from mosaic positions must use `interpretive` or `unknown`, not `exact`.
+
+---
+
+## 2026-03-13
 **Decision:** Use repo-based project brain for Civitas / Explore Barbizon.
 **Reason:** Preserve continuity across AI sessions and across machines.
-**Consequence:** Core context must live in files, not only in chat history.
+**Consequence:** Core context must live in files, not only in chat history. All brain/ and docs/ files must be kept current after meaningful sessions.
 
 ---
 
@@ -29,7 +36,7 @@ Add new entries at the top.
 ## March 2026
 **Decision:** Homepage should be visual-first and video-led, not essay/copy-led.
 **Reason:** User preference and strategic alignment — beauty and utility attract users faster than text.
-**Consequence:** Hero should be a cinematic looping video with minimal overlay text. Long-form content lives deeper in the site.
+**Consequence:** Hero is a `<video>` element with `autoPlay muted loop playsInline`. Minimal text overlay: eyebrow + H1 + two CTAs only. Long-form content lives deeper in the site.
 
 ---
 
@@ -78,7 +85,7 @@ Add new entries at the top.
 ## March 2026
 **Decision:** Postcards are a better starting point than paintings for the historical media layer.
 **Reason:** Barbizon mosaic coordinates are not reliable exact painting locations and require serious historical research. Postcards are more tractable.
-**Consequence:** The historical visual overlay feature should begin with postcards, not paintings.
+**Consequence:** The historical visual overlay feature should begin with postcards. Subsumed into the `visual_works` model — postcards are a `work_type` value.
 
 ---
 

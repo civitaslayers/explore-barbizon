@@ -27,6 +27,25 @@ Civitas Layers is not a normal tourism website. It is a civic geo-narrative plat
 | Tailwind | Styling |
 | Webflow | Editorial shell (temporary / being phased out) |
 
+### Supabase project details
+
+| Field | Value |
+|---|---|
+| Project name | Civitas Layers' Project |
+| Project ref | `afqyrxtfbspghpfulvmy` |
+| Region | eu-west-2 |
+| Postgres version | 17 |
+| REST base URL | `https://afqyrxtfbspghpfulvmy.supabase.co` |
+| Management API | `https://api.supabase.com/v1/projects/afqyrxtfbspghpfulvmy` |
+
+To connect `@supabase/supabase-js` in the frontend, you need the project's `anon` key (not the management API token). Add to `.env.local`:
+```
+NEXT_PUBLIC_SUPABASE_URL=https://afqyrxtfbspghpfulvmy.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon key from Supabase dashboard>
+```
+
+The Management API SQL query endpoint (`POST /v1/projects/{ref}/database/query`) works with a personal access token and is suitable for schema inspection and migrations from a trusted environment. Do not expose the management token in client-side code or the repo.
+
 ---
 
 ## Current Development Direction

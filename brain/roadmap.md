@@ -1,31 +1,43 @@
 # Roadmap
 
-Source: extracted from MAIN_BRAIN.md
-Last updated: March 2026
+Last updated: 2026-03-13
 
 ---
 
 ## Phase 1 — Barbizon MVP (Current)
 
 ### Visual shell
-- [ ] Replace hero with cinematic looping video
-- [ ] Reduce homepage text density
-- [ ] Refine card design and image treatment
-- [ ] Fix large-screen layout width
-- [ ] Refine navigation/header calmness
-- [ ] Prepare real imagery and video assets
+- [x] Replace hero with cinematic looping video — code done, video asset needed
+- [x] Reduce homepage text density — hero stripped to H1 + two CTAs
+- [x] Mobile navigation — hamburger with animated X, active state
+- [x] Featured place cards linkable — wrapped in Link with real slugs
+- [ ] Add real video asset (`/public/videos/hero-barbizon.mp4`)
+- [ ] Add real place images (`/public/images/places/*.jpg`)
+- [ ] Card polish and image treatment pass
+- [ ] Large-screen layout width refinement
+- [ ] Place page visual refinement
 
 ### Content and data
-- [ ] Complete Forest & Nature layer
+- [ ] Complete Forest & Nature layer (data entry in Supabase)
 - [ ] Polish hero locations
 - [ ] Build first walking trail
 - [ ] Improve featured places presentation
-- [ ] Prepare historical postcard/media layer
+- [ ] Prepare historical visual works layer (postcards first — use `visual_works` model)
 
 ### Data integration
-- [ ] Connect place pages to real Supabase data
-- [ ] Connect tours to real Supabase data
+- [ ] Obtain Supabase `anon` key and add to `.env.local`
+- [ ] Install `@supabase/supabase-js` and create `lib/supabase.ts`
+- [ ] Replace `data/places.ts` with live Supabase query
+- [ ] Replace `data/tours.ts` with live Supabase query
 - [ ] Wire up Mapbox map with live location data
+
+### Schema migrations (sequence matters — see docs/schema-reference.md)
+- [ ] Add `is_published`, `tour_type`, `difficulty` to `tours`
+- [ ] Create `stories` + `story_locations`
+- [ ] Create `artists` + `artist_locations`
+- [ ] Create `visual_works` + `visual_work_locations`
+- [ ] Create `routes`
+- [ ] Create `layers` + migrate `categories.layer` text → FK (breaking change — do last)
 
 ### Dashboard v1
 - [ ] Login
@@ -55,30 +67,17 @@ Physical QR plaques around town linking into map/place pages.
 ### Merchant discovery trails
 Curated local trails connecting galleries, food, commerce, and culture.
 
-### Historical media layer
-Old postcards, photographs, and archival imagery linked to places.
+### Visual works layer
+Paintings, postcards, photographs, and archival imagery linked to places via the `visual_works` + `visual_work_locations` model. Postcards are the practical starting point. Geo attribution uses `geo_confidence` — never assume exact coordinates from mosaics or secondary sources.
 
 ### Story mode
-Deeper cultural narratives and articles.
+Deeper cultural narratives and articles via the `stories` table.
 
 ### AI guide
-Conversational layer, grounded in database content.
+Conversational layer grounded in database content. Deferred.
 
 ### Events layer
 Temporary map pins for exhibitions, openings, concerts, seasonal activity.
 
 ### Visitor passport / visits tracking
 Longer-term gamified exploration layer.
-
----
-
-## Signature Future Feature — Painting Locations
-
-Long-term goal:
-- Connect paintings, postcards, or archival images to locations in Barbizon
-- Allow users to move from image to place to walk
-
-Important caveat:
-- The Barbizon mosaics are not reliable exact painting coordinates
-- This feature requires real historical research
-- Postcards may be an easier and stronger starting point than paintings
