@@ -2,21 +2,7 @@
 
 ## Session start protocol
 
-Read these files in order before doing anything else:
-
-1. `brain/current-state.md`
-2. `brain/task-queue.md`
-3. `brain/decisions.md`
-4. `docs/schema-reference.md`
-
-Read `MAIN_BRAIN.md` only if the task requires product strategy, design rationale, or long-range planning.
-
-After reading, output:
-
-- **Status:** 2 sentences on where the project stands
-- **Top 3 next tasks:** highest-priority unblocked work
-- **Blockers:** anything preventing progress
-- **Recommended next step:** one concrete action to take now
+Read `brain/session-start.md` first and follow it exactly.
 
 ---
 
