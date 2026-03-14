@@ -2,35 +2,30 @@
 
 Last updated: 2026-03-14
 
-This document explains how AI tools are used to develop the Civitas Layers / ExploreBarbizon project.
+This repository uses a structured AI-assisted development workflow.
 
-The goal is to run AI as a coordinated team rather than relying on a single assistant for everything.
-
-When used correctly, this workflow dramatically improves development speed and reduces token usage.
+The goal is to run AI tools as a coordinated team rather than relying on a single assistant.
 
 ---
 
 # AI Roles
 
-The project uses three AI roles.
+The development workflow uses three AI roles.
 
 ## ChatGPT — Strategist
 
-ChatGPT is responsible for direction and planning.
+ChatGPT is responsible for planning and direction.
 
 Responsibilities:
 
 - deciding what should be built next
-- breaking large ideas into small engineering tasks
-- prioritising work
+- breaking large ideas into engineering tasks
 - identifying risks
-- reviewing outputs or screenshots
-- writing handoff files
-- generating optimized prompts for Claude and Cursor
+- reviewing outputs
+- generating optimized prompts
+- maintaining project clarity
 
-ChatGPT should **not implement code directly in the repository**.
-
-It acts as the **planning and synthesis layer**.
+ChatGPT does **not implement code in the repository**.
 
 ---
 
@@ -40,46 +35,44 @@ Claude is responsible for architecture and safe implementation planning.
 
 Responsibilities:
 
-- repo-aware planning
-- defining the smallest safe implementation path
+- understanding repository structure
+- defining smallest safe implementation steps
 - schema and migration planning
-- identifying required files
-- validating architectural decisions
-- reviewing diffs after implementation
-- updating project brain files
+- identifying impacted files
+- reviewing diffs
+- maintaining project brain files
 
-Claude should **not be used for long coding sessions**.
-
-Use Claude primarily for **planning and architecture validation**.
+Claude should **not run long coding sessions**.
 
 ---
 
 ## Cursor — Implementer
 
-Cursor is responsible for actual coding work.
+Cursor is responsible for code execution.
 
 Responsibilities:
 
 - writing code
 - editing files
 - debugging
-- implementing small scoped tasks
-- running lint and build locally
-- iterating quickly on UI or data wiring
+- implementing scoped tasks
+- running local builds and lint checks
 
-Cursor should receive **very specific scoped tasks**.
+Cursor should receive **precise instructions with clear file scope**.
 
-Cursor should **not make architectural decisions**.
+Cursor should not redesign systems.
 
 ---
 
 # The Operating Loop
 
-Each development session should follow the same loop.
+Each development session follows the same cycle.
+
+---
 
 ## Step 1 — Strategy (ChatGPT)
 
-Start by describing the goal.
+Start by defining the goal.
 
 Example:
 
@@ -87,202 +80,148 @@ Example:
 
 ChatGPT returns:
 
-- the best task order
-- which tasks belong to Claude vs Cursor
-- risks or dependencies
+- task breakdown
+- priorities
+- risks
 - optimized prompts
 
 ---
 
 ## Step 2 — Planning (Claude)
 
-Claude defines the smallest safe implementation plan.
+Claude plans the implementation.
 
 Claude reads:
 
-- brain/session-start.md
-- brain/current-state.md
-- brain/task-queue.md
-- brain/decisions.md
+brain/current-state.md  
+brain/task-queue.md  
+brain/decisions.md  
 
-Claude outputs:
+Claude returns:
 
-- files that must be inspected
-- smallest implementation steps
+- files involved
+- smallest safe steps
 - schema dependencies
 - risks
-- the exact first step to implement
 
-Claude **does not implement the code yet**.
+Claude does **not implement yet**.
 
 ---
 
 ## Step 3 — Implementation (Cursor)
 
-Cursor performs the actual coding work.
-
-Cursor receives only the **first implementation step**.
+Cursor executes one implementation step.
 
 Example instruction:
 
 Implement step 1 only.
 
-Touch only these files:
+Files allowed:
 
-- pages/tours/[slug].tsx
-- lib/supabase/tours.ts
+pages/tours/[slug].tsx  
+lib/supabase/tours.ts  
 
 Constraints:
 
-- do not refactor unrelated code
-- preserve styling
+- no unrelated refactors
 - preserve schema fields
-- stop after this step
+- preserve styling
 
 ---
 
 ## Step 4 — Architecture Review (Claude)
 
-After Cursor finishes coding, Claude reviews the result.
+Claude reviews the changes.
 
-Claude checks:
+Checks include:
 
-- schema correctness
-- architectural consistency
-- minimal diff discipline
-- potential future risks
-
-Claude may propose small follow-up improvements if necessary.
+- schema consistency
+- architectural safety
+- unnecessary complexity
+- potential regressions
 
 ---
 
-## Step 5 — Project Brain Update (ChatGPT)
+## Step 5 — Brain Update (ChatGPT)
 
-ChatGPT then:
+ChatGPT updates:
 
-- updates brain/current-state.md
-- updates brain/task-queue.md
-- determines the next task
+brain/current-state.md  
+brain/task-queue.md  
 
-This completes the loop.
+Then determines the next task.
 
 ---
 
 # Task Size System
 
-All work should be classified before starting.
+Work must be broken into task sizes.
 
-## XS — micro tasks
+### XS — micro tasks
 
 Examples:
 
-- one bug fix
-- one UI tweak
-- one SQL query
-- one migration draft
+- bug fix
+- UI tweak
+- SQL query
 
-Usually touches **1–2 files**.
-
-Best handled directly by Cursor.
+Usually touches 1–2 files.
 
 ---
 
-## S — small feature slice
+### S — small feature
 
 Examples:
 
-- wiring a Supabase query
-- implementing a single component
-- adding a schema field
+- wiring Supabase query
+- implementing a page component
 
-Usually touches **2–5 files**.
-
-Cursor implements, Claude reviews.
+Usually touches 2–5 files.
 
 ---
 
-## M — subsystem change
+### M — subsystem
 
 Examples:
 
-- replacing local data with Supabase
-- implementing the stories layer
+- stories layer
+- tours data integration
 - dashboard module
 
 Claude plans → Cursor implements in slices.
 
 ---
 
-## L — architecture change
+### L — architecture change
 
 Examples:
 
 - multi-town migration
 - major schema redesign
-- map architecture changes
 
-Claude must break this into smaller tasks before implementation.
-
-Cursor should **never receive an L task directly**.
+Must be broken down into smaller tasks.
 
 ---
 
 # Token Efficiency Rules
 
-To keep Claude usage manageable:
+To reduce Claude token usage:
 
-### Start new Claude sessions frequently
+Start new Claude sessions frequently.
 
-Avoid keeping one long conversation for the entire project.
-
----
-
-### Avoid vague prompts
-
-Never ask:
-
-"Improve this code."
-
-Ask:
-
-"Adjust the place page layout spacing for screens wider than 1400px."
-
----
-
-### Limit file scope
+Avoid vague prompts.
 
 Always specify files.
 
-Example:
+Avoid loading strategic documents unnecessarily.
 
-Inspect only:
-
-- pages/places/[slug].tsx
-- components/PlaceHeader.tsx
-
----
-
-### Avoid unnecessary document loading
-
-Files that should **not be loaded automatically**:
-
-- MAIN_BRAIN.md
-- roadmap files
-- design essays
-
-Load them only when the task clearly requires them.
+Use agents for role separation.
 
 ---
 
 # Prompt Templates
 
-These templates help keep prompts short and consistent.
-
----
-
-# ChatGPT Strategy Prompt
-
-Use this when the task is still unclear.
+## ChatGPT Strategy Prompt
 
 Act as technical strategist for Civitas Layers.
 
@@ -291,74 +230,75 @@ Goal:
 
 Return:
 
-1. best task order
-2. what belongs to Claude vs Cursor
-3. hidden risks
-4. optimized Claude planning prompt
-5. optimized Cursor implementation prompt
+1. task order
+2. Claude vs Cursor responsibilities
+3. risks
+4. Claude planning prompt
+5. Cursor implementation prompt
 
 ---
 
-# Claude Planning Prompt
+## Claude Planning Prompt
 
-Follow brain/session-start.md.
+Follow session-start protocol.
 
 Task:
 [paste task]
 
-Do not implement yet.
-
 Return:
 
-1. understanding of task
-2. files to inspect
-3. smallest safe implementation plan
-4. schema dependencies
-5. risks
-6. exact first implementation step
+- understanding of task
+- files to inspect
+- smallest safe implementation plan
+- schema dependencies
+- risks
+- first implementation step
 
 ---
 
-# Cursor Implementation Prompt
+## Cursor Implementation Prompt
 
 Implement only this step:
 
 [paste step]
 
+Files allowed:
+[list]
+
 Constraints:
 
-- touch only these files: [list]
-- do not refactor unrelated code
+- no unrelated refactors
 - preserve styling
-- preserve schema exactly
+- preserve schema
 - stop after this step
 
 ---
 
-# Recommended Repo Structure
+# Recommended Repository Structure
 
-.claude/
-brain/
-    session-start.md
-    current-state.md
-    task-queue.md
-    decisions.md
-docs/
-    ai-operating-system.md
-    schema-reference.md
-    design-direction.md
-MAIN_BRAIN.md
+.claude/  
+brain/  
+docs/  
+components/  
+pages/  
+lib/  
+
+brain files represent project memory.
+
+docs contain reference material.
+
+.claude contains agents, commands, and hooks.
 
 ---
 
 # Key Principle
 
-Do not make one AI do everything.
+Do not make one AI perform all roles.
 
-ChatGPT provides **direction**
+ChatGPT provides direction.
 
-Claude provides **architecture**
+Claude provides architecture.
 
-Cursor provides **implementation**
+Cursor performs implementation.
 
-This creates a fast and stable development workflow for Civitas Layers.
+This system creates a faster and safer development workflow.
