@@ -1,47 +1,69 @@
 #!/usr/bin/env bash
 # Civitas Layers / ExploreBarbizon — session orientation hook
-# Runs at the start of every Claude Code session.
-# Output is injected into Claude's session context.
+# Low-token startup: show only the minimum needed to begin safely.
 
 echo "╔══════════════════════════════════════════════════════════╗"
-echo "║         CIVITAS LAYERS — SESSION START                   ║"
+echo "║ CIVITAS LAYERS — SESSION START                         ║"
 echo "╚══════════════════════════════════════════════════════════╝"
 echo ""
-echo "Read these files in order before doing anything:"
-echo "  1. MAIN_BRAIN.md              — master project orientation"
-echo "  2. brain/current-state.md     — operational state"
-echo "  3. brain/decisions.md         — architectural decision log"
-echo "  4. brain/task-queue.md        — Now / Next / Later / Blocked"
-echo "  5. docs/schema-reference.md   — live schema + proposed model"
+
+echo "Read this first:"
+echo " 1. brain/session-start.md"
 echo ""
-echo "After reading, output:"
-echo "  - Current state summary (2-3 sentences)"
-echo "  - Top 3 next unblocked tasks"
-echo "  - Active blockers"
-echo "  - Recommended next implementation step"
+
+echo "If the task touches SQL, Supabase, or schema fields, also read:"
+echo " - docs/schema-reference.md"
 echo ""
+
+echo "If the task touches strategy, major UX direction, roadmap, or multi-town architecture, also read:"
+echo " - MAIN_BRAIN.md"
+echo ""
+
+echo "Operational preview"
 echo "══════════════════════════════════════════════════════════"
-echo "CURRENT STATE:"
-echo "══════════════════════════════════════════════════════════"
+
+echo ""
+echo "[current-state.md preview]"
 if [ -f "brain/current-state.md" ]; then
-  cat brain/current-state.md
+  sed -n '1,80p' brain/current-state.md
 else
   echo "[WARNING] brain/current-state.md not found"
 fi
 
 echo ""
-echo "══════════════════════════════════════════════════════════"
-echo "TASK QUEUE:"
-echo "══════════════════════════════════════════════════════════"
+echo "[task-queue.md preview]"
 if [ -f "brain/task-queue.md" ]; then
-  cat brain/task-queue.md
+  sed -n '1,120p' brain/task-queue.md
 else
   echo "[WARNING] brain/task-queue.md not found"
 fi
 
 echo ""
-echo "══════════════════════════════════════════════════════════"
-echo "Stack: Next.js Pages Router · Supabase · Mapbox · Tailwind"
-echo "Do not change the stack. Prefer refinement over rewrites."
-echo "Run /next-task to pick work. Run /update-brain after completing work."
-echo "══════════════════════════════════════════════════════════"
+echo "[decisions.md preview]"
+if [ -f "brain/decisions.md" ]; then
+  sed -n '1,60p' brain/decisions.md
+else
+  echo "[WARNING] brain/decisions.md not found"
+fi
+
+echo ""
+echo "After reading, return only:"
+echo " - Status"
+echo " - Top 3 next unblocked tasks"
+echo " - Active blockers"
+echo " - Recommended next step"
+echo ""
+
+echo "Recommended commands:"
+echo " - /next-task"
+echo " - /session-summary"
+echo " - /update-brain"
+echo " - /ship-feature [description]"
+echo ""
+
+echo "Rules:"
+echo " - Do not scan the entire repo"
+echo " - Prefer smallest safe change"
+echo " - Preserve Pages Router, Supabase, Mapbox, Tailwind stack"
+echo " - Use agents deliberately"
+echo ""
