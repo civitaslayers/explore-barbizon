@@ -4,15 +4,17 @@
 
 Read these files in order before doing anything else:
 
-1. `MAIN_BRAIN.md` — master project orientation, strategy, and product vision
-2. `brain/current-state.md` — operational state: status, last completed, blockers
-3. `brain/decisions.md` — architectural decision log
-4. `brain/task-queue.md` — Now / Next / Later / Blocked
-5. `docs/schema-reference.md` — live Supabase schema and proposed Civitas data model
+1. `brain/current-state.md`
+2. `brain/task-queue.md`
+3. `brain/decisions.md`
+4. `docs/schema-reference.md`
+
+Read `MAIN_BRAIN.md` only if the task requires product strategy, design rationale, or long-range planning.
 
 After reading, output:
-- **Status:** 2–3 sentences on where the project stands
-- **Top 3 next tasks:** the highest-priority unblocked work
+
+- **Status:** 2 sentences on where the project stands
+- **Top 3 next tasks:** highest-priority unblocked work
 - **Blockers:** anything preventing progress
 - **Recommended next step:** one concrete action to take now
 
@@ -21,59 +23,56 @@ After reading, output:
 ## Project
 
 **Civitas Layers / ExploreBarbizon**
-A civic geo-narrative platform for heritage towns. Barbizon is the flagship prototype.
-ExploreBarbizon sits between cultural magazine, museum archive, and cartographic product.
+
+A civic geo-narrative platform for heritage towns.  
+Barbizon is the flagship prototype.
+
+ExploreBarbizon should feel like a calm, visual, map-first cultural atlas.  
+Avoid generic tourism, directory, or SaaS patterns.
 
 ---
 
 ## Stack (fixed — do not change)
 
-- **Next.js** — Pages Router (do not convert to App Router)
-- **Supabase** — single source of truth (`afqyrxtfbspghpfulvmy`, eu-west-2, Postgres 17)
+- **Next.js** — Pages Router
+- **Supabase** — single source of truth
 - **Mapbox** — spatial engine
-- **Tailwind** — styling (all custom values defined in `tailwind.config.js` — do not invent new ones)
+- **Tailwind** — use existing tokens and config only
 - **Webflow** — editorial shell only, being phased out
 
 ---
 
 ## Working principles
 
-- Prefer refinement over rewrites — do not rebuild working code
-- Preserve the editorial, visual-first, museum-cartography aesthetic
-- Avoid generic SaaS or tourism-brochure design
+- Prefer refinement over rewrites
 - Keep diffs minimal and targeted
+- Do not rebuild working code without clear reason
+- Preserve the editorial, visual-first, museum-cartography aesthetic
 - Do not expose secrets in code or committed files
-- Validate (tsc + lint) before every commit — use `/ship-feature`
+- Validate with `tsc` and `lint` before shipping
 
 ---
 
-## Slash commands
+## Execution rules
 
-| Command | Purpose |
-|---|---|
-| `/next-task` | Identify and begin the next unblocked task |
-| `/update-brain` | Update brain files after completing work |
-| `/schema-check` | Audit schema state and propose next migration |
-| `/ship-feature` | Validate, commit, push, and update brain |
+For any task:
 
----
+1. Restate the task briefly
+2. Identify only the files needed
+3. Propose the smallest safe plan
+4. Implement only that scope
+5. Return:
+   - files changed
+   - what changed
+   - risks or follow-ups
 
-## Agents
+Do not:
 
-| Agent | Purpose |
-|---|---|
-| `civitas-architect` | Architecture decisions, schema evolution, system design |
-| `civitas-implementer` | Scoped feature implementation, minimal diffs, data wiring |
-| `civitas-content-ops` | Content seeding, SQL inserts, copy, visual_works entries |
-| `civitas-release-checker` | Pre-deploy validation: tsc, lint, build, brain freshness, design checks |
-
----
-
-## After significant work
-
-Always:
-1. Run `/ship-feature [description]` — validates, commits, pushes
-2. This will call `/update-brain` — updates `brain/current-state.md` and `brain/task-queue.md`
+- scan or refactor unrelated parts of the repo
+- convert Pages Router to App Router
+- invent schema fields
+- invent Tailwind utilities
+- change visual direction unless asked
 
 ---
 
@@ -87,10 +86,33 @@ Always:
 
 ---
 
-## Deeper context
+## Commands
 
-- `docs/design-direction.md` — visual principles, homepage direction, typography, palette
-- `docs/frontend-workflow.md` — Cursor workflow, local dev setup, Tailwind cautions
-- `docs/execution-queue.md` — historical task log
-- `brain/architecture-summary.md` — stack details, product model, Supabase project info
-- `brain/roadmap.md` — MVP checklist and long-term features
+| Command | Purpose |
+|---|---|
+| `/next-task` | identify and begin the next unblocked task |
+| `/update-brain` | update `current-state.md` and `task-queue.md` after work |
+| `/schema-check` | audit schema state and propose next migration |
+| `/ship-feature` | validate, commit, push, and update brain |
+
+---
+
+## Agents
+
+| Agent | Purpose |
+|---|---|
+| `civitas-architect` | architecture, schema evolution, system design |
+| `civitas-implementer` | scoped feature work, minimal diffs, data wiring |
+| `civitas-content-ops` | SQL inserts, content seeding, copy, media records |
+| `civitas-release-checker` | validation, build checks, design and brain freshness |
+
+---
+
+## Deeper context (read only when relevant)
+
+- `MAIN_BRAIN.md`
+- `docs/design-direction.md`
+- `docs/frontend-workflow.md`
+- `docs/execution-queue.md`
+- `brain/architecture-summary.md`
+- `brain/roadmap.md`
