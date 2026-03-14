@@ -80,7 +80,7 @@ function toPlace(row: LocationRow): Place {
 // ---------------------------------------------------------------------------
 
 /**
- * Fetch all published locations for the places listing, joined with category name.
+ * Fetch all published locations (all categories). Used for the map.
  * Throws if Supabase is not configured or the query fails.
  */
 export async function getPublishedLocations(): Promise<Place[]> {
@@ -94,6 +94,28 @@ export async function getPublishedLocations(): Promise<Place[]> {
 
   if (error) throw new Error(error.message);
   if (!data || data.length === 0) throw new Error("No published locations");
+
+  return (data as LocationRow[]).map(toPlace);
+}
+
+/**
+ * Fetch published locations for the editorial places listing.
+ * Excludes utility categories (Parking, Bus Stop, etc.) via categories.show_in_editorial.
+ * Requires: `alter table categories add column show_in_editorial boolean not null default true`
+ * Throws if Supabase is not configured or the query fails.
+ */
+export async function getEditorialLocations(): Promise<Place[]> {
+  if (!supabase) throw new Error("Supabase not configured");
+
+  const { data, error } = await supabase
+    .from("locations")
+    .select("*, categories!inner(name, show_in_editorial)")
+    .eq("is_published", true)
+    .eq("categories.show_in_editorial", true)
+    .order("name");
+
+  if (error) throw new Error(error.message);
+  if (!data || data.length === 0) throw new Error("No editorial locations");
 
   return (data as LocationRow[]).map(toPlace);
 }

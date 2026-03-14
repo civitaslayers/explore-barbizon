@@ -3,6 +3,7 @@ import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 import { getAllPlaces, type Place } from "@/data/places";
 import { getPublishedLocations, getPublishedSlugs } from "@/lib/supabase";
+import { staticMapUrl, hasMapbox } from "@/lib/mapbox";
 
 type PlacePageProps = {
   place: Place;
@@ -75,9 +76,18 @@ const PlacePage: NextPage<PlacePageProps> = ({
           <aside className="space-y-6">
             <section className="card space-y-4 p-5 md:p-6">
               <p className="eyebrow">MAP PREVIEW</p>
-              <div className="flex h-44 items-center justify-center rounded-2xl border border-dashed border-ink/25 bg-[radial-gradient(circle_at_top,_#f5f1e8,_#d6d0c3)] px-6 text-center text-[11px] leading-relaxed text-ink/60 md:h-52 md:text-xs">
-                Future map view centred on this place, with layers for studios,
-                paths, and nearby clearings.
+              <div className="relative h-44 overflow-hidden rounded-2xl md:h-52">
+                {hasMapbox ? (
+                  <img
+                    src={staticMapUrl(place.longitude, place.latitude, 600, 400, 15)}
+                    alt={`Map showing location of ${place.name}`}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center rounded-2xl border border-dashed border-ink/25 bg-[radial-gradient(circle_at_top,_#f5f1e8,_#d6d0c3)] text-[11px] text-ink/60">
+                    Map unavailable
+                  </div>
+                )}
               </div>
               <div className="space-y-1 text-xs text-ink/70">
                 <div>

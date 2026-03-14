@@ -1,14 +1,31 @@
 import Head from "next/head";
 import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
+import { useState, useMemo } from "react";
 import { getAllPlaces, type Place } from "@/data/places";
-import { getPublishedLocations } from "@/lib/supabase";
+import { getEditorialLocations } from "@/lib/supabase";
+import { staticMapUrl, hasMapbox } from "@/lib/mapbox";
 
 type PlacesIndexProps = {
   places: Place[];
 };
 
 const PlacesIndexPage: NextPage<PlacesIndexProps> = ({ places }) => {
+  const [activeCategory, setActiveCategory] = useState("All");
+
+  const categories = useMemo(() => {
+    const cats = Array.from(new Set(places.map((p) => p.category))).sort();
+    return ["All", ...cats];
+  }, [places]);
+
+  const filtered = useMemo(
+    () =>
+      activeCategory === "All"
+        ? places
+        : places.filter((p) => p.category === activeCategory),
+    [places, activeCategory]
+  );
+
   return (
     <>
       <Head>
@@ -17,9 +34,7 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({ places }) => {
 
       <section className="space-y-10">
         <header className="editorial-measure space-y-4">
-          <p className="text-xs uppercase tracking-[0.25em] text-ink/60">
-            PLACES TO TRACE
-          </p>
+          <p className="eyebrow">PLACES TO TRACE</p>
           <h1 className="font-serif text-3xl leading-tight text-ink md:text-4xl">
             Studios, paths, and small museums along the forest edge.
           </h1>
@@ -30,25 +45,64 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({ places }) => {
           </p>
         </header>
 
+        {/* Category filters */}
+        <div className="flex flex-wrap gap-2">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={`rounded-full border px-4 py-1.5 text-[11px] uppercase tracking-[0.2em] transition-all duration-250 ease-soft ${
+                activeCategory === cat
+                  ? "border-ink bg-ink text-cream"
+                  : "border-ink/20 text-ink/60 hover:border-ink/50 hover:text-ink"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        <p className="text-xs text-ink/40">
+          {filtered.length} {filtered.length === 1 ? "place" : "places"}
+          {activeCategory !== "All" && ` · ${activeCategory}`}
+        </p>
+
         <div className="grid gap-6 md:grid-cols-3">
-          {places.map((place) => (
+          {filtered.map((place) => (
             <Link
               key={place.slug}
               href={`/places/${place.slug}`}
-              className="group flex flex-col border border-ink/10 bg-cream/60 px-4 py-5 transition hover:border-ink/25"
+              className="card card-hover group flex flex-col overflow-hidden"
             >
-              <span className="text-[11px] uppercase tracking-[0.18em] text-ink/50">
-                {place.category}
-              </span>
-              <span className="mt-1 font-serif text-base text-ink">
-                {place.name}
-              </span>
-              <span className="mt-2 text-xs leading-relaxed text-ink/75">
-                {place.shortDescription}
-              </span>
-              <span className="mt-4 text-[11px] uppercase tracking-[0.18em] text-ink/45">
-                View place →
-              </span>
+              {/* Map thumbnail */}
+              <div className="relative h-40 overflow-hidden">
+                {hasMapbox ? (
+                  <img
+                    src={staticMapUrl(place.longitude, place.latitude)}
+                    alt={`Map location of ${place.name}`}
+                    className="h-full w-full object-cover transition-transform duration-500 ease-soft group-hover:scale-[1.04]"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="h-full bg-ink/8" />
+                )}
+              </div>
+
+              {/* Content */}
+              <div className="flex flex-1 flex-col p-5 md:p-6">
+                <p className="eyebrow">{place.category}</p>
+                <h3 className="mt-1 font-serif text-base text-ink">
+                  {place.name}
+                </h3>
+                {place.shortDescription && (
+                  <p className="mt-2 text-xs leading-relaxed text-ink/70 md:text-[13px]">
+                    {place.shortDescription}
+                  </p>
+                )}
+                <span className="mt-auto pt-4 text-[11px] uppercase tracking-[0.2em] text-ink/40">
+                  View place →
+                </span>
+              </div>
             </Link>
           ))}
         </div>
@@ -59,13 +113,11 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({ places }) => {
 
 export const getStaticProps: GetStaticProps<PlacesIndexProps> = async () => {
   try {
-    const places = await getPublishedLocations();
+    const places = await getEditorialLocations();
     return { props: { places }, revalidate: 60 };
   } catch {
-    // Supabase unavailable or not configured — use static fallback
     return { props: { places: getAllPlaces() }, revalidate: 60 };
   }
 };
 
 export default PlacesIndexPage;
-

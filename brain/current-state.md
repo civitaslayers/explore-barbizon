@@ -1,32 +1,25 @@
 # Current State
 
-Last updated: 2026-03-13
+Last updated: 2026-03-14
 
 ---
 
 ## Status
 
-Visual shell partially built. Supabase SDK installed and integrated with ISR + static fallback pattern. Schema fully designed but not yet migrated. Live data queries ready — blocked on `.env.local` anon key and media assets. Dev environment fully configured for autonomous AI development.
+Live Supabase connection confirmed (65+ locations loading). Places listing redesigned with Mapbox Static map thumbnails, category filter pills, and `.card .card-hover` treatment. Editorial/utility category split implemented in code — pending one SQL migration to activate. Uncommitted work from last session needs committing.
 
 ---
 
 ## Last Completed
 
-- Persistent AI dev environment: settings.json, hooks, agents, slash commands all configured
-- `brain/task-queue.md` created and seeded (Now / Next / Later / Blocked)
-- `/next-task`, `/update-brain`, `/schema-check`, `/ship-feature` commands available
-- 4 agents: civitas-architect, civitas-implementer, civitas-content-ops, civitas-release-checker
-- Homepage hero: `<video autoPlay muted loop playsInline>` (asset still needed)
-- Homepage: text stripped, CTAs fixed, map placeholder removed, WIP copy removed
-- Navigation: mobile hamburger with animated X and active route state
-- Featured place cards: `<Link>` with slugs, 7 entries in `data/places.ts`
-- Schema: live Supabase schema documented (7 tables) in `docs/schema-reference.md` Part 1
-- Schema: proposed Civitas target schema documented in `docs/schema-reference.md` Part 2
-- `visual_works` + `visual_work_locations` geo model finalised
-- Supabase SDK: `@supabase/supabase-js` installed, `lib/supabase.ts` with typed helpers + `toPlace()` adapter
-- `pages/places/index.tsx` + `[slug].tsx`: ISR with live Supabase queries + static fallback
-- ESLint: migrated to flat config (`eslint.config.mjs`), `npm run lint` clean on ESLint 9 / Next.js 16
-- `tsconfig.json`: removed non-existent `jest` type reference, `tsc --noEmit` clean
+- Supabase anon key + Mapbox token added to `.env.local`
+- `lib/mapbox.ts`: `staticMapUrl()` helper + `hasMapbox` flag
+- `pages/places/index.tsx`: full redesign — Mapbox Static thumbnails on cards, category filter pills (client-side), `.card .card-hover` treatment, conditional short description
+- `pages/places/[slug].tsx`: map preview section replaced with real Mapbox Static image (zoom 15)
+- `lib/supabase.ts`: `getEditorialLocations()` added — filters `categories.show_in_editorial = true`; `getPublishedLocations()` kept for the map (all categories)
+- `pages/places/index.tsx`: switched to `getEditorialLocations()`
+- Serialization fix: `Place.history` and `Place.heroImage` changed from `?: string` to `string | null`
+- Brain sync + committed as `940e920`, pushed
 
 ---
 
@@ -35,8 +28,16 @@ Visual shell partially built. Supabase SDK installed and integrated with ISR + s
 | Blocker | Needed for |
 |---|---|
 | `/public/videos/hero-barbizon.mp4` | Hero video renders |
-| `/public/images/places/*.jpg` (7 files) | Place card images render |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` in `.env.local` | All live data queries |
+| Run SQL in Supabase: `alter table categories add column show_in_editorial boolean not null default true` + update utility rows | Editorial/utility split goes live |
+
+---
+
+## Pending (uncommitted)
+
+- `lib/mapbox.ts` (new)
+- `lib/supabase.ts` (getEditorialLocations added)
+- `pages/places/index.tsx` (redesigned)
+- `pages/places/[slug].tsx` (map preview updated)
 
 ---
 
@@ -44,14 +45,7 @@ Visual shell partially built. Supabase SDK installed and integrated with ISR + s
 
 See `brain/task-queue.md` for the full ordered queue. Top unblocked items:
 
-1. Visual refinement — card design, large-screen layout width
-2. Place page refinement (`pages/places/[slug].tsx`)
-3. Schema migration — add `is_published`, `tour_type`, `difficulty` to `tours`
-
----
-
-## Next Session Starting Point
-
-Run `/next-task` to identify the top unblocked item.
-If assets are now available, add them to `public/` and verify hero + place cards render.
-If the Supabase anon key is available, begin data integration (task-queue Next section).
+1. Commit last session's places redesign + Mapbox work
+2. Run the `show_in_editorial` SQL migration in Supabase
+3. Build the map page (`pages/map.tsx`) with Mapbox GL + location pins
+4. Place detail page refinement
