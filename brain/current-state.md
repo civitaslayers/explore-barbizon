@@ -6,31 +6,64 @@ Last updated: 2026-03-14
 
 ## Status
 
-Per-category map icons fully implemented and live. 11 category-specific SVG icons replace the previous 4 group-level icons. Museum redesigned with wide classical proportions. Boulder v4 redesigned with all-convex silhouette (no ear-reading). Preview updated to v4. All committed and pushed.
+The core Barbizon app is live locally in Next.js with:
+- Mapbox GL JS map page
+- clustering
+- per-category SVG icons
+- search
+- layer toggles
+- places index
+- place detail pages
+- related and nearby sections
+
+The project is now in refinement mode, not rebuild mode.
 
 ---
 
-## Last Completed
+## Last completed
 
-- `components/MapGL.tsx`: 11 per-category icons (museum, gallery, restaurant, café, hotel, tree, viewpoint, boulder, parking, info, bus) replacing 4 group-level icons. Category→icon mapping covers all known categories.
-- `public/map-preview.html`: updated to v4 — museum widened (3:1 pediment, thick columns, plinth overhang), boulder all-convex v4, shadow system + sidebar badges updated
-- Committed as `a126564`, pushed
+- Map page shipped with clustering and category icon system
+- Places index built
+- Place detail pages built
+- Mapbox Static thumbnails integrated for place cards / previews
+
+---
+
+## Current focus
+
+1. place page refinement
+2. geographic nearby places logic
+3. large-screen layout audit
+4. visual polish without broad rewrites
 
 ---
 
 ## Blockers
 
-| Blocker | Needed for |
-|---|---|
-| `/public/videos/hero-barbizon.mp4` | Hero video renders |
-| Run SQL in Supabase: `alter table categories add column show_in_editorial boolean not null default true` + update utility rows | Editorial/utility split goes live |
+- none confirmed in repo state
+- note blockers here only if they actively stop implementation
 
 ---
 
-## Next Tasks
+## Constraints
 
-See `brain/task-queue.md` for the full ordered queue. Top unblocked items:
+- keep Pages Router
+- preserve current stack
+- preserve museum-cartography direction
+- keep diffs minimal
+- follow schema reference exactly
 
-1. Visual refinement: large-screen layout width audit
-2. `show_in_editorial` SQL migration — needs user to run in Supabase
-3. Wire `getEditorialLocations()` filter once migration is run
+---
+
+## Recommended next step
+
+Audit place detail layout on large screens, then tighten nearby places behavior using geographic logic only if the current data path supports it cleanly.
+
+---
+
+## Files likely in play next
+
+- `pages/places/[slug].tsx`
+- `pages/places/index.tsx`
+- related place components
+- nearby place query / utility files
