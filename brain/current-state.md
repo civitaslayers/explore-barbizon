@@ -6,20 +6,19 @@ Last updated: 2026-03-14
 
 ## Status
 
-Live Supabase connection confirmed (65+ locations loading). Places listing redesigned with Mapbox Static map thumbnails, category filter pills, and `.card .card-hover` treatment. Editorial/utility category split implemented in code — pending one SQL migration to activate. Uncommitted work from last session needs committing.
+Map page fully live with Mapbox GL JS, clustering, per-category SVG icons, search, and layer toggles — all committed. Places index and place detail pages are built with Mapbox Static thumbnails, category filters, related/nearby sections. Next work: place page refinement (geographic nearbyPlaces) and large-screen layout audit.
 
 ---
 
 ## Last Completed
 
-- Supabase anon key + Mapbox token added to `.env.local`
-- `lib/mapbox.ts`: `staticMapUrl()` helper + `hasMapbox` flag
-- `pages/places/index.tsx`: full redesign — Mapbox Static thumbnails on cards, category filter pills (client-side), `.card .card-hover` treatment, conditional short description
-- `pages/places/[slug].tsx`: map preview section replaced with real Mapbox Static image (zoom 15)
-- `lib/supabase.ts`: `getEditorialLocations()` added — filters `categories.show_in_editorial = true`; `getPublishedLocations()` kept for the map (all categories)
-- `pages/places/index.tsx`: switched to `getEditorialLocations()`
-- Serialization fix: `Place.history` and `Place.heroImage` changed from `?: string` to `string | null`
-- Brain sync + committed as `940e920`, pushed
+- `lib/mapbox.ts`: `staticMapUrl()` + `hasMapbox` flag
+- `lib/supabase.ts`: `getEditorialLocations()` (filters `show_in_editorial`), `getPublishedLocations()` for map
+- `pages/places/index.tsx`: Mapbox Static thumbnails, category filter pills, card grid
+- `pages/places/[slug].tsx`: hero, about, map preview, related + nearby sections
+- `components/MapGL.tsx`: Mapbox GL JS, GeoJSON source, clustering, per-group SVG icons, popups, layer/search controls
+- `pages/map.tsx`: left panel with search + layer toggles wired to MapGL
+- All committed through `a2dfe65`
 
 ---
 
@@ -32,20 +31,10 @@ Live Supabase connection confirmed (65+ locations loading). Places listing redes
 
 ---
 
-## Pending (uncommitted)
-
-- `lib/mapbox.ts` (new)
-- `lib/supabase.ts` (getEditorialLocations added)
-- `pages/places/index.tsx` (redesigned)
-- `pages/places/[slug].tsx` (map preview updated)
-
----
-
 ## Next Tasks
 
 See `brain/task-queue.md` for the full ordered queue. Top unblocked items:
 
-1. Commit last session's places redesign + Mapbox work
-2. Run the `show_in_editorial` SQL migration in Supabase
-3. Build the map page (`pages/map.tsx`) with Mapbox GL + location pins
-4. Place detail page refinement
+1. Place page refinement — geographic `nearbyPlaces` (haversine distance sort)
+2. Visual refinement: large-screen layout width audit
+3. Wire `show_in_editorial` once SQL migration is run

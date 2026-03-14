@@ -10,11 +10,9 @@ Update this file whenever work is completed or blockers are resolved.
 ## Now
 *Unblocked tasks that can be started immediately.*
 
-- [ ] Commit last session's places redesign + Mapbox work (uncommitted)
-- [ ] Run SQL in Supabase: `show_in_editorial` migration (see current-state.md)
-- [ ] Map page: build `pages/map.tsx` with Mapbox GL JS + all published location pins
-- [ ] Place page refinement (`pages/places/[slug].tsx` — currently minimal shell)
+- [ ] Place page refinement: geographic `nearbyPlaces` using haversine sort (`pages/places/[slug].tsx`)
 - [ ] Visual refinement: large-screen layout width audit
+- [ ] Run SQL in Supabase: `show_in_editorial` migration (see current-state.md) — needs user action
 
 ---
 

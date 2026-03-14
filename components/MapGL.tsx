@@ -109,8 +109,6 @@ type Props = { locations: Place[] };
 export default function MapGL({ locations }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
-  const locationsRef = useRef(locations);
-  locationsRef.current = locations;
 
   // Initialise map — runs once on mount
   useEffect(() => {
@@ -143,7 +141,7 @@ export default function MapGL({ locations }: Props) {
       // GeoJSON source with clustering
       map.addSource("locations", {
         type: "geojson",
-        data: buildGeoJSON(locationsRef.current),
+        data: buildGeoJSON(locations),
         cluster: true,
         clusterMaxZoom: 15,
         clusterRadius: 44,

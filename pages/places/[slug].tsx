@@ -5,6 +5,23 @@ import { getAllPlaces, type Place } from "@/data/places";
 import { getPublishedLocations, getPublishedSlugs } from "@/lib/supabase";
 import { staticMapUrl, hasMapbox } from "@/lib/mapbox";
 
+function haversineKm(
+  a: { latitude: number; longitude: number },
+  b: { latitude: number; longitude: number }
+): number {
+  const R = 6371;
+  const dLat = ((b.latitude - a.latitude) * Math.PI) / 180;
+  const dLon = ((b.longitude - a.longitude) * Math.PI) / 180;
+  const sinLat = Math.sin(dLat / 2);
+  const sinLon = Math.sin(dLon / 2);
+  const c =
+    sinLat * sinLat +
+    Math.cos((a.latitude * Math.PI) / 180) *
+      Math.cos((b.latitude * Math.PI) / 180) *
+      sinLon * sinLon;
+  return R * 2 * Math.atan2(Math.sqrt(c), Math.sqrt(1 - c));
+}
+
 type PlacePageProps = {
   place: Place;
   relatedPlaces: Place[];
@@ -166,9 +183,14 @@ const PlacePage: NextPage<PlacePageProps> = ({
                   href={`/places/${nearby.slug}`}
                   className="group card card-hover space-y-1 p-4 md:p-5"
                 >
-                  <p className="text-[11px] uppercase tracking-[0.18em] text-ink/50">
-                    {nearby.category}
-                  </p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-[11px] uppercase tracking-[0.18em] text-ink/50">
+                      {nearby.category}
+                    </p>
+                    <p className="text-[11px] text-ink/35">
+                      {Math.round(haversineKm(place, nearby) * 1000)}&thinsp;m
+                    </p>
+                  </div>
                   <p className="font-serif text-sm text-ink group-hover:underline group-hover:underline-offset-4">
                     {nearby.name}
                   </p>
@@ -225,6 +247,7 @@ export const getStaticProps: GetStaticProps<PlacePageProps> = async ({
 
     const nearbyPlaces = allPlaces
       .filter((p) => p.slug !== slug && p.category !== place.category)
+      .sort((a, b) => haversineKm(place, a) - haversineKm(place, b))
       .slice(0, 3);
 
     return { props: { place, relatedPlaces, nearbyPlaces }, revalidate: 60 };
@@ -241,6 +264,7 @@ export const getStaticProps: GetStaticProps<PlacePageProps> = async ({
 
     const nearbyPlaces = allPlaces
       .filter((p) => p.slug !== slug && p.category !== place.category)
+      .sort((a, b) => haversineKm(place, a) - haversineKm(place, b))
       .slice(0, 3);
 
     return { props: { place, relatedPlaces, nearbyPlaces }, revalidate: 60 };
