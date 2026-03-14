@@ -1,23 +1,120 @@
+# Command: next-task
+
+Purpose:
+Identify the highest-priority unblocked task and route it to the correct agent.
+
 ---
-description: Identify and begin the next unblocked task from the task queue.
+
+## Step 1 — Read minimal project state
+
+Read only these files:
+
+- brain/current-state.md
+- brain/task-queue.md
+- brain/decisions.md
+
+Do not scan the entire repository.
+
 ---
 
-Read `brain/task-queue.md` and `brain/current-state.md`.
+## Step 2 — Select the highest priority task
 
-Then do the following:
+From `task-queue.md`:
 
-1. List all tasks currently in the **Now** section of `brain/task-queue.md`.
-2. Cross-reference against the **Blocked** section — exclude any task whose blocker is unresolved.
-3. Identify the single highest-priority unblocked task.
-4. State clearly:
-   - **Task:** what it is
-   - **Why now:** why this is the right next step
-   - **Files to touch:** which files will need to change
-   - **Definition of done:** what "complete" looks like for this task
-5. Ask for confirmation before starting, unless $ARGUMENTS contains "go" — in which case begin immediately.
+1. Look in **Now**
+2. Skip tasks that require **user-action**
+3. Skip tasks in **Blocked**
 
-If $ARGUMENTS names a specific task (e.g. "visual refinement" or "schema migration"), find that task in the queue and apply the same breakdown.
+Select the first remaining task.
 
-After completing the task:
-- Run /update-brain to record what was done.
-- Move the completed task from Now to a completed section or remove it.
+---
+
+## Step 3 — Determine task type
+
+Infer the task category.
+
+### Frontend / UI
+
+Examples:
+- page layout
+- component changes
+- wiring UI to data
+
+Agent:
+civitas-implementer
+
+---
+
+### Data / SQL / Seeding
+
+Examples:
+- inserting locations
+- generating SQL
+- content migrations
+
+Agent:
+civitas-content-ops
+
+---
+
+### Schema / Architecture
+
+Examples:
+- schema migrations
+- database structure
+- multi-town architecture
+- Supabase table design
+
+Agent:
+civitas-architect
+
+---
+
+### Validation / Release
+
+Examples:
+- lint checks
+- build verification
+- diff review
+- release readiness
+
+Agent:
+civitas-release-checker
+
+---
+
+## Step 4 — Output
+
+Return:
+
+Task  
+Task type  
+Recommended agent  
+First implementation step
+
+Example:
+
+Task:
+Replace `data/tours.ts` with live Supabase query
+
+Task type:
+frontend + data
+
+Agent:
+civitas-implementer
+
+First step:
+Create `lib/supabase/tours.ts` helper query.
+
+---
+
+## Step 5 — Execution guidance
+
+To start implementation:
+
+/agent civitas-implementer
+
+Then execute the first step only.
+Do not perform the full task at once.
+
+Work in small safe increments.
