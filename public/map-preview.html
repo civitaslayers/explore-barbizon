@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Map Icon Proposal v3 — Explore Barbizon</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #F5F1E8;
+      font-family: system-ui, sans-serif;
+      color: #111;
+      padding: 48px;
+      max-width: 900px;
+    }
+    h1 { font-family: Georgia, serif; font-size: 22px; font-weight: 400; margin-bottom: 6px; }
+    .subtitle { font-size: 11px; text-transform: uppercase; letter-spacing: 0.25em; color: rgba(17,17,17,0.4); margin-bottom: 48px; }
+    .section { margin-bottom: 44px; }
+    .section-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 0.3em;
+      color: rgba(17,17,17,0.4); margin-bottom: 20px;
+      padding-bottom: 8px; border-bottom: 1px solid rgba(17,17,17,0.1);
+    }
+    .row { display: flex; align-items: flex-end; gap: 28px; flex-wrap: wrap; }
+    .marker-item { display: flex; flex-direction: column; align-items: center; gap: 9px; }
+    .marker-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em;
+      color: rgba(17,17,17,0.45); text-align: center; line-height: 1.5;
+    }
+    .divider { margin: 32px 0 24px; border: none; border-top: 1px solid rgba(17,17,17,0.08); }
+    .note {
+      font-size: 11px; color: rgba(17,17,17,0.45); line-height: 1.6;
+      max-width: 560px; margin-top: 14px;
+    }
+    .group-header {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em;
+      color: rgba(17,17,17,0.5); margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    /* Shadow levels */
+    .shadow-default  { filter: drop-shadow(0px 1px 2px rgba(0,0,0,0.18)); }
+    .shadow-cluster  { filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.22)); }
+    .shadow-selected { filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.25)); }
+
+    .callout {
+      background: rgba(17,17,17,0.04);
+      border: 1px solid rgba(17,17,17,0.09);
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 11px;
+      line-height: 1.7;
+      color: rgba(17,17,17,0.6);
+      max-width: 560px;
+      margin-top: 14px;
+    }
+    .callout strong { color: rgba(17,17,17,0.8); font-weight: 500; }
+  </style>
+</head>
+<body>
+
+<h1>Map Icon Proposal v4</h1>
+<p class="subtitle">Museum widened · boulder all-convex · max-one-detail rule · terrain notes</p>
+
+<!-- ─── SHADOW SYSTEM ────────────────────────────────────── -->
+<div class="section">
+  <p class="section-label">Shadow System — floating depth</p>
+  <div class="row" style="align-items:center">
+
+    <div class="marker-item">
+      <svg class="shadow-default" width="40" height="40" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="11.25" fill="#8A5A3B" stroke="#F5F1E8" stroke-width="1.5"/>
+        <g stroke="#F5F1E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <!-- Pediment: wide + low, overhangs columns -->
+          <path d="M5 13L12 8.5L19 13"/>
+          <line x1="5" y1="13" x2="19" y2="13"/>
+          <!-- Three thick columns -->
+          <line stroke-width="2" x1="7.5"  y1="13" x2="7.5"  y2="17.5"/>
+          <line stroke-width="2" x1="12"   y1="13" x2="12"   y2="17.5"/>
+          <line stroke-width="2" x1="16.5" y1="13" x2="16.5" y2="17.5"/>
+          <!-- Plinth: wider than pediment base -->
+          <line stroke-width="2" x1="4.5" y1="17.5" x2="19.5" y2="17.5"/>
+        </g>
+      </svg>
+      <span class="marker-label">Default<br/><code style="font-size:9px;color:rgba(17,17,17,0.4)">0px 1px 2px · 0.18</code></span>
+    </div>
+
+    <div class="marker-item">
+      <svg class="shadow-cluster" width="38" height="38" viewBox="0 0 36 36">
+        <circle cx="18" cy="18" r="16" fill="#8A5A3B" stroke="#F5F1E8" stroke-width="2"/>
+        <text x="18" y="22.5" text-anchor="middle" fill="#F5F1E8" font-size="11" font-weight="600" font-family="system-ui,sans-serif">7</text>
+      </svg>
+      <span class="marker-label">Cluster<br/><code style="font-size:9px;color:rgba(17,17,17,0.4)">0px 2px 3px · 0.22</code></span>
+    </div>
+
+    <div class="marker-item">
+      <svg class="shadow-selected" width="50" height="50" viewBox="0 0 48 48">
+        <circle cx="24" cy="24" r="23" fill="rgba(138,90,59,0.15)"/>
+        <circle cx="24" cy="24" r="19" fill="#8A5A3B" stroke="#F5F1E8" stroke-width="2"/>
+        <g stroke="#F5F1E8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" fill="none"
+           transform="translate(24,24) scale(1.55) translate(-12,-12)">
+          <path d="M5 13L12 8.5L19 13"/>
+          <line x1="5" y1="13" x2="19" y2="13"/>
+          <line stroke-width="2.2" x1="7.5"  y1="13" x2="7.5"  y2="17.5"/>
+          <line stroke-width="2.2" x1="12"   y1="13" x2="12"   y2="17.5"/>
+          <line stroke-width="2.2" x1="16.5" y1="13" x2="16.5" y2="17.5"/>
+          <line stroke-width="2.2" x1="4.5" y1="17.5" x2="19.5" y2="17.5"/>
+        </g>
+      </svg>
+      <span class="marker-label">Selected<br/><code style="font-size:9px;color:rgba(17,17,17,0.4)">0px 2px 4px · 0.25</code></span>
+    </div>
+
+  </div>
+  <p class="note">Shadow applied via CSS <code>filter: drop-shadow()</code> on the Mapbox icon images. Effect is felt as depth — not seen as a shadow. All three levels shown at natural scale.</p>
+</div>
+
+<hr class="divider"/>
+
+<!-- ─── ART & HISTORY ─────────────────────────────────────── -->
+<div class="section">
+  <p class="section-label">Art &amp; History — #8A5A3B</p>
+  <div class="group-header"><span class="dot" style="background:#8A5A3B"></span>One internal detail per icon</div>
+  <div class="row">
+
+    <!-- MUSEUM: wide pediment, thick columns, plinth. Building wider than tall.
+         Pediment overhangs columns. Three thick columns (the single detail). -->
+    <div class="marker-item">
+      <svg class="shadow-default" width="40" height="40" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="11.25" fill="#8A5A3B" stroke="#F5F1E8" stroke-width="1.5"/>
+        <g stroke="#F5F1E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <!-- Pediment: wide and low (3:1 aspect) + entablature -->
+          <path d="M5 13L12 8.5L19 13"/>
+          <line x1="5" y1="13" x2="19" y2="13"/>
+          <!-- Three thick columns — the single internal detail -->
+          <line stroke-width="2" x1="7.5"  y1="13" x2="7.5"  y2="17.5"/>
+          <line stroke-width="2" x1="12"   y1="13" x2="12"   y2="17.5"/>
+          <line stroke-width="2" x1="16.5" y1="13" x2="16.5" y2="17.5"/>
+          <!-- Plinth: wider than pediment base, grounds the building -->
+          <line stroke-width="2" x1="4.5" y1="17.5" x2="19.5" y2="17.5"/>
+        </g>
+      </svg>
+      <span class="marker-label">Museum /<br/>Heritage</span>
+    </div>
+
+    <!-- GALLERY: frame outline + inner opening only. Corner ornaments removed. -->
+    <div class="marker-item">
+      <svg class="shadow-default" width="40" height="40" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="11.25" fill="#8A5A3B" stroke="#F5F1E8" stroke-width="1.5"/>
+        <g stroke="#F5F1E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <!-- Outer frame -->
+          <rect x="6" y="7.5" width="12" height="9" rx="0.5"/>
+          <!-- Inner opening (single detail) -->
+          <rect x="8.5" y="9.5" width="7" height="5" rx="0.3"/>
+        </g>
+      </svg>
+      <span class="marker-label">Gallery /<br/>Studio</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- ─── EAT & STAY ────────────────────────────────────────── -->
+<div class="section">
+  <p class="section-label">Eat &amp; Stay — #C4A25E</p>
+  <div class="group-header"><span class="dot" style="background:#C4A25E"></span>One internal detail per icon</div>
+  <div class="row">
+
+    <!-- RESTAURANT: fork + knife. Two tines (not three). Unchanged — fork/knife are two shapes, which is the icon concept. -->
+    <div class="marker-item">
+      <svg class="shadow-default" width="40" height="40" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="11.25" fill="#C4A25E" stroke="#F5F1E8" stroke-width="1.5"/>
+        <g stroke="#F5F1E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <line x1="9"  y1="7.5" x2="9"  y2="10.5"/>
+          <line x1="11" y1="7.5" x2="11" y2="10.5"/>
+          <path d="M9 10.5 Q10 12.5 10 13L10 16.5"/>
+          <line x1="14.5" y1="7.5" x2="14.5" y2="16.5"/>
+          <path d="M14.5 7.5 Q17 9 17 12L14.5 12"/>
+        </g>
+      </svg>
+      <span class="marker-label">Restaurant</span>
+    </div>
+
+    <!-- CAFÉ: cup + handle. Reduced to ONE steam line (was two). -->
+    <div class="marker-item">
+      <svg class="shadow-default" width="40" height="40" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="11.25" fill="#C4A25E" stroke="#F5F1E8" stroke-width="1.5"/>
+        <g stroke="#F5F1E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <!-- Single steam line (centred) -->
+          <path d="M12 9.5 Q12.5 8 12 7"/>
+          <!-- Cup body -->
+          <path d="M7.5 10L7.5 15.5Q7.5 16.5 12 16.5Q16.5 16.5 16.5 15.5L16.5 10"/>
+          <!-- Handle (the single internal detail) -->
+          <path d="M16.5 11.5 Q19 11.5 19 13.5 Q19 15.5 16.5 15.5"/>
+        </g>
+      </svg>
+      <span class="marker-label">Café</span>
+    </div>
+
+    <!-- HOTEL: headboard + pillow. Mattress divider line removed. -->
+    <div class="marker-item">
+      <svg class="shadow-default" width="40" height="40" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="11.25" fill="#C4A25E" stroke="#F5F1E8" stroke-width="1.5"/>
+        <g stroke="#F5F1E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <!-- Bed frame with headboard -->
+          <path d="M6.5 17L6.5 13.5L17.5 13.5L17.5 17"/>
+          <path d="M6.5 13.5L6.5 10.5Q6.5 9.5 7.5 9.5L16.5 9.5Q17.5 9.5 17.5 10.5L17.5 13.5"/>
+          <!-- Pillow (single internal detail) -->
+          <rect x="8.5" y="10.5" width="4" height="3" rx="1"/>
+        </g>
+      </svg>
+      <span class="marker-label">Hotel</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- ─── FOREST & NATURE ───────────────────────────────────── -->
+<div class="section">
+  <p class="section-label">Forest &amp; Nature — #4E6B4A</p>
+  <div class="group-header"><span class="dot" style="background:#4E6B4A"></span>One internal detail per icon</div>
+  <div class="row">
+
+    <!-- TREE: triangle + trunk. No change needed — already minimal. -->
+    <div class="marker-item">
+      <svg class="shadow-default" width="40" height="40" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="11.25" fill="#4E6B4A" stroke="#F5F1E8" stroke-width="1.5"/>
+        <g stroke="#F5F1E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <path d="M12 7L18.5 17.5H5.5L12 7Z"/>
+          <line x1="12" y1="17.5" x2="12" y2="19.5"/>
+        </g>
+      </svg>
+      <span class="marker-label">Trail /<br/>Forest</span>
+    </div>
+
+    <!-- VIEWPOINT: two ovals + bridge only. Inner lens circles removed. -->
+    <div class="marker-item">
+      <svg class="shadow-default" width="40" height="40" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="11.25" fill="#4E6B4A" stroke="#F5F1E8" stroke-width="1.5"/>
+        <g stroke="#F5F1E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <!-- Left barrel -->
+          <rect x="5.5" y="10.5" width="5.5" height="7" rx="2.75"/>
+          <!-- Right barrel -->
+          <rect x="13"  y="10.5" width="5.5" height="7" rx="2.75"/>
+          <!-- Bridge (single internal detail) -->
+          <path d="M11 12.5 Q12 11 13 12.5"/>
+        </g>
+      </svg>
+      <span class="marker-label">Viewpoint</span>
+    </div>
+
+    <!-- BOULDER v4: all-convex silhouette, wider than tall, flat base via Z close.
+         Every control point pushes outward — no concave dips that read as an ear.
+         Crack is a short diagonal in the upper-right area (fracture, not a canal). -->
+    <div class="marker-item">
+      <svg class="shadow-default" width="40" height="40" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="11.25" fill="#4E6B4A" stroke="#F5F1E8" stroke-width="1.5"/>
+        <g stroke="#F5F1E8" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <!-- Boulder silhouette: all-convex, flat base via Z -->
+          <path stroke-width="1.5"
+            d="M5.5 18
+               Q4 17.5 4 14.5
+               Q4 10 9.5 8.5
+               Q14 7 18 10.5
+               Q20.5 13.5 18.5 18
+               Z"/>
+          <!-- Single crack: short diagonal upper-right, reads as fracture not canal -->
+          <line stroke-width="1.2" x1="14.5" y1="10" x2="12.5" y2="13"/>
+        </g>
+      </svg>
+      <span class="marker-label">Climbing /<br/>Boulder</span>
+    </div>
+
+  </div>
+  <p class="note">Boulder v4: all-convex silhouette — every control point pushes outward, eliminating the concave left side that read as an ear. Flat base via Z close. Short diagonal crack in upper-right reads as fracture. Museum: pediment widened to 3:1 aspect, three thick columns, plinth extends beyond pediment.</p>
+</div>
+
+<!-- ─── PRACTICAL ─────────────────────────────────────────── -->
+<div class="section">
+  <p class="section-label">Practical — #5E6E7A</p>
+  <div class="group-header"><span class="dot" style="background:#5E6E7A"></span>One internal detail per icon</div>
+  <div class="row">
+
+    <!-- PARKING: P letterform. Unchanged. -->
+    <div class="marker-item">
+      <svg class="shadow-default" width="40" height="40" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="11.25" fill="#5E6E7A" stroke="#F5F1E8" stroke-width="1.5"/>
+        <g stroke="#F5F1E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <line x1="9.5" y1="7.5" x2="9.5" y2="16.5"/>
+          <path d="M9.5 7.5 Q14.5 7.5 14.5 10.5 Q14.5 13.5 9.5 13.5"/>
+        </g>
+      </svg>
+      <span class="marker-label">Parking</span>
+    </div>
+
+    <!-- INFO: dot + serif stem. Unchanged. -->
+    <div class="marker-item">
+      <svg class="shadow-default" width="40" height="40" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="11.25" fill="#5E6E7A" stroke="#F5F1E8" stroke-width="1.5"/>
+        <g stroke="#F5F1E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <circle cx="12" cy="8.5" r="1.3" fill="#F5F1E8" stroke="none"/>
+          <line x1="10.5" y1="11.5" x2="13.5" y2="11.5"/>
+          <line x1="12"   y1="11.5" x2="12"   y2="16.5"/>
+          <line x1="10.5" y1="16.5" x2="13.5" y2="16.5"/>
+        </g>
+      </svg>
+      <span class="marker-label">Info /<br/>Services</span>
+    </div>
+
+    <!-- BUS: body + 2 wheels. Windows removed (over-detailed at 14px). -->
+    <div class="marker-item">
+      <svg class="shadow-default" width="40" height="40" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="11.25" fill="#5E6E7A" stroke="#F5F1E8" stroke-width="1.5"/>
+        <g stroke="#F5F1E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <!-- Bus body (rounded rect) -->
+          <rect x="6" y="8.5" width="12" height="7" rx="1.5"/>
+          <!-- Windshield divider (single internal detail) -->
+          <line x1="9.5" y1="8.5" x2="9.5" y2="11.5"/>
+          <!-- Wheels -->
+          <circle cx="9.5"  cy="16.5" r="1.5"/>
+          <circle cx="14.5" cy="16.5" r="1.5"/>
+        </g>
+      </svg>
+      <span class="marker-label">Transport /<br/>Bus</span>
+    </div>
+
+  </div>
+  <p class="note">Bus simplified: body + windshield line + 2 wheels. Window rectangles removed — at 14px they cluttered the silhouette rather than aiding recognition.</p>
+</div>
+
+<hr class="divider"/>
+
+<!-- ─── CLUSTER + STATES ──────────────────────────────────── -->
+<div class="section">
+  <p class="section-label">Cluster &amp; Selected States</p>
+  <div class="row" style="align-items:center">
+
+    <div class="marker-item">
+      <svg class="shadow-cluster" width="38" height="38" viewBox="0 0 36 36">
+        <circle cx="18" cy="18" r="16" fill="#8A5A3B" stroke="#F5F1E8" stroke-width="2"/>
+        <text x="18" y="22.5" text-anchor="middle" fill="#F5F1E8" font-size="11" font-weight="600" font-family="system-ui,sans-serif">5</text>
+      </svg>
+      <span class="marker-label">Cluster small</span>
+    </div>
+
+    <div class="marker-item">
+      <svg class="shadow-cluster" width="44" height="44" viewBox="0 0 42 42">
+        <circle cx="21" cy="21" r="19" fill="#8A5A3B" stroke="#F5F1E8" stroke-width="2"/>
+        <text x="21" y="25.5" text-anchor="middle" fill="#F5F1E8" font-size="12" font-weight="600" font-family="system-ui,sans-serif">12</text>
+      </svg>
+      <span class="marker-label">Cluster large</span>
+    </div>
+
+    <div class="marker-item">
+      <svg class="shadow-selected" width="52" height="52" viewBox="0 0 48 48">
+        <circle cx="24" cy="24" r="23" fill="rgba(138,90,59,0.15)"/>
+        <circle cx="24" cy="24" r="19" fill="#8A5A3B" stroke="#F5F1E8" stroke-width="2"/>
+        <g stroke="#F5F1E8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" fill="none"
+           transform="translate(24,24) scale(1.55) translate(-12,-12)">
+          <path d="M6 12.5L12 7.5L18 12.5"/>
+          <line x1="6"   y1="12.5" x2="18"  y2="12.5"/>
+          <line x1="8.5" y1="12.5" x2="8.5" y2="17"/>
+          <line x1="12"  y1="12.5" x2="12"  y2="17"/>
+          <line x1="15.5" y1="12.5" x2="15.5" y2="17"/>
+          <line x1="6.5" y1="17"   x2="17.5" y2="17"/>
+        </g>
+      </svg>
+      <span class="marker-label">Selected<br/>scale 1.25 + halo</span>
+    </div>
+
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- ─── TERRAIN NOTE ──────────────────────────────────────── -->
+<div class="section">
+  <p class="section-label">Terrain + Hillshade + Buildings (implementation note)</p>
+  <div class="callout">
+    <strong>What will be added to the live map:</strong><br/><br/>
+    <strong>Terrain:</strong> Mapbox raster-dem source with <code>exaggeration: 0.5</code> — subtle ground relief visible in the Fontainebleau forest area, not a dramatic 3D landscape.<br/><br/>
+    <strong>Hillshade:</strong> Low-opacity hillshade layer (shadow-intensity ~0.25, highlight-exaggeration ~0.4) for soft directional shading. Feels like a engraved map rather than a satellite view.<br/><br/>
+    <strong>Building extrusions:</strong> Visible at zoom ≥ 15. White/cream fill at opacity 0.6, no roof color, no specular highlights. Buildings appear as architectural model blocks — matte, flat-toned.<br/><br/>
+    <strong>Pitch:</strong> Initial map pitch ~30° (not 35° — avoids excessive tilt on the village-scale view). User can tilt freely. Pitch makes hillshade and buildings legible.<br/><br/>
+    <em>Cannot be previewed in static HTML. Will be visible on the live map at <code>localhost:3000/map</code> after implementation.</em>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- ─── SIDEBAR ───────────────────────────────────────────── -->
+<div class="section">
+  <p class="section-label">Sidebar Layer Badges</p>
+  <div style="display:flex;flex-direction:column;gap:10px;max-width:300px;">
+
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid rgba(17,17,17,0.12);border-radius:12px;">
+      <svg class="shadow-default" width="22" height="22" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="11.25" fill="#8A5A3B" stroke="#F5F1E8" stroke-width="1.5"/>
+        <g stroke="#F5F1E8" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <path d="M5 13L12 8.5L19 13"/>
+          <line x1="5" y1="13" x2="19" y2="13"/>
+          <line stroke-width="1.9" x1="7.5"  y1="13" x2="7.5"  y2="17.5"/>
+          <line stroke-width="1.9" x1="12"   y1="13" x2="12"   y2="17.5"/>
+          <line stroke-width="1.9" x1="16.5" y1="13" x2="16.5" y2="17.5"/>
+          <line stroke-width="1.9" x1="4.5"  y1="17.5" x2="19.5" y2="17.5"/>
+        </g>
+      </svg>
+      <div>
+        <p style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.18em;color:#111">Art &amp; History</p>
+        <p style="font-size:10px;color:rgba(17,17,17,0.45);margin-top:2px">Studios, galleries, heritage sites</p>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid rgba(17,17,17,0.12);border-radius:12px;">
+      <svg class="shadow-default" width="22" height="22" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="11.25" fill="#C4A25E" stroke="#F5F1E8" stroke-width="1.5"/>
+        <g stroke="#F5F1E8" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <line x1="9"  y1="7.5" x2="9"  y2="10.5"/>
+          <line x1="11" y1="7.5" x2="11" y2="10.5"/>
+          <path d="M9 10.5 Q10 12.5 10 13L10 16.5"/>
+          <line x1="14.5" y1="7.5" x2="14.5" y2="16.5"/>
+          <path d="M14.5 7.5 Q17 9 17 12L14.5 12"/>
+        </g>
+      </svg>
+      <div>
+        <p style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.18em;color:#111">Eat &amp; Stay</p>
+        <p style="font-size:10px;color:rgba(17,17,17,0.45);margin-top:2px">Restaurants, cafés, hotels, shops</p>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid rgba(17,17,17,0.12);border-radius:12px;">
+      <svg class="shadow-default" width="22" height="22" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="11.25" fill="#4E6B4A" stroke="#F5F1E8" stroke-width="1.5"/>
+        <g stroke="#F5F1E8" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <path d="M12 7L18.5 17.5H5.5L12 7Z"/>
+          <line x1="12" y1="17.5" x2="12" y2="19.5"/>
+        </g>
+      </svg>
+      <div>
+        <p style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.18em;color:#111">Forest &amp; Nature</p>
+        <p style="font-size:10px;color:rgba(17,17,17,0.45);margin-top:2px">Trails, viewpoints, climbing areas</p>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid rgba(17,17,17,0.12);border-radius:12px;">
+      <svg class="shadow-default" width="22" height="22" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="11.25" fill="#5E6E7A" stroke="#F5F1E8" stroke-width="1.5"/>
+        <g stroke="#F5F1E8" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <circle cx="12" cy="8.5" r="1.3" fill="#F5F1E8" stroke="none"/>
+          <line x1="10.5" y1="11.5" x2="13.5" y2="11.5"/>
+          <line x1="12"   y1="11.5" x2="12"   y2="16.5"/>
+          <line x1="10.5" y1="16.5" x2="13.5" y2="16.5"/>
+        </g>
+      </svg>
+      <div>
+        <p style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.18em;color:#111">Practical</p>
+        <p style="font-size:10px;color:rgba(17,17,17,0.45);margin-top:2px">Parking, transport, services</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<p style="font-size:10px;color:rgba(17,17,17,0.3);text-transform:uppercase;letter-spacing:0.2em;margin-top:8px">
+  Proposal v4 — implemented in MapGL.tsx
+</p>
+
+</body>
+</html>
