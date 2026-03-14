@@ -79,7 +79,11 @@ export function Layout({ children }: LayoutProps) {
       </header>
 
       <main className="flex-1">
-        <div className="editorial-container py-12 md:py-20">{children}</div>
+        {pathname === "/map" ? (
+          <div className="px-4 pb-6 pt-4 md:px-8 md:pt-5">{children}</div>
+        ) : (
+          <div className="editorial-container py-12 md:py-20">{children}</div>
+        )}
       </main>
 
       <footer className="border-t border-ink/10 bg-cream/95">
