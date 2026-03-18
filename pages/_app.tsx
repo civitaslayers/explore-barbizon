@@ -1,4 +1,6 @@
+import type { NextPage } from "next";
 import type { AppProps } from "next/app";
+import type { ReactElement, ReactNode } from "react";
 import { Inter, Playfair_Display } from "next/font/google";
 import "@/styles/globals.css";
 import { Layout } from "@/components/Layout";
@@ -13,15 +15,23 @@ const playfair = Playfair_Display({
   variable: "--font-playfair"
 });
 
-export default function MyApp({ Component, pageProps }: AppProps) {
+type NextPageWithLayout = NextPage & {
+  getLayout?: (page: ReactElement) => ReactNode;
+};
+
+type AppPropsWithLayout = AppProps & {
+  Component: NextPageWithLayout;
+};
+
+export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
+  const getLayout =
+    Component.getLayout ?? ((page) => <Layout>{page}</Layout>);
+
   return (
     <div
       className={`${inter.variable} ${playfair.variable} font-sans bg-cream text-ink min-h-screen`}
     >
-      <Layout>
-        <Component {...pageProps} />
-      </Layout>
+      {getLayout(<Component {...pageProps} />)}
     </div>
   );
 }
-
