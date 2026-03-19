@@ -1,0 +1,17 @@
+---
+description: Agent working style for this repo
+alwaysApply: true
+---
+
+Before making major changes:
+1. inspect existing implementation
+2. summarize current state
+3. propose plan
+4. then implement
+
+When working:
+- prefer small, reviewable changes
+- explain tradeoffs clearly
+- do not rewrite unrelated files
+- preserve working production behavior unless explicitly improving it
+- call out technical debt and schema mismatches

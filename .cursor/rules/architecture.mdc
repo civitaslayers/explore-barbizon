@@ -1,0 +1,18 @@
+---
+description: Core product and architecture rules for Civitas Layers
+alwaysApply: true
+---
+
+Civitas Layers is not a generic CMS or SaaS app.
+
+It is a civic knowledge system and operating layer for heritage towns.
+The public proof-of-concept product is ExploreBarbizon.
+
+Architectural principles:
+- Keep the schema simple, explicit, and scalable.
+- Prefer clear relational structures over abstract generic tables.
+- Separate internal operating system data from public content data.
+- The system should support map data, editorial content, tours, stories, and AI-assisted knowledge workflows.
+- Optimize for long-term maintainability over short-term hacks.
+- Avoid premature micro-abstractions.
+- Any major schema change should preserve a clear migration path from the current working Command Center.
