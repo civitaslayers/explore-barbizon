@@ -403,6 +403,49 @@ const TaskDetailPage: NextPageWithLayout = () => {
 
   if (!task) return null;
 
+  const locationLinks = taskLinks.filter((l) => l.entity_type === "location");
+  const tourLinks = taskLinks.filter((l) => l.entity_type === "tour");
+  const otherLinks = taskLinks.filter(
+    (l) => l.entity_type !== "location" && l.entity_type !== "tour"
+  );
+
+  function renderLinkedRow(
+    link: TaskLink,
+    meta: Record<string, { name: string; slug?: string }>,
+    basePath: string
+  ) {
+    const m = meta[link.entity_id];
+    return (
+      <li key={link.id} className="flex items-baseline gap-3 justify-between">
+        <span>
+          {m?.slug ? (
+            <Link
+              href={`${basePath}/${m.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-ink/65 hover:text-ink hover:underline"
+            >
+              {m.name || link.entity_id}
+            </Link>
+          ) : (
+            m?.name ?? link.entity_id
+          )}
+          {m && (
+            <span className="text-ink/40 text-xs ml-1">{link.entity_id}</span>
+          )}
+        </span>
+        <button
+          onClick={() => handleUnlink(link.id)}
+          className="text-[10px] text-ink/40 hover:text-ink transition-colors"
+          disabled={unlinkingId === link.id}
+          type="button"
+        >
+          {unlinkingId === link.id ? "Unlinking..." : "Unlink"}
+        </button>
+      </li>
+    );
+  }
+
   return (
     <div className="p-8 max-w-3xl">
       {/* Back */}
@@ -592,83 +635,31 @@ const TaskDetailPage: NextPageWithLayout = () => {
             <p className="text-sm text-ink/35">No linked entities yet.</p>
           ) : (
             <div className="space-y-4">
-              {taskLinks.filter((l) => l.entity_type === "location").length > 0 && (
+              {locationLinks.length > 0 && (
                 <div>
                   <p className="text-[10px] text-ink/30 mb-1">Locations</p>
                   <ul className="text-sm text-ink/65 space-y-1">
-                    {taskLinks.filter((l) => l.entity_type === "location").map((link) => (
-                      <li key={link.id} className="flex items-baseline gap-3 justify-between">
-                        <span>
-                          {locationMeta[link.entity_id]?.slug ? (
-                            <Link
-                              href={`/places/${locationMeta[link.entity_id].slug}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-ink/65 hover:text-ink hover:underline"
-                            >
-                              {locationMeta[link.entity_id].name || link.entity_id}
-                            </Link>
-                          ) : (
-                            locationMeta[link.entity_id]?.name ?? link.entity_id
-                          )}
-                          {locationMeta[link.entity_id] && (
-                            <span className="text-ink/40 text-xs ml-1">{link.entity_id}</span>
-                          )}
-                        </span>
-                        <button
-                          onClick={() => handleUnlink(link.id)}
-                          className="text-[10px] text-ink/40 hover:text-ink transition-colors"
-                          disabled={unlinkingId === link.id}
-                          type="button"
-                        >
-                          {unlinkingId === link.id ? "Unlinking..." : "Unlink"}
-                        </button>
-                      </li>
-                    ))}
+                    {locationLinks.map((link) =>
+                      renderLinkedRow(link, locationMeta, "/places")
+                    )}
                   </ul>
                 </div>
               )}
-              {taskLinks.filter((l) => l.entity_type === "tour").length > 0 && (
+              {tourLinks.length > 0 && (
                 <div>
                   <p className="text-[10px] text-ink/30 mb-1">Tours</p>
                   <ul className="text-sm text-ink/65 space-y-1">
-                    {taskLinks.filter((l) => l.entity_type === "tour").map((link) => (
-                      <li key={link.id} className="flex items-baseline gap-3 justify-between">
-                        <span>
-                          {tourMeta[link.entity_id]?.slug ? (
-                            <Link
-                              href={`/tours/${tourMeta[link.entity_id].slug}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-ink/65 hover:text-ink hover:underline"
-                            >
-                              {tourMeta[link.entity_id].name || link.entity_id}
-                            </Link>
-                          ) : (
-                            tourMeta[link.entity_id]?.name ?? link.entity_id
-                          )}
-                          {tourMeta[link.entity_id] && (
-                            <span className="text-ink/40 text-xs ml-1">{link.entity_id}</span>
-                          )}
-                        </span>
-                        <button
-                          onClick={() => handleUnlink(link.id)}
-                          className="text-[10px] text-ink/40 hover:text-ink transition-colors"
-                          disabled={unlinkingId === link.id}
-                          type="button"
-                        >
-                          {unlinkingId === link.id ? "Unlinking..." : "Unlink"}
-                        </button>
-                      </li>
-                    ))}
+                    {tourLinks.map((link) =>
+                      renderLinkedRow(link, tourMeta, "/tours")
+                    )}
                   </ul>
                 </div>
               )}
-              {taskLinks.filter((l) => l.entity_type !== "location" && l.entity_type !== "tour").length > 0 && (
+              {otherLinks.length > 0 && (
                 <div>
                   <p className="text-[10px] text-ink/30 mb-1">Other</p>
                   <ul className="text-sm text-ink/65 space-y-1">
-                    {taskLinks.filter((l) => l.entity_type !== "location" && l.entity_type !== "tour").map((link) => (
+                    {otherLinks.map((link) => (
                       <li key={link.id} className="flex items-baseline gap-3 justify-between">
                         <span className="text-ink/65">
                           <span className="text-ink/40">{link.entity_type}</span> {link.entity_id}
