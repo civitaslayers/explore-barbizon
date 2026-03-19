@@ -62,6 +62,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
   const [outputs, setOutputs] = useState<Output[]>([]);
   const [taskLinks, setTaskLinks] = useState<TaskLink[]>([]);
   const [locationMeta, setLocationMeta] = useState<Record<string, { name: string; slug?: string }>>({});
+  const [tourMeta, setTourMeta] = useState<Record<string, { name: string; slug?: string }>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -112,6 +113,36 @@ const TaskDetailPage: NextPageWithLayout = () => {
         setLocationMeta(map);
       })
       .catch(() => setLocationMeta({}));
+  }, [taskLinks]);
+
+  useEffect(() => {
+    const tourIds = taskLinks
+      .filter((l) => l.entity_type === "tour")
+      .map((l) => l.entity_id);
+    if (tourIds.length === 0) {
+      setTourMeta({});
+      return;
+    }
+    if (!supabase) {
+      setTourMeta({});
+      return;
+    }
+    supabase
+      .from("tours")
+      .select("id, name, slug")
+      .in("id", tourIds)
+      .then(({ data, error }) => {
+        if (error) {
+          setTourMeta({});
+          return;
+        }
+        const map: Record<string, { name: string; slug?: string }> = {};
+        for (const row of data ?? []) {
+          map[row.id] = { name: row.name ?? "", slug: row.slug ?? undefined };
+        }
+        setTourMeta(map);
+      })
+      .catch(() => setTourMeta({}));
   }, [taskLinks]);
 
   async function load(taskId: string) {
@@ -490,6 +521,24 @@ const TaskDetailPage: NextPageWithLayout = () => {
                           locationMeta[link.entity_id]?.name ?? link.entity_id
                         )}
                         {locationMeta[link.entity_id] && (
+                          <span className="text-ink/40 text-xs ml-1">{link.entity_id}</span>
+                        )}
+                      </>
+                    ) : link.entity_type === "tour" ? (
+                      <>
+                        {tourMeta[link.entity_id]?.slug ? (
+                          <Link
+                            href={`/tours/${tourMeta[link.entity_id].slug}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-ink/65 hover:text-ink hover:underline"
+                          >
+                            {tourMeta[link.entity_id].name || link.entity_id}
+                          </Link>
+                        ) : (
+                          tourMeta[link.entity_id]?.name ?? link.entity_id
+                        )}
+                        {tourMeta[link.entity_id] && (
                           <span className="text-ink/40 text-xs ml-1">{link.entity_id}</span>
                         )}
                       </>
