@@ -501,64 +501,86 @@ const TaskDetailPage: NextPageWithLayout = () => {
           {taskLinks.length === 0 ? (
             <p className="text-sm text-ink/35">No linked entities yet.</p>
           ) : (
-            <ul className="text-sm text-ink/65 space-y-1">
-              {taskLinks.map((link) => (
-                <li key={link.id} className="flex items-baseline gap-3 justify-between">
-                  <span>
-                    {link.entity_type}:{" "}
-                    {link.entity_type === "location" ? (
-                      <>
-                        {locationMeta[link.entity_id]?.slug ? (
-                          <Link
-                            href={`/places/${locationMeta[link.entity_id].slug}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-ink/65 hover:text-ink hover:underline"
-                          >
-                            {locationMeta[link.entity_id].name || link.entity_id}
-                          </Link>
-                        ) : (
-                          locationMeta[link.entity_id]?.name ?? link.entity_id
-                        )}
-                        {locationMeta[link.entity_id] && (
-                          <span className="text-ink/40 text-xs ml-1">{link.entity_id}</span>
-                        )}
-                      </>
-                    ) : link.entity_type === "tour" ? (
-                      <>
-                        {tourMeta[link.entity_id]?.slug ? (
-                          <Link
-                            href={`/tours/${tourMeta[link.entity_id].slug}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-ink/65 hover:text-ink hover:underline"
-                          >
-                            {tourMeta[link.entity_id].name || link.entity_id}
-                          </Link>
-                        ) : (
-                          tourMeta[link.entity_id]?.name ?? link.entity_id
-                        )}
-                        {tourMeta[link.entity_id] && (
-                          <span className="text-ink/40 text-xs ml-1">{link.entity_id}</span>
-                        )}
-                      </>
-                    ) : (
-                      <span className="text-ink/40">{link.entity_id}</span>
-                    )}
-                  </span>
-                  {link.entity_type === "location" && (
-                    <button
-                      onClick={() => handleUnlink(link.id)}
-                      className="text-[10px] text-ink/40 hover:text-ink transition-colors"
-                      disabled={unlinkingId === link.id}
-                      type="button"
-                    >
-                      {unlinkingId === link.id ? "Unlinking..." : "Unlink"}
-                    </button>
-                  )}
-                </li>
-              ))}
-            </ul>
+            <div className="space-y-4">
+              {taskLinks.filter((l) => l.entity_type === "location").length > 0 && (
+                <div>
+                  <p className="text-[10px] text-ink/30 mb-1">Locations</p>
+                  <ul className="text-sm text-ink/65 space-y-1">
+                    {taskLinks.filter((l) => l.entity_type === "location").map((link) => (
+                      <li key={link.id} className="flex items-baseline gap-3 justify-between">
+                        <span>
+                          {locationMeta[link.entity_id]?.slug ? (
+                            <Link
+                              href={`/places/${locationMeta[link.entity_id].slug}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-ink/65 hover:text-ink hover:underline"
+                            >
+                              {locationMeta[link.entity_id].name || link.entity_id}
+                            </Link>
+                          ) : (
+                            locationMeta[link.entity_id]?.name ?? link.entity_id
+                          )}
+                          {locationMeta[link.entity_id] && (
+                            <span className="text-ink/40 text-xs ml-1">{link.entity_id}</span>
+                          )}
+                        </span>
+                        <button
+                          onClick={() => handleUnlink(link.id)}
+                          className="text-[10px] text-ink/40 hover:text-ink transition-colors"
+                          disabled={unlinkingId === link.id}
+                          type="button"
+                        >
+                          {unlinkingId === link.id ? "Unlinking..." : "Unlink"}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {taskLinks.filter((l) => l.entity_type === "tour").length > 0 && (
+                <div>
+                  <p className="text-[10px] text-ink/30 mb-1">Tours</p>
+                  <ul className="text-sm text-ink/65 space-y-1">
+                    {taskLinks.filter((l) => l.entity_type === "tour").map((link) => (
+                      <li key={link.id} className="flex items-baseline gap-3 justify-between">
+                        <span>
+                          {tourMeta[link.entity_id]?.slug ? (
+                            <Link
+                              href={`/tours/${tourMeta[link.entity_id].slug}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-ink/65 hover:text-ink hover:underline"
+                            >
+                              {tourMeta[link.entity_id].name || link.entity_id}
+                            </Link>
+                          ) : (
+                            tourMeta[link.entity_id]?.name ?? link.entity_id
+                          )}
+                          {tourMeta[link.entity_id] && (
+                            <span className="text-ink/40 text-xs ml-1">{link.entity_id}</span>
+                          )}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {taskLinks.filter((l) => l.entity_type !== "location" && l.entity_type !== "tour").length > 0 && (
+                <div>
+                  <p className="text-[10px] text-ink/30 mb-1">Other</p>
+                  <ul className="text-sm text-ink/65 space-y-1">
+                    {taskLinks.filter((l) => l.entity_type !== "location" && l.entity_type !== "tour").map((link) => (
+                      <li key={link.id} className="flex items-baseline gap-3 justify-between">
+                        <span className="text-ink/65">
+                          <span className="text-ink/40">{link.entity_type}</span> {link.entity_id}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
