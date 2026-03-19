@@ -61,7 +61,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
   const [task, setTask] = useState<Task | null>(null);
   const [outputs, setOutputs] = useState<Output[]>([]);
   const [taskLinks, setTaskLinks] = useState<TaskLink[]>([]);
-  const [locationTitles, setLocationTitles] = useState<Record<string, string>>({});
+  const [locationMeta, setLocationMeta] = useState<Record<string, { name: string; slug?: string }>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -89,29 +89,29 @@ const TaskDetailPage: NextPageWithLayout = () => {
       .filter((l) => l.entity_type === "location")
       .map((l) => l.entity_id);
     if (locationIds.length === 0) {
-      setLocationTitles({});
+      setLocationMeta({});
       return;
     }
     if (!supabase) {
-      setLocationTitles({});
+      setLocationMeta({});
       return;
     }
     supabase
       .from("locations")
-      .select("id, name")
+      .select("id, name, slug")
       .in("id", locationIds)
       .then(({ data, error }) => {
         if (error) {
-          setLocationTitles({});
+          setLocationMeta({});
           return;
         }
-        const map: Record<string, string> = {};
+        const map: Record<string, { name: string; slug?: string }> = {};
         for (const row of data ?? []) {
-          map[row.id] = row.name ?? "";
+          map[row.id] = { name: row.name ?? "", slug: row.slug ?? undefined };
         }
-        setLocationTitles(map);
+        setLocationMeta(map);
       })
-      .catch(() => setLocationTitles({}));
+      .catch(() => setLocationMeta({}));
   }, [taskLinks]);
 
   async function load(taskId: string) {
@@ -477,8 +477,17 @@ const TaskDetailPage: NextPageWithLayout = () => {
                     {link.entity_type}:{" "}
                     {link.entity_type === "location" ? (
                       <>
-                        {locationTitles[link.entity_id] ?? link.entity_id}
-                        {locationTitles[link.entity_id] && (
+                        {locationMeta[link.entity_id]?.slug ? (
+                          <Link
+                            href={`/places/${locationMeta[link.entity_id].slug}`}
+                            className="text-ink/65 hover:text-ink underline"
+                          >
+                            {locationMeta[link.entity_id].name || link.entity_id}
+                          </Link>
+                        ) : (
+                          locationMeta[link.entity_id]?.name ?? link.entity_id
+                        )}
+                        {locationMeta[link.entity_id] && (
                           <span className="text-ink/40 text-xs ml-1">{link.entity_id}</span>
                         )}
                       </>
