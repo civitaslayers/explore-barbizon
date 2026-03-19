@@ -480,7 +480,9 @@ const TaskDetailPage: NextPageWithLayout = () => {
                         {locationMeta[link.entity_id]?.slug ? (
                           <Link
                             href={`/places/${locationMeta[link.entity_id].slug}`}
-                            className="text-ink/65 hover:text-ink underline"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-ink/65 hover:text-ink hover:underline"
                           >
                             {locationMeta[link.entity_id].name || link.entity_id}
                           </Link>
