@@ -61,6 +61,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
   const [task, setTask] = useState<Task | null>(null);
   const [outputs, setOutputs] = useState<Output[]>([]);
   const [taskLinks, setTaskLinks] = useState<TaskLink[]>([]);
+  const [locationTitles, setLocationTitles] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -82,6 +83,36 @@ const TaskDetailPage: NextPageWithLayout = () => {
     if (!id || typeof id !== "string") return;
     load(id);
   }, [id]);
+
+  useEffect(() => {
+    const locationIds = taskLinks
+      .filter((l) => l.entity_type === "location")
+      .map((l) => l.entity_id);
+    if (locationIds.length === 0) {
+      setLocationTitles({});
+      return;
+    }
+    if (!supabase) {
+      setLocationTitles({});
+      return;
+    }
+    supabase
+      .from("locations")
+      .select("id, name")
+      .in("id", locationIds)
+      .then(({ data, error }) => {
+        if (error) {
+          setLocationTitles({});
+          return;
+        }
+        const map: Record<string, string> = {};
+        for (const row of data ?? []) {
+          map[row.id] = row.name ?? "";
+        }
+        setLocationTitles(map);
+      })
+      .catch(() => setLocationTitles({}));
+  }, [taskLinks]);
 
   async function load(taskId: string) {
     setLoading(true);
@@ -442,7 +473,19 @@ const TaskDetailPage: NextPageWithLayout = () => {
             <ul className="text-sm text-ink/65 space-y-1">
               {taskLinks.map((link) => (
                 <li key={link.id} className="flex items-baseline gap-3 justify-between">
-                  {link.entity_type}: <span className="text-ink/40">{link.entity_id}</span>
+                  <span>
+                    {link.entity_type}:{" "}
+                    {link.entity_type === "location" ? (
+                      <>
+                        {locationTitles[link.entity_id] ?? link.entity_id}
+                        {locationTitles[link.entity_id] && (
+                          <span className="text-ink/40 text-xs ml-1">{link.entity_id}</span>
+                        )}
+                      </>
+                    ) : (
+                      <span className="text-ink/40">{link.entity_id}</span>
+                    )}
+                  </span>
                   {link.entity_type === "location" && (
                     <button
                       onClick={() => handleUnlink(link.id)}
