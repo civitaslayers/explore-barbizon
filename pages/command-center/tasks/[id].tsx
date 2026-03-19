@@ -86,22 +86,23 @@ const TaskDetailPage: NextPageWithLayout = () => {
   }, [id]);
 
   useEffect(() => {
-    const locationIds = taskLinks
-      .filter((l) => l.entity_type === "location")
-      .map((l) => l.entity_id);
-    if (locationIds.length === 0) {
-      setLocationMeta({});
-      return;
-    }
-    if (!supabase) {
-      setLocationMeta({});
-      return;
-    }
-    supabase
-      .from("locations")
-      .select("id, name, slug")
-      .in("id", locationIds)
-      .then(({ data, error }) => {
+    async function fetchLocationMeta() {
+      const locationIds = taskLinks
+        .filter((l) => l.entity_type === "location")
+        .map((l) => l.entity_id);
+      if (locationIds.length === 0) {
+        setLocationMeta({});
+        return;
+      }
+      if (!supabase) {
+        setLocationMeta({});
+        return;
+      }
+      try {
+        const { data, error } = await supabase
+          .from("locations")
+          .select("id, name, slug")
+          .in("id", locationIds);
         if (error) {
           setLocationMeta({});
           return;
@@ -111,27 +112,31 @@ const TaskDetailPage: NextPageWithLayout = () => {
           map[row.id] = { name: row.name ?? "", slug: row.slug ?? undefined };
         }
         setLocationMeta(map);
-      })
-      .catch(() => setLocationMeta({}));
+      } catch {
+        setLocationMeta({});
+      }
+    }
+    fetchLocationMeta();
   }, [taskLinks]);
 
   useEffect(() => {
-    const tourIds = taskLinks
-      .filter((l) => l.entity_type === "tour")
-      .map((l) => l.entity_id);
-    if (tourIds.length === 0) {
-      setTourMeta({});
-      return;
-    }
-    if (!supabase) {
-      setTourMeta({});
-      return;
-    }
-    supabase
-      .from("tours")
-      .select("id, name, slug")
-      .in("id", tourIds)
-      .then(({ data, error }) => {
+    async function fetchTourMeta() {
+      const tourIds = taskLinks
+        .filter((l) => l.entity_type === "tour")
+        .map((l) => l.entity_id);
+      if (tourIds.length === 0) {
+        setTourMeta({});
+        return;
+      }
+      if (!supabase) {
+        setTourMeta({});
+        return;
+      }
+      try {
+        const { data, error } = await supabase
+          .from("tours")
+          .select("id, name, slug")
+          .in("id", tourIds);
         if (error) {
           setTourMeta({});
           return;
@@ -141,8 +146,11 @@ const TaskDetailPage: NextPageWithLayout = () => {
           map[row.id] = { name: row.name ?? "", slug: row.slug ?? undefined };
         }
         setTourMeta(map);
-      })
-      .catch(() => setTourMeta({}));
+      } catch {
+        setTourMeta({});
+      }
+    }
+    fetchTourMeta();
   }, [taskLinks]);
 
   async function load(taskId: string) {
