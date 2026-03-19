@@ -37,10 +37,13 @@ This is the exact schema as it exists in the database today, pulled directly fro
 | icon | text | YES | — |
 | color | text | YES | — |
 | display_order | integer | YES | 0 |
+| show_in_editorial | boolean | NO | true |
 
 FK: `town_id` → `towns.id`
 
 Note: `layer` is a plain text field encoding which map layer this category belongs to. See proposed schema for how this should evolve.
+
+Note: `show_in_editorial` controls whether a category's locations are eligible for the editorial “Places to trace” listing. The map can still show locations from categories with `show_in_editorial = false`.
 
 ---
 

@@ -3,6 +3,8 @@ import { supabase } from "@/lib/supabase";
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
+// DB timestamps use DEFAULT now(); updated_at is maintained by triggers on
+// tasks, memory, and prompt_templates.
 
 export type TaskStatus = "backlog" | "ready" | "in_progress" | "review" | "done";
 export type AssignedAgent = "chatgpt" | "claude" | "cursor" | "manual";
@@ -21,7 +23,7 @@ export type Task = {
   title: string;
   description: string | null;
   status: TaskStatus;
-  priority: number;
+  priority: number; // DB column is nullable with default 3; app always uses a numeric priority
   assigned_agent: AssignedAgent | null;
   related_area: RelatedArea | null;
   created_at: string;
@@ -30,7 +32,7 @@ export type Task = {
 
 export type Output = {
   id: string;
-  task_id: string | null;
+  task_id: string | null; // Nullable by design in DB; FK to tasks.id with ON DELETE CASCADE
   agent: string;
   prompt: string | null;
   response: string | null;
@@ -49,7 +51,7 @@ export type Decision = {
 
 export type Memory = {
   id: string;
-  key: string;
+  key: string; // Unique constraint (memory_key_key); upsert uses key as logical identifier
   content: string;
   category: string | null;
   updated_at: string;
@@ -64,6 +66,17 @@ export type PromptTemplate = {
   template: string;
   created_at: string;
   updated_at: string;
+};
+
+export type TaskEntityType = "location" | "tour" | "story";
+
+export type TaskLink = {
+  id: string;
+  task_id: string;
+  entity_type: TaskEntityType;
+  // Note: entity_id is intentionally not FK-constrained to locations/tours/stories yet.
+  entity_id: string;
+  created_at: string;
 };
 
 // ---------------------------------------------------------------------------
@@ -126,6 +139,40 @@ export async function updateTask(
 export async function deleteTask(id: string): Promise<void> {
   if (!supabase) throw new Error("Supabase not configured");
   const { error } = await supabase.from("tasks").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+// ---------------------------------------------------------------------------
+// Task Links (CCC <-> public entities)
+// ---------------------------------------------------------------------------
+
+export async function getTaskLinks(taskId: string): Promise<TaskLink[]> {
+  if (!supabase) throw new Error("Supabase not configured");
+  const { data, error } = await supabase
+    .from("task_links")
+    .select("*")
+    .eq("task_id", taskId)
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+export async function createTaskLink(
+  input: Omit<TaskLink, "id" | "created_at">
+): Promise<TaskLink> {
+  if (!supabase) throw new Error("Supabase not configured");
+  const { data, error } = await supabase
+    .from("task_links")
+    .insert(input)
+    .select()
+    .single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function deleteTaskLink(id: string): Promise<void> {
+  if (!supabase) throw new Error("Supabase not configured");
+  const { error } = await supabase.from("task_links").delete().eq("id", id);
   if (error) throw new Error(error.message);
 }
 

@@ -10,8 +10,16 @@ import {
   getOutputsForTask,
   createOutput,
   deleteOutput,
+  getTaskLinks,
 } from "@/lib/commandCenter";
-import type { Task, Output, TaskStatus, AssignedAgent, RelatedArea } from "@/lib/commandCenter";
+import type {
+  Task,
+  Output,
+  TaskStatus,
+  AssignedAgent,
+  RelatedArea,
+  TaskLink,
+} from "@/lib/commandCenter";
 
 type NextPageWithLayout = NextPage & {
   getLayout?: (page: ReactElement) => ReactNode;
@@ -49,6 +57,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
 
   const [task, setTask] = useState<Task | null>(null);
   const [outputs, setOutputs] = useState<Output[]>([]);
+  const [taskLinks, setTaskLinks] = useState<TaskLink[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -70,9 +79,10 @@ const TaskDetailPage: NextPageWithLayout = () => {
     setLoading(true);
     setError(null);
     try {
-      const [t, o] = await Promise.all([
+      const [t, o, links] = await Promise.all([
         getTask(taskId),
         getOutputsForTask(taskId),
+        getTaskLinks(taskId),
       ]);
       if (!t) {
         setError("Task not found.");
@@ -81,6 +91,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
       setTask(t);
       setEditForm(t);
       setOutputs(o);
+      setTaskLinks(links);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Failed to load task");
     } finally {
@@ -308,6 +319,22 @@ const TaskDetailPage: NextPageWithLayout = () => {
           <p className="text-[10px] text-ink/30">
             Updated {new Date(task.updated_at).toLocaleDateString()}
           </p>
+        </div>
+
+        {/* Linked entities */}
+        <div className="mt-4 pt-4 border-t border-ink/8">
+          <p className="text-[10px] text-ink/30 mb-2">Linked entities</p>
+          {taskLinks.length === 0 ? (
+            <p className="text-sm text-ink/35">No linked entities yet.</p>
+          ) : (
+            <ul className="text-sm text-ink/65 space-y-1">
+              {taskLinks.map((link) => (
+                <li key={link.id}>
+                  {link.entity_type}: <span className="text-ink/40">{link.entity_id}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
 
