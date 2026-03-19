@@ -69,6 +69,9 @@ const TaskDetailPage: NextPageWithLayout = () => {
   const [attachSlug, setAttachSlug] = useState("");
   const [attachError, setAttachError] = useState<string | null>(null);
   const [attaching, setAttaching] = useState(false);
+  const [attachTourSlug, setAttachTourSlug] = useState("");
+  const [attachTourError, setAttachTourError] = useState<string | null>(null);
+  const [attachingTour, setAttachingTour] = useState(false);
   const [unlinkingId, setUnlinkingId] = useState<string | null>(null);
 
   const [editing, setEditing] = useState(false);
@@ -240,14 +243,74 @@ const TaskDetailPage: NextPageWithLayout = () => {
     }
   }
 
+  async function handleAttachTour(e: React.FormEvent) {
+    e.preventDefault();
+    if (!task) return;
+
+    setAttachTourError(null);
+    const slug = attachTourSlug.trim();
+    if (!slug) {
+      setAttachTourError("Enter a tour slug.");
+      return;
+    }
+
+    setAttachingTour(true);
+    try {
+      if (!supabase) throw new Error("Supabase not configured");
+
+      const { data, error } = await supabase
+        .from("tours")
+        .select("id")
+        .eq("slug", slug)
+        .maybeSingle();
+
+      if (error) throw new Error(error.message);
+
+      const resolvedTourId = data?.id;
+      if (!resolvedTourId) {
+        setAttachTourError(`No tour found for slug "${slug}".`);
+        return;
+      }
+
+      const createResult: any = await createTaskLink({
+        task_id: task.id,
+        entity_type: "tour",
+        entity_id: resolvedTourId,
+      });
+      if (createResult?.error) {
+        throw new Error(
+          createResult.error.message ?? "Failed to attach tour"
+        );
+      }
+
+      await refreshTaskLinks(task.id);
+      setAttachTourSlug("");
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Failed to attach";
+      if (
+        message.toLowerCase().includes("duplicate") ||
+        message.toLowerCase().includes("unique")
+      ) {
+        setAttachTourError("This tour is already linked to the task.");
+      } else {
+        setAttachTourError(message);
+      }
+    } finally {
+      setAttachingTour(false);
+    }
+  }
+
   async function handleUnlink(linkId: string) {
     if (!task) return;
     setUnlinkingId(linkId);
+    const link = taskLinks.find((l) => l.id === linkId);
+    const isTour = link?.entity_type === "tour";
+    const setErr = isTour ? setAttachTourError : setAttachError;
     try {
       const deleteResult: any = await deleteTaskLink(linkId);
       if (deleteResult?.error) {
-        setAttachError(
-          deleteResult.error.message ?? "Failed to unlink location"
+        setErr(
+          deleteResult.error.message ?? (isTour ? "Failed to unlink tour" : "Failed to unlink location")
         );
         return;
       }
@@ -255,8 +318,8 @@ const TaskDetailPage: NextPageWithLayout = () => {
       await refreshTaskLinks(task.id);
     } catch (e: unknown) {
       const message =
-        e instanceof Error ? e.message : "Failed to unlink location";
-      setAttachError(message);
+        e instanceof Error ? e.message : (isTour ? "Failed to unlink tour" : "Failed to unlink location");
+      setErr(message);
     } finally {
       setUnlinkingId(null);
     }
@@ -505,7 +568,26 @@ const TaskDetailPage: NextPageWithLayout = () => {
           </form>
           {attachError && <p className="mt-1 text-xs text-red-600">{attachError}</p>}
 
-          <p className="text-[10px] text-ink/30 mb-2">Linked entities</p>
+          <p className="text-[10px] text-ink/30 mb-2 mt-4">Attach tour</p>
+          <form onSubmit={handleAttachTour} className="flex gap-2 items-start">
+            <input
+              value={attachTourSlug}
+              onChange={(e) => setAttachTourSlug(e.target.value)}
+              placeholder="Tour slug"
+              className="flex-1 rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
+              disabled={attachingTour}
+            />
+            <button
+              type="submit"
+              disabled={attachingTour}
+              className="text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded bg-ink text-cream hover:bg-ink/90 transition-colors disabled:opacity-50"
+            >
+              {attachingTour ? "Attaching..." : "Attach"}
+            </button>
+          </form>
+          {attachTourError && <p className="mt-1 text-xs text-red-600">{attachTourError}</p>}
+
+          <p className="text-[10px] text-ink/30 mb-2 mt-4">Linked entities</p>
           {taskLinks.length === 0 ? (
             <p className="text-sm text-ink/35">No linked entities yet.</p>
           ) : (
@@ -569,6 +651,14 @@ const TaskDetailPage: NextPageWithLayout = () => {
                             <span className="text-ink/40 text-xs ml-1">{link.entity_id}</span>
                           )}
                         </span>
+                        <button
+                          onClick={() => handleUnlink(link.id)}
+                          className="text-[10px] text-ink/40 hover:text-ink transition-colors"
+                          disabled={unlinkingId === link.id}
+                          type="button"
+                        >
+                          {unlinkingId === link.id ? "Unlinking..." : "Unlink"}
+                        </button>
                       </li>
                     ))}
                   </ul>
