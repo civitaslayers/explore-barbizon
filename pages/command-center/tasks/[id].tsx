@@ -68,9 +68,11 @@ const TaskDetailPage: NextPageWithLayout = () => {
 
   const [attachSlug, setAttachSlug] = useState("");
   const [attachError, setAttachError] = useState<string | null>(null);
+  const [attachSuccess, setAttachSuccess] = useState(false);
   const [attaching, setAttaching] = useState(false);
   const [attachTourSlug, setAttachTourSlug] = useState("");
   const [attachTourError, setAttachTourError] = useState<string | null>(null);
+  const [attachTourSuccess, setAttachTourSuccess] = useState(false);
   const [attachingTour, setAttachingTour] = useState(false);
   const [unlinkingId, setUnlinkingId] = useState<string | null>(null);
 
@@ -228,6 +230,9 @@ const TaskDetailPage: NextPageWithLayout = () => {
 
       await refreshTaskLinks(task.id);
       setAttachSlug("");
+      setAttachError(null);
+      setAttachSuccess(true);
+      setTimeout(() => setAttachSuccess(false), 2500);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Failed to attach";
       if (
@@ -285,6 +290,9 @@ const TaskDetailPage: NextPageWithLayout = () => {
 
       await refreshTaskLinks(task.id);
       setAttachTourSlug("");
+      setAttachTourError(null);
+      setAttachTourSuccess(true);
+      setTimeout(() => setAttachTourSuccess(false), 2500);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Failed to attach";
       if (
@@ -451,10 +459,19 @@ const TaskDetailPage: NextPageWithLayout = () => {
       {/* Back */}
       <Link
         href="/command-center/tasks"
-        className="text-[10px] uppercase tracking-[0.2em] text-ink/35 no-underline hover:text-ink transition-colors mb-6 inline-block"
+        className="text-[10px] uppercase tracking-[0.2em] text-ink/35 no-underline hover:text-ink transition-colors mb-4 inline-block"
       >
         ← Tasks
       </Link>
+
+      {/* Linked entity summary */}
+      {taskLinks.length > 0 && (
+        <p className="text-[10px] text-ink/40 mb-4">
+          Linked: {locationLinks.length} location{locationLinks.length !== 1 ? "s" : ""},{" "}
+          {tourLinks.length} tour{tourLinks.length !== 1 ? "s" : ""},{" "}
+          {otherLinks.length} other
+        </p>
+      )}
 
       {/* Task metadata */}
       <div className="border border-ink/12 rounded-xl p-6 mb-6">
@@ -592,45 +609,52 @@ const TaskDetailPage: NextPageWithLayout = () => {
 
         {/* Linked entities */}
         <div className="mt-4 pt-4 border-t border-ink/8">
-          <p className="text-[10px] text-ink/30 mb-2">Attach to place</p>
-          <form onSubmit={handleAttachToPlace} className="flex gap-2 items-start">
-            <input
-              value={attachSlug}
-              onChange={(e) => setAttachSlug(e.target.value)}
-              placeholder="Location slug"
-              className="flex-1 rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
-              disabled={attaching}
-            />
-            <button
-              type="submit"
-              disabled={attaching}
-              className="text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded bg-ink text-cream hover:bg-ink/90 transition-colors disabled:opacity-50"
-            >
-              {attaching ? "Attaching..." : "Attach"}
-            </button>
-          </form>
-          {attachError && <p className="mt-1 text-xs text-red-600">{attachError}</p>}
+          <div className="space-y-4">
+            <div>
+              <p className="text-[10px] text-ink/30 mb-1.5">Attach to place</p>
+              <form onSubmit={handleAttachToPlace} className="flex gap-2 items-start">
+                <input
+                  value={attachSlug}
+                  onChange={(e) => setAttachSlug(e.target.value)}
+                  placeholder="Location slug"
+                  className="flex-1 rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
+                  disabled={attaching}
+                />
+                <button
+                  type="submit"
+                  disabled={attaching}
+                  className="text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded bg-ink text-cream hover:bg-ink/90 transition-colors disabled:opacity-50"
+                >
+                  {attaching ? "Attaching..." : "Attach"}
+                </button>
+              </form>
+              {attachError && <p className="mt-1 text-xs text-red-600">{attachError}</p>}
+              {attachSuccess && <p className="mt-1 text-xs text-moss">Attached.</p>}
+            </div>
+            <div>
+              <p className="text-[10px] text-ink/30 mb-1.5">Attach tour</p>
+              <form onSubmit={handleAttachTour} className="flex gap-2 items-start">
+                <input
+                  value={attachTourSlug}
+                  onChange={(e) => setAttachTourSlug(e.target.value)}
+                  placeholder="Tour slug"
+                  className="flex-1 rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
+                  disabled={attachingTour}
+                />
+                <button
+                  type="submit"
+                  disabled={attachingTour}
+                  className="text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded bg-ink text-cream hover:bg-ink/90 transition-colors disabled:opacity-50"
+                >
+                  {attachingTour ? "Attaching..." : "Attach"}
+                </button>
+              </form>
+              {attachTourError && <p className="mt-1 text-xs text-red-600">{attachTourError}</p>}
+              {attachTourSuccess && <p className="mt-1 text-xs text-moss">Attached.</p>}
+            </div>
+          </div>
 
-          <p className="text-[10px] text-ink/30 mb-2 mt-4">Attach tour</p>
-          <form onSubmit={handleAttachTour} className="flex gap-2 items-start">
-            <input
-              value={attachTourSlug}
-              onChange={(e) => setAttachTourSlug(e.target.value)}
-              placeholder="Tour slug"
-              className="flex-1 rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
-              disabled={attachingTour}
-            />
-            <button
-              type="submit"
-              disabled={attachingTour}
-              className="text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded bg-ink text-cream hover:bg-ink/90 transition-colors disabled:opacity-50"
-            >
-              {attachingTour ? "Attaching..." : "Attach"}
-            </button>
-          </form>
-          {attachTourError && <p className="mt-1 text-xs text-red-600">{attachTourError}</p>}
-
-          <p className="text-[10px] text-ink/30 mb-2 mt-4">Linked entities</p>
+          <p className="text-[10px] text-ink/30 mb-2 mt-5">Linked entities</p>
           {taskLinks.length === 0 ? (
             <p className="text-sm text-ink/35">No linked entities yet.</p>
           ) : (
