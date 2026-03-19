@@ -11,6 +11,8 @@ import {
   createOutput,
   deleteOutput,
   getTaskLinks,
+  createTaskLink,
+  deleteTaskLink,
 } from "@/lib/commandCenter";
 import type {
   Task,
@@ -20,6 +22,7 @@ import type {
   RelatedArea,
   TaskLink,
 } from "@/lib/commandCenter";
+import { supabase } from "@/lib/supabase";
 
 type NextPageWithLayout = NextPage & {
   getLayout?: (page: ReactElement) => ReactNode;
@@ -61,6 +64,11 @@ const TaskDetailPage: NextPageWithLayout = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [attachSlug, setAttachSlug] = useState("");
+  const [attachError, setAttachError] = useState<string | null>(null);
+  const [attaching, setAttaching] = useState(false);
+  const [unlinkingId, setUnlinkingId] = useState<string | null>(null);
+
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Task>>({});
   const [saving, setSaving] = useState(false);
@@ -96,6 +104,91 @@ const TaskDetailPage: NextPageWithLayout = () => {
       setError(e instanceof Error ? e.message : "Failed to load task");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function refreshTaskLinks(taskId: string) {
+    const links = await getTaskLinks(taskId);
+    setTaskLinks(links);
+  }
+
+  async function handleAttachToPlace(e: React.FormEvent) {
+    e.preventDefault();
+    if (!task) return;
+
+    setAttachError(null);
+    const slug = attachSlug.trim();
+    if (!slug) {
+      setAttachError("Enter a location slug.");
+      return;
+    }
+
+    setAttaching(true);
+    try {
+      if (!supabase) throw new Error("Supabase not configured");
+
+      const { data, error } = await supabase
+        .from("locations")
+        .select("id")
+        .eq("slug", slug)
+        .maybeSingle();
+
+      if (error) throw new Error(error.message);
+
+      const resolvedLocationId = data?.id;
+      if (!resolvedLocationId) {
+        setAttachError(`No location found for slug "${slug}".`);
+        return;
+      }
+
+      // Helpers currently throw, but keep this page resilient if they return { error }.
+      const createResult: any = await createTaskLink({
+        task_id: task.id,
+        entity_type: "location",
+        entity_id: resolvedLocationId,
+      });
+      if (createResult?.error) {
+        throw new Error(
+          createResult.error.message ?? "Failed to attach location"
+        );
+      }
+
+      await refreshTaskLinks(task.id);
+      setAttachSlug("");
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Failed to attach";
+      if (
+        message.toLowerCase().includes("duplicate") ||
+        message.toLowerCase().includes("unique")
+      ) {
+        setAttachError("This location is already linked to the task.");
+      } else {
+        setAttachError(message);
+      }
+    } finally {
+      setAttaching(false);
+    }
+  }
+
+  async function handleUnlink(linkId: string) {
+    if (!task) return;
+    setUnlinkingId(linkId);
+    try {
+      const deleteResult: any = await deleteTaskLink(linkId);
+      if (deleteResult?.error) {
+        setAttachError(
+          deleteResult.error.message ?? "Failed to unlink location"
+        );
+        return;
+      }
+
+      await refreshTaskLinks(task.id);
+    } catch (e: unknown) {
+      const message =
+        e instanceof Error ? e.message : "Failed to unlink location";
+      setAttachError(message);
+    } finally {
+      setUnlinkingId(null);
     }
   }
 
@@ -323,14 +416,43 @@ const TaskDetailPage: NextPageWithLayout = () => {
 
         {/* Linked entities */}
         <div className="mt-4 pt-4 border-t border-ink/8">
+          <p className="text-[10px] text-ink/30 mb-2">Attach to place</p>
+          <form onSubmit={handleAttachToPlace} className="flex gap-2 items-start">
+            <input
+              value={attachSlug}
+              onChange={(e) => setAttachSlug(e.target.value)}
+              placeholder="Location slug"
+              className="flex-1 rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
+              disabled={attaching}
+            />
+            <button
+              type="submit"
+              disabled={attaching}
+              className="text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded bg-ink text-cream hover:bg-ink/90 transition-colors disabled:opacity-50"
+            >
+              {attaching ? "Attaching..." : "Attach"}
+            </button>
+          </form>
+          {attachError && <p className="mt-1 text-xs text-red-600">{attachError}</p>}
+
           <p className="text-[10px] text-ink/30 mb-2">Linked entities</p>
           {taskLinks.length === 0 ? (
             <p className="text-sm text-ink/35">No linked entities yet.</p>
           ) : (
             <ul className="text-sm text-ink/65 space-y-1">
               {taskLinks.map((link) => (
-                <li key={link.id}>
+                <li key={link.id} className="flex items-baseline gap-3 justify-between">
                   {link.entity_type}: <span className="text-ink/40">{link.entity_id}</span>
+                  {link.entity_type === "location" && (
+                    <button
+                      onClick={() => handleUnlink(link.id)}
+                      className="text-[10px] text-ink/40 hover:text-ink transition-colors"
+                      disabled={unlinkingId === link.id}
+                      type="button"
+                    >
+                      {unlinkingId === link.id ? "Unlinking..." : "Unlink"}
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>
