@@ -54,6 +54,31 @@ const emptyOutputForm = {
   version: 1,
 };
 
+function CopyableId({ id }: { id: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    if (typeof navigator?.clipboard?.writeText === "function") {
+      navigator.clipboard.writeText(id);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }
+  };
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <code className="text-xs font-mono text-ink/55 cursor-text px-1 py-0.5 rounded bg-ink/5 [user-select:all]">
+        {id}
+      </code>
+      <button
+        type="button"
+        onClick={handleCopy}
+        className="text-[9px] text-ink/35 hover:text-ink/60 transition-colors"
+      >
+        {copied ? "Copied" : "Copy"}
+      </button>
+    </span>
+  );
+}
+
 const TaskDetailPage: NextPageWithLayout = () => {
   const router = useRouter();
   const { id } = router.query;
@@ -436,10 +461,12 @@ const TaskDetailPage: NextPageWithLayout = () => {
               {m.name || link.entity_id}
             </Link>
           ) : (
-            m?.name ?? link.entity_id
+            m?.name ?? <CopyableId id={link.entity_id} />
           )}
           {m && (
-            <span className="text-ink/40 text-xs ml-1">{link.entity_id}</span>
+            <span className="ml-1.5">
+              <CopyableId id={link.entity_id} />
+            </span>
           )}
         </span>
         <button
@@ -606,12 +633,14 @@ const TaskDetailPage: NextPageWithLayout = () => {
             Updated {new Date(task.updated_at).toLocaleDateString()}
           </p>
         </div>
+      </div>
 
-        {/* Linked entities */}
-        <div className="mt-4 pt-4 border-t border-ink/8">
-          <div className="space-y-4">
-            <div>
-              <p className="text-[10px] text-ink/30 mb-1.5">Attach to place</p>
+      {/* Attach area */}
+      <div className="border border-ink/12 rounded-xl p-6 mb-6 bg-ink/[0.02]">
+        <p className="text-[10px] text-ink/35 uppercase tracking-[0.15em] mb-4">Attach entities</p>
+        <div className="space-y-4">
+          <div>
+            <p className="text-[10px] text-ink/30 mb-1.5">Attach to place</p>
               <form onSubmit={handleAttachToPlace} className="flex gap-2 items-start">
                 <input
                   value={attachSlug}
@@ -654,10 +683,11 @@ const TaskDetailPage: NextPageWithLayout = () => {
             </div>
           </div>
 
-          <p className="text-[10px] text-ink/30 mb-2 mt-5">Linked entities</p>
-          {taskLinks.length === 0 ? (
-            <p className="text-sm text-ink/35">No linked entities yet.</p>
-          ) : (
+          <div className="mt-6 pt-5 border-t border-ink/8">
+            <p className="text-[10px] text-ink/35 uppercase tracking-[0.15em] mb-3">Linked entities</p>
+            {taskLinks.length === 0 ? (
+              <p className="text-sm text-ink/40">No entities linked to this task. Attach locations or tours above.</p>
+            ) : (
             <div className="space-y-4">
               {locationLinks.length > 0 && (
                 <div>
@@ -681,12 +711,13 @@ const TaskDetailPage: NextPageWithLayout = () => {
               )}
               {otherLinks.length > 0 && (
                 <div>
-                  <p className="text-[10px] text-ink/30 mb-1">Other</p>
-                  <ul className="text-sm text-ink/65 space-y-1">
+                  <p className="text-[10px] text-ink/30 mb-1.5">Other</p>
+                  <ul className="text-sm text-ink/65 space-y-1.5">
                     {otherLinks.map((link) => (
-                      <li key={link.id} className="flex items-baseline gap-3 justify-between">
-                        <span className="text-ink/65">
-                          <span className="text-ink/40">{link.entity_type}</span> {link.entity_id}
+                      <li key={link.id} className="flex items-center gap-3 justify-between py-0.5">
+                        <span className="flex items-center gap-2">
+                          <span className="text-[10px] uppercase tracking-[0.1em] text-ink/40 w-20 shrink-0">{link.entity_type}</span>
+                          <CopyableId id={link.entity_id} />
                         </span>
                       </li>
                     ))}
@@ -695,8 +726,8 @@ const TaskDetailPage: NextPageWithLayout = () => {
               )}
             </div>
           )}
+          </div>
         </div>
-      </div>
 
       {/* Outputs */}
       <div>
