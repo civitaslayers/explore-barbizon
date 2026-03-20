@@ -305,6 +305,175 @@ function HandoffReviewBlock({ task, outputs }: { task: Task; outputs: Output[] }
   );
 }
 
+function RunHandoffBlock({
+  task,
+  onUpdated,
+}: {
+  task: Task;
+  onUpdated: (t: Task) => void;
+}) {
+  const defaultTarget = useMemo(() => {
+    const fromAssignee = (task.assigned_to ?? "").trim();
+    if (fromAssignee) return fromAssignee;
+    return (task.last_run_target ?? "").trim();
+  }, [task.assigned_to, task.last_run_target, task.id]);
+
+  const [target, setTarget] = useState(defaultTarget);
+  const [note, setNote] = useState("");
+  const [recording, setRecording] = useState(false);
+  const [feedback, setFeedback] = useState<{
+    kind: "ok" | "err";
+    msg: string;
+  } | null>(null);
+
+  useEffect(() => {
+    setTarget(defaultTarget);
+  }, [defaultTarget]);
+
+  async function handleRecordHandoff(e: React.FormEvent) {
+    e.preventDefault();
+    const trimmedTarget = target.trim();
+    if (!trimmedTarget) {
+      setFeedback({ kind: "err", msg: "Choose or enter a handoff target." });
+      window.setTimeout(() => setFeedback(null), 4000);
+      return;
+    }
+    setRecording(true);
+    setFeedback(null);
+    try {
+      const updated = await updateTask(task.id, {
+        last_run_target: trimmedTarget,
+        last_run_note: note.trim() || null,
+        last_run_at: new Date().toISOString(),
+      });
+      onUpdated(updated);
+      setNote("");
+      const nextDefault = (updated.assigned_to ?? "").trim() || trimmedTarget;
+      setTarget(nextDefault);
+      setFeedback({ kind: "ok", msg: "Recorded." });
+      window.setTimeout(() => setFeedback(null), 2000);
+    } catch (err: unknown) {
+      setFeedback({
+        kind: "err",
+        msg: err instanceof Error ? err.message : "Could not record handoff.",
+      });
+      window.setTimeout(() => setFeedback(null), 4000);
+    } finally {
+      setRecording(false);
+    }
+  }
+
+  const savedTarget = (task.last_run_target ?? "").trim();
+  const savedNote = (task.last_run_note ?? "").trim();
+  const savedAt = task.last_run_at ? new Date(task.last_run_at) : null;
+  const hasRecordedRun = Boolean(savedTarget && task.last_run_at);
+
+  return (
+    <section
+      className="border border-ink/12 rounded-xl p-6 mb-6"
+      aria-label="Run and handoff"
+    >
+      <h2 className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-1">
+        Run / handoff
+      </h2>
+      <p className="text-[11px] text-ink/38 leading-snug mb-4">
+        Latest recorded handoff only — not tied to Copy brief or execution
+        status.
+      </p>
+
+      {!hasRecordedRun ? (
+        <p className="text-[13px] text-ink/45 leading-snug mb-4">
+          No run recorded yet.
+        </p>
+      ) : (
+        <dl className="grid grid-cols-[6.5rem_1fr] gap-x-3 gap-y-2 text-xs text-ink/65 mb-4">
+          <dt className="text-ink/40">Target</dt>
+          <dd className="min-w-0 font-medium text-ink/75">{savedTarget}</dd>
+          <dt className="text-ink/40">Recorded</dt>
+          <dd className="min-w-0">
+            {savedAt
+              ? savedAt.toLocaleString(undefined, {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                })
+              : "—"}
+          </dd>
+          <dt className="text-ink/40">Note</dt>
+          <dd className="min-w-0 leading-snug">
+            {savedNote ? (
+              <span className="whitespace-pre-wrap">{savedNote}</span>
+            ) : (
+              <span className="text-ink/35">—</span>
+            )}
+          </dd>
+        </dl>
+      )}
+
+      <form onSubmit={handleRecordHandoff} className="space-y-2 pt-1 border-t border-ink/8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div>
+            <label
+              htmlFor="ccc-run-handoff-target"
+              className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1"
+            >
+              Handoff target
+            </label>
+            <input
+              id="ccc-run-handoff-target"
+              list="ccc-run-handoff-target-presets"
+              value={target}
+              onChange={(e) => setTarget(e.target.value)}
+              placeholder="claude, cursor, human…"
+              disabled={recording}
+              className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink placeholder-ink/30 focus:outline-none disabled:opacity-60"
+            />
+            <datalist id="ccc-run-handoff-target-presets">
+              {RUN_HANDOFF_TARGET_PRESETS.map((p) => (
+                <option key={p} value={p} />
+              ))}
+            </datalist>
+          </div>
+          <div>
+            <label
+              htmlFor="ccc-run-handoff-note"
+              className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1"
+            >
+              Note (optional)
+            </label>
+            <input
+              id="ccc-run-handoff-note"
+              type="text"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Short handoff context…"
+              disabled={recording}
+              className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink placeholder-ink/30 focus:outline-none disabled:opacity-60"
+            />
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="submit"
+            disabled={recording}
+            className="text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded border border-ink/25 text-ink/55 hover:text-ink hover:border-ink/40 transition-colors disabled:opacity-50"
+          >
+            {recording ? "Recording…" : "Record handoff"}
+          </button>
+          {feedback && (
+            <span
+              className={`text-[10px] ${
+                feedback.kind === "ok" ? "text-moss/85" : "text-red-600/85"
+              }`}
+            >
+              {feedback.msg}
+            </span>
+          )}
+        </div>
+      </form>
+    </section>
+  );
+}
+
 function AgentBriefBlock({
   task,
   taskLinks,
@@ -434,6 +603,17 @@ const ASSIGNEE_PRESETS = [
   "openclaw",
   "paperclip",
   "unassigned",
+] as const;
+
+/** Presets for recording where a brief was handed (datalist); free text allowed. */
+const RUN_HANDOFF_TARGET_PRESETS = [
+  "human",
+  "claude",
+  "cursor",
+  "chatgpt",
+  "codex",
+  "openclaw",
+  "paperclip",
 ] as const;
 
 const STATUS_STYLE: Record<TaskStatus, string> = {
@@ -1586,6 +1766,14 @@ const TaskDetailPage: NextPageWithLayout = () => {
       </div>
 
       <HandoffReviewBlock task={task} outputs={outputs} />
+
+      <RunHandoffBlock
+        task={task}
+        onUpdated={(t) => {
+          setTask(t);
+          setEditForm((f) => ({ ...f, ...t }));
+        }}
+      />
 
       <AgentBriefBlock
         task={task}

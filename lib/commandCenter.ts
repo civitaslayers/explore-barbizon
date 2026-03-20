@@ -52,6 +52,12 @@ export type Task = {
   implementation_notes: string | null;
   /** Reviewer note, approval, or requested changes. */
   review_note: string | null;
+  /** Tool or person the brief was last handed to (free text). */
+  last_run_target: string | null;
+  /** When the latest handoff/run was recorded. */
+  last_run_at: string | null;
+  /** Short note about the latest handoff/run. */
+  last_run_note: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -119,6 +125,9 @@ function taskFromRow(row: Task): Task {
     artifact_links: row.artifact_links ?? null,
     implementation_notes: row.implementation_notes ?? null,
     review_note: row.review_note ?? null,
+    last_run_target: row.last_run_target ?? null,
+    last_run_at: row.last_run_at ?? null,
+    last_run_note: row.last_run_note ?? null,
   };
 }
 

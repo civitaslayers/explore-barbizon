@@ -85,6 +85,9 @@ export type TaskExecutionInsert = Pick<
   | "artifact_links"
   | "implementation_notes"
   | "review_note"
+  | "last_run_target"
+  | "last_run_at"
+  | "last_run_note"
 >;
 
 const emptyExecution: TaskExecutionInsert = {
@@ -98,6 +101,9 @@ const emptyExecution: TaskExecutionInsert = {
   artifact_links: null,
   implementation_notes: null,
   review_note: null,
+  last_run_target: null,
+  last_run_at: null,
+  last_run_note: null,
 };
 
 /** Maps template defaults to columns sent on insert; optional strings "" become null. */
@@ -121,5 +127,8 @@ export function executionFieldsForCreate(
     artifact_links: null,
     implementation_notes: trimOrNull(d.implementation_notes),
     review_note: null,
+    last_run_target: null,
+    last_run_at: null,
+    last_run_note: null,
   };
 }

@@ -396,7 +396,9 @@ const TasksPage: NextPageWithLayout = () => {
                       )}
                       {(task.execution_status ||
                         task.assigned_to ||
-                        (task.next_step && task.next_step.trim())) && (
+                        (task.next_step && task.next_step.trim()) ||
+                        (task.last_run_at &&
+                          (task.last_run_target ?? "").trim())) && (
                         <div className="flex flex-wrap gap-1 mt-1.5 items-center">
                           {task.execution_status && (
                             <span
@@ -418,6 +420,17 @@ const TasksPage: NextPageWithLayout = () => {
                               Next step
                             </span>
                           )}
+                          {task.last_run_at &&
+                            task.last_run_target?.trim() && (
+                              <span
+                                className="text-[9px] tracking-tight px-1.5 py-0.5 rounded border border-ink/8 text-ink/32"
+                                title={`Last handoff: ${new Date(
+                                  task.last_run_at
+                                ).toLocaleString()}`}
+                              >
+                                → {task.last_run_target.trim()}
+                              </span>
+                            )}
                         </div>
                       )}
                     </td>

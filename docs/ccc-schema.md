@@ -49,6 +49,9 @@ Execution queue for work across product, content, map, schema, and operations.
 | artifact_links | text    | YES      | URLs or path-like refs; often one per line |
 | implementation_notes | text | YES   | Compact notes on what changed / was produced / decided |
 | review_note    | text    | YES      | Short reviewer note, approval, or requested-change note |
+| last_run_target | text   | YES      | Tool or person the brief was last handed to (free text; e.g. `claude`, `human`) |
+| last_run_at    | timestamptz | YES   | When the latest handoff/run was recorded |
+| last_run_note  | text    | YES      | Short optional note about the latest handoff |
 | created_at     | timestamptz | YES  | Creation timestamp; default `now()` |
 | updated_at     | timestamptz | YES  | Last update timestamp; default `now()`; auto-updated by trigger |
 
@@ -63,6 +66,7 @@ Execution queue for work across product, content, map, schema, and operations.
   - `title`, `description`, `status`, `priority`, `assigned_agent`, `related_area`
   - `task_type`, `execution_status`, `assigned_to`, `latest_output`, `last_action_note`, `next_step` (migration `migrations/task-execution-fields.sql`)
   - `source_prompt`, `artifact_links`, `implementation_notes`, `review_note` (migration `migrations/task-structured-output-fields.sql`)
+  - `last_run_target`, `last_run_at`, `last_run_note` — latest handoff record only (migration `migrations/task-last-run-fields.sql`)
 
 Note: Although `priority` is nullable in the database, the application relies on the default value `3` and always treats it as a number when ordering.
 
