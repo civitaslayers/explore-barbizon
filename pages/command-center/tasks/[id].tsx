@@ -734,7 +734,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
           <>
             <div className="mb-4">
               <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-2">
-                Queue — pipeline position
+                Queue — pipeline / admin
               </p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -802,7 +802,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
             </div>
             <div className="mb-4 pt-4 border-t border-ink/8">
               <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-2">
-                Execution — current work
+                Execution — work posture / handoff
               </p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -857,7 +857,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
         ) : (
           <>
             <div className="mb-4">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-2">Queue — pipeline</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-2">Queue — pipeline / admin</p>
               <div className="flex flex-wrap gap-2">
                 <span className={`text-[10px] uppercase tracking-[0.15em] px-2.5 py-1 rounded-full ${STATUS_STYLE[task.status]}`}>
                   {task.status.replace("_", " ")}
@@ -883,7 +883,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
               </div>
             </div>
             <div className="mb-4 pt-4 border-t border-ink/8">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-2">Execution — work</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-2">Execution — work posture / handoff</p>
               <div className="rounded-lg border border-ink/10 bg-ink/[0.02] px-3 py-2.5 mb-2">
                 <p className="text-[9px] uppercase tracking-[0.2em] text-ink/30 mb-2">Handoff readiness</p>
                 <dl className="grid grid-cols-[7.5rem_1fr] gap-x-2 gap-y-1.5 text-xs text-ink/65">

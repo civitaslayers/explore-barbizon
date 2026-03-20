@@ -349,7 +349,6 @@ const TasksPage: NextPageWithLayout = () => {
                         </p>
                       )}
                       {(task.execution_status ||
-                        task.task_type ||
                         task.assigned_to ||
                         (task.next_step && task.next_step.trim())) && (
                         <div className="flex flex-wrap gap-1 mt-1.5 items-center">
@@ -358,11 +357,6 @@ const TasksPage: NextPageWithLayout = () => {
                               className={`text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded ${EXECUTION_STATUS_STYLE[task.execution_status] ?? "bg-ink/6 text-ink/45"}`}
                             >
                               {task.execution_status.replace("_", " ")}
-                            </span>
-                          )}
-                          {task.task_type && (
-                            <span className="text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded border border-ink/12 text-ink/40">
-                              {task.task_type}
                             </span>
                           )}
                           {task.assigned_to && (
