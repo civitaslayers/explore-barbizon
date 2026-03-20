@@ -11,6 +11,11 @@ import {
   deleteTask,
 } from "@/lib/commandCenter";
 import type { Task, TaskStatus, AssignedAgent, RelatedArea } from "@/lib/commandCenter";
+import {
+  TASK_TEMPLATES,
+  executionFieldsForCreate,
+  type TaskTemplateId,
+} from "@/lib/taskTemplates";
 
 type NextPageWithLayout = NextPage & {
   getLayout?: (page: ReactElement) => ReactNode;
@@ -67,8 +72,14 @@ const TasksPage: NextPageWithLayout = () => {
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [creationTemplateId, setCreationTemplateId] = useState<TaskTemplateId | null>(null);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+
+  const creationTemplate =
+    creationTemplateId == null
+      ? null
+      : TASK_TEMPLATES.find((t) => t.id === creationTemplateId) ?? null;
 
   // Filters from query params
   const filterStatus = (router.query.status as string) ?? "";
@@ -103,18 +114,10 @@ const TasksPage: NextPageWithLayout = () => {
         priority: form.priority,
         assigned_agent: (form.assigned_agent as AssignedAgent) || null,
         related_area: (form.related_area as RelatedArea) || null,
-        task_type: null,
-        execution_status: null,
-        assigned_to: null,
-        latest_output: null,
-        last_action_note: null,
-        next_step: null,
-        source_prompt: null,
-        artifact_links: null,
-        implementation_notes: null,
-        review_note: null,
+        ...executionFieldsForCreate(creationTemplate),
       });
       setForm(emptyForm);
+      setCreationTemplateId(null);
       setShowForm(false);
       await load();
     } catch (e: unknown) {
@@ -162,7 +165,16 @@ const TasksPage: NextPageWithLayout = () => {
           <h1 className="font-serif text-2xl tracking-tight">Tasks</h1>
         </div>
         <button
-          onClick={() => setShowForm((v) => !v)}
+          onClick={() => {
+            setShowForm((v) => {
+              if (v) {
+                setForm(emptyForm);
+                setFormError(null);
+                setCreationTemplateId(null);
+              }
+              return !v;
+            });
+          }}
           className="btn btn-primary text-[11px] py-2.5 px-5"
         >
           {showForm ? "Cancel" : "+ New Task"}
@@ -176,6 +188,36 @@ const TasksPage: NextPageWithLayout = () => {
           className="mb-6 p-5 border border-ink/15 rounded-xl bg-white/60 space-y-3"
         >
           <p className="text-[11px] uppercase tracking-[0.2em] text-ink/40 mb-1">New Task</p>
+          <div className="flex flex-wrap items-center gap-1.5 pb-1">
+            <span className="text-[10px] uppercase tracking-[0.15em] text-ink/35 mr-1">
+              Preset
+            </span>
+            <button
+              type="button"
+              onClick={() => setCreationTemplateId(null)}
+              className={`text-[10px] uppercase tracking-[0.12em] px-2 py-1 rounded border transition-colors ${
+                creationTemplateId == null
+                  ? "border-ink/30 bg-ink/5 text-ink"
+                  : "border-ink/12 text-ink/45 hover:border-ink/25 hover:text-ink/65"
+              }`}
+            >
+              None
+            </button>
+            {TASK_TEMPLATES.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setCreationTemplateId(t.id)}
+                className={`text-[10px] uppercase tracking-[0.12em] px-2 py-1 rounded border transition-colors ${
+                  creationTemplateId === t.id
+                    ? "border-umber/40 bg-umber/10 text-umber"
+                    : "border-ink/12 text-ink/45 hover:border-ink/25 hover:text-ink/65"
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
           {formError && (
             <p className="text-xs text-red-600">{formError}</p>
           )}
