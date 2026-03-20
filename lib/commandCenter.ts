@@ -8,6 +8,17 @@ import { supabase } from "@/lib/supabase";
 
 export type TaskStatus = "backlog" | "ready" | "in_progress" | "review" | "done";
 export type AssignedAgent = "chatgpt" | "claude" | "cursor" | "manual";
+export type TaskType =
+  | "content"
+  | "code"
+  | "map"
+  | "data"
+  | "ops"
+  | "design"
+  | "research"
+  | "other";
+/** Where the work stands for execution (separate from queue `status`). */
+export type ExecutionStatus = "todo" | "in_progress" | "review" | "blocked" | "done";
 export type RelatedArea =
   | "product"
   | "content"
@@ -26,6 +37,13 @@ export type Task = {
   priority: number; // DB column is nullable with default 3; app always uses a numeric priority
   assigned_agent: AssignedAgent | null;
   related_area: RelatedArea | null;
+  task_type: TaskType | null;
+  execution_status: ExecutionStatus | null;
+  assigned_to: string | null;
+  latest_output: string | null;
+  last_action_note: string | null;
+  /** Short instruction for the next actor (human + AI handoffs). */
+  next_step: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -79,6 +97,19 @@ export type TaskLink = {
   created_at: string;
 };
 
+/** Ensures execution columns exist at runtime (null) if DB predates migration. */
+function taskFromRow(row: Task): Task {
+  return {
+    ...row,
+    task_type: row.task_type ?? null,
+    execution_status: row.execution_status ?? null,
+    assigned_to: row.assigned_to ?? null,
+    latest_output: row.latest_output ?? null,
+    last_action_note: row.last_action_note ?? null,
+    next_step: row.next_step ?? null,
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Tasks
 // ---------------------------------------------------------------------------
@@ -91,7 +122,7 @@ export async function getTasks(): Promise<Task[]> {
     .order("priority", { ascending: true })
     .order("created_at", { ascending: false });
   if (error) throw new Error(error.message);
-  return data ?? [];
+  return (data ?? []).map((r) => taskFromRow(r as Task));
 }
 
 export async function getTask(id: string): Promise<Task | null> {
@@ -105,7 +136,7 @@ export async function getTask(id: string): Promise<Task | null> {
     if (error.code === "PGRST116") return null;
     throw new Error(error.message);
   }
-  return data;
+  return taskFromRow(data as Task);
 }
 
 export async function createTask(
@@ -118,7 +149,7 @@ export async function createTask(
     .select()
     .single();
   if (error) throw new Error(error.message);
-  return data;
+  return taskFromRow(data as Task);
 }
 
 export async function updateTask(
@@ -133,7 +164,7 @@ export async function updateTask(
     .select()
     .single();
   if (error) throw new Error(error.message);
-  return data;
+  return taskFromRow(data as Task);
 }
 
 export async function deleteTask(id: string): Promise<void> {

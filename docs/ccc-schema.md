@@ -1,6 +1,6 @@
 ## Civitas Command Center (CCC) Schema
 
-Last updated: 2026-03-19
+Last updated: 2026-03-20
 
 Source: Supabase project `afqyrxtfbspghpfulvmy` (Civitas Layers, eu-west-2, Postgres 17)
 
@@ -39,6 +39,12 @@ Execution queue for work across product, content, map, schema, and operations.
 | priority       | integer | YES      | Sort key; DB default `3`; app treats it as numeric for ordering |
 | assigned_agent | text    | YES      | One of: `chatgpt`, `claude`, `cursor`, `manual` (enforced in app code) |
 | related_area   | text    | YES      | One of: `product`, `content`, `map`, `database`, `design`, `engineering`, `seo`, `ops` (enforced in app code) |
+| task_type      | text    | YES      | Work class: `content`, `code`, `map`, `data`, `ops`, `design`, `research`, `other` (app-enforced on forms) |
+| execution_status | text | YES   | Execution posture: `todo`, `in_progress`, `review`, `blocked`, `done` (distinct from queue `status`) |
+| assigned_to    | text    | YES      | Assignee or tool label (free text; suggested presets in UI) |
+| latest_output  | text    | YES      | Latest result / draft / implementation summary |
+| last_action_note | text | YES     | Short note on last action or handoff |
+| next_step      | text    | YES      | One-line instruction for the next actor (handoff readability) |
 | created_at     | timestamptz | YES  | Creation timestamp; default `now()` |
 | updated_at     | timestamptz | YES  | Last update timestamp; default `now()`; auto-updated by trigger |
 
@@ -51,6 +57,7 @@ Execution queue for work across product, content, map, schema, and operations.
   - `.eq("id", id).single()`
 - Create/update operations read and write:
   - `title`, `description`, `status`, `priority`, `assigned_agent`, `related_area`
+  - `task_type`, `execution_status`, `assigned_to`, `latest_output`, `last_action_note`, `next_step` (added in migration `migrations/task-execution-fields.sql`)
 
 Note: Although `priority` is nullable in the database, the application relies on the default value `3` and always treats it as a number when ordering.
 

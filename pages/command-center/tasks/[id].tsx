@@ -18,6 +18,8 @@ import type {
   Task,
   Output,
   TaskStatus,
+  TaskType,
+  ExecutionStatus,
   AssignedAgent,
   RelatedArea,
   TaskLink,
@@ -31,6 +33,28 @@ type NextPageWithLayout = NextPage & {
 const STATUSES: TaskStatus[] = ["backlog", "ready", "in_progress", "review", "done"];
 const AGENTS: AssignedAgent[] = ["chatgpt", "claude", "cursor", "manual"];
 const AREAS: RelatedArea[] = ["product", "content", "map", "database", "design", "engineering", "seo", "ops"];
+const TASK_TYPES: TaskType[] = [
+  "content",
+  "code",
+  "map",
+  "data",
+  "ops",
+  "design",
+  "research",
+  "other",
+];
+const EXECUTION_STATUSES: ExecutionStatus[] = ["todo", "in_progress", "review", "blocked", "done"];
+/** Quick actions only cycle through active handoff postures (not `todo`). */
+const EXECUTION_QUICK_ACTIONS: ExecutionStatus[] = ["in_progress", "review", "blocked", "done"];
+const ASSIGNEE_PRESETS = [
+  "human",
+  "claude",
+  "cursor",
+  "codex",
+  "openclaw",
+  "paperclip",
+  "unassigned",
+] as const;
 
 const STATUS_STYLE: Record<TaskStatus, string> = {
   backlog: "bg-ink/8 text-ink/50",
@@ -45,6 +69,14 @@ const AGENT_STYLE: Record<string, string> = {
   claude: "bg-moss/15 text-moss",
   cursor: "bg-ink/10 text-ink/60",
   manual: "border border-ink/20 text-ink/50",
+};
+
+const EXECUTION_STATUS_STYLE: Record<ExecutionStatus, string> = {
+  todo: "bg-ink/6 text-ink/50",
+  in_progress: "bg-moss/12 text-moss",
+  review: "bg-ink/12 text-ink/60",
+  blocked: "bg-umber/8 text-umber/90",
+  done: "bg-ink/15 text-ink/65",
 };
 
 const emptyOutputForm = {
@@ -102,6 +134,22 @@ function sortTaskLinksByDisplayKey(
   );
 }
 
+function handoffReadinessCues(task: Task): string[] {
+  const cues: string[] = [];
+  const ex = task.execution_status;
+  const notDone = ex !== "done";
+  if (ex === "review" && !task.latest_output?.trim()) {
+    cues.push("Review posture, but latest output is empty.");
+  }
+  if (notDone && !task.assigned_to?.trim()) {
+    cues.push("No assignee — clarify who should pick this up.");
+  }
+  if (notDone && !task.next_step?.trim()) {
+    cues.push("No next step yet.");
+  }
+  return cues;
+}
+
 function sortOtherTaskLinks(links: TaskLink[]): TaskLink[] {
   return [...links].sort(
     (a, b) =>
@@ -155,6 +203,11 @@ const TaskDetailPage: NextPageWithLayout = () => {
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Task>>({});
   const [saving, setSaving] = useState(false);
+  const [executionPatching, setExecutionPatching] = useState(false);
+  const [executionFeedback, setExecutionFeedback] = useState<{
+    kind: "ok" | "err";
+    msg: string;
+  } | null>(null);
 
   const [showOutputForm, setShowOutputForm] = useState(false);
   const [outputForm, setOutputForm] = useState(emptyOutputForm);
@@ -442,6 +495,12 @@ const TaskDetailPage: NextPageWithLayout = () => {
         priority: editForm.priority,
         assigned_agent: editForm.assigned_agent ?? null,
         related_area: editForm.related_area ?? null,
+        task_type: editForm.task_type ?? null,
+        execution_status: editForm.execution_status ?? null,
+        assigned_to: editForm.assigned_to?.trim() || null,
+        latest_output: editForm.latest_output?.trim() || null,
+        last_action_note: editForm.last_action_note?.trim() || null,
+        next_step: editForm.next_step?.trim() || null,
       });
       setTask(updated);
       setEditing(false);
@@ -449,6 +508,27 @@ const TaskDetailPage: NextPageWithLayout = () => {
       setError(e instanceof Error ? e.message : "Failed to save");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleExecutionStatusQuick(next: ExecutionStatus) {
+    if (!task) return;
+    setExecutionPatching(true);
+    setExecutionFeedback(null);
+    try {
+      const updated = await updateTask(task.id, { execution_status: next });
+      setTask(updated);
+      setEditForm((f) => ({ ...f, ...updated }));
+      setExecutionFeedback({ kind: "ok", msg: "Updated" });
+      window.setTimeout(() => setExecutionFeedback(null), 2000);
+    } catch (e: unknown) {
+      setExecutionFeedback({
+        kind: "err",
+        msg: e instanceof Error ? e.message : "Could not update",
+      });
+      window.setTimeout(() => setExecutionFeedback(null), 4000);
+    } finally {
+      setExecutionPatching(false);
     }
   }
 
@@ -508,6 +588,8 @@ const TaskDetailPage: NextPageWithLayout = () => {
   }
 
   if (!task) return null;
+
+  const readinessCues = handoffReadinessCues(task);
 
   const locationLinks = taskLinks.filter((l) => l.entity_type === "location");
   const tourLinks = taskLinks.filter((l) => l.entity_type === "tour");
@@ -647,71 +729,220 @@ const TaskDetailPage: NextPageWithLayout = () => {
           </div>
         </div>
 
-        {/* Status / priority / agent / area */}
+        {/* Queue (pipeline) vs execution (work) */}
         {editing ? (
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            <div>
-              <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">Status</label>
-              <select
-                value={editForm.status}
-                onChange={(e) => setEditForm({ ...editForm, status: e.target.value as TaskStatus })}
-                className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
-              >
-                {STATUSES.map((s) => <option key={s} value={s}>{s.replace("_", " ")}</option>)}
-              </select>
+          <>
+            <div className="mb-4">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-2">
+                Queue — pipeline position
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">Queue status</label>
+                  <select
+                    value={editForm.status}
+                    onChange={(e) => setEditForm({ ...editForm, status: e.target.value as TaskStatus })}
+                    className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
+                  >
+                    {STATUSES.map((s) => <option key={s} value={s}>{s.replace("_", " ")}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">Priority</label>
+                  <select
+                    value={editForm.priority}
+                    onChange={(e) => setEditForm({ ...editForm, priority: Number(e.target.value) })}
+                    className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
+                  >
+                    {[1, 2, 3, 4, 5].map((p) => <option key={p} value={p}>{p}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">Assigned agent</label>
+                  <select
+                    value={editForm.assigned_agent ?? ""}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, assigned_agent: (e.target.value as AssignedAgent) || null })
+                    }
+                    className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
+                  >
+                    <option value="">—</option>
+                    {AGENTS.map((a) => <option key={a} value={a}>{a}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">Area</label>
+                  <select
+                    value={editForm.related_area ?? ""}
+                    onChange={(e) => setEditForm({ ...editForm, related_area: (e.target.value as RelatedArea) || null })}
+                    className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
+                  >
+                    <option value="">—</option>
+                    {AREAS.map((a) => <option key={a} value={a}>{a}</option>)}
+                  </select>
+                </div>
+                <div className="col-span-2">
+                  <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">Task type</label>
+                  <select
+                    value={editForm.task_type ?? ""}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, task_type: (e.target.value as TaskType) || null })
+                    }
+                    className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
+                  >
+                    <option value="">—</option>
+                    {TASK_TYPES.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
             </div>
-            <div>
-              <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">Priority</label>
-              <select
-                value={editForm.priority}
-                onChange={(e) => setEditForm({ ...editForm, priority: Number(e.target.value) })}
-                className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
-              >
-                {[1, 2, 3, 4, 5].map((p) => <option key={p} value={p}>{p}</option>)}
-              </select>
+            <div className="mb-4 pt-4 border-t border-ink/8">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-2">
+                Execution — current work
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">Execution status</label>
+                  <select
+                    value={editForm.execution_status ?? ""}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, execution_status: (e.target.value as ExecutionStatus) || null })
+                    }
+                    className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
+                  >
+                    <option value="">—</option>
+                    {EXECUTION_STATUSES.map((s) => (
+                      <option key={s} value={s}>
+                        {s.replace("_", " ")}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">
+                    Assignee / tool
+                  </label>
+                  <input
+                    list="ccc-task-assignee-presets"
+                    value={editForm.assigned_to ?? ""}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, assigned_to: e.target.value || null })
+                    }
+                    placeholder="human, claude, cursor…"
+                    className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink placeholder-ink/30 focus:outline-none"
+                  />
+                  <datalist id="ccc-task-assignee-presets">
+                    {ASSIGNEE_PRESETS.map((p) => (
+                      <option key={p} value={p} />
+                    ))}
+                  </datalist>
+                </div>
+                <div className="col-span-2">
+                  <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">Next step</label>
+                  <input
+                    type="text"
+                    value={editForm.next_step ?? ""}
+                    onChange={(e) => setEditForm({ ...editForm, next_step: e.target.value || null })}
+                    placeholder="e.g. Review latest output and approve"
+                    className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink placeholder-ink/30 focus:outline-none"
+                  />
+                </div>
+              </div>
             </div>
-            <div>
-              <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">Agent</label>
-              <select
-                value={editForm.assigned_agent ?? ""}
-                onChange={(e) => setEditForm({ ...editForm, assigned_agent: (e.target.value as AssignedAgent) || null })}
-                className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
-              >
-                <option value="">—</option>
-                {AGENTS.map((a) => <option key={a} value={a}>{a}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">Area</label>
-              <select
-                value={editForm.related_area ?? ""}
-                onChange={(e) => setEditForm({ ...editForm, related_area: (e.target.value as RelatedArea) || null })}
-                className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
-              >
-                <option value="">—</option>
-                {AREAS.map((a) => <option key={a} value={a}>{a}</option>)}
-              </select>
-            </div>
-          </div>
+          </>
         ) : (
-          <div className="flex flex-wrap gap-2 mb-4">
-            <span className={`text-[10px] uppercase tracking-[0.15em] px-2.5 py-1 rounded-full ${STATUS_STYLE[task.status]}`}>
-              {task.status.replace("_", " ")}
-            </span>
-            <span className="text-[10px] uppercase tracking-[0.15em] px-2.5 py-1 rounded-full bg-ink/6 text-ink/50">
-              Priority {task.priority}
-            </span>
-            {task.assigned_agent && (
-              <span className={`text-[10px] uppercase tracking-[0.15em] px-2.5 py-1 rounded-full ${AGENT_STYLE[task.assigned_agent] ?? "bg-ink/10 text-ink/60"}`}>
-                {task.assigned_agent}
-              </span>
-            )}
-            {task.related_area && (
-              <span className="text-[10px] uppercase tracking-[0.15em] px-2.5 py-1 rounded-full border border-ink/15 text-ink/45">
-                {task.related_area}
-              </span>
-            )}
-          </div>
+          <>
+            <div className="mb-4">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-2">Queue — pipeline</p>
+              <div className="flex flex-wrap gap-2">
+                <span className={`text-[10px] uppercase tracking-[0.15em] px-2.5 py-1 rounded-full ${STATUS_STYLE[task.status]}`}>
+                  {task.status.replace("_", " ")}
+                </span>
+                <span className="text-[10px] uppercase tracking-[0.15em] px-2.5 py-1 rounded-full bg-ink/6 text-ink/50">
+                  Priority {task.priority}
+                </span>
+                {task.assigned_agent && (
+                  <span className={`text-[10px] uppercase tracking-[0.15em] px-2.5 py-1 rounded-full ${AGENT_STYLE[task.assigned_agent] ?? "bg-ink/10 text-ink/60"}`}>
+                    {task.assigned_agent}
+                  </span>
+                )}
+                {task.related_area && (
+                  <span className="text-[10px] uppercase tracking-[0.15em] px-2.5 py-1 rounded-full border border-ink/15 text-ink/45">
+                    {task.related_area}
+                  </span>
+                )}
+                {task.task_type && (
+                  <span className="text-[10px] uppercase tracking-[0.15em] px-2.5 py-1 rounded-full border border-ink/12 text-ink/45">
+                    {task.task_type}
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="mb-4 pt-4 border-t border-ink/8">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-2">Execution — work</p>
+              <div className="rounded-lg border border-ink/10 bg-ink/[0.02] px-3 py-2.5 mb-2">
+                <p className="text-[9px] uppercase tracking-[0.2em] text-ink/30 mb-2">Handoff readiness</p>
+                <dl className="grid grid-cols-[7.5rem_1fr] gap-x-2 gap-y-1.5 text-xs text-ink/65">
+                  <dt className="text-ink/40">Assigned to</dt>
+                  <dd className="min-w-0">{task.assigned_to?.trim() || "—"}</dd>
+                  <dt className="text-ink/40">Execution status</dt>
+                  <dd className="min-w-0">
+                    {task.execution_status ? (
+                      <span
+                        className={`inline-block text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded ${EXECUTION_STATUS_STYLE[task.execution_status] ?? "bg-ink/8 text-ink/50"}`}
+                      >
+                        {task.execution_status.replace("_", " ")}
+                      </span>
+                    ) : (
+                      "—"
+                    )}
+                  </dd>
+                  <dt className="text-ink/40">Next step</dt>
+                  <dd className="min-w-0 leading-snug">{task.next_step?.trim() || "—"}</dd>
+                  <dt className="text-ink/40">Latest output</dt>
+                  <dd className="min-w-0">{task.latest_output?.trim() ? "Present" : "—"}</dd>
+                </dl>
+              </div>
+              {readinessCues.length > 0 && (
+                <ul className="mb-2 space-y-1 text-[11px] text-ink/45">
+                  {readinessCues.map((c, i) => (
+                    <li key={`${i}-${c}`}>· {c}</li>
+                  ))}
+                </ul>
+              )}
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[9px] uppercase tracking-[0.2em] text-ink/30 shrink-0">Quick</span>
+                {EXECUTION_QUICK_ACTIONS.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    disabled={executionPatching}
+                    onClick={() => handleExecutionStatusQuick(s)}
+                    className={`text-[9px] uppercase tracking-[0.12em] px-2 py-1 rounded border transition-colors disabled:opacity-50 ${
+                      task.execution_status === s
+                        ? "border-ink/35 bg-ink/8 text-ink/70"
+                        : "border-ink/15 text-ink/50 hover:bg-ink/5 hover:border-ink/25"
+                    }`}
+                  >
+                    {s.replace("_", " ")}
+                  </button>
+                ))}
+                {executionFeedback && (
+                  <span
+                    className={`text-[10px] ${
+                      executionFeedback.kind === "ok" ? "text-moss/90" : "text-red-600/90"
+                    }`}
+                  >
+                    {executionFeedback.msg}
+                  </span>
+                )}
+              </div>
+            </div>
+          </>
         )}
 
         {/* Description */}
@@ -728,6 +959,64 @@ const TaskDetailPage: NextPageWithLayout = () => {
             <p className="text-sm text-ink/65 leading-relaxed">{task.description}</p>
           )
         )}
+
+        {/* Work state — latest output & handoff notes */}
+        <div className="mt-4 pt-4 border-t border-ink/8">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-3">Work state</p>
+          {editing ? (
+            <div className="space-y-3">
+              <div>
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">
+                  Last action note
+                </label>
+                <textarea
+                  value={editForm.last_action_note ?? ""}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, last_action_note: e.target.value })
+                  }
+                  rows={2}
+                  placeholder="e.g. Waiting for review before implementation"
+                  className="w-full rounded border border-ink/20 bg-white px-3 py-2 text-sm text-ink placeholder-ink/30 focus:outline-none resize-none"
+                />
+              </div>
+              <div>
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">
+                  Latest output
+                </label>
+                <textarea
+                  value={editForm.latest_output ?? ""}
+                  onChange={(e) => setEditForm({ ...editForm, latest_output: e.target.value })}
+                  rows={6}
+                  placeholder="Result, draft, or implementation summary…"
+                  className="w-full rounded border border-ink/20 bg-white px-3 py-2 text-sm text-ink placeholder-ink/30 focus:outline-none resize-y min-h-[120px] font-mono text-[13px] leading-relaxed"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div>
+                <p className="text-[9px] uppercase tracking-[0.2em] text-ink/30 mb-1">Last action</p>
+                {task.last_action_note ? (
+                  <p className="text-sm text-ink/60 leading-relaxed whitespace-pre-wrap">
+                    {task.last_action_note}
+                  </p>
+                ) : (
+                  <p className="text-xs text-ink/30">—</p>
+                )}
+              </div>
+              <div>
+                <p className="text-[9px] uppercase tracking-[0.2em] text-ink/30 mb-1">Latest output</p>
+                {task.latest_output ? (
+                  <div className="text-sm text-ink/70 leading-relaxed whitespace-pre-wrap max-h-64 overflow-y-auto rounded-lg border border-ink/10 bg-ink/[0.02] px-3 py-2.5">
+                    {task.latest_output}
+                  </div>
+                ) : (
+                  <p className="text-xs text-ink/30">—</p>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Timestamps */}
         <div className="flex gap-4 mt-4 pt-4 border-t border-ink/8">

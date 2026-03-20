@@ -35,6 +35,14 @@ const AGENT_STYLE: Record<string, string> = {
   manual: "border border-ink/20 text-ink/50",
 };
 
+const EXECUTION_STATUS_STYLE: Record<string, string> = {
+  todo: "bg-ink/6 text-ink/50",
+  in_progress: "bg-moss/12 text-moss",
+  review: "bg-ink/12 text-ink/60",
+  blocked: "bg-umber/8 text-umber/90",
+  done: "bg-ink/15 text-ink/65",
+};
+
 const PRIORITY_LABEL: Record<number, string> = {
   1: "Urgent",
   2: "High",
@@ -95,6 +103,12 @@ const TasksPage: NextPageWithLayout = () => {
         priority: form.priority,
         assigned_agent: (form.assigned_agent as AssignedAgent) || null,
         related_area: (form.related_area as RelatedArea) || null,
+        task_type: null,
+        execution_status: null,
+        assigned_to: null,
+        latest_output: null,
+        last_action_note: null,
+        next_step: null,
       });
       setForm(emptyForm);
       setShowForm(false);
@@ -333,6 +347,38 @@ const TasksPage: NextPageWithLayout = () => {
                         <p className="text-[11px] text-ink/40 mt-0.5 line-clamp-1">
                           {task.description}
                         </p>
+                      )}
+                      {(task.execution_status ||
+                        task.task_type ||
+                        task.assigned_to ||
+                        (task.next_step && task.next_step.trim())) && (
+                        <div className="flex flex-wrap gap-1 mt-1.5 items-center">
+                          {task.execution_status && (
+                            <span
+                              className={`text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded ${EXECUTION_STATUS_STYLE[task.execution_status] ?? "bg-ink/6 text-ink/45"}`}
+                            >
+                              {task.execution_status.replace("_", " ")}
+                            </span>
+                          )}
+                          {task.task_type && (
+                            <span className="text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded border border-ink/12 text-ink/40">
+                              {task.task_type}
+                            </span>
+                          )}
+                          {task.assigned_to && (
+                            <span className="text-[9px] tracking-tight px-1.5 py-0.5 rounded border border-ink/10 text-ink/38">
+                              {task.assigned_to}
+                            </span>
+                          )}
+                          {task.next_step?.trim() && (
+                            <span
+                              className="text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded border border-ink/10 text-ink/35"
+                              title={task.next_step.trim()}
+                            >
+                              Next step
+                            </span>
+                          )}
+                        </div>
                       )}
                     </td>
                     <td className="px-4 py-3">
