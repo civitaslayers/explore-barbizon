@@ -37,7 +37,6 @@ Execution queue for work across product, content, map, schema, and operations.
 | description    | text    | YES      | Longer free-form description |
 | status         | text    | NO       | One of: `backlog`, `ready`, `in_progress`, `review`, `done` (enforced in app code) |
 | priority       | integer | YES      | Sort key; DB default `3`; app treats it as numeric for ordering |
-| assigned_agent | text    | YES      | Legacy; prefer `assigned_to` in UI. App may leave null on new tasks. |
 | related_area   | text    | YES      | One of: `product`, `content`, `map`, `database`, `design`, `engineering`, `seo`, `ops` (enforced in app code) |
 | task_type      | text    | YES      | Work class: `content`, `code`, `map`, `data`, `ops`, `design`, `research`, `other` (app-enforced on forms) |
 | execution_status | text | YES   | Execution posture: `todo`, `in_progress`, `review`, `blocked`, `done` (distinct from queue `status`) |
@@ -55,6 +54,13 @@ Execution queue for work across product, content, map, schema, and operations.
 | created_at     | timestamptz | YES  | Creation timestamp; default `now()` |
 | updated_at     | timestamptz | YES  | Last update timestamp; default `now()`; auto-updated by trigger |
 
+#### Queue status vs execution posture
+
+- **`status`** — queue / pipeline state; set by the human operator.
+- **`execution_status`** — current execution posture; set by whoever is actively working the task.
+- They are **independent** and **not** auto-synced in the app.
+- **Convention:** when `execution_status` becomes `done`, the operator should move `status` to `review` or `done` as appropriate.
+
 ### Usage in code
 
 - Queried via `getTasks()` with:
@@ -63,7 +69,7 @@ Execution queue for work across product, content, map, schema, and operations.
 - Single-task fetch via `getTask(id)`:
   - `.eq("id", id).single()`
 - Create/update operations read and write:
-  - `title`, `description`, `status`, `priority`, `assigned_agent`, `related_area`
+  - `title`, `description`, `status`, `priority`, `related_area`
   - `task_type`, `execution_status`, `assigned_to`, `latest_output`, `last_action_note`, `next_step` (migration `migrations/task-execution-fields.sql`)
   - `source_prompt`, `artifact_links`, `implementation_notes`, `review_note` (migration `migrations/task-structured-output-fields.sql`)
   - `last_run_target`, `last_run_at`, `last_run_note` — latest handoff record only (migration `migrations/task-last-run-fields.sql`)
@@ -228,7 +234,8 @@ This is a minimal additive linking layer:
 ## Summary of code vs database expectations
 
 - All CCC tables are assumed to use **UUID primary keys** and **timestamptz timestamps** with sensible defaults.
-- The app enforces enum-like behavior in TypeScript for `status`, `assigned_agent`, and `related_area`, but the database is expected to store them as simple `text` fields.
+- The app enforces enum-like behavior in TypeScript for `status` and `related_area`, but the database is expected to store them as simple `text` fields.
+- Legacy column `assigned_agent` was removed; use `assigned_to` only (migration `migrations/drop-task-assigned-agent.sql`).
 - `memory.key` **must be unique** for upsert behavior to work correctly.
 - `outputs.task_id` is modeled as nullable in TypeScript; the database should either allow `NULL` or the type definition should be tightened if `NOT NULL` is desired.
 - `task_links` uses `UNIQUE (task_id, entity_type, entity_id)` to prevent duplicate attachments.

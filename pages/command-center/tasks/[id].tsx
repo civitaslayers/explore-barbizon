@@ -20,7 +20,6 @@ import type {
   TaskStatus,
   TaskType,
   ExecutionStatus,
-  AssignedAgent,
   RelatedArea,
   TaskLink,
 } from "@/lib/commandCenter";
@@ -192,6 +191,19 @@ function deriveChiefOfStaffSuggestions(
       category: "execution",
       message:
         "Marked done but no output is recorded. Consider capturing what shipped or decided.",
+    });
+  }
+
+  if (
+    exec === "done" &&
+    (task.status === "backlog" || task.status === "ready")
+  ) {
+    out.push({
+      id: "queue-lags-execution-done",
+      level: "note",
+      category: "structure",
+      message:
+        "Execution posture is done but queue status is still backlog or ready. Consider advancing queue status to review or done.",
     });
   }
 
@@ -826,7 +838,8 @@ type NextPageWithLayout = NextPage & {
 };
 
 const STATUSES: TaskStatus[] = ["backlog", "ready", "in_progress", "review", "done"];
-const AGENTS: AssignedAgent[] = ["chatgpt", "claude", "cursor", "manual"];
+/** Quick-pick labels for `outputs.agent` (free-text in DB; presets only). */
+const OUTPUT_AGENT_PRESETS: readonly string[] = ["chatgpt", "claude", "cursor", "manual"];
 const AREAS: RelatedArea[] = ["product", "content", "map", "database", "design", "engineering", "seo", "ops"];
 const TASK_TYPES: TaskType[] = [
   "content",
@@ -843,6 +856,7 @@ const EXECUTION_STATUSES: ExecutionStatus[] = ["todo", "in_progress", "review", 
 const EXECUTION_QUICK_ACTIONS: ExecutionStatus[] = ["in_progress", "review", "blocked", "done"];
 const ASSIGNEE_PRESETS = [
   "human",
+  "chatgpt",
   "claude",
   "cursor",
   "codex",
@@ -992,7 +1006,7 @@ const EXECUTION_STATUS_STYLE: Record<ExecutionStatus, string> = {
 };
 
 const emptyOutputForm = {
-  agent: "claude" as AssignedAgent,
+  agent: "claude",
   prompt: "",
   response: "",
   version: 1,
@@ -2123,10 +2137,14 @@ const TaskDetailPage: NextPageWithLayout = () => {
               <div className="flex gap-3">
                 <select
                   value={outputForm.agent}
-                  onChange={(e) => setOutputForm({ ...outputForm, agent: e.target.value as AssignedAgent })}
+                  onChange={(e) => setOutputForm({ ...outputForm, agent: e.target.value })}
                   className="rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
                 >
-                  {AGENTS.map((a) => <option key={a} value={a}>{a}</option>)}
+                  {OUTPUT_AGENT_PRESETS.map((a) => (
+                    <option key={a} value={a}>
+                      {a}
+                    </option>
+                  ))}
                 </select>
                 <input
                   type="number"

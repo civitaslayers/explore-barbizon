@@ -120,7 +120,6 @@ const TasksPage: NextPageWithLayout = () => {
         description: form.description.trim() || null,
         status: form.status,
         priority: form.priority,
-        assigned_agent: null,
         related_area: (form.related_area as RelatedArea) || null,
         ...execFields,
         assigned_to: form.assigned_to.trim() || execFields.assigned_to,

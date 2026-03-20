@@ -7,7 +7,6 @@ import { supabase } from "@/lib/supabase";
 // tasks, memory, and prompt_templates.
 
 export type TaskStatus = "backlog" | "ready" | "in_progress" | "review" | "done";
-export type AssignedAgent = "chatgpt" | "claude" | "cursor" | "manual";
 export type TaskType =
   | "content"
   | "code"
@@ -35,7 +34,6 @@ export type Task = {
   description: string | null;
   status: TaskStatus;
   priority: number; // DB column is nullable with default 3; app always uses a numeric priority
-  assigned_agent: AssignedAgent | null;
   related_area: RelatedArea | null;
   task_type: TaskType | null;
   execution_status: ExecutionStatus | null;

@@ -10,7 +10,6 @@ create table if not exists tasks (
   description   text,
   status        text not null default 'backlog',
   priority      integer default 3,
-  assigned_agent text,
   related_area  text,
   created_at    timestamptz default now(),
   updated_at    timestamptz default now()
