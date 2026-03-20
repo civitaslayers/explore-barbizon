@@ -539,16 +539,26 @@ function RunHandoffBlock({
   );
 }
 
+type RunWithBriefTool = "chatgpt" | "claude" | "cursor";
+
+const RUN_WITH_TOOL_LABEL: Record<RunWithBriefTool, string> = {
+  chatgpt: "ChatGPT",
+  claude: "Claude",
+  cursor: "Cursor",
+};
+
 function AgentBriefBlock({
   task,
   taskLinks,
   locationMeta,
   tourMeta,
+  onUpdated,
 }: {
   task: Task;
   taskLinks: TaskLink[];
   locationMeta: Record<string, { name: string; slug?: string }>;
   tourMeta: Record<string, { name: string; slug?: string }>;
+  onUpdated: (t: Task) => void;
 }) {
   const [briefMode, setBriefMode] = useState<AgentBriefMode>(() =>
     defaultAgentBriefModeFromAssignee(task.assigned_to)
@@ -564,12 +574,106 @@ function AgentBriefBlock({
     [task, taskLinks, locationMeta, tourMeta, briefMode]
   );
   const [copied, setCopied] = useState(false);
+  const [recordHandoffOnRun, setRecordHandoffOnRun] = useState(true);
+  const [alignAssigneeOnRun, setAlignAssigneeOnRun] = useState(true);
+  const [runWithBusyTool, setRunWithBusyTool] = useState<RunWithBriefTool | null>(
+    null
+  );
+  const [runWithFeedback, setRunWithFeedback] = useState<{
+    kind: "ok" | "err";
+    msg: string;
+  } | null>(null);
 
   async function handleCopyBrief() {
     const ok = await copyTextToClipboard(brief);
     if (!ok) return;
     setCopied(true);
     window.setTimeout(() => setCopied(false), 2000);
+  }
+
+  async function handleRunWithTool(tool: RunWithBriefTool) {
+    setBriefMode(tool);
+    setRunWithFeedback(null);
+    setRunWithBusyTool(tool);
+    const toolLabel = RUN_WITH_TOOL_LABEL[tool];
+    let taskForBrief: Task = task;
+    let saveErr: string | null = null;
+    let savedToServer = false;
+
+    try {
+      if (recordHandoffOnRun || alignAssigneeOnRun) {
+        const patch: Partial<
+          Omit<Task, "id" | "created_at" | "updated_at">
+        > = {};
+        if (recordHandoffOnRun) {
+          patch.last_run_target = tool;
+          patch.last_run_at = new Date().toISOString();
+          const existingNote = (task.last_run_note ?? "").trim();
+          if (existingNote) {
+            patch.last_run_note = task.last_run_note;
+          }
+        }
+        if (alignAssigneeOnRun) {
+          patch.assigned_to = tool;
+          patch.assigned_agent = tool as AssignedAgent;
+        }
+        try {
+          const updated = await updateTask(task.id, patch);
+          onUpdated(updated);
+          taskForBrief = updated;
+          savedToServer = true;
+        } catch (e: unknown) {
+          saveErr =
+            e instanceof Error ? e.message : "Could not save to Command Center.";
+        }
+      }
+
+      const text = buildAgentTaskBrief(
+        taskForBrief,
+        taskLinks,
+        locationMeta,
+        tourMeta,
+        tool
+      );
+      const copiedOk = await copyTextToClipboard(text);
+
+      if (!copiedOk) {
+        setRunWithFeedback({
+          kind: "err",
+          msg: savedToServer
+            ? "Could not copy — task was updated."
+            : saveErr
+              ? `Could not copy. ${saveErr}`
+              : "Could not copy to clipboard.",
+        });
+        window.setTimeout(() => setRunWithFeedback(null), 4000);
+        return;
+      }
+
+      if (saveErr) {
+        setRunWithFeedback({
+          kind: "err",
+          msg: `Copied ${toolLabel} brief — not saved: ${saveErr}`,
+        });
+        window.setTimeout(() => setRunWithFeedback(null), 4000);
+        return;
+      }
+
+      let msg = `Copied ${toolLabel} brief`;
+      if (savedToServer) {
+        if (recordHandoffOnRun && alignAssigneeOnRun) {
+          msg += " — Handoff + assignee updated";
+        } else if (recordHandoffOnRun) {
+          msg += " — Handoff recorded";
+        } else if (alignAssigneeOnRun) {
+          msg += " — Assignee updated";
+        }
+      }
+      setRunWithFeedback({ kind: "ok", msg });
+      window.setTimeout(() => setRunWithFeedback(null), 2000);
+    } finally {
+      setRunWithBusyTool(null);
+    }
   }
 
   return (
@@ -590,7 +694,8 @@ function AgentBriefBlock({
         <button
           type="button"
           onClick={handleCopyBrief}
-          className="shrink-0 text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded border border-ink/20 text-ink/50 hover:text-ink hover:border-ink/40 transition-colors"
+          disabled={runWithBusyTool !== null}
+          className="shrink-0 text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded border border-ink/20 text-ink/50 hover:text-ink hover:border-ink/40 transition-colors disabled:opacity-50"
         >
           {copied ? "Copied" : "Copy brief"}
         </button>
@@ -609,8 +714,9 @@ function AgentBriefBlock({
               type="button"
               role="tab"
               aria-selected={active}
+              disabled={runWithBusyTool !== null}
               onClick={() => setBriefMode(mode)}
-              className={`text-[10px] uppercase tracking-[0.12em] px-2.5 py-1 rounded-md transition-colors ${
+              className={`text-[10px] uppercase tracking-[0.12em] px-2.5 py-1 rounded-md transition-colors disabled:opacity-50 ${
                 active
                   ? "bg-white border border-ink/18 text-ink/75 shadow-sm"
                   : "text-ink/45 hover:text-ink/65 border border-transparent"
@@ -624,6 +730,60 @@ function AgentBriefBlock({
       <p className="text-[10px] text-ink/32 leading-snug mb-3">
         Same task, framed for different tools.
       </p>
+
+      <div className="mb-3 pt-3 border-t border-ink/10">
+        <p className="text-[9px] uppercase tracking-[0.2em] text-ink/35 mb-2">
+          Run with…
+        </p>
+        <div className="flex flex-wrap gap-x-4 gap-y-2 mb-3">
+          <label className="inline-flex items-center gap-2 text-[9px] uppercase tracking-[0.14em] text-ink/50 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              className="rounded border-ink/25 text-ink/70 focus:ring-ink/20 shrink-0"
+              checked={recordHandoffOnRun}
+              onChange={(e) => setRecordHandoffOnRun(e.target.checked)}
+              disabled={runWithBusyTool !== null}
+            />
+            Record handoff
+          </label>
+          <label className="inline-flex items-center gap-2 text-[9px] uppercase tracking-[0.14em] text-ink/50 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              className="rounded border-ink/25 text-ink/70 focus:ring-ink/20 shrink-0"
+              checked={alignAssigneeOnRun}
+              onChange={(e) => setAlignAssigneeOnRun(e.target.checked)}
+              disabled={runWithBusyTool !== null}
+            />
+            Align assignee
+          </label>
+        </div>
+        <div className="flex flex-wrap items-center gap-1.5">
+          {(["chatgpt", "claude", "cursor"] as const).map((tool) => (
+            <button
+              key={tool}
+              type="button"
+              disabled={runWithBusyTool !== null}
+              onClick={() => handleRunWithTool(tool)}
+              className="text-[9px] uppercase tracking-[0.12em] px-2 py-1 rounded border border-ink/18 text-ink/55 hover:text-ink hover:border-ink/32 transition-colors disabled:opacity-50"
+            >
+              {runWithBusyTool === tool
+                ? "…"
+                : `Run with ${RUN_WITH_TOOL_LABEL[tool]}`}
+            </button>
+          ))}
+        </div>
+        {runWithFeedback ? (
+          <p
+            className={`text-[10px] mt-2 ${
+              runWithFeedback.kind === "ok"
+                ? "text-moss/85"
+                : "text-red-600/85"
+            }`}
+          >
+            {runWithFeedback.msg}
+          </p>
+        ) : null}
+      </div>
 
       <pre className="text-[11px] leading-relaxed text-ink/65 font-mono whitespace-pre-wrap break-words max-h-72 overflow-y-auto rounded-lg border border-ink/10 bg-ink/[0.02] px-3 py-2.5">
         {brief}
@@ -1935,6 +2095,10 @@ const TaskDetailPage: NextPageWithLayout = () => {
           taskLinks={taskLinks}
           locationMeta={locationMeta}
           tourMeta={tourMeta}
+          onUpdated={(t) => {
+            setTask(t);
+            setEditForm((f) => ({ ...f, ...t }));
+          }}
         />
 
         <RunHandoffBlock
