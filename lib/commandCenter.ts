@@ -44,7 +44,10 @@ export type Task = {
   last_action_note: string | null;
   /** Short instruction for the next actor (human + AI handoffs). */
   next_step: string | null;
-  /** Latest meaningful prompt or instruction (human or agent). */
+  /**
+   * Exact text of the latest agent brief copied/sent via Run with… (operational snapshot).
+   * Not a free-form scratch field; use implementation notes or outputs for other capture.
+   */
   source_prompt: string | null;
   /** URLs or path-like references; often one per line. */
   artifact_links: string | null;
@@ -414,7 +417,7 @@ export async function getOverviewStats() {
 
   const [tasks, recentOutputs, recentDecisions, recentMemory] =
     await Promise.all([
-      supabase.from("tasks").select("id, title, status, assigned_agent, updated_at").order("updated_at", { ascending: false }),
+      supabase.from("tasks").select("id, title, status, assigned_to, updated_at").order("updated_at", { ascending: false }),
       supabase.from("outputs").select("*").order("created_at", { ascending: false }).limit(5),
       supabase.from("decisions").select("*").order("created_at", { ascending: false }).limit(5),
       supabase.from("memory").select("*").order("updated_at", { ascending: false }).limit(5),

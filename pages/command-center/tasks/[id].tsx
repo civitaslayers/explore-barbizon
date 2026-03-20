@@ -49,38 +49,6 @@ function hasMeaningfulLatestOutput(task: Task, outputs: Output[]): boolean {
   return outputs.some((o) => (o.response ?? "").trim().length > 0);
 }
 
-/** Operational review lens; wording kept distinct from Chief of Staff diagnostics. */
-function deriveReviewReadinessCues(task: Task, outputs: Output[]): string[] {
-  const exec = task.execution_status;
-  const hasOutput = hasMeaningfulLatestOutput(task, outputs);
-  const hasLastNote = (task.last_action_note ?? "").trim().length > 0;
-  const cues: string[] = [];
-
-  if (exec === "in_progress" || exec === "review") {
-    cues.push(
-      hasOutput
-        ? "Ready for review — output is recorded."
-        : "Not ready for review — no output recorded yet."
-    );
-  }
-
-  if (exec === "blocked" && !hasLastNote) {
-    cues.push("Blocked — unclear without a last action note.");
-  }
-
-  if (exec === "done" && (!hasOutput || !hasLastNote)) {
-    cues.push(
-      "Done — documentation thin (missing output or last action note)."
-    );
-  }
-
-  if (exec === "todo" && hasOutput) {
-    cues.push("Work present — execution still todo.");
-  }
-
-  return cues;
-}
-
 /** Single derived cue for the Actions rail; no extra state or API. */
 function deriveNextAction(task: Task): { sentence: string; toolHint: string } {
   const hasLatestOutput = (task.latest_output ?? "").trim().length > 0;
@@ -183,13 +151,27 @@ function deriveChiefOfStaffSuggestions(
     });
   }
 
+  if (
+    task.execution_status &&
+    task.execution_status !== "done" &&
+    !nextStep
+  ) {
+    out.push({
+      id: "handoff-missing-next-step",
+      level: "note",
+      category: "handoff",
+      message:
+        "No next step set yet. A concrete next step reduces ambiguity for the assignee.",
+    });
+  }
+
   if (exec === "in_progress" && !hasLatestSurface) {
     out.push({
       id: "exec-in-progress-no-output",
       level: "warning",
       category: "execution",
       message:
-        "Status is in progress but no latest output is recorded. Capture a short result or paste into latest output.",
+        "Execution is in progress but no latest output is recorded. Capture a short result or paste into latest output.",
     });
   }
 
@@ -223,6 +205,16 @@ function deriveChiefOfStaffSuggestions(
     });
   }
 
+  if (exec === "review" && !(task.review_note ?? "").trim()) {
+    out.push({
+      id: "exec-review-no-review-note",
+      level: "note",
+      category: "execution",
+      message:
+        "In review — consider a short review note for the record.",
+    });
+  }
+
   if (hasLatestSurface && !lastNote) {
     out.push({
       id: "handoff-output-no-note",
@@ -233,13 +225,13 @@ function deriveChiefOfStaffSuggestions(
     });
   }
 
-  if (exec === "blocked" && !lastNote && !nextStep) {
+  if (exec === "blocked" && !lastNote) {
     out.push({
       id: "handoff-blocked-no-context",
       level: "warning",
       category: "handoff",
       message:
-        "Blocked without a last action note or next step. A short reason speeds unblock.",
+        "Blocked without a last action note. A short reason (and next step if helpful) speeds unblock.",
     });
   }
 
@@ -295,22 +287,25 @@ function HandoffReviewBlock({ task, outputs }: { task: Task; outputs: Output[] }
     ? task.execution_status.replace("_", " ")
     : "—";
   const assigneeLabel = (task.assigned_to ?? "").trim() || "—";
-  const reviewCues = deriveReviewReadinessCues(task, outputs);
+  const queueLabel = task.status.replace("_", " ");
 
   return (
     <section
       className="mb-0"
-      aria-label="Handoff and review snapshot"
+      aria-label="Work snapshot"
     >
       <h2 className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-1">
-        Handoff / review
+        Work snapshot
       </h2>
       <p className="text-[11px] text-ink/38 leading-snug mb-4">
-        Read-only snapshot of execution and review posture (saved task).
+        Read-only. Queue status is where the task sits in the pipeline; execution posture is how
+        work is going now. Advisory messages are in Task guidance above.
       </p>
 
-      <dl className="grid grid-cols-[6.5rem_1fr] gap-x-3 gap-y-2 text-xs text-ink/65 mb-4">
-        <dt className="text-ink/40">Status</dt>
+      <dl className="grid grid-cols-[6.5rem_1fr] gap-x-3 gap-y-2 text-xs text-ink/65 mb-0">
+        <dt className="text-ink/40">Queue status</dt>
+        <dd className="min-w-0 capitalize">{queueLabel}</dd>
+        <dt className="text-ink/40">Execution posture</dt>
         <dd className="min-w-0 capitalize">{execLabel}</dd>
         <dt className="text-ink/40">Assignee</dt>
         <dd className="min-w-0">{assigneeLabel}</dd>
@@ -329,23 +324,6 @@ function HandoffReviewBlock({ task, outputs }: { task: Task; outputs: Output[] }
           {nextStepRaw || "—"}
         </dd>
       </dl>
-
-      {reviewCues.length > 0 ? (
-        <div>
-          <p className="text-[9px] uppercase tracking-[0.2em] text-ink/30 mb-2">
-            Review readiness
-          </p>
-          <ul className="space-y-1.5 text-[13px] text-ink/65 leading-snug">
-            {reviewCues.map((c, i) => (
-              <li key={`${i}-${c.slice(0, 24)}`}>· {c}</li>
-            ))}
-          </ul>
-        </div>
-      ) : (
-        <p className="text-[13px] text-ink/45 leading-snug">
-          No extra review cues for the current posture.
-        </p>
-      )}
     </section>
   );
 }
@@ -430,14 +408,14 @@ function RunHandoffBlock({
   return (
     <section
       className="pt-6 mt-6 border-t border-ink/10"
-      aria-label="Run and handoff"
+      aria-label="Manual handoff log"
     >
       <h2 className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-1">
-        Run / handoff
+        Manual handoff log
       </h2>
       <p className="text-[11px] text-ink/38 leading-snug mb-4">
-        Latest recorded handoff only — not tied to Copy brief or execution
-        status.
+        Fallback when you already handed off outside the brief flow — records
+        target, time, and note only. Does not change execution status.
       </p>
 
       {!hasRecordedRun ? (
@@ -490,7 +468,7 @@ function RunHandoffBlock({
               className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink placeholder-ink/30 focus:outline-none disabled:opacity-60"
             />
             <p className="mt-1 text-[10px] text-ink/38 leading-snug">
-              Defaults to assigned agent
+              Defaults to assignee when empty
             </p>
             <datalist id="ccc-run-handoff-target-presets">
               {RUN_HANDOFF_TARGET_PRESETS.map((p) => (
@@ -576,6 +554,7 @@ function AgentBriefBlock({
   const [copied, setCopied] = useState(false);
   const [recordHandoffOnRun, setRecordHandoffOnRun] = useState(true);
   const [alignAssigneeOnRun, setAlignAssigneeOnRun] = useState(true);
+  const [runWithHandoffNote, setRunWithHandoffNote] = useState("");
   const [runWithBusyTool, setRunWithBusyTool] = useState<RunWithBriefTool | null>(
     null
   );
@@ -596,61 +575,44 @@ function AgentBriefBlock({
     setRunWithFeedback(null);
     setRunWithBusyTool(tool);
     const toolLabel = RUN_WITH_TOOL_LABEL[tool];
-    let taskForBrief: Task = task;
-    let saveErr: string | null = null;
-    let savedToServer = false;
+
+    const patch: Partial<Omit<Task, "id" | "created_at" | "updated_at">> = {};
+    if (recordHandoffOnRun) {
+      patch.last_run_target = tool;
+      patch.last_run_at = new Date().toISOString();
+      patch.last_run_note = runWithHandoffNote.trim() || null;
+    }
+    if (alignAssigneeOnRun) {
+      patch.assigned_to = tool;
+    }
+
+    const mergedForBrief = { ...task, ...patch } as Task;
+    const text = buildAgentTaskBrief(
+      mergedForBrief,
+      taskLinks,
+      locationMeta,
+      tourMeta,
+      tool
+    );
 
     try {
-      if (recordHandoffOnRun || alignAssigneeOnRun) {
-        const patch: Partial<
-          Omit<Task, "id" | "created_at" | "updated_at">
-        > = {};
-        if (recordHandoffOnRun) {
-          patch.last_run_target = tool;
-          patch.last_run_at = new Date().toISOString();
-          const existingNote = (task.last_run_note ?? "").trim();
-          if (existingNote) {
-            patch.last_run_note = task.last_run_note;
-          }
-        }
-        if (alignAssigneeOnRun) {
-          patch.assigned_to = tool;
-          patch.assigned_agent = tool as AssignedAgent;
-        }
-        try {
-          const updated = await updateTask(task.id, patch);
-          onUpdated(updated);
-          taskForBrief = updated;
-          savedToServer = true;
-        } catch (e: unknown) {
-          saveErr =
-            e instanceof Error ? e.message : "Could not save to Command Center.";
-        }
-      }
-
-      const text = buildAgentTaskBrief(
-        taskForBrief,
-        taskLinks,
-        locationMeta,
-        tourMeta,
-        tool
-      );
       const copiedOk = await copyTextToClipboard(text);
-
       if (!copiedOk) {
         setRunWithFeedback({
           kind: "err",
-          msg: savedToServer
-            ? "Could not copy — task was updated."
-            : saveErr
-              ? `Could not copy. ${saveErr}`
-              : "Could not copy to clipboard.",
+          msg: "Could not copy to clipboard.",
         });
         window.setTimeout(() => setRunWithFeedback(null), 4000);
         return;
       }
 
-      if (saveErr) {
+      patch.source_prompt = text;
+      try {
+        const updated = await updateTask(task.id, patch);
+        onUpdated(updated);
+      } catch (e: unknown) {
+        const saveErr =
+          e instanceof Error ? e.message : "Could not save to Command Center.";
         setRunWithFeedback({
           kind: "err",
           msg: `Copied ${toolLabel} brief — not saved: ${saveErr}`,
@@ -659,15 +621,17 @@ function AgentBriefBlock({
         return;
       }
 
-      let msg = `Copied ${toolLabel} brief`;
-      if (savedToServer) {
-        if (recordHandoffOnRun && alignAssigneeOnRun) {
-          msg += " — Handoff + assignee updated";
-        } else if (recordHandoffOnRun) {
-          msg += " — Handoff recorded";
-        } else if (alignAssigneeOnRun) {
-          msg += " — Assignee updated";
-        }
+      if (recordHandoffOnRun) {
+        setRunWithHandoffNote("");
+      }
+
+      let msg = `Copied ${toolLabel} brief — Last brief sent saved`;
+      if (recordHandoffOnRun && alignAssigneeOnRun) {
+        msg += "; handoff + assignee updated";
+      } else if (recordHandoffOnRun) {
+        msg += "; handoff recorded";
+      } else if (alignAssigneeOnRun) {
+        msg += "; assignee updated";
       }
       setRunWithFeedback({ kind: "ok", msg });
       window.setTimeout(() => setRunWithFeedback(null), 2000);
@@ -735,7 +699,7 @@ function AgentBriefBlock({
         <p className="text-[9px] uppercase tracking-[0.2em] text-ink/35 mb-2">
           Run with…
         </p>
-        <div className="flex flex-wrap gap-x-4 gap-y-2 mb-3">
+        <div className="flex flex-wrap gap-x-4 gap-y-2 mb-2">
           <label className="inline-flex items-center gap-2 text-[9px] uppercase tracking-[0.14em] text-ink/50 cursor-pointer select-none">
             <input
               type="checkbox"
@@ -744,7 +708,7 @@ function AgentBriefBlock({
               onChange={(e) => setRecordHandoffOnRun(e.target.checked)}
               disabled={runWithBusyTool !== null}
             />
-            Record handoff
+            Record handoff on run
           </label>
           <label className="inline-flex items-center gap-2 text-[9px] uppercase tracking-[0.14em] text-ink/50 cursor-pointer select-none">
             <input
@@ -754,8 +718,29 @@ function AgentBriefBlock({
               onChange={(e) => setAlignAssigneeOnRun(e.target.checked)}
               disabled={runWithBusyTool !== null}
             />
-            Align assignee
+            Align assignee on run
           </label>
+        </div>
+        <div className="mb-3">
+          <label
+            htmlFor="ccc-run-with-handoff-note"
+            className="text-[9px] uppercase tracking-[0.2em] text-ink/30 block mb-1"
+          >
+            Handoff note (optional)
+          </label>
+          <input
+            id="ccc-run-with-handoff-note"
+            type="text"
+            value={runWithHandoffNote}
+            onChange={(e) => setRunWithHandoffNote(e.target.value)}
+            placeholder={
+              recordHandoffOnRun
+                ? "Saved with handoff when “Record handoff on run” is on…"
+                : "Turn on “Record handoff on run” to save a note with the run"
+            }
+            disabled={runWithBusyTool !== null || !recordHandoffOnRun}
+            className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink placeholder-ink/30 focus:outline-none disabled:opacity-60"
+          />
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
           {(["chatgpt", "claude", "cursor"] as const).map((tool) => (
@@ -798,16 +783,13 @@ function ChiefOfStaffSuggestionsBlock({
   suggestions: ChiefSuggestion[];
 }) {
   return (
-    <section
-      className="pt-6 mt-6 border-t border-ink/10"
-      aria-label="Chief of Staff suggestions"
-    >
+    <section className="mb-0" aria-label="Task guidance">
       <h2 className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-1">
-        Chief of Staff suggestions
+        Task guidance
       </h2>
       <p className="text-[11px] text-ink/38 leading-snug mb-4">
-        Read-only system guidance from the current task shape. Nothing here
-        applies changes automatically.
+        Single read-only advisory from the current task shape — no automation,
+        no rules engine. Nothing here applies changes automatically.
       </p>
       {suggestions.length === 0 ? (
         <p className="text-sm text-ink/45 leading-relaxed">
@@ -908,8 +890,6 @@ function AgentLanesBlock({
   task: Task;
   onUpdated: (t: Task) => void;
 }) {
-  const [handoffNote, setHandoffNote] = useState("");
-  const [busyAction, setBusyAction] = useState<"assign" | "handoff" | null>(null);
   const [busyLaneId, setBusyLaneId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{
     kind: "ok" | "err";
@@ -919,13 +899,11 @@ function AgentLanesBlock({
   const assigneeNorm = (task.assigned_to ?? "").trim().toLowerCase();
 
   async function assignLane(lane: (typeof AGENT_LANES)[number]) {
-    setBusyAction("assign");
     setBusyLaneId(lane.id);
     setFeedback(null);
     try {
       const updated = await updateTask(task.id, {
         assigned_to: lane.tool,
-        assigned_agent: lane.tool as AssignedAgent,
       });
       onUpdated(updated);
       setFeedback({ kind: "ok", msg: "Assignee updated" });
@@ -937,33 +915,6 @@ function AgentLanesBlock({
       });
       window.setTimeout(() => setFeedback(null), 4000);
     } finally {
-      setBusyAction(null);
-      setBusyLaneId(null);
-    }
-  }
-
-  async function recordHandoffToLane(lane: (typeof AGENT_LANES)[number]) {
-    setBusyAction("handoff");
-    setBusyLaneId(lane.id);
-    setFeedback(null);
-    try {
-      const updated = await updateTask(task.id, {
-        last_run_target: lane.tool,
-        last_run_note: handoffNote.trim() || null,
-        last_run_at: new Date().toISOString(),
-      });
-      onUpdated(updated);
-      setHandoffNote("");
-      setFeedback({ kind: "ok", msg: "Handoff recorded" });
-      window.setTimeout(() => setFeedback(null), 2000);
-    } catch (e: unknown) {
-      setFeedback({
-        kind: "err",
-        msg: e instanceof Error ? e.message : "Could not record handoff",
-      });
-      window.setTimeout(() => setFeedback(null), 4000);
-    } finally {
-      setBusyAction(null);
       setBusyLaneId(null);
     }
   }
@@ -977,15 +928,15 @@ function AgentLanesBlock({
         Agent lanes
       </p>
       <p className="text-[11px] text-ink/38 leading-snug mb-3">
-        Static roles and tools — assign execution or record a handoff. Same fields
-        as elsewhere; no automation.
+        Assignment only — set who owns the task. Use Run with… in the brief to
+        copy a tool-specific brief and optionally log the handoff.
       </p>
 
-      <ul className="space-y-2 mb-3">
+      <ul className="space-y-2">
         {AGENT_LANES.map((lane) => {
           const active = assigneeNorm === lane.tool;
           const laneBusy = busyLaneId === lane.id;
-          const disabled = busyAction !== null;
+          const disabled = busyLaneId !== null;
           return (
             <li
               key={lane.id}
@@ -1011,39 +962,13 @@ function AgentLanesBlock({
                   onClick={() => assignLane(lane)}
                   className="text-[9px] uppercase tracking-[0.12em] px-2 py-1 rounded border border-ink/18 text-ink/55 hover:text-ink hover:border-ink/32 transition-colors disabled:opacity-50"
                 >
-                  {laneBusy && busyAction === "assign" ? "…" : "Assign"}
-                </button>
-                <button
-                  type="button"
-                  disabled={disabled}
-                  onClick={() => recordHandoffToLane(lane)}
-                  className="text-[9px] uppercase tracking-[0.12em] px-2 py-1 rounded border border-ink/18 text-ink/55 hover:text-ink hover:border-ink/32 transition-colors disabled:opacity-50"
-                >
-                  {laneBusy && busyAction === "handoff" ? "…" : "Hand off"}
+                  {laneBusy ? "…" : "Assign"}
                 </button>
               </div>
             </li>
           );
         })}
       </ul>
-
-      <div className="pt-2 border-t border-ink/8">
-        <label
-          htmlFor="ccc-agent-lanes-handoff-note"
-          className="text-[9px] uppercase tracking-[0.2em] text-ink/30 block mb-1"
-        >
-          Handoff note (optional)
-        </label>
-        <input
-          id="ccc-agent-lanes-handoff-note"
-          type="text"
-          value={handoffNote}
-          onChange={(e) => setHandoffNote(e.target.value)}
-          placeholder="Applied when you click Hand off on a lane…"
-          disabled={busyAction !== null}
-          className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink placeholder-ink/30 focus:outline-none disabled:opacity-60"
-        />
-      </div>
 
       {feedback ? (
         <p
@@ -1119,39 +1044,6 @@ function sortTaskLinksByDisplayKey(
       sensitivity: "base",
     })
   );
-}
-
-function handoffReadinessCues(task: Task): string[] {
-  const cues: string[] = [];
-  const ex = task.execution_status;
-  const notDone = ex !== "done";
-  if (ex === "review" && !task.latest_output?.trim()) {
-    cues.push("Review posture, but latest output is empty.");
-  }
-  if (notDone && !task.assigned_to?.trim()) {
-    cues.push("No assignee — clarify who should pick this up.");
-  }
-  if (notDone && !task.next_step?.trim()) {
-    cues.push("No next step yet.");
-  }
-  return cues;
-}
-
-function taskOutputReadinessCues(task: Task): string[] {
-  const cues: string[] = [];
-  if (task.execution_status === "review" && !task.review_note?.trim()) {
-    cues.push("In review — consider a short review note.");
-  }
-  const hasStructured =
-    Boolean(task.source_prompt?.trim()) ||
-    Boolean(task.artifact_links?.trim()) ||
-    Boolean(task.implementation_notes?.trim()) ||
-    Boolean(task.review_note?.trim());
-  const hasLatest = Boolean(task.latest_output?.trim());
-  if (task.execution_status === "done" && !hasStructured && !hasLatest) {
-    cues.push("Marked done — no outputs recorded in task fields yet.");
-  }
-  return cues;
 }
 
 function lineLooksLikeHttpUrl(line: string): boolean {
@@ -1535,7 +1427,6 @@ const TaskDetailPage: NextPageWithLayout = () => {
         description: editForm.description ?? null,
         status: editForm.status,
         priority: editForm.priority,
-        assigned_agent: editForm.assigned_agent ?? null,
         related_area: editForm.related_area ?? null,
         task_type: editForm.task_type ?? null,
         execution_status: editForm.execution_status ?? null,
@@ -1635,8 +1526,6 @@ const TaskDetailPage: NextPageWithLayout = () => {
 
   if (!task) return null;
 
-  const readinessCues = handoffReadinessCues(task);
-  const outputReadinessCues = taskOutputReadinessCues(task);
   const chiefSuggestions = deriveChiefOfStaffSuggestions(task, taskLinks, outputs);
 
   const locationLinks = taskLinks.filter((l) => l.entity_type === "location");
@@ -1798,6 +1687,10 @@ const TaskDetailPage: NextPageWithLayout = () => {
             <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-2">
               Queue — pipeline / admin
             </p>
+            <p className="text-[11px] text-ink/38 leading-snug mb-3">
+              Primary control for where the task sits in the work queue. Assignee is under Work
+              posture below.
+            </p>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">Queue status</label>
@@ -1819,20 +1712,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
                   {[1, 2, 3, 4, 5].map((p) => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>
-              <div>
-                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">Assigned agent</label>
-                <select
-                  value={editForm.assigned_agent ?? ""}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, assigned_agent: (e.target.value as AssignedAgent) || null })
-                  }
-                  className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
-                >
-                  <option value="">—</option>
-                  {AGENTS.map((a) => <option key={a} value={a}>{a}</option>)}
-                </select>
-              </div>
-              <div>
+              <div className="col-span-2">
                 <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">Area</label>
                 <select
                   value={editForm.related_area ?? ""}
@@ -1865,6 +1745,9 @@ const TaskDetailPage: NextPageWithLayout = () => {
         ) : (
           <div className="mb-0">
             <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-2">Queue — pipeline / admin</p>
+            <p className="text-[11px] text-ink/38 leading-snug mb-3">
+              Queue status is the pipeline position. Execution posture is in Work posture below.
+            </p>
             <div className="flex flex-wrap gap-2">
               <span className={`text-[10px] uppercase tracking-[0.15em] px-2.5 py-1 rounded-full ${STATUS_STYLE[task.status]}`}>
                 {task.status.replace("_", " ")}
@@ -1872,11 +1755,6 @@ const TaskDetailPage: NextPageWithLayout = () => {
               <span className="text-[10px] uppercase tracking-[0.15em] px-2.5 py-1 rounded-full bg-ink/6 text-ink/50">
                 Priority {task.priority}
               </span>
-              {task.assigned_agent && (
-                <span className={`text-[10px] uppercase tracking-[0.15em] px-2.5 py-1 rounded-full ${AGENT_STYLE[task.assigned_agent] ?? "bg-ink/10 text-ink/60"}`}>
-                  {task.assigned_agent}
-                </span>
-              )}
               {task.related_area && (
                 <span className="text-[10px] uppercase tracking-[0.15em] px-2.5 py-1 rounded-full border border-ink/15 text-ink/45">
                   {task.related_area}
@@ -1901,17 +1779,23 @@ const TaskDetailPage: NextPageWithLayout = () => {
         </div>
       </div>
 
-      {/* Work posture */}
+      {/* Work posture — execution (queue / pipeline is in Identity above) */}
       <div className="border border-ink/12 rounded-xl p-6 mb-6">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-4">Work posture</p>
+        <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-1">Work posture</p>
+        <p className="text-[11px] text-ink/38 leading-snug mb-4">
+          Execution posture only — how the work is going now. Queue position (backlog → done) is set
+          in the Identity block above; these fields are independent and are not synced automatically.
+        </p>
         {editing ? (
           <div className="mb-0">
             <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-2">
-              Execution — work posture / handoff
+              Execution — assignee and posture
             </p>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">Execution status</label>
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">
+                  Execution posture
+                </label>
                 <select
                   value={editForm.execution_status ?? ""}
                   onChange={(e) =>
@@ -1960,13 +1844,12 @@ const TaskDetailPage: NextPageWithLayout = () => {
           </div>
         ) : (
           <div className="mb-0">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-2">Execution — work posture / handoff</p>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-2">Execution snapshot</p>
             <div className="rounded-lg border border-ink/10 bg-ink/[0.02] px-3 py-2.5 mb-2">
-              <p className="text-[9px] uppercase tracking-[0.2em] text-ink/30 mb-2">Handoff readiness</p>
               <dl className="grid grid-cols-[7.5rem_1fr] gap-x-2 gap-y-1.5 text-xs text-ink/65">
                 <dt className="text-ink/40">Assigned to</dt>
                 <dd className="min-w-0">{task.assigned_to?.trim() || "—"}</dd>
-                <dt className="text-ink/40">Execution status</dt>
+                <dt className="text-ink/40">Execution posture</dt>
                 <dd className="min-w-0">
                   {task.execution_status ? (
                     <span
@@ -1984,13 +1867,6 @@ const TaskDetailPage: NextPageWithLayout = () => {
                 <dd className="min-w-0">{task.latest_output?.trim() ? "Present" : "—"}</dd>
               </dl>
             </div>
-            {readinessCues.length > 0 && (
-              <ul className="mb-2 space-y-1 text-[11px] text-ink/45">
-                {readinessCues.map((c, i) => (
-                  <li key={`${i}-${c}`}>· {c}</li>
-                ))}
-              </ul>
-            )}
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-[9px] uppercase tracking-[0.2em] text-ink/30 shrink-0">Quick</span>
               {EXECUTION_QUICK_ACTIONS.map((s) => (
@@ -2111,12 +1987,16 @@ const TaskDetailPage: NextPageWithLayout = () => {
 
         {/* Task outputs — structured (lighter) */}
         <div className="mt-6 pt-6 border-t border-ink/8 text-ink/80">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-ink/30 mb-3">Task outputs</p>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-ink/30 mb-1">Task outputs</p>
+          <p className="text-[11px] text-ink/38 leading-snug mb-3">
+            Last brief sent is stored automatically when you use Run with…. You can paste or adjust
+            here manually if needed.
+          </p>
           {editing ? (
             <div className="space-y-3">
               <div>
                 <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">
-                  Source prompt
+                  Last brief sent to tool
                 </label>
                 <textarea
                   value={editForm.source_prompt ?? ""}
@@ -2124,7 +2004,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
                     setEditForm({ ...editForm, source_prompt: e.target.value || null })
                   }
                   rows={4}
-                  placeholder="Instruction or prompt used for this round of work…"
+                  placeholder="Exact brief last copied via Run with… (editable if you sent a variant)"
                   className="w-full rounded border border-ink/20 bg-white px-3 py-2 text-sm text-ink placeholder-ink/30 focus:outline-none resize-y min-h-[80px]"
                 />
               </div>
@@ -2174,13 +2054,15 @@ const TaskDetailPage: NextPageWithLayout = () => {
           ) : (
             <div className="space-y-3">
               <div>
-                <p className="text-[9px] uppercase tracking-[0.2em] text-ink/30 mb-1">Source prompt</p>
+                <p className="text-[9px] uppercase tracking-[0.2em] text-ink/30 mb-1">
+                  Last brief sent to tool
+                </p>
                 {task.source_prompt?.trim() ? (
                   <div className="text-sm text-ink/70 leading-relaxed whitespace-pre-wrap max-h-48 overflow-y-auto rounded-lg border border-ink/10 bg-ink/[0.02] px-3 py-2.5">
                     {task.source_prompt}
                   </div>
                 ) : (
-                  <p className="text-xs text-ink/30">—</p>
+                  <p className="text-xs text-ink/30">— (use Run with… to capture)</p>
                 )}
               </div>
               <div>
@@ -2213,13 +2095,6 @@ const TaskDetailPage: NextPageWithLayout = () => {
                   <p className="text-xs text-ink/30">—</p>
                 )}
               </div>
-              {outputReadinessCues.length > 0 && (
-                <ul className="pt-1 space-y-1 text-[11px] text-ink/45">
-                  {outputReadinessCues.map((c, i) => (
-                    <li key={`out-${i}-${c}`}>· {c}</li>
-                  ))}
-                </ul>
-              )}
             </div>
           )}
         </div>
@@ -2341,8 +2216,10 @@ const TaskDetailPage: NextPageWithLayout = () => {
       {/* Oversight */}
       <div className="mt-8 pt-8 border-t border-ink/12 mb-8">
         <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-4">Oversight</p>
-        <HandoffReviewBlock task={task} outputs={outputs} />
         <ChiefOfStaffSuggestionsBlock suggestions={chiefSuggestions} />
+        <div className="pt-6 mt-6 border-t border-ink/10">
+          <HandoffReviewBlock task={task} outputs={outputs} />
+        </div>
       </div>
 
       {/* Attach area */}

@@ -189,7 +189,12 @@ function buildAgentTaskBriefCore(
   lines.push("## Existing outputs/context");
   lines.push(fieldLine("Last action note", task.last_action_note));
   lines.push(fieldLine("Latest output", task.latest_output));
-  lines.push(fieldLine("Source prompt", task.source_prompt));
+  lines.push(
+    fieldLine(
+      "Last brief sent to tool (stored snapshot)",
+      task.source_prompt
+    )
+  );
   lines.push(fieldLine("Implementation notes", task.implementation_notes));
   lines.push(fieldLine("Review note", task.review_note));
 

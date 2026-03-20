@@ -37,7 +37,7 @@ Execution queue for work across product, content, map, schema, and operations.
 | description    | text    | YES      | Longer free-form description |
 | status         | text    | NO       | One of: `backlog`, `ready`, `in_progress`, `review`, `done` (enforced in app code) |
 | priority       | integer | YES      | Sort key; DB default `3`; app treats it as numeric for ordering |
-| assigned_agent | text    | YES      | One of: `chatgpt`, `claude`, `cursor`, `manual` (enforced in app code) |
+| assigned_agent | text    | YES      | Legacy; prefer `assigned_to` in UI. App may leave null on new tasks. |
 | related_area   | text    | YES      | One of: `product`, `content`, `map`, `database`, `design`, `engineering`, `seo`, `ops` (enforced in app code) |
 | task_type      | text    | YES      | Work class: `content`, `code`, `map`, `data`, `ops`, `design`, `research`, `other` (app-enforced on forms) |
 | execution_status | text | YES   | Execution posture: `todo`, `in_progress`, `review`, `blocked`, `done` (distinct from queue `status`) |
@@ -45,7 +45,7 @@ Execution queue for work across product, content, map, schema, and operations.
 | latest_output  | text    | YES      | Latest result / draft / implementation summary |
 | last_action_note | text | YES     | Short note on last action or handoff |
 | next_step      | text    | YES      | One-line instruction for the next actor (handoff readability) |
-| source_prompt  | text    | YES      | Latest meaningful prompt or instruction (human or agent) |
+| source_prompt  | text    | YES      | Exact agent brief last copied via Run with… (manual edit allowed); not general scratch |
 | artifact_links | text    | YES      | URLs or path-like refs; often one per line |
 | implementation_notes | text | YES   | Compact notes on what changed / was produced / decided |
 | review_note    | text    | YES      | Short reviewer note, approval, or requested-change note |

@@ -10,7 +10,7 @@ import {
   updateTask,
   deleteTask,
 } from "@/lib/commandCenter";
-import type { Task, TaskStatus, AssignedAgent, RelatedArea } from "@/lib/commandCenter";
+import type { Task, TaskStatus, RelatedArea } from "@/lib/commandCenter";
 import {
   TASK_TEMPLATES,
   executionFieldsForCreate,
@@ -22,8 +22,15 @@ type NextPageWithLayout = NextPage & {
 };
 
 const STATUSES: TaskStatus[] = ["backlog", "ready", "in_progress", "review", "done"];
-const AGENTS: AssignedAgent[] = ["chatgpt", "claude", "cursor", "manual"];
 const AREAS: RelatedArea[] = ["product", "content", "map", "database", "design", "engineering", "seo", "ops"];
+
+const ASSIGNEE_FILTER_PRESETS = [
+  "human",
+  "claude",
+  "cursor",
+  "chatgpt",
+  "codex",
+] as const;
 
 const STATUS_STYLE: Record<TaskStatus, string> = {
   backlog: "bg-ink/8 text-ink/50",
@@ -61,7 +68,7 @@ const emptyForm = {
   description: "",
   status: "backlog" as TaskStatus,
   priority: 3,
-  assigned_agent: "" as AssignedAgent | "",
+  assigned_to: "",
   related_area: "" as RelatedArea | "",
 };
 
@@ -107,14 +114,16 @@ const TasksPage: NextPageWithLayout = () => {
     setSaving(true);
     setFormError(null);
     try {
+      const execFields = executionFieldsForCreate(creationTemplate);
       await createTask({
         title: form.title.trim(),
         description: form.description.trim() || null,
         status: form.status,
         priority: form.priority,
-        assigned_agent: (form.assigned_agent as AssignedAgent) || null,
+        assigned_agent: null,
         related_area: (form.related_area as RelatedArea) || null,
-        ...executionFieldsForCreate(creationTemplate),
+        ...execFields,
+        assigned_to: form.assigned_to.trim() || execFields.assigned_to,
       });
       setForm(emptyForm);
       setCreationTemplateId(null);
@@ -151,7 +160,9 @@ const TasksPage: NextPageWithLayout = () => {
 
   const filtered = tasks.filter((t) => {
     if (filterStatus && t.status !== filterStatus) return false;
-    if (filterAgent && t.assigned_agent !== filterAgent) return false;
+    if (filterAgent && (t.assigned_to ?? "").trim().toLowerCase() !== filterAgent.toLowerCase()) {
+      return false;
+    }
     if (filterArea && t.related_area !== filterArea) return false;
     return true;
   });
@@ -235,7 +246,12 @@ const TasksPage: NextPageWithLayout = () => {
             rows={2}
             className="w-full rounded border border-ink/20 bg-white px-3 py-2 text-sm text-ink placeholder-ink/30 focus:outline-none focus:border-ink/50 resize-none"
           />
-          <div className="grid grid-cols-4 gap-3">
+          <datalist id="ccc-new-task-assignee-presets">
+            {ASSIGNEE_FILTER_PRESETS.map((p) => (
+              <option key={p} value={p} />
+            ))}
+          </datalist>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <select
               value={form.status}
               onChange={(e) => setForm({ ...form, status: e.target.value as TaskStatus })}
@@ -254,16 +270,13 @@ const TasksPage: NextPageWithLayout = () => {
                 <option key={p} value={p}>{PRIORITY_LABEL[p]}</option>
               ))}
             </select>
-            <select
-              value={form.assigned_agent}
-              onChange={(e) => setForm({ ...form, assigned_agent: e.target.value as AssignedAgent | "" })}
-              className="rounded border border-ink/20 bg-white px-2 py-2 text-sm text-ink focus:outline-none focus:border-ink/50"
-            >
-              <option value="">Agent —</option>
-              {AGENTS.map((a) => (
-                <option key={a} value={a}>{a}</option>
-              ))}
-            </select>
+            <input
+              list="ccc-new-task-assignee-presets"
+              value={form.assigned_to}
+              onChange={(e) => setForm({ ...form, assigned_to: e.target.value })}
+              placeholder="Assignee (optional)"
+              className="rounded border border-ink/20 bg-white px-2 py-2 text-sm text-ink placeholder-ink/35 focus:outline-none focus:border-ink/50"
+            />
             <select
               value={form.related_area}
               onChange={(e) => setForm({ ...form, related_area: e.target.value as RelatedArea | "" })}
@@ -312,8 +325,8 @@ const TasksPage: NextPageWithLayout = () => {
           onChange={(e) => setFilterAgent(e.target.value)}
           className="rounded border border-ink/20 bg-white px-3 py-1.5 text-[11px] uppercase tracking-[0.15em] text-ink focus:outline-none"
         >
-          <option value="">All Agents</option>
-          {AGENTS.map((a) => (
+          <option value="">All assignees</option>
+          {ASSIGNEE_FILTER_PRESETS.map((a) => (
             <option key={a} value={a}>{a}</option>
           ))}
         </select>
@@ -369,8 +382,8 @@ const TasksPage: NextPageWithLayout = () => {
                 <tr className="border-b border-ink/10 bg-ink/2">
                   <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-ink/40 font-normal w-8">P</th>
                   <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-ink/40 font-normal">Title</th>
-                  <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-ink/40 font-normal">Status</th>
-                  <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-ink/40 font-normal">Agent</th>
+                  <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-ink/40 font-normal">Queue</th>
+                  <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-ink/40 font-normal">Assignee</th>
                   <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-ink/40 font-normal">Area</th>
                   <th className="px-4 py-2.5 w-16"></th>
                 </tr>
@@ -448,11 +461,13 @@ const TasksPage: NextPageWithLayout = () => {
                       </select>
                     </td>
                     <td className="px-4 py-3">
-                      {task.assigned_agent && (
-                        <span className={`text-[10px] uppercase tracking-[0.15em] px-2 py-0.5 rounded-full ${AGENT_STYLE[task.assigned_agent] ?? "bg-ink/10 text-ink/50"}`}>
-                          {task.assigned_agent}
+                      {task.assigned_to?.trim() ? (
+                        <span
+                          className={`text-[10px] uppercase tracking-[0.15em] px-2 py-0.5 rounded-full ${AGENT_STYLE[task.assigned_to.trim().toLowerCase()] ?? "border border-ink/15 text-ink/45"}`}
+                        >
+                          {task.assigned_to.trim()}
                         </span>
-                      )}
+                      ) : null}
                     </td>
                     <td className="px-4 py-3">
                       {task.related_area && (
