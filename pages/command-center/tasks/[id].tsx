@@ -79,6 +79,56 @@ function CopyableId({ id }: { id: string }) {
   );
 }
 
+function sortKeyForLinkedLink(
+  link: TaskLink,
+  meta: Record<string, { name: string; slug?: string }> | undefined
+): string {
+  const m = meta?.[link.entity_id];
+  const name = (m?.name ?? "").trim();
+  const slug = (m?.slug ?? "").trim();
+  if (name) return name.toLowerCase();
+  if (slug) return slug.toLowerCase();
+  return link.entity_id.toLowerCase();
+}
+
+function sortTaskLinksByDisplayKey(
+  links: TaskLink[],
+  meta: Record<string, { name: string; slug?: string }>
+): TaskLink[] {
+  return [...links].sort((a, b) =>
+    sortKeyForLinkedLink(a, meta).localeCompare(sortKeyForLinkedLink(b, meta), undefined, {
+      sensitivity: "base",
+    })
+  );
+}
+
+function sortOtherTaskLinks(links: TaskLink[]): TaskLink[] {
+  return [...links].sort(
+    (a, b) =>
+      a.entity_type.localeCompare(b.entity_type, undefined, { sensitivity: "base" }) ||
+      a.entity_id.localeCompare(b.entity_id, undefined, { sensitivity: "base" })
+  );
+}
+
+function linkMatchesLinkedFilter(
+  link: TaskLink,
+  meta: Record<string, { name: string; slug?: string }> | undefined,
+  q: string
+): boolean {
+  const needle = q.trim().toLowerCase();
+  if (!needle) return true;
+  const m = meta?.[link.entity_id];
+  const hay = [
+    link.entity_type,
+    link.entity_id,
+    m?.name,
+    m?.slug,
+  ]
+    .filter((v): v is string => typeof v === "string" && v.length > 0)
+    .map((s) => s.toLowerCase());
+  return hay.some((h) => h.includes(needle));
+}
+
 const TaskDetailPage: NextPageWithLayout = () => {
   const router = useRouter();
   const { id } = router.query;
@@ -100,6 +150,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
   const [attachTourSuccess, setAttachTourSuccess] = useState(false);
   const [attachingTour, setAttachingTour] = useState(false);
   const [unlinkingId, setUnlinkingId] = useState<string | null>(null);
+  const [linkedEntitiesFilter, setLinkedEntitiesFilter] = useState("");
 
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Task>>({});
@@ -223,6 +274,17 @@ const TaskDetailPage: NextPageWithLayout = () => {
       return;
     }
 
+    const normalizedSlug = slug.toLowerCase();
+    const locationLinksNow = taskLinks.filter((l) => l.entity_type === "location");
+    const slugAlreadyLinked = locationLinksNow.some((l) => {
+      const s = locationMeta[l.entity_id]?.slug;
+      return s != null && s.trim().toLowerCase() === normalizedSlug;
+    });
+    if (slugAlreadyLinked) {
+      setAttachError("This location is already linked to the task.");
+      return;
+    }
+
     setAttaching(true);
     try {
       if (!supabase) throw new Error("Supabase not configured");
@@ -281,6 +343,17 @@ const TaskDetailPage: NextPageWithLayout = () => {
     const slug = attachTourSlug.trim();
     if (!slug) {
       setAttachTourError("Enter a tour slug.");
+      return;
+    }
+
+    const normalizedTourSlug = slug.toLowerCase();
+    const tourLinksNow = taskLinks.filter((l) => l.entity_type === "tour");
+    const tourSlugAlreadyLinked = tourLinksNow.some((l) => {
+      const s = tourMeta[l.entity_id]?.slug;
+      return s != null && s.trim().toLowerCase() === normalizedTourSlug;
+    });
+    if (tourSlugAlreadyLinked) {
+      setAttachTourError("This tour is already linked to the task.");
       return;
     }
 
@@ -442,6 +515,27 @@ const TaskDetailPage: NextPageWithLayout = () => {
     (l) => l.entity_type !== "location" && l.entity_type !== "tour"
   );
 
+  const locationLinksSorted = sortTaskLinksByDisplayKey(locationLinks, locationMeta);
+  const tourLinksSorted = sortTaskLinksByDisplayKey(tourLinks, tourMeta);
+  const otherLinksSorted = sortOtherTaskLinks(otherLinks);
+
+  const linkedFilterQuery = linkedEntitiesFilter;
+  const locationLinksFiltered = locationLinksSorted.filter((l) =>
+    linkMatchesLinkedFilter(l, locationMeta, linkedFilterQuery)
+  );
+  const tourLinksFiltered = tourLinksSorted.filter((l) =>
+    linkMatchesLinkedFilter(l, tourMeta, linkedFilterQuery)
+  );
+  const otherLinksFiltered = otherLinksSorted.filter((l) =>
+    linkMatchesLinkedFilter(l, undefined, linkedFilterQuery)
+  );
+  const linkedFilterActive = linkedFilterQuery.trim().length > 0;
+  const linkedFilterEmpty =
+    linkedFilterActive &&
+    locationLinksFiltered.length === 0 &&
+    tourLinksFiltered.length === 0 &&
+    otherLinksFiltered.length === 0;
+
   function renderLinkedRow(
     link: TaskLink,
     meta: Record<string, { name: string; slug?: string }>,
@@ -449,29 +543,40 @@ const TaskDetailPage: NextPageWithLayout = () => {
   ) {
     const m = meta[link.entity_id];
     return (
-      <li key={link.id} className="flex items-baseline gap-3 justify-between">
-        <span>
+      <li key={link.id} className="flex items-start gap-3 justify-between">
+        <div className="min-w-0 flex-1">
           {m?.slug ? (
-            <Link
-              href={`${basePath}/${m.slug}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-ink/65 hover:text-ink hover:underline"
-            >
-              {m.name || link.entity_id}
-            </Link>
+            <>
+              <Link
+                href={`${basePath}/${m.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-ink/65 hover:text-ink hover:underline"
+              >
+                {m.name || link.entity_id}
+              </Link>
+              <p className="text-[10px] text-ink/35 font-mono mt-0.5 tracking-tight">
+                {m.slug}
+              </p>
+            </>
           ) : (
-            m?.name ?? <CopyableId id={link.entity_id} />
+            <>
+              {m?.name ? (
+                <span className="text-ink/65">{m.name}</span>
+              ) : (
+                <CopyableId id={link.entity_id} />
+              )}
+            </>
           )}
           {m && (
-            <span className="ml-1.5">
+            <div className="mt-1">
               <CopyableId id={link.entity_id} />
-            </span>
+            </div>
           )}
-        </span>
+        </div>
         <button
           onClick={() => handleUnlink(link.id)}
-          className="text-[10px] text-ink/40 hover:text-ink transition-colors"
+          className="text-[10px] text-ink/40 hover:text-ink transition-colors shrink-0 pt-0.5"
           disabled={unlinkingId === link.id}
           type="button"
         >
@@ -644,7 +749,11 @@ const TaskDetailPage: NextPageWithLayout = () => {
               <form onSubmit={handleAttachToPlace} className="flex gap-2 items-start">
                 <input
                   value={attachSlug}
-                  onChange={(e) => setAttachSlug(e.target.value)}
+                  onChange={(e) => {
+                    setAttachSlug(e.target.value);
+                    setAttachError(null);
+                    setAttachSuccess(false);
+                  }}
                   placeholder="Location slug"
                   className="flex-1 rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
                   disabled={attaching}
@@ -665,7 +774,11 @@ const TaskDetailPage: NextPageWithLayout = () => {
               <form onSubmit={handleAttachTour} className="flex gap-2 items-start">
                 <input
                   value={attachTourSlug}
-                  onChange={(e) => setAttachTourSlug(e.target.value)}
+                  onChange={(e) => {
+                    setAttachTourSlug(e.target.value);
+                    setAttachTourError(null);
+                    setAttachTourSuccess(false);
+                  }}
                   placeholder="Tour slug"
                   className="flex-1 rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
                   disabled={attachingTour}
@@ -688,32 +801,48 @@ const TaskDetailPage: NextPageWithLayout = () => {
             {taskLinks.length === 0 ? (
               <p className="text-sm text-ink/40">No entities linked to this task. Attach locations or tours above.</p>
             ) : (
+            <>
+              <label className="sr-only" htmlFor="linked-entities-filter">
+                Filter linked entities
+              </label>
+              <input
+                id="linked-entities-filter"
+                value={linkedEntitiesFilter}
+                onChange={(e) => setLinkedEntitiesFilter(e.target.value)}
+                placeholder="Filter linked entities…"
+                className="w-full max-w-md rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink placeholder-ink/30 focus:outline-none mb-3"
+                type="search"
+                autoComplete="off"
+              />
+            {linkedFilterEmpty ? (
+              <p className="text-sm text-ink/40">No linked entities match this filter.</p>
+            ) : (
             <div className="space-y-4">
-              {locationLinks.length > 0 && (
+              {locationLinksFiltered.length > 0 && (
                 <div>
                   <p className="text-[10px] text-ink/30 mb-1">Locations</p>
                   <ul className="text-sm text-ink/65 space-y-1">
-                    {locationLinks.map((link) =>
+                    {locationLinksFiltered.map((link) =>
                       renderLinkedRow(link, locationMeta, "/places")
                     )}
                   </ul>
                 </div>
               )}
-              {tourLinks.length > 0 && (
+              {tourLinksFiltered.length > 0 && (
                 <div>
                   <p className="text-[10px] text-ink/30 mb-1">Tours</p>
                   <ul className="text-sm text-ink/65 space-y-1">
-                    {tourLinks.map((link) =>
+                    {tourLinksFiltered.map((link) =>
                       renderLinkedRow(link, tourMeta, "/tours")
                     )}
                   </ul>
                 </div>
               )}
-              {otherLinks.length > 0 && (
+              {otherLinksFiltered.length > 0 && (
                 <div>
                   <p className="text-[10px] text-ink/30 mb-1.5">Other</p>
                   <ul className="text-sm text-ink/65 space-y-1.5">
-                    {otherLinks.map((link) => (
+                    {otherLinksFiltered.map((link) => (
                       <li key={link.id} className="flex items-center gap-3 justify-between py-0.5">
                         <span className="flex items-center gap-2">
                           <span className="text-[10px] uppercase tracking-[0.1em] text-ink/40 w-20 shrink-0">{link.entity_type}</span>
@@ -725,7 +854,9 @@ const TaskDetailPage: NextPageWithLayout = () => {
                 </div>
               )}
             </div>
-          )}
+            )}
+            </>
+            )}
           </div>
         </div>
 
