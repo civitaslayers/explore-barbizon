@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import type { ReactElement, ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { CommandCenterLayout } from "@/components/CommandCenterLayout";
@@ -25,6 +25,7 @@ import type {
   TaskLink,
 } from "@/lib/commandCenter";
 import { supabase } from "@/lib/supabase";
+import { buildAgentTaskBrief, copyTextToClipboard } from "@/lib/taskBriefs";
 
 type ChiefSuggestionLevel = "note" | "warning" | "opportunity";
 
@@ -300,6 +301,60 @@ function HandoffReviewBlock({ task, outputs }: { task: Task; outputs: Output[] }
           No extra review cues for the current posture.
         </p>
       )}
+    </section>
+  );
+}
+
+function AgentBriefBlock({
+  task,
+  taskLinks,
+  locationMeta,
+  tourMeta,
+}: {
+  task: Task;
+  taskLinks: TaskLink[];
+  locationMeta: Record<string, { name: string; slug?: string }>;
+  tourMeta: Record<string, { name: string; slug?: string }>;
+}) {
+  const brief = useMemo(
+    () => buildAgentTaskBrief(task, taskLinks, locationMeta, tourMeta),
+    [task, taskLinks, locationMeta, tourMeta]
+  );
+  const [copied, setCopied] = useState(false);
+
+  async function handleCopyBrief() {
+    const ok = await copyTextToClipboard(brief);
+    if (!ok) return;
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 2000);
+  }
+
+  return (
+    <section
+      className="border border-ink/12 rounded-xl p-6 mb-6"
+      aria-label="Agent brief"
+    >
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="min-w-0">
+          <h2 className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-1">
+            Agent brief
+          </h2>
+          <p className="text-[11px] text-ink/38 leading-snug">
+            Derived from saved task fields and linked entities — for paste into
+            your AI tool.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={handleCopyBrief}
+          className="shrink-0 text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded border border-ink/20 text-ink/50 hover:text-ink hover:border-ink/40 transition-colors"
+        >
+          {copied ? "Copied" : "Copy brief"}
+        </button>
+      </div>
+      <pre className="text-[11px] leading-relaxed text-ink/65 font-mono whitespace-pre-wrap break-words max-h-72 overflow-y-auto rounded-lg border border-ink/10 bg-ink/[0.02] px-3 py-2.5">
+        {brief}
+      </pre>
     </section>
   );
 }
@@ -1531,6 +1586,13 @@ const TaskDetailPage: NextPageWithLayout = () => {
       </div>
 
       <HandoffReviewBlock task={task} outputs={outputs} />
+
+      <AgentBriefBlock
+        task={task}
+        taskLinks={taskLinks}
+        locationMeta={locationMeta}
+        tourMeta={tourMeta}
+      />
 
       <ChiefOfStaffSuggestionsBlock suggestions={chiefSuggestions} />
 
