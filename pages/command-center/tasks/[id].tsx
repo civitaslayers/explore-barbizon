@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import type { ReactElement, ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { CommandCenterLayout } from "@/components/CommandCenterLayout";
@@ -312,13 +312,14 @@ function RunHandoffBlock({
   task: Task;
   onUpdated: (t: Task) => void;
 }) {
-  const defaultTarget = useMemo(() => {
-    const fromAssignee = (task.assigned_to ?? "").trim();
-    if (fromAssignee) return fromAssignee;
-    return (task.last_run_target ?? "").trim();
-  }, [task.assigned_to, task.last_run_target, task.id]);
+  const taskIdRef = useRef<string | null>(null);
+  const skipAutoTargetRef = useRef(false);
 
-  const [target, setTarget] = useState(defaultTarget);
+  const [target, setTarget] = useState(
+    () =>
+      (task.assigned_to ?? "").trim() ||
+      (task.last_run_target ?? "").trim()
+  );
   const [note, setNote] = useState("");
   const [recording, setRecording] = useState(false);
   const [feedback, setFeedback] = useState<{
@@ -327,8 +328,20 @@ function RunHandoffBlock({
   } | null>(null);
 
   useEffect(() => {
-    setTarget(defaultTarget);
-  }, [defaultTarget]);
+    const assigned = (task.assigned_to ?? "").trim();
+    const lastRun = (task.last_run_target ?? "").trim();
+
+    if (taskIdRef.current !== task.id) {
+      taskIdRef.current = task.id;
+      skipAutoTargetRef.current = false;
+      setTarget(assigned || lastRun);
+      return;
+    }
+
+    if (skipAutoTargetRef.current) return;
+    if (lastRun) return;
+    setTarget(assigned);
+  }, [task.id, task.assigned_to, task.last_run_target]);
 
   async function handleRecordHandoff(e: React.FormEvent) {
     e.preventDefault();
@@ -348,6 +361,7 @@ function RunHandoffBlock({
       });
       onUpdated(updated);
       setNote("");
+      skipAutoTargetRef.current = false;
       const nextDefault = (updated.assigned_to ?? "").trim() || trimmedTarget;
       setTarget(nextDefault);
       setFeedback({ kind: "ok", msg: "Recorded." });
@@ -422,11 +436,17 @@ function RunHandoffBlock({
               id="ccc-run-handoff-target"
               list="ccc-run-handoff-target-presets"
               value={target}
-              onChange={(e) => setTarget(e.target.value)}
+              onChange={(e) => {
+                skipAutoTargetRef.current = true;
+                setTarget(e.target.value);
+              }}
               placeholder="claude, cursor, human…"
               disabled={recording}
               className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink placeholder-ink/30 focus:outline-none disabled:opacity-60"
             />
+            <p className="mt-1 text-[10px] text-ink/38 leading-snug">
+              Defaults to assigned agent
+            </p>
             <datalist id="ccc-run-handoff-target-presets">
               {RUN_HANDOFF_TARGET_PRESETS.map((p) => (
                 <option key={p} value={p} />
