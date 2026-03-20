@@ -3,6 +3,28 @@ import type { Task, TaskLink } from "@/lib/commandCenter";
 /** Placeholder for missing task fields in generated agent briefs. */
 export const AGENT_BRIEF_NOT_SET = "Not set";
 
+/** Modes for tool-specific framing; selection is UI-only (not persisted). */
+export type AgentBriefMode = "general" | "chatgpt" | "claude" | "cursor";
+
+export const AGENT_BRIEF_MODE_OPTIONS: {
+  mode: AgentBriefMode;
+  label: string;
+}[] = [
+  { mode: "general", label: "General" },
+  { mode: "chatgpt", label: "ChatGPT" },
+  { mode: "claude", label: "Claude" },
+  { mode: "cursor", label: "Cursor" },
+];
+
+/** Default brief mode from saved assignee (free-text field, common presets). */
+export function defaultAgentBriefModeFromAssignee(
+  assignedTo: string | null | undefined
+): AgentBriefMode {
+  const a = (assignedTo ?? "").trim().toLowerCase();
+  if (a === "chatgpt" || a === "claude" || a === "cursor") return a;
+  return "general";
+}
+
 function trimOrEmpty(s: string | null | undefined): string {
   return (s ?? "").trim();
 }
@@ -44,11 +66,46 @@ function fieldLine(label: string, value: string | null | undefined): string {
   return `${label}:\n${v}`;
 }
 
-/**
- * Plain-text agent brief from persisted task state and resolved link metadata.
- * Does not use draft / edit-form values.
- */
-export function buildAgentTaskBrief(
+/** Mode-specific preamble; keep wording easy to edit independently of task facts. */
+function toolFramingBlock(mode: Exclude<AgentBriefMode, "general">): string {
+  switch (mode) {
+    case "chatgpt":
+      return [
+        "## Brief framing (ChatGPT)",
+        "",
+        "Use for planning, synthesis, structured reasoning, and ideation / research / strategy support.",
+        "",
+        "Guidance: prioritize clarity; produce a structured answer; note assumptions and gaps when they affect the conclusion.",
+        "",
+        "---",
+        "",
+      ].join("\n");
+    case "claude":
+      return [
+        "## Brief framing (Claude)",
+        "",
+        "Use for architecture, repo-aware reasoning, scoped change planning, careful constraint-following, and implementation strategy before coding.",
+        "",
+        "Guidance: if this is not code work, stay useful as rigorous planning or review — avoid improvisation; respect stated boundaries.",
+        "",
+        "---",
+        "",
+      ].join("\n");
+    case "cursor":
+      return [
+        "## Brief framing (Cursor)",
+        "",
+        "Use for in-editor implementation: explicit scope limits, file-local caution, and execution over exploration.",
+        "",
+        "Guidance: prefer a concrete diff or patch-style output; preserve current behavior; do not broaden scope or touch unrelated files.",
+        "",
+        "---",
+        "",
+      ].join("\n");
+  }
+}
+
+function buildAgentTaskBriefCore(
   task: Task,
   taskLinks: TaskLink[],
   locationMeta: EntityMeta,
@@ -143,6 +200,22 @@ export function buildAgentTaskBrief(
   );
 
   return lines.join("\n");
+}
+
+/**
+ * Plain-text agent brief from persisted task state and resolved link metadata.
+ * Does not use draft / edit-form values.
+ */
+export function buildAgentTaskBrief(
+  task: Task,
+  taskLinks: TaskLink[],
+  locationMeta: EntityMeta,
+  tourMeta: EntityMeta,
+  mode: AgentBriefMode = "general"
+): string {
+  const core = buildAgentTaskBriefCore(task, taskLinks, locationMeta, tourMeta);
+  if (mode === "general") return core;
+  return `${toolFramingBlock(mode)}${core}`;
 }
 
 async function copyTextToClipboard(text: string): Promise<boolean> {

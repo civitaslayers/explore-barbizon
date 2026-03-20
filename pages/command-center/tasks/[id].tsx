@@ -25,7 +25,13 @@ import type {
   TaskLink,
 } from "@/lib/commandCenter";
 import { supabase } from "@/lib/supabase";
-import { buildAgentTaskBrief, copyTextToClipboard } from "@/lib/taskBriefs";
+import {
+  AGENT_BRIEF_MODE_OPTIONS,
+  buildAgentTaskBrief,
+  copyTextToClipboard,
+  defaultAgentBriefModeFromAssignee,
+  type AgentBriefMode,
+} from "@/lib/taskBriefs";
 
 type ChiefSuggestionLevel = "note" | "warning" | "opportunity";
 
@@ -544,9 +550,18 @@ function AgentBriefBlock({
   locationMeta: Record<string, { name: string; slug?: string }>;
   tourMeta: Record<string, { name: string; slug?: string }>;
 }) {
+  const [briefMode, setBriefMode] = useState<AgentBriefMode>(() =>
+    defaultAgentBriefModeFromAssignee(task.assigned_to)
+  );
+
+  useEffect(() => {
+    setBriefMode(defaultAgentBriefModeFromAssignee(task.assigned_to));
+  }, [task.id, task.assigned_to]);
+
   const brief = useMemo(
-    () => buildAgentTaskBrief(task, taskLinks, locationMeta, tourMeta),
-    [task, taskLinks, locationMeta, tourMeta]
+    () =>
+      buildAgentTaskBrief(task, taskLinks, locationMeta, tourMeta, briefMode),
+    [task, taskLinks, locationMeta, tourMeta, briefMode]
   );
   const [copied, setCopied] = useState(false);
 
@@ -580,6 +595,36 @@ function AgentBriefBlock({
           {copied ? "Copied" : "Copy brief"}
         </button>
       </div>
+
+      <div
+        className="flex flex-wrap gap-1 p-0.5 rounded-lg border border-ink/10 bg-ink/[0.02] mb-1.5"
+        role="tablist"
+        aria-label="Brief mode"
+      >
+        {AGENT_BRIEF_MODE_OPTIONS.map(({ mode, label }) => {
+          const active = briefMode === mode;
+          return (
+            <button
+              key={mode}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => setBriefMode(mode)}
+              className={`text-[10px] uppercase tracking-[0.12em] px-2.5 py-1 rounded-md transition-colors ${
+                active
+                  ? "bg-white border border-ink/18 text-ink/75 shadow-sm"
+                  : "text-ink/45 hover:text-ink/65 border border-transparent"
+              }`}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
+      <p className="text-[10px] text-ink/32 leading-snug mb-3">
+        Same task, framed for different tools.
+      </p>
+
       <pre className="text-[11px] leading-relaxed text-ink/65 font-mono whitespace-pre-wrap break-words max-h-72 overflow-y-auto rounded-lg border border-ink/10 bg-ink/[0.02] px-3 py-2.5">
         {brief}
       </pre>
