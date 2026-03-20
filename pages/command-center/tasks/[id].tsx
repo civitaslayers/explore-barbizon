@@ -42,6 +42,38 @@ function hasMeaningfulLatestOutput(task: Task, outputs: Output[]): boolean {
   return outputs.some((o) => (o.response ?? "").trim().length > 0);
 }
 
+/** Operational review lens; wording kept distinct from Chief of Staff diagnostics. */
+function deriveReviewReadinessCues(task: Task, outputs: Output[]): string[] {
+  const exec = task.execution_status;
+  const hasOutput = hasMeaningfulLatestOutput(task, outputs);
+  const hasLastNote = (task.last_action_note ?? "").trim().length > 0;
+  const cues: string[] = [];
+
+  if (exec === "in_progress" || exec === "review") {
+    cues.push(
+      hasOutput
+        ? "Ready for review — output is recorded."
+        : "Not ready for review — no output recorded yet."
+    );
+  }
+
+  if (exec === "blocked" && !hasLastNote) {
+    cues.push("Blocked — unclear without a last action note.");
+  }
+
+  if (exec === "done" && (!hasOutput || !hasLastNote)) {
+    cues.push(
+      "Done — documentation thin (missing output or last action note)."
+    );
+  }
+
+  if (exec === "todo" && hasOutput) {
+    cues.push("Work present — execution still todo.");
+  }
+
+  return cues;
+}
+
 function deriveChiefOfStaffSuggestions(
   task: Task,
   taskLinks: TaskLink[],
@@ -208,6 +240,69 @@ const CHIEF_LEVEL_STYLE: Record<ChiefSuggestionLevel, string> = {
   opportunity: "border-moss/20 bg-moss/[0.06] text-moss/90",
   note: "border-ink/12 bg-ink/[0.02] text-ink/50",
 };
+
+function HandoffReviewBlock({ task, outputs }: { task: Task; outputs: Output[] }) {
+  const hasOutput = hasMeaningfulLatestOutput(task, outputs);
+  const hasLastNote = (task.last_action_note ?? "").trim().length > 0;
+  const nextStepRaw = (task.next_step ?? "").trim();
+  const execLabel = task.execution_status
+    ? task.execution_status.replace("_", " ")
+    : "—";
+  const assigneeLabel = (task.assigned_to ?? "").trim() || "—";
+  const reviewCues = deriveReviewReadinessCues(task, outputs);
+
+  return (
+    <section
+      className="border border-ink/12 rounded-xl p-6 mb-6"
+      aria-label="Handoff and review snapshot"
+    >
+      <h2 className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-1">
+        Handoff / review
+      </h2>
+      <p className="text-[11px] text-ink/38 leading-snug mb-4">
+        Read-only snapshot of execution and review posture (saved task).
+      </p>
+
+      <dl className="grid grid-cols-[6.5rem_1fr] gap-x-3 gap-y-2 text-xs text-ink/65 mb-4">
+        <dt className="text-ink/40">Status</dt>
+        <dd className="min-w-0 capitalize">{execLabel}</dd>
+        <dt className="text-ink/40">Assignee</dt>
+        <dd className="min-w-0">{assigneeLabel}</dd>
+        <dt className="text-ink/40">Output</dt>
+        <dd className="min-w-0">{hasOutput ? "Yes" : "No"}</dd>
+        <dt className="text-ink/40">Last action</dt>
+        <dd className="min-w-0">{hasLastNote ? "Yes" : "No"}</dd>
+        <dt className="text-ink/40">Next step</dt>
+        <dd
+          className={`min-w-0 leading-snug ${
+            nextStepRaw
+              ? "text-ink/80 border-l-2 border-ink/20 pl-2 -ml-px"
+              : ""
+          }`}
+        >
+          {nextStepRaw || "—"}
+        </dd>
+      </dl>
+
+      {reviewCues.length > 0 ? (
+        <div>
+          <p className="text-[9px] uppercase tracking-[0.2em] text-ink/30 mb-2">
+            Review readiness
+          </p>
+          <ul className="space-y-1.5 text-[13px] text-ink/65 leading-snug">
+            {reviewCues.map((c, i) => (
+              <li key={`${i}-${c.slice(0, 24)}`}>· {c}</li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        <p className="text-[13px] text-ink/45 leading-snug">
+          No extra review cues for the current posture.
+        </p>
+      )}
+    </section>
+  );
+}
 
 function ChiefOfStaffSuggestionsBlock({
   suggestions,
@@ -1434,6 +1529,8 @@ const TaskDetailPage: NextPageWithLayout = () => {
           </p>
         </div>
       </div>
+
+      <HandoffReviewBlock task={task} outputs={outputs} />
 
       <ChiefOfStaffSuggestionsBlock suggestions={chiefSuggestions} />
 
