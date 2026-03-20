@@ -44,6 +44,14 @@ export type Task = {
   last_action_note: string | null;
   /** Short instruction for the next actor (human + AI handoffs). */
   next_step: string | null;
+  /** Latest meaningful prompt or instruction (human or agent). */
+  source_prompt: string | null;
+  /** URLs or path-like references; often one per line. */
+  artifact_links: string | null;
+  /** What changed, was produced, or was decided (compact). */
+  implementation_notes: string | null;
+  /** Reviewer note, approval, or requested changes. */
+  review_note: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -107,6 +115,10 @@ function taskFromRow(row: Task): Task {
     latest_output: row.latest_output ?? null,
     last_action_note: row.last_action_note ?? null,
     next_step: row.next_step ?? null,
+    source_prompt: row.source_prompt ?? null,
+    artifact_links: row.artifact_links ?? null,
+    implementation_notes: row.implementation_notes ?? null,
+    review_note: row.review_note ?? null,
   };
 }
 

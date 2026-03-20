@@ -150,6 +150,61 @@ function handoffReadinessCues(task: Task): string[] {
   return cues;
 }
 
+function taskOutputReadinessCues(task: Task): string[] {
+  const cues: string[] = [];
+  if (task.execution_status === "review" && !task.review_note?.trim()) {
+    cues.push("In review — consider a short review note.");
+  }
+  const hasStructured =
+    Boolean(task.source_prompt?.trim()) ||
+    Boolean(task.artifact_links?.trim()) ||
+    Boolean(task.implementation_notes?.trim()) ||
+    Boolean(task.review_note?.trim());
+  const hasLatest = Boolean(task.latest_output?.trim());
+  if (task.execution_status === "done" && !hasStructured && !hasLatest) {
+    cues.push("Marked done — no outputs recorded in task fields yet.");
+  }
+  return cues;
+}
+
+function lineLooksLikeHttpUrl(line: string): boolean {
+  return /^https?:\/\//i.test(line.trim());
+}
+
+function ArtifactLinksReadonly({ text }: { text: string }) {
+  const lines = text.split("\n");
+  return (
+    <div className="space-y-1 font-mono text-[12px] leading-relaxed text-ink/70 max-h-40 overflow-y-auto">
+      {lines.map((line, i) => {
+        const trimmed = line.trim();
+        if (!trimmed) {
+          return <span key={i} className="block min-h-[0.5em]" />;
+        }
+        if (lineLooksLikeHttpUrl(line)) {
+          const href = trimmed;
+          return (
+            <div key={i}>
+              <a
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-ink/70 hover:text-ink hover:underline break-all"
+              >
+                {href}
+              </a>
+            </div>
+          );
+        }
+        return (
+          <div key={i} className="whitespace-pre-wrap break-all">
+            {line}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function sortOtherTaskLinks(links: TaskLink[]): TaskLink[] {
   return [...links].sort(
     (a, b) =>
@@ -501,6 +556,10 @@ const TaskDetailPage: NextPageWithLayout = () => {
         latest_output: editForm.latest_output?.trim() || null,
         last_action_note: editForm.last_action_note?.trim() || null,
         next_step: editForm.next_step?.trim() || null,
+        source_prompt: editForm.source_prompt?.trim() || null,
+        artifact_links: editForm.artifact_links?.trim() || null,
+        implementation_notes: editForm.implementation_notes?.trim() || null,
+        review_note: editForm.review_note?.trim() || null,
       });
       setTask(updated);
       setEditing(false);
@@ -590,6 +649,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
   if (!task) return null;
 
   const readinessCues = handoffReadinessCues(task);
+  const outputReadinessCues = taskOutputReadinessCues(task);
 
   const locationLinks = taskLinks.filter((l) => l.entity_type === "location");
   const tourLinks = taskLinks.filter((l) => l.entity_type === "tour");
@@ -1014,6 +1074,121 @@ const TaskDetailPage: NextPageWithLayout = () => {
                   <p className="text-xs text-ink/30">—</p>
                 )}
               </div>
+            </div>
+          )}
+        </div>
+
+        {/* Task outputs — structured latest work artifacts */}
+        <div className="mt-4 pt-4 border-t border-ink/8">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-3">Task outputs</p>
+          {editing ? (
+            <div className="space-y-3">
+              <div>
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">
+                  Source prompt
+                </label>
+                <textarea
+                  value={editForm.source_prompt ?? ""}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, source_prompt: e.target.value || null })
+                  }
+                  rows={4}
+                  placeholder="Instruction or prompt used for this round of work…"
+                  className="w-full rounded border border-ink/20 bg-white px-3 py-2 text-sm text-ink placeholder-ink/30 focus:outline-none resize-y min-h-[80px]"
+                />
+              </div>
+              <div>
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">
+                  Artifact links
+                </label>
+                <textarea
+                  value={editForm.artifact_links ?? ""}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, artifact_links: e.target.value || null })
+                  }
+                  rows={3}
+                  placeholder="One URL or path per line…"
+                  className="w-full rounded border border-ink/20 bg-white px-3 py-2 text-sm text-ink placeholder-ink/30 focus:outline-none resize-y min-h-[72px] font-mono text-[13px]"
+                />
+              </div>
+              <div>
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">
+                  Implementation notes
+                </label>
+                <textarea
+                  value={editForm.implementation_notes ?? ""}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, implementation_notes: e.target.value || null })
+                  }
+                  rows={4}
+                  placeholder="What changed, what was built, key decisions…"
+                  className="w-full rounded border border-ink/20 bg-white px-3 py-2 text-sm text-ink placeholder-ink/30 focus:outline-none resize-y min-h-[88px]"
+                />
+              </div>
+              <div>
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">
+                  Review note
+                </label>
+                <textarea
+                  value={editForm.review_note ?? ""}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, review_note: e.target.value || null })
+                  }
+                  rows={2}
+                  placeholder="Approval, requested changes, reviewer comment…"
+                  className="w-full rounded border border-ink/20 bg-white px-3 py-2 text-sm text-ink placeholder-ink/30 focus:outline-none resize-none"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div>
+                <p className="text-[9px] uppercase tracking-[0.2em] text-ink/30 mb-1">Source prompt</p>
+                {task.source_prompt?.trim() ? (
+                  <div className="text-sm text-ink/70 leading-relaxed whitespace-pre-wrap max-h-48 overflow-y-auto rounded-lg border border-ink/10 bg-ink/[0.02] px-3 py-2.5">
+                    {task.source_prompt}
+                  </div>
+                ) : (
+                  <p className="text-xs text-ink/30">—</p>
+                )}
+              </div>
+              <div>
+                <p className="text-[9px] uppercase tracking-[0.2em] text-ink/30 mb-1">Artifact links</p>
+                {task.artifact_links?.trim() ? (
+                  <div className="rounded-lg border border-ink/10 bg-ink/[0.02] px-3 py-2.5">
+                    <ArtifactLinksReadonly text={task.artifact_links} />
+                  </div>
+                ) : (
+                  <p className="text-xs text-ink/30">—</p>
+                )}
+              </div>
+              <div>
+                <p className="text-[9px] uppercase tracking-[0.2em] text-ink/30 mb-1">Implementation notes</p>
+                {task.implementation_notes?.trim() ? (
+                  <div className="text-sm text-ink/70 leading-relaxed whitespace-pre-wrap max-h-48 overflow-y-auto rounded-lg border border-ink/10 bg-ink/[0.02] px-3 py-2.5">
+                    {task.implementation_notes}
+                  </div>
+                ) : (
+                  <p className="text-xs text-ink/30">—</p>
+                )}
+              </div>
+              <div>
+                <p className="text-[9px] uppercase tracking-[0.2em] text-ink/30 mb-1">Review note</p>
+                {task.review_note?.trim() ? (
+                  <div className="text-sm text-ink/65 leading-relaxed whitespace-pre-wrap max-h-32 overflow-y-auto rounded-lg border border-ink/10 bg-ink/[0.02] px-3 py-2.5">
+                    {task.review_note}
+                  </div>
+                ) : (
+                  <p className="text-xs text-ink/30">—</p>
+                )}
+              </div>
+              {outputReadinessCues.length > 0 && (
+                <ul className="pt-1 space-y-1 text-[11px] text-ink/45">
+                  {outputReadinessCues.map((c, i) => (
+                    <li key={`out-${i}-${c}`}>· {c}</li>
+                  ))}
+                </ul>
+              )}
             </div>
           )}
         </div>

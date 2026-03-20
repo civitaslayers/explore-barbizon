@@ -45,6 +45,10 @@ Execution queue for work across product, content, map, schema, and operations.
 | latest_output  | text    | YES      | Latest result / draft / implementation summary |
 | last_action_note | text | YES     | Short note on last action or handoff |
 | next_step      | text    | YES      | One-line instruction for the next actor (handoff readability) |
+| source_prompt  | text    | YES      | Latest meaningful prompt or instruction (human or agent) |
+| artifact_links | text    | YES      | URLs or path-like refs; often one per line |
+| implementation_notes | text | YES   | Compact notes on what changed / was produced / decided |
+| review_note    | text    | YES      | Short reviewer note, approval, or requested-change note |
 | created_at     | timestamptz | YES  | Creation timestamp; default `now()` |
 | updated_at     | timestamptz | YES  | Last update timestamp; default `now()`; auto-updated by trigger |
 
@@ -57,7 +61,8 @@ Execution queue for work across product, content, map, schema, and operations.
   - `.eq("id", id).single()`
 - Create/update operations read and write:
   - `title`, `description`, `status`, `priority`, `assigned_agent`, `related_area`
-  - `task_type`, `execution_status`, `assigned_to`, `latest_output`, `last_action_note`, `next_step` (added in migration `migrations/task-execution-fields.sql`)
+  - `task_type`, `execution_status`, `assigned_to`, `latest_output`, `last_action_note`, `next_step` (migration `migrations/task-execution-fields.sql`)
+  - `source_prompt`, `artifact_links`, `implementation_notes`, `review_note` (migration `migrations/task-structured-output-fields.sql`)
 
 Note: Although `priority` is nullable in the database, the application relies on the default value `3` and always treats it as a number when ordering.
 

@@ -109,6 +109,10 @@ const TasksPage: NextPageWithLayout = () => {
         latest_output: null,
         last_action_note: null,
         next_step: null,
+        source_prompt: null,
+        artifact_links: null,
+        implementation_notes: null,
+        review_note: null,
       });
       setForm(emptyForm);
       setShowForm(false);
