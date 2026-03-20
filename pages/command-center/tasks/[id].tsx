@@ -26,6 +26,236 @@ import type {
 } from "@/lib/commandCenter";
 import { supabase } from "@/lib/supabase";
 
+type ChiefSuggestionLevel = "note" | "warning" | "opportunity";
+
+type ChiefSuggestionCategory = "structure" | "execution" | "handoff" | "context";
+
+type ChiefSuggestion = {
+  id: string;
+  level: ChiefSuggestionLevel;
+  message: string;
+  category?: ChiefSuggestionCategory;
+};
+
+function hasMeaningfulLatestOutput(task: Task, outputs: Output[]): boolean {
+  if ((task.latest_output ?? "").trim().length > 0) return true;
+  return outputs.some((o) => (o.response ?? "").trim().length > 0);
+}
+
+function deriveChiefOfStaffSuggestions(
+  task: Task,
+  taskLinks: TaskLink[],
+  outputs: Output[]
+): ChiefSuggestion[] {
+  const out: ChiefSuggestion[] = [];
+
+  const title = (task.title ?? "").trim();
+  const assignee = (task.assigned_to ?? "").trim();
+  const exec = task.execution_status;
+  const hasLatestSurface = hasMeaningfulLatestOutput(task, outputs);
+  const lastNote = (task.last_action_note ?? "").trim();
+  const nextStep = (task.next_step ?? "").trim();
+  const impl = (task.implementation_notes ?? "").trim();
+
+  if (!task.task_type) {
+    out.push({
+      id: "hygiene-task-type",
+      level: "note",
+      category: "structure",
+      message:
+        "No task type set. Consider classifying this task for clearer routing.",
+    });
+  }
+
+  if (task.execution_status == null) {
+    out.push({
+      id: "hygiene-execution-status",
+      level: "warning",
+      category: "structure",
+      message: assignee
+        ? "No execution status while someone is assigned. Set posture so handoffs stay legible."
+        : "No execution status. Set posture so handoffs stay legible.",
+    });
+  }
+
+  if (!assignee) {
+    out.push({
+      id: "hygiene-assignee",
+      level: "note",
+      category: "structure",
+      message: "No assignee yet. Naming who owns this reduces drift.",
+    });
+  }
+
+  if (title.length > 0 && title.length <= 3) {
+    out.push({
+      id: "hygiene-short-title",
+      level: "note",
+      category: "structure",
+      message: "Title is very short. A few more words usually improves scanability.",
+    });
+  }
+
+  if (taskLinks.length === 0) {
+    out.push({
+      id: "hygiene-no-links",
+      level: "note",
+      category: "structure",
+      message: "No linked entities. Link places or tours when work should stay anchored in the map or public layer.",
+    });
+  }
+
+  if (exec === "in_progress" && !hasLatestSurface) {
+    out.push({
+      id: "exec-in-progress-no-output",
+      level: "warning",
+      category: "execution",
+      message:
+        "Status is in progress but no latest output is recorded. Capture a short result or paste into latest output.",
+    });
+  }
+
+  if (exec === "review" && !hasLatestSurface) {
+    out.push({
+      id: "exec-review-no-output",
+      level: "warning",
+      category: "execution",
+      message:
+        "In review, but latest output is empty. Reviewers usually need something concrete to react to.",
+    });
+  }
+
+  if (exec === "done" && !hasLatestSurface && !impl) {
+    out.push({
+      id: "exec-done-no-output",
+      level: "warning",
+      category: "execution",
+      message:
+        "Marked done but no output is recorded. Consider capturing what shipped or decided.",
+    });
+  }
+
+  if (exec === "todo" && hasLatestSurface) {
+    out.push({
+      id: "exec-todo-has-output",
+      level: "opportunity",
+      category: "execution",
+      message:
+        "There is recorded output while execution is still “todo”. You may want to move posture forward.",
+    });
+  }
+
+  if (hasLatestSurface && !lastNote) {
+    out.push({
+      id: "handoff-output-no-note",
+      level: "note",
+      category: "handoff",
+      message:
+        "Output exists but no last action note. A one-line note helps the next actor land quickly.",
+    });
+  }
+
+  if (exec === "blocked" && !lastNote && !nextStep) {
+    out.push({
+      id: "handoff-blocked-no-context",
+      level: "warning",
+      category: "handoff",
+      message:
+        "Blocked without a last action note or next step. A short reason speeds unblock.",
+    });
+  }
+
+  const contextualTypes: TaskType[] = ["content", "map", "data"];
+  const tt = task.task_type;
+  if (tt && contextualTypes.includes(tt)) {
+    const hasPlaceOrTour = taskLinks.some(
+      (l) => l.entity_type === "location" || l.entity_type === "tour"
+    );
+    if (!hasPlaceOrTour) {
+      out.push({
+        id: "context-type-without-place",
+        level: "note",
+        category: "context",
+        message:
+          "This looks like map or editorial work but no place or tour is linked yet. Link when scope is known.",
+      });
+    }
+  }
+
+  if (taskLinks.length >= 5) {
+    out.push({
+      id: "context-many-links",
+      level: "note",
+      category: "context",
+      message:
+        "Several entities are linked. If scope feels fuzzy, consider narrowing or splitting the task.",
+    });
+  }
+
+  const levelRank = (l: ChiefSuggestionLevel) =>
+    l === "warning" ? 0 : l === "opportunity" ? 1 : 2;
+  return [...out].sort((a, b) => levelRank(a.level) - levelRank(b.level));
+}
+
+const CHIEF_LEVEL_LABEL: Record<ChiefSuggestionLevel, string> = {
+  warning: "Warning",
+  opportunity: "Opportunity",
+  note: "Note",
+};
+
+const CHIEF_LEVEL_STYLE: Record<ChiefSuggestionLevel, string> = {
+  warning: "border-umber/25 bg-umber/[0.06] text-umber/90",
+  opportunity: "border-moss/20 bg-moss/[0.06] text-moss/90",
+  note: "border-ink/12 bg-ink/[0.02] text-ink/50",
+};
+
+function ChiefOfStaffSuggestionsBlock({
+  suggestions,
+}: {
+  suggestions: ChiefSuggestion[];
+}) {
+  return (
+    <section
+      className="border border-ink/12 rounded-xl p-6 mb-6 bg-ink/[0.02]"
+      aria-label="Chief of Staff suggestions"
+    >
+      <h2 className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-1">
+        Chief of Staff suggestions
+      </h2>
+      <p className="text-[11px] text-ink/38 leading-snug mb-4">
+        Read-only system guidance from the current task shape. Nothing here
+        applies changes automatically.
+      </p>
+      {suggestions.length === 0 ? (
+        <p className="text-sm text-ink/45 leading-relaxed">
+          No immediate suggestions. This task looks structurally sound.
+        </p>
+      ) : (
+        <ul className="space-y-2">
+          {suggestions.map((s) => (
+            <li
+              key={s.id}
+              className={`rounded-lg border px-3 py-2.5 ${CHIEF_LEVEL_STYLE[s.level]}`}
+            >
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mb-1">
+                <span className="text-[9px] uppercase tracking-[0.14em] opacity-90">
+                  {CHIEF_LEVEL_LABEL[s.level]}
+                </span>
+                {s.category && (
+                  <span className="text-[9px] uppercase tracking-[0.12em] text-ink/35">
+                    · {s.category}
+                  </span>
+                )}
+              </div>
+              <p className="text-[13px] text-ink/70 leading-snug">{s.message}</p>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 type NextPageWithLayout = NextPage & {
   getLayout?: (page: ReactElement) => ReactNode;
 };
@@ -650,6 +880,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
 
   const readinessCues = handoffReadinessCues(task);
   const outputReadinessCues = taskOutputReadinessCues(task);
+  const chiefSuggestions = deriveChiefOfStaffSuggestions(task, taskLinks, outputs);
 
   const locationLinks = taskLinks.filter((l) => l.entity_type === "location");
   const tourLinks = taskLinks.filter((l) => l.entity_type === "tour");
@@ -1203,6 +1434,8 @@ const TaskDetailPage: NextPageWithLayout = () => {
           </p>
         </div>
       </div>
+
+      <ChiefOfStaffSuggestionsBlock suggestions={chiefSuggestions} />
 
       {/* Attach area */}
       <div className="border border-ink/12 rounded-xl p-6 mb-6 bg-ink/[0.02]">
