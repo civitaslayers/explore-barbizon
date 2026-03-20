@@ -75,6 +75,45 @@ function deriveReviewReadinessCues(task: Task, outputs: Output[]): string[] {
   return cues;
 }
 
+/** Single derived cue for the Actions rail; no extra state or API. */
+function deriveNextAction(task: Task): { sentence: string; toolHint: string } {
+  const hasLatestOutput = (task.latest_output ?? "").trim().length > 0;
+  const exec = task.execution_status;
+  const toolHint = (task.assigned_to ?? "").trim() || "AI tool";
+
+  if (!hasLatestOutput) {
+    return { sentence: "Generate initial output", toolHint };
+  }
+  if (exec === "in_progress" || exec === "review") {
+    return { sentence: "Refine or structure current output", toolHint };
+  }
+  if (exec === "blocked") {
+    return { sentence: "Resolve blocker", toolHint };
+  }
+  if (exec === "done") {
+    return { sentence: "Review and finalize", toolHint };
+  }
+  return { sentence: "Continue work", toolHint };
+}
+
+function NextActionBlock({ task }: { task: Task }) {
+  const { sentence, toolHint } = deriveNextAction(task);
+  return (
+    <div
+      className="rounded-lg border border-ink/10 bg-ink/[0.02] px-3 py-2.5 mb-4"
+      aria-label="Next action"
+    >
+      <p className="text-[9px] uppercase tracking-[0.2em] text-ink/30 mb-1.5">
+        Next action
+      </p>
+      <p className="text-[13px] text-ink/70 leading-snug">{sentence}</p>
+      <p className="text-[11px] text-ink/45 leading-snug mt-1">
+        Suggested tool: {toolHint}
+      </p>
+    </div>
+  );
+}
+
 function deriveChiefOfStaffSuggestions(
   task: Task,
   taskLinks: TaskLink[],
@@ -1675,6 +1714,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
       {/* Actions */}
       <div className="mb-6">
         <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-4">Actions</p>
+        <NextActionBlock task={task} />
         <AgentBriefBlock
           task={task}
           taskLinks={taskLinks}
