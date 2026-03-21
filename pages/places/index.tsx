@@ -32,13 +32,13 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({ places }) => {
         <title>Places — Explore Barbizon</title>
       </Head>
 
-      <section className="space-y-10">
+      <section className="space-y-10 xl:space-y-12">
         <header className="editorial-measure space-y-4">
           <p className="eyebrow">PLACES TO TRACE</p>
-          <h1 className="font-serif text-3xl leading-tight text-ink md:text-4xl">
+          <h1 className="font-serif text-3xl leading-tight tracking-tight text-ink md:text-4xl xl:text-[2.5rem]">
             Studios, paths, and small museums along the forest edge.
           </h1>
-          <p className="text-sm leading-relaxed text-ink/80 md:text-base">
+          <p className="text-sm leading-relaxed text-ink/80 md:text-base xl:text-[1.0625rem] xl:leading-[1.65]">
             A small, evolving index of places in and around Barbizon. Each is
             less a destination than a vantage point: a room, a path, a clearing
             from which to look.
@@ -67,7 +67,7 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({ places }) => {
           {activeCategory !== "All" && ` · ${activeCategory}`}
         </p>
 
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-3 xl:gap-8">
           {filtered.map((place) => (
             <Link
               key={place.slug}

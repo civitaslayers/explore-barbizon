@@ -68,6 +68,14 @@ const PRIORITY_LABEL: Record<number, string> = {
   5: "Later",
 };
 
+/** Lower number = higher priority; tie-break by newest first (matches getTasks). */
+function sortTasksByPriorityThenRecency(a: Task, b: Task): number {
+  const pa = a.priority ?? 3;
+  const pb = b.priority ?? 3;
+  if (pa !== pb) return pa - pb;
+  return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+}
+
 const emptyForm = {
   title: "",
   description: "",
@@ -442,14 +450,16 @@ const TasksPage: NextPageWithLayout = () => {
     }
   }
 
-  const filtered = tasks.filter((t) => {
-    if (filterStatus && t.status !== filterStatus) return false;
-    if (filterAgent && (t.assigned_to ?? "").trim().toLowerCase() !== filterAgent.toLowerCase()) {
-      return false;
-    }
-    if (filterArea && t.related_area !== filterArea) return false;
-    return true;
-  });
+  const filtered = tasks
+    .filter((t) => {
+      if (filterStatus && t.status !== filterStatus) return false;
+      if (filterAgent && (t.assigned_to ?? "").trim().toLowerCase() !== filterAgent.toLowerCase()) {
+        return false;
+      }
+      if (filterArea && t.related_area !== filterArea) return false;
+      return true;
+    })
+    .sort(sortTasksByPriorityThenRecency);
 
   const isDone = (t: Task) => t.status === "done" || t.execution_status === "done";
   const activeTasks = filtered.filter((t) => !isDone(t));

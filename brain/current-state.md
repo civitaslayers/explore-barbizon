@@ -1,6 +1,6 @@
 # Current State
 
-Last updated: 2026-03-22
+Last updated: 2026-03-21
 
 ---
 
@@ -8,33 +8,36 @@ Last updated: 2026-03-22
 
 The core Barbizon app is live locally in Next.js with:
 - Mapbox GL JS map page with clustering and per-category SVG icons
-- search and layer toggles
-- places index and place detail pages
-- related and nearby sections
+- Search and layer toggles
+- Places index and place detail pages
+- Related and nearby sections
 - Mapbox Static thumbnails for place cards
+- Per-place `<title>`, meta description, and Open Graph tags on place detail pages
 
-The Command Center (CCC) is now the active development surface — an internal AI operating system built into the same Next.js codebase. The CCC now has a complete automated execution loop: tasks can be dispatched to Claude, executed, and their outputs captured back into Supabase without leaving the browser.
-
----
-
-## Last completed
-
-- **CCC automation loop (full):** Run button on list + detail page → `/api/tasks/[id]/run` → `claude --print` via stdin → output saved to Supabase → `execution_status = review`
-- **CCC API foundations:** `POST /api/tasks/[id]/dispatch` (returns `brief_json` + `callback_url`) and `POST /api/tasks/[id]/outputs` (ingestion callback for any automation layer)
-- **CLI script:** `scripts/run-task.js` + `npm run task <id>` — same loop via terminal
-- **Task list UX:** inline agent assignment (select dropdown), quick brief copy (▶ on hover), Done button (on hover), always-visible Run chip for claude tasks
-- **Brain ↔ CCC sync:** → brain button writes `brain/task-queue.md` from live Supabase state
-- **Roadmap seeded:** 30+ structured tasks in Supabase covering all MVP phases
-- **MCP tooling:** Context7 + Tavily wired into Cursor and Claude Code CLI
-- `docs/agent-tooling.md` created as canonical optional tooling reference
+The Command Center (CCC) is the active development surface — a complete internal AI operating system. The automation loop, knowledge base, and task intelligence layer are all live.
 
 ---
 
-## Current focus
+## Last completed (2026-03-21 session)
 
-1. Run seed SQL in Supabase (`migrations/seed-ccc-roadmap-tasks.sql`) if not already done
-2. Run `migrations/seed-ccc-completed-tasks.sql` to record completed CCC work in task history
-3. Resume public-site work: large-screen layout audit, place-page refinement, `show_in_editorial` SQL migration
+- **CCC knowledge base seeded:** Decisions (14), Memory (18 entries), Prompt Templates (6) — sourced from brain/ and docs/. Live in Supabase, visible in CCC Decisions/Memory/Prompts pages.
+- **Task suggestions — pre-populated briefs:** Suggest prompt now returns `next_step` + `implementation_notes` per suggestion. Tasks created from suggestions have fully populated briefs on creation.
+- **Done task collapsing:** Done tasks (status=done OR execution_status=done) hidden by default below a "▸ N done tasks" toggle. Marking queue=done now auto-syncs execution_status=done.
+- **Review with Claude:** Oversight section replaced with a "Review with Claude" button. Calls `POST /api/tasks/[id]/review` → Claude evaluates latest output against requirements → verdict + issues + suggested changes + next step rendered inline. Falls back to outputs table if latest_output is empty.
+- **Follow-up prompt button:** If review includes a recommended next step, a "Copy follow-up prompt" button appears — generates a full framed brief for the assigned agent ready to paste.
+- **Task Master AI pilot documented:** Verdict in `docs/agent-tooling.md` — use only as one-shot PRD decomposition for >6 interdependent tasks, not ongoing task management.
+- **Cursor protected files rule:** `_document.tsx`, `_app.tsx`, `lib/supabase.ts`, `tailwind.config.js`, `migrations/*` now listed as protected in the Cursor framing block, `.cursor/rules/working-style.mdc`, and the CCC Prompts template.
+- **OG tags on place pages:** `og:type`, `og:url`, meta description added to `pages/places/[slug].tsx` by Cursor. Regression in `_document.tsx` (Head removed) caught and fixed.
+
+---
+
+## Pending SQL to run in Supabase
+
+These migrations exist in the repo but have not yet been confirmed run:
+- `migrations/seed-ccc-roadmap-tasks.sql` — 30+ structured roadmap tasks
+- `migrations/seed-ccc-completed-tasks.sql` — records completed CCC work as done
+- `migrations/seed-ccc-knowledge-base.sql` — Decisions, Memory, Prompt Templates (may already be seeded)
+- `migrations/add-show-in-editorial-to-locations.sql` — show_in_editorial column + backfill
 
 ---
 
@@ -52,13 +55,13 @@ The Command Center (CCC) is now the active development surface — an internal A
 - Preserve museum-cartography direction on public site
 - Keep diffs minimal
 - Follow schema reference exactly
-- External tooling must not outrank `brain/` as source of truth
+- `_document.tsx` and `_app.tsx` are global shells — never in scope for page-level tasks
 
 ---
 
 ## Recommended next step
 
-Run the two SQL migrations in Supabase, then use the CCC Run button on "Large-screen layout width refinement" or "Place page visual refinement" to test the full automated loop end-to-end.
+Place page visual refinement and large-screen layout audit — both are Cursor tasks with pre-populated briefs. Use "Copy brief" from the CCC task list and paste into Cursor.
 
 ---
 
@@ -66,6 +69,4 @@ Run the two SQL migrations in Supabase, then use the CCC Run button on "Large-sc
 
 - `pages/places/[slug].tsx` — place page refinement (cursor task)
 - `pages/places/index.tsx` — place index refinement (cursor task)
-- `migrations/seed-ccc-completed-tasks.sql` — run in Supabase to record session work
-- `migrations/seed-ccc-roadmap-tasks.sql` — run in Supabase if not already done
-- `pages/api/tasks/[id]/run.ts` — automated execution route (test with Run button)
+- `pages/command-center/` — CCC iteration as needed
