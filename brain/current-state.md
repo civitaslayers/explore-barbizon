@@ -1,6 +1,6 @@
 # Current State
 
-Last updated: 2026-03-21
+Last updated: 2026-03-22
 
 ---
 
@@ -19,20 +19,24 @@ The Command Center (CCC) is now the active development surface — an internal A
 
 ## Last completed
 
-- CCC task model refinement: `assigned_agent` field retired, `assigned_to` convention locked
-- CCC guidance surfaces refined: run-with buttons, copy/save decoupling, feedback polish, UI consistency pass
-- Lightweight agent lane coordination added to CCC
-- Tool-specific agent brief modes added to CCC
-- MCP tooling layer planned and implemented: Context7, Tavily wired into Cursor and Claude Code CLI
+- CCC automation API foundations: `POST /api/tasks/[id]/dispatch` + `POST /api/tasks/[id]/outputs`
+- `dispatch` endpoint returns `brief_json` (structured payload) + `callback_url` — key primitive for future agent SDK integration
+- `outputs` endpoint is the callback target any automation layer can POST results to
+- Done button added to task list row actions (quick close-out without navigating to detail page)
+- Full roadmap seeded into CCC as structured tasks (30+ tasks across all phases)
+- Inline agent assignment added to task list (editable select, was read-only badge)
+- Quick brief copy added to task list (▶ button on row hover)
+- Brain ↔ CCC drift fixed: → brain button generates task-queue.md from live Supabase state
+- MCP tooling layer: Context7, Tavily wired into Cursor and Claude Code CLI
 - `docs/agent-tooling.md` created as canonical optional tooling reference
 
 ---
 
 ## Current focus
 
-1. CCC surface polish
-2. MCP tooling layer active (Context7 + Tavily) — verify connections after Cursor restart
-3. Task Master pilot: evaluate on one multi-step initiative when ready
+1. CCC automation loop — API foundations are in place; next is a CLI script that calls /dispatch, runs an agent, and POSTs back to /outputs
+2. Run seed SQL in Supabase (`migrations/seed-ccc-roadmap-tasks.sql`) to populate the 30 roadmap tasks
+3. Resume public-site work: large-screen layout audit, place-page refinement, `show_in_editorial` SQL migration
 
 ---
 
@@ -55,14 +59,16 @@ The Command Center (CCC) is now the active development surface — an internal A
 
 ## Recommended next step
 
-Restart Cursor, verify Context7 and Tavily appear in MCP panel, then resume place-page refinement (large-screen layout audit) and the `show_in_editorial` SQL migration.
+Run `migrations/seed-ccc-roadmap-tasks.sql` in Supabase SQL editor to populate all roadmap tasks, then either:
+- Build the CLI automation script (calls /dispatch → runs Claude → POSTs to /outputs), or
+- Resume public-site work (large-screen layout, place-page refinement, show_in_editorial migration)
 
 ---
 
 ## Files likely in play next
 
-- `pages/command-center/` — CCC surface
-- `lib/commandCenter.ts` — CCC data model
-- `docs/agent-tooling.md` — approved MCP reference
-- `pages/places/[slug].tsx` — place page refinement (after tooling verified)
-- `pages/places/index.tsx` — place page refinement (after tooling verified)
+- `pages/api/tasks/[id]/dispatch.ts` — dispatch endpoint (foundation for automation)
+- `pages/api/tasks/[id]/outputs.ts` — output ingestion endpoint
+- `migrations/seed-ccc-roadmap-tasks.sql` — run this in Supabase
+- `pages/places/[slug].tsx` — place page refinement
+- `pages/places/index.tsx` — place page refinement
