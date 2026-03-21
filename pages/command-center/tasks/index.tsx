@@ -89,6 +89,8 @@ const TasksPage: NextPageWithLayout = () => {
   const [syncing, setSyncing] = useState(false);
   const [syncMsg, setSyncMsg] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [runningId, setRunningId] = useState<string | null>(null);
+  const [runError, setRunError] = useState<string | null>(null);
 
   const creationTemplate =
     creationTemplateId == null
@@ -171,6 +173,33 @@ const TasksPage: NextPageWithLayout = () => {
     await navigator.clipboard.writeText(brief);
     setCopiedId(task.id);
     setTimeout(() => setCopiedId(null), 2000);
+  }
+
+  async function handleRun(task: Task) {
+    if (runningId) return; // prevent parallel runs
+    setRunningId(task.id);
+    setRunError(null);
+    try {
+      const res = await fetch(`/api/tasks/${task.id}/run`, { method: "POST" });
+      const json = await res.json();
+      if (!res.ok) {
+        setRunError(json.error ?? "Run failed");
+        return;
+      }
+      // Reflect the new execution_status locally without a full reload.
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === task.id
+            ? { ...t, execution_status: "review", latest_output: json.response_preview ?? t.latest_output }
+            : t
+        )
+      );
+    } catch {
+      setRunError("Run failed — is the dev server running?");
+    } finally {
+      setRunningId(null);
+      setTimeout(() => setRunError(null), 6000);
+    }
   }
 
   async function handleSyncBrain() {
@@ -404,6 +433,9 @@ const TasksPage: NextPageWithLayout = () => {
           {syncMsg && (
             <span className="text-[10px] text-moss/70">{syncMsg}</span>
           )}
+          {runError && (
+            <span className="text-[10px] text-red-500">{runError}</span>
+          )}
           <span className="text-[11px] text-ink/35">
             {filtered.length} task{filtered.length !== 1 ? "s" : ""}
           </span>
@@ -538,6 +570,24 @@ const TasksPage: NextPageWithLayout = () => {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100">
+                        {task.assigned_to === "claude" &&
+                          task.status !== "done" &&
+                          task.execution_status !== "done" && (
+                            <button
+                              onClick={() => handleRun(task)}
+                              disabled={runningId !== null}
+                              className={`text-[10px] transition-colors ${
+                                runningId === task.id
+                                  ? "text-moss cursor-wait"
+                                  : runningId !== null
+                                  ? "text-ink/15 cursor-not-allowed"
+                                  : "text-ink/25 hover:text-moss"
+                              }`}
+                              title={runningId === task.id ? "Running…" : "Run with Claude"}
+                            >
+                              {runningId === task.id ? "Running…" : "Run"}
+                            </button>
+                          )}
                         <button
                           onClick={() => handleCopyBrief(task)}
                           className="text-[10px] text-ink/25 hover:text-moss transition-colors"
