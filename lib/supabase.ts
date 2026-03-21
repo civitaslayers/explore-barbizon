@@ -42,6 +42,7 @@ export type DbLocation = {
   is_featured: boolean | null;
   qr_code_url: string | null;
   show_on_map: boolean | null;
+  show_in_editorial: boolean | null;
   created_at: string | null;
   updated_at: string | null;
 };
@@ -111,6 +112,7 @@ export async function getEditorialLocations(): Promise<Place[]> {
     .from("locations")
     .select("*, categories!inner(name, show_in_editorial)")
     .eq("is_published", true)
+    .eq("show_in_editorial", true)
     .eq("categories.show_in_editorial", true)
     .order("name");
 

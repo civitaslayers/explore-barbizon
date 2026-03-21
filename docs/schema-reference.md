@@ -70,6 +70,7 @@ Note: `show_in_editorial` controls whether a category's locations are eligible f
 | is_featured | boolean | YES | false |
 | qr_code_url | text | YES | — |
 | show_on_map | boolean | YES | true |
+| show_in_editorial | boolean | NO | false |
 | created_at | timestamptz | YES | now() |
 | updated_at | timestamptz | YES | now() |
 
