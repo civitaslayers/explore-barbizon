@@ -451,8 +451,9 @@ const TasksPage: NextPageWithLayout = () => {
     return true;
   });
 
-  const activeTasks = filtered.filter((t) => t.status !== "done");
-  const doneTasks = filtered.filter((t) => t.status === "done");
+  const isDone = (t: Task) => t.status === "done" || t.execution_status === "done";
+  const activeTasks = filtered.filter((t) => !isDone(t));
+  const doneTasks = filtered.filter((t) => isDone(t));
 
   return (
     <div className="p-8">
