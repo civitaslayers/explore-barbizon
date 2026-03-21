@@ -529,6 +529,62 @@ function RunHandoffBlock({
   );
 }
 
+/** Most recent row from `outputs` (API / runs / manual saves), surfaced above history. */
+function LatestExecutionResultBlock({ latest }: { latest: Output | null }) {
+  return (
+    <section
+      className="pt-6 mt-6 border-t border-ink/10"
+      aria-label="Latest execution result"
+    >
+      <h2 className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-1">
+        Latest execution result
+      </h2>
+      <p className="text-[11px] text-ink/38 leading-snug mb-4">
+        Most recent row from outputs (runs, CLI, or POST /api/tasks/…/outputs). Sorted by time.
+      </p>
+      {!latest ? (
+        <p className="text-[13px] text-ink/45 leading-snug">
+          No execution rows yet — run the task or add an output below.
+        </p>
+      ) : (
+        <>
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <span
+              className={`text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded ${AGENT_STYLE[latest.agent] ?? "bg-ink/8 text-ink/55"}`}
+            >
+              {latest.agent}
+            </span>
+            <span className="text-[10px] text-ink/30">v{latest.version}</span>
+          </div>
+          <dl className="grid grid-cols-[6.5rem_1fr] gap-x-3 gap-y-2 text-xs text-ink/65 mb-3">
+            <dt className="text-ink/40">Recorded</dt>
+            <dd className="min-w-0">
+              {new Date(latest.created_at).toLocaleString(undefined, {
+                dateStyle: "medium",
+                timeStyle: "short",
+              })}
+            </dd>
+            <dt className="text-ink/40">Status</dt>
+            <dd className="min-w-0">
+              {(latest.response ?? "").trim() ? "Has output" : "No output text"}
+            </dd>
+            <dt className="text-ink/40">Output</dt>
+            <dd className="min-w-0">
+              {(latest.response ?? "").trim() ? (
+                <div className="text-[13px] text-ink/75 leading-relaxed whitespace-pre-wrap max-h-56 overflow-y-auto rounded-lg border border-ink/10 bg-ink/[0.02] px-3 py-2.5 font-mono">
+                  {latest.response}
+                </div>
+              ) : (
+                <span className="text-ink/35">—</span>
+              )}
+            </dd>
+          </dl>
+        </>
+      )}
+    </section>
+  );
+}
+
 type RunWithBriefTool = "chatgpt" | "claude" | "cursor";
 
 const RUN_WITH_TOOL_LABEL: Record<RunWithBriefTool, string> = {
@@ -879,6 +935,61 @@ function ChiefOfStaffSuggestionsBlock({
             </li>
           ))}
         </ul>
+      )}
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// ReviewBlock — runs claude --print to verify latest output
+// ---------------------------------------------------------------------------
+
+function ReviewBlock({ taskId, hasOutput }: { taskId: string; hasOutput: boolean }) {
+  const [reviewing, setReviewing] = useState(false);
+  const [result, setResult] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleReview() {
+    setReviewing(true);
+    setResult(null);
+    setError(null);
+    try {
+      const res = await fetch(`/api/tasks/${taskId}/review`, { method: "POST" });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "Review failed");
+      setResult(json.review);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Review failed");
+    } finally {
+      setReviewing(false);
+    }
+  }
+
+  return (
+    <section>
+      <h2 className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-3">
+        Review output
+      </h2>
+      <button
+        onClick={handleReview}
+        disabled={reviewing || !hasOutput}
+        title={!hasOutput ? "No output to review — run the task first" : "Ask Claude to verify the output and suggest changes"}
+        className={`text-[11px] uppercase tracking-[0.15em] px-4 py-2 rounded border transition-colors disabled:opacity-40 ${
+          reviewing
+            ? "border-moss/30 text-moss/70 cursor-wait"
+            : "border-ink/20 text-ink/50 hover:border-moss/40 hover:text-moss"
+        }`}
+      >
+        {reviewing ? "Reviewing…" : "Review with Claude"}
+      </button>
+      {error && (
+        <p className="mt-3 text-xs text-red-600">{error}</p>
+      )}
+      {result && (
+        <div className="mt-4 rounded-lg border border-ink/12 bg-ink/[0.02] px-4 py-3">
+          <p className="text-[9px] uppercase tracking-[0.18em] text-ink/30 mb-2">Claude review</p>
+          <div className="text-[13px] text-ink/70 leading-relaxed whitespace-pre-wrap">{result}</div>
+        </div>
       )}
     </section>
   );
@@ -1591,7 +1702,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
 
   if (!task) return null;
 
-  const chiefSuggestions = deriveChiefOfStaffSuggestions(task, taskLinks, outputs);
+  const hasOutput = hasMeaningfulLatestOutput(task, outputs);
 
   const locationLinks = taskLinks.filter((l) => l.entity_type === "location");
   const tourLinks = taskLinks.filter((l) => l.entity_type === "tour");
@@ -2054,6 +2165,8 @@ const TaskDetailPage: NextPageWithLayout = () => {
           }}
         />
 
+        <LatestExecutionResultBlock latest={outputs[0] ?? null} />
+
         {/* Task outputs — structured (lighter) */}
         <div className="mt-6 pt-6 border-t border-ink/8 text-ink/80">
           <p className="text-[10px] uppercase tracking-[0.2em] text-ink/30 mb-1">Task outputs</p>
@@ -2286,13 +2399,9 @@ const TaskDetailPage: NextPageWithLayout = () => {
         </div>
       </div>
 
-      {/* Oversight */}
+      {/* Review */}
       <div className="mt-8 pt-8 border-t border-ink/12 mb-8">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-4">Oversight</p>
-        <ChiefOfStaffSuggestionsBlock suggestions={chiefSuggestions} />
-        <div className="pt-6 mt-6 border-t border-ink/10">
-          <HandoffReviewBlock task={task} outputs={outputs} />
-        </div>
+        <ReviewBlock taskId={task.id} hasOutput={hasOutput} />
       </div>
 
       {/* Attach area */}
