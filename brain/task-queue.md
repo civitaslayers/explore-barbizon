@@ -1,6 +1,6 @@
 # Task Queue
 
-Last updated: 2026-03-14
+Last updated: 2026-03-21
 
 Tasks are ordered by priority within each section.
 Move tasks between sections as status changes.
@@ -19,14 +19,17 @@ Task tags:
 ## Now
 *Unblocked tasks that can be started immediately.*
 
+- [x] [infra] Add MCP tooling layer (Context7, Tavily) — see `docs/agent-tooling.md`
+- [ ] [user-action] Set `TAVILY_API_KEY` in shell env to activate Tavily MCP
+- [ ] [sql,user-action] Run SQL in Supabase: `show_in_editorial` migration
 - [ ] [frontend] Visual refinement: large-screen layout width audit
-- [ ] [sql,user-action] Run SQL in Supabase: `show_in_editorial` migration (see current-state.md)
 
 ---
 
 ## Next
 *Unblocked after Now tasks or after a specific blocker is resolved.*
 
+- [ ] [infra] Pilot Task Master AI on one multi-step CCC initiative
 - [ ] [frontend+data] Replace `data/tours.ts` with live Supabase query to `tours` + `tour_stops`
 - [ ] [frontend+data] Stories page: wire `stories` table to `pages/stories/index.tsx`
 
@@ -56,6 +59,7 @@ Task tags:
 - [ ] [infra] QR infrastructure: generate and store `qr_code_url` on locations
 - [ ] [data] Events layer: temporary pins for exhibitions and openings
 - [ ] [infra] Multi-town migration: `town_settings`, composite slugs, `category_templates`
+- [ ] [infra] Codebase Memory MCP — defer until repo scale justifies it
 
 ---
 
@@ -63,3 +67,4 @@ Task tags:
 *Cannot proceed until the blocker is resolved.*
 
 - [ ] [infra] Hero video renders → needs `/public/videos/hero-barbizon.mp4`
+- [ ] [infra] Tavily MCP → needs `TAVILY_API_KEY` from user

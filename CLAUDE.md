@@ -44,6 +44,24 @@ Read `MAIN_BRAIN.md` if the task touches:
 
 Avoid loading unnecessary documents.
 
+Read `docs/agent-tooling.md` if the task involves:
+
+- writing code against Next.js, Supabase, or Mapbox APIs (use Context7)
+- external research on history, libraries, or APIs (use Tavily)
+- decomposing a large multi-step initiative (pilot Task Master)
+
+---
+
+## Optional Tooling
+
+External MCP tools are available but not mandatory. They support the brain — they do not replace it.
+
+- **Context7** — version-accurate library docs. Invoke by appending `use context7` to any library-related prompt.
+- **Tavily** — structured external research. Requires `TAVILY_API_KEY` in shell env.
+- **Task Master** — task decomposition pilot. Use only for large, multi-step initiatives.
+
+Full setup and usage guidance: `docs/agent-tooling.md`
+
 ---
 
 # After Reading Startup Files
