@@ -62,7 +62,8 @@ async function main() {
 
   // 2. Run Claude Code CLI with the brief
   console.log("→ Running Claude Code CLI…\n");
-  const result = spawnSync("claude", ["--print", brief], {
+  const result = spawnSync("claude", ["--print"], {
+    input: brief,
     encoding: "utf8",
     maxBuffer: 20 * 1024 * 1024,
     stdio: ["pipe", "pipe", "inherit"], // stderr goes to terminal so you see progress

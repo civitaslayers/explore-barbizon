@@ -569,48 +569,50 @@ const TasksPage: NextPageWithLayout = () => {
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100">
+                      <div className="flex items-center gap-2">
                         {task.assigned_to === "claude" &&
                           task.status !== "done" &&
                           task.execution_status !== "done" && (
                             <button
                               onClick={() => handleRun(task)}
                               disabled={runningId !== null}
-                              className={`text-[10px] transition-colors ${
+                              className={`text-[10px] px-2 py-0.5 rounded transition-colors ${
                                 runningId === task.id
-                                  ? "text-moss cursor-wait"
+                                  ? "bg-moss/15 text-moss cursor-wait"
                                   : runningId !== null
-                                  ? "text-ink/15 cursor-not-allowed"
-                                  : "text-ink/25 hover:text-moss"
+                                  ? "bg-ink/6 text-ink/20 cursor-not-allowed"
+                                  : "bg-moss/10 text-moss hover:bg-moss/18"
                               }`}
                               title={runningId === task.id ? "Running…" : "Run with Claude"}
                             >
                               {runningId === task.id ? "Running…" : "Run"}
                             </button>
                           )}
-                        <button
-                          onClick={() => handleCopyBrief(task)}
-                          className="text-[10px] text-ink/25 hover:text-moss transition-colors"
-                          title={`Copy ${task.assigned_to ?? "general"} brief`}
-                        >
-                          {copiedId === task.id ? "✓" : "▶"}
-                        </button>
-                        {task.status !== "done" && (
+                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100">
                           <button
-                            onClick={() => handleStatusChange(task.id, "done")}
-                            className="text-[10px] text-ink/25 hover:text-green-600 transition-colors"
-                            title="Mark done"
+                            onClick={() => handleCopyBrief(task)}
+                            className="text-[10px] text-ink/25 hover:text-moss transition-colors"
+                            title={`Copy ${task.assigned_to ?? "general"} brief`}
                           >
-                            Done
+                            {copiedId === task.id ? "✓" : "▶"}
                           </button>
-                        )}
-                        <button
-                          onClick={() => handleDelete(task.id)}
-                          className="text-[10px] text-ink/25 hover:text-red-500 transition-colors"
-                          title="Delete task"
-                        >
-                          Del
-                        </button>
+                          {task.status !== "done" && (
+                            <button
+                              onClick={() => handleStatusChange(task.id, "done")}
+                              className="text-[10px] text-ink/25 hover:text-green-600 transition-colors"
+                              title="Mark done"
+                            >
+                              Done
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleDelete(task.id)}
+                            className="text-[10px] text-ink/25 hover:text-red-500 transition-colors"
+                            title="Delete task"
+                          >
+                            Del
+                          </button>
+                        </div>
                       </div>
                     </td>
                   </tr>

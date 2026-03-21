@@ -543,12 +543,14 @@ function AgentBriefBlock({
   locationMeta,
   tourMeta,
   onUpdated,
+  onRun,
 }: {
   task: Task;
   taskLinks: TaskLink[];
   locationMeta: Record<string, { name: string; slug?: string }>;
   tourMeta: Record<string, { name: string; slug?: string }>;
   onUpdated: (t: Task) => void;
+  onRun?: () => Promise<void>;
 }) {
   const [briefMode, setBriefMode] = useState<AgentBriefMode>(() =>
     defaultAgentBriefModeFromAssignee(task.assigned_to)
@@ -592,6 +594,7 @@ function AgentBriefBlock({
       }
       setAutoRunFeedback({ kind: "ok", msg: "Done — output saved, moved to review" });
       onUpdated({ ...task, execution_status: "review", latest_output: json.response_preview ?? task.latest_output });
+      await onRun?.();
       setTimeout(() => setAutoRunFeedback(null), 6000);
     } catch {
       setAutoRunFeedback({ kind: "err", msg: "Run failed — is the dev server running?" });
@@ -2036,6 +2039,10 @@ const TaskDetailPage: NextPageWithLayout = () => {
           onUpdated={(t) => {
             setTask(t);
             setEditForm((f) => ({ ...f, ...t }));
+          }}
+          onRun={async () => {
+            const updated = await getOutputsForTask(task.id);
+            setOutputs(updated);
           }}
         />
 

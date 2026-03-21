@@ -107,9 +107,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 function runClaude(brief: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    const proc = spawn("claude", ["--print", brief], {
+    // Pass brief via stdin rather than as a positional arg — more reliable
+    // for long prompts and consistent across claude CLI versions.
+    const proc = spawn("claude", ["--print"], {
       env: process.env,
     });
+    proc.stdin.write(brief);
+    proc.stdin.end();
 
     let stdout = "";
     let stderr = "";
