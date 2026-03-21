@@ -99,6 +99,13 @@ function toolFramingBlock(mode: Exclude<AgentBriefMode, "general">): string {
         "",
         "Guidance: prefer a concrete diff or patch-style output; preserve current behavior; do not broaden scope or touch unrelated files.",
         "",
+        "Protected files — do NOT touch unless explicitly named in the task scope:",
+        "- `pages/_document.tsx` — global HTML shell; changes affect the entire app",
+        "- `pages/_app.tsx` — global app wrapper; changes affect every route",
+        "- `lib/supabase.ts` — database client and type definitions",
+        "- `tailwind.config.js` — design token source of truth",
+        "- Any migration file in `migrations/` — never modify a migration once written",
+        "",
         "---",
         "",
       ].join("\n");

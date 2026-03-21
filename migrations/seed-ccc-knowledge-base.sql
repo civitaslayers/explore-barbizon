@@ -295,6 +295,13 @@ Guidance: make the smallest safe change. Do not refactor unrelated code. Preserv
 - Preserve existing class patterns and spacing conventions
 - Test at mobile and >1280px viewport
 
+## Protected files — do NOT touch unless explicitly named in this task
+- `pages/_document.tsx` — global HTML shell; removing <Head /> breaks CSS for the entire app
+- `pages/_app.tsx` — global app wrapper; changes affect every route
+- `lib/supabase.ts` — DB client and shared types
+- `tailwind.config.js` — design token source of truth
+- Any file in `migrations/`
+
 ## Files likely in scope
 [LIST FILES]'
 ),

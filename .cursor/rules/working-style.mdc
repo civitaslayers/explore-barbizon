@@ -15,3 +15,10 @@ When working:
 - do not rewrite unrelated files
 - preserve working production behavior unless explicitly improving it
 - call out technical debt and schema mismatches
+
+Protected files — never touch unless the task explicitly names them:
+- `pages/_document.tsx` — global HTML shell; removing <Head /> breaks CSS for the entire app
+- `pages/_app.tsx` — global app wrapper; changes affect every route, not just the page in scope
+- `lib/supabase.ts` — DB client and shared types; schema changes belong in migrations
+- `tailwind.config.js` — design token source of truth; do not add one-off values
+- Any file in `migrations/` — never edit a migration once it has been written
