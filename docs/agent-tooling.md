@@ -78,25 +78,31 @@ export TAVILY_API_KEY=your_key_here
 
 ---
 
-### Task Master AI (Pilot)
+### Task Master AI (Pilot — evaluated March 2026)
 
-**Status:** Not yet wired. Pilot pending.
+**Status:** Evaluated. Use selectively — see verdict below.
 
-**Purpose:** Structured task decomposition and dependency tracking for multi-step initiatives. Takes a PRD or initiative description and breaks it into sequenced tasks with dependencies.
+**Pilot initiative:** "AI guide: conversational layer grounded in database content" — chosen as the most dependency-rich item in the backlog.
 
-**Role in this project:** Supplement to `brain/task-queue.md` for large initiatives only. Does NOT replace the task queue as source of truth.
+**What Task Master adds:**
+- Dependency ordering and parallelism visibility across subtasks
+- Machine-readable task state suitable for agent handoff
+- A one-line `brain/` entry becomes an 8-step sequenced plan with explicit `dependsOn` relationships
 
-**When to consider:**
-- A new initiative has more than ~6 interdependent tasks
-- Task ordering and dependency tracking is genuinely complex
-- You want to sync a large feature plan across Claude/Cursor sessions
+**What it does not add:**
+- Project context, schema conventions, or editorial direction — output is generic engineering tasks
+- Awareness of the CCC task model or existing Supabase structure
 
-**When NOT to use:**
-- Routine task execution (use `/next-task` + `brain/task-queue.md`)
-- Single-file or small scoped changes
-- As a universal first step for every session
+**Verdict:**
+- **Do NOT use as ongoing task management** — the CCC already serves that role, and parallel state causes drift
+- **Use selectively as a one-shot PRD decomposition tool** for initiatives with more than ~6 interdependent tasks: run `parse-prd` once, promote results into the CCC, discard the `.taskmaster/` directory
 
-**To pilot:** Run `npx -y task-master-ai` in a session, feed it one multi-step initiative, and evaluate whether the output adds value over the existing brain/ structure. Update this doc with findings.
+**Workflow when applicable:**
+1. Write a short PRD or initiative description
+2. Run `npx -y task-master-ai` → `parse-prd`
+3. Review the generated subtask list
+4. Promote relevant tasks into CCC (with correct `assigned_to`, `task_type`, `related_area`)
+5. Delete `.taskmaster/` — CCC is the source of truth from that point
 
 **Source:** `eyaltoledano/claude-task-master` on GitHub.
 
