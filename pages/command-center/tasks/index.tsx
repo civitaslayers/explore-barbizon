@@ -545,6 +545,15 @@ const TasksPage: NextPageWithLayout = () => {
                         >
                           {copiedId === task.id ? "✓" : "▶"}
                         </button>
+                        {task.status !== "done" && (
+                          <button
+                            onClick={() => handleStatusChange(task.id, "done")}
+                            className="text-[10px] text-ink/25 hover:text-green-600 transition-colors"
+                            title="Mark done"
+                          >
+                            Done
+                          </button>
+                        )}
                         <button
                           onClick={() => handleDelete(task.id)}
                           className="text-[10px] text-ink/25 hover:text-red-500 transition-colors"
