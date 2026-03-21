@@ -293,13 +293,13 @@ const TasksPage: NextPageWithLayout = () => {
   }
 
   async function handleStatusChange(id: string, status: TaskStatus) {
+    const extra = status === "done" ? { execution_status: "done" as const } : {};
     try {
-      await updateTask(id, { status });
+      await updateTask(id, { status, ...extra });
       setTasks((prev) =>
-        prev.map((t) => (t.id === id ? { ...t, status } : t))
+        prev.map((t) => (t.id === id ? { ...t, status, ...extra } : t))
       );
     } catch {
-      // non-critical inline action — just reload
       await load();
     }
   }
