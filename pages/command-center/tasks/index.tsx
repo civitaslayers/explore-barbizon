@@ -16,6 +16,10 @@ import {
   executionFieldsForCreate,
   type TaskTemplateId,
 } from "@/lib/taskTemplates";
+import {
+  buildAgentTaskBrief,
+  defaultAgentBriefModeFromAssignee,
+} from "@/lib/taskBriefs";
 
 type NextPageWithLayout = NextPage & {
   getLayout?: (page: ReactElement) => ReactNode;
@@ -84,6 +88,7 @@ const TasksPage: NextPageWithLayout = () => {
   const [formError, setFormError] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [syncMsg, setSyncMsg] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const creationTemplate =
     creationTemplateId == null
@@ -147,6 +152,25 @@ const TasksPage: NextPageWithLayout = () => {
       // non-critical inline action — just reload
       await load();
     }
+  }
+
+  async function handleAssigneeChange(id: string, assignee: string) {
+    try {
+      await updateTask(id, { assigned_to: assignee || null });
+      setTasks((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, assigned_to: assignee || null } : t))
+      );
+    } catch {
+      await load();
+    }
+  }
+
+  async function handleCopyBrief(task: Task) {
+    const mode = defaultAgentBriefModeFromAssignee(task.assigned_to);
+    const brief = buildAgentTaskBrief(task, [], {}, {}, mode);
+    await navigator.clipboard.writeText(brief);
+    setCopiedId(task.id);
+    setTimeout(() => setCopiedId(null), 2000);
   }
 
   async function handleSyncBrain() {
@@ -490,13 +514,20 @@ const TasksPage: NextPageWithLayout = () => {
                       </select>
                     </td>
                     <td className="px-4 py-3">
-                      {task.assigned_to?.trim() ? (
-                        <span
-                          className={`text-[10px] uppercase tracking-[0.15em] px-2 py-0.5 rounded-full ${AGENT_STYLE[task.assigned_to.trim().toLowerCase()] ?? "border border-ink/15 text-ink/45"}`}
-                        >
-                          {task.assigned_to.trim()}
-                        </span>
-                      ) : null}
+                      <select
+                        value={task.assigned_to ?? ""}
+                        onChange={(e) => handleAssigneeChange(task.id, e.target.value)}
+                        className={`text-[10px] uppercase tracking-[0.15em] px-2 py-0.5 rounded-full border-0 cursor-pointer focus:outline-none bg-transparent ${
+                          task.assigned_to?.trim()
+                            ? (AGENT_STYLE[task.assigned_to.trim().toLowerCase()] ?? "text-ink/45")
+                            : "text-ink/25"
+                        }`}
+                      >
+                        <option value="">—</option>
+                        {ASSIGNEE_FILTER_PRESETS.map((a) => (
+                          <option key={a} value={a}>{a}</option>
+                        ))}
+                      </select>
                     </td>
                     <td className="px-4 py-3">
                       {task.related_area && (
@@ -506,13 +537,22 @@ const TasksPage: NextPageWithLayout = () => {
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      <button
-                        onClick={() => handleDelete(task.id)}
-                        className="text-[10px] text-ink/25 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                        title="Delete task"
-                      >
-                        Del
-                      </button>
+                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100">
+                        <button
+                          onClick={() => handleCopyBrief(task)}
+                          className="text-[10px] text-ink/25 hover:text-moss transition-colors"
+                          title={`Copy ${task.assigned_to ?? "general"} brief`}
+                        >
+                          {copiedId === task.id ? "✓" : "▶"}
+                        </button>
+                        <button
+                          onClick={() => handleDelete(task.id)}
+                          className="text-[10px] text-ink/25 hover:text-red-500 transition-colors"
+                          title="Delete task"
+                        >
+                          Del
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

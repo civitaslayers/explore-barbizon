@@ -200,3 +200,15 @@ INSERT INTO tasks (title, description, status, priority, task_type, related_area
   'Track which places a visitor has been to. Longer-term engagement feature.',
   'backlog', 5, 'research', 'product', 'todo', null
 );
+
+-- ============================================================
+-- Fix null assignees on deferred tasks
+-- Run after the INSERT block above.
+-- ============================================================
+
+UPDATE tasks SET assigned_to = 'claude'
+WHERE title IN (
+  'Merchant discovery trails',
+  'AI guide: conversational layer grounded in database content',
+  'Visitor passport: gamified exploration layer'
+) AND assigned_to IS NULL;
