@@ -82,6 +82,8 @@ const TasksPage: NextPageWithLayout = () => {
   const [creationTemplateId, setCreationTemplateId] = useState<TaskTemplateId | null>(null);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
+  const [syncMsg, setSyncMsg] = useState<string | null>(null);
 
   const creationTemplate =
     creationTemplateId == null
@@ -144,6 +146,21 @@ const TasksPage: NextPageWithLayout = () => {
     } catch {
       // non-critical inline action — just reload
       await load();
+    }
+  }
+
+  async function handleSyncBrain() {
+    setSyncing(true);
+    setSyncMsg(null);
+    try {
+      const res = await fetch("/api/brain/sync-tasks", { method: "POST" });
+      const json = await res.json();
+      setSyncMsg(json.success ? `Synced (${json.count} tasks)` : (json.error ?? "Sync failed"));
+    } catch {
+      setSyncMsg("Sync failed");
+    } finally {
+      setSyncing(false);
+      setTimeout(() => setSyncMsg(null), 4000);
     }
   }
 
@@ -351,9 +368,22 @@ const TasksPage: NextPageWithLayout = () => {
             Clear
           </button>
         )}
-        <span className="ml-auto text-[11px] text-ink/35 self-center">
-          {filtered.length} task{filtered.length !== 1 ? "s" : ""}
-        </span>
+        <div className="ml-auto flex items-center gap-3">
+          <button
+            onClick={handleSyncBrain}
+            disabled={syncing}
+            className="text-[10px] uppercase tracking-[0.12em] px-2.5 py-1 rounded border border-ink/15 text-ink/45 hover:text-ink/70 transition-colors disabled:opacity-40"
+            title="Regenerate brain/task-queue.md from current Supabase task state"
+          >
+            {syncing ? "Syncing…" : "→ brain"}
+          </button>
+          {syncMsg && (
+            <span className="text-[10px] text-moss/70">{syncMsg}</span>
+          )}
+          <span className="text-[11px] text-ink/35">
+            {filtered.length} task{filtered.length !== 1 ? "s" : ""}
+          </span>
+        </div>
       </div>
 
       {/* Error */}
