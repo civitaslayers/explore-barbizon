@@ -15,12 +15,7 @@ class MyDocument extends Document {
   render() {
     return (
       <Html lang="en">
-        <Head>
-          <meta
-            name="description"
-            content="Explore Barbizon — a curated cultural guide to the forest-edge village that inspired generations of artists."
-          />
-        </Head>
+        <Head />
         <body className="bg-cream text-ink">
           <Main />
           <NextScript />
