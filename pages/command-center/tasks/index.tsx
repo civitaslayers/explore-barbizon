@@ -20,6 +20,7 @@ import {
   buildAgentTaskBrief,
   defaultAgentBriefModeFromAssignee,
 } from "@/lib/taskBriefs";
+import type { TaskSuggestion } from "@/pages/api/tasks/suggest";
 
 type NextPageWithLayout = NextPage & {
   getLayout?: (page: ReactElement) => ReactNode;
@@ -91,6 +92,11 @@ const TasksPage: NextPageWithLayout = () => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [runningId, setRunningId] = useState<string | null>(null);
   const [runError, setRunError] = useState<string | null>(null);
+  const [suggesting, setSuggesting] = useState(false);
+  const [suggestions, setSuggestions] = useState<TaskSuggestion[] | null>(null);
+  const [suggestError, setSuggestError] = useState<string | null>(null);
+  const [acceptedIndexes, setAcceptedIndexes] = useState<Set<number>>(new Set());
+  const [addingTasks, setAddingTasks] = useState(false);
 
   const creationTemplate =
     creationTemplateId == null
@@ -199,6 +205,73 @@ const TasksPage: NextPageWithLayout = () => {
     } finally {
       setRunningId(null);
       setTimeout(() => setRunError(null), 6000);
+    }
+  }
+
+  async function handleSuggest() {
+    setSuggesting(true);
+    setSuggestions(null);
+    setSuggestError(null);
+    setAcceptedIndexes(new Set());
+    try {
+      const res = await fetch("/api/tasks/suggest", { method: "POST" });
+      const json = await res.json();
+      if (!res.ok) {
+        setSuggestError(json.error ?? "Suggestion failed");
+        return;
+      }
+      setSuggestions(json.suggestions);
+      // Pre-select all suggestions.
+      setAcceptedIndexes(new Set(json.suggestions.map((_: TaskSuggestion, i: number) => i)));
+    } catch {
+      setSuggestError("Suggestion failed — is the dev server running?");
+    } finally {
+      setSuggesting(false);
+    }
+  }
+
+  function toggleAccepted(index: number) {
+    setAcceptedIndexes((prev) => {
+      const next = new Set(prev);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      return next;
+    });
+  }
+
+  async function handleAddAccepted() {
+    if (!suggestions) return;
+    setAddingTasks(true);
+    const toAdd = suggestions.filter((_, i) => acceptedIndexes.has(i));
+    try {
+      for (const s of toAdd) {
+        await createTask({
+          title: s.title,
+          description: s.description,
+          status: "backlog",
+          priority: s.priority,
+          task_type: (s.task_type as Task["task_type"]) ?? null,
+          related_area: (s.related_area as RelatedArea) ?? null,
+          assigned_to: s.assigned_to || null,
+          execution_status: "todo",
+          latest_output: null,
+          last_action_note: null,
+          next_step: null,
+          source_prompt: null,
+          implementation_notes: null,
+          last_run_target: null,
+          last_run_at: null,
+          last_run_note: null,
+          artifact_links: null,
+          review_note: null,
+        });
+      }
+      setSuggestions(null);
+      await load();
+    } catch (e: unknown) {
+      setSuggestError(e instanceof Error ? e.message : "Failed to add tasks");
+    } finally {
+      setAddingTasks(false);
     }
   }
 
@@ -423,6 +496,14 @@ const TasksPage: NextPageWithLayout = () => {
         )}
         <div className="ml-auto flex items-center gap-3">
           <button
+            onClick={handleSuggest}
+            disabled={suggesting || addingTasks}
+            className="text-[10px] uppercase tracking-[0.12em] px-2.5 py-1 rounded border border-moss/30 text-moss/70 hover:text-moss hover:border-moss/50 transition-colors disabled:opacity-40"
+            title="Analyse project state and suggest new tasks"
+          >
+            {suggesting ? "Analysing…" : "Suggest tasks"}
+          </button>
+          <button
             onClick={handleSyncBrain}
             disabled={syncing}
             className="text-[10px] uppercase tracking-[0.12em] px-2.5 py-1 rounded border border-ink/15 text-ink/45 hover:text-ink/70 transition-colors disabled:opacity-40"
@@ -441,6 +522,74 @@ const TasksPage: NextPageWithLayout = () => {
           </span>
         </div>
       </div>
+
+      {/* Suggestions panel */}
+      {suggestError && (
+        <p className="text-sm text-red-600 mb-4 p-3 bg-red-50 rounded border border-red-200">
+          {suggestError}
+        </p>
+      )}
+      {suggestions && suggestions.length > 0 && (
+        <div className="mb-6 rounded-lg border border-moss/20 bg-moss/[0.03] overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-moss/15">
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.18em] text-moss/80 font-medium">
+                Task suggestions
+              </p>
+              <p className="text-[11px] text-ink/40 mt-0.5">
+                {acceptedIndexes.size} of {suggestions.length} selected — uncheck any you want to skip
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setSuggestions(null)}
+                className="text-[10px] text-ink/35 hover:text-ink/60 transition-colors"
+              >
+                Dismiss
+              </button>
+              <button
+                onClick={handleAddAccepted}
+                disabled={addingTasks || acceptedIndexes.size === 0}
+                className="text-[10px] uppercase tracking-[0.12em] px-3 py-1.5 rounded bg-moss/12 text-moss hover:bg-moss/20 transition-colors disabled:opacity-40"
+              >
+                {addingTasks ? "Adding…" : `Add ${acceptedIndexes.size} task${acceptedIndexes.size !== 1 ? "s" : ""}`}
+              </button>
+            </div>
+          </div>
+          <div className="divide-y divide-moss/10">
+            {suggestions.map((s, i) => (
+              <label
+                key={i}
+                className={`flex items-start gap-3 px-4 py-3 cursor-pointer transition-colors ${
+                  acceptedIndexes.has(i) ? "bg-white/60" : "bg-transparent opacity-50"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={acceptedIndexes.has(i)}
+                  onChange={() => toggleAccepted(i)}
+                  className="mt-1 shrink-0 rounded border-moss/30 text-moss focus:ring-moss/20"
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                    <span className="text-[13px] font-medium text-ink leading-snug">{s.title}</span>
+                    <span className={`text-[9px] uppercase tracking-[0.15em] px-1.5 py-0.5 rounded-full ${AGENT_STYLE[s.assigned_to] ?? "bg-ink/8 text-ink/50"}`}>
+                      {s.assigned_to}
+                    </span>
+                    <span className="text-[9px] text-ink/30 uppercase tracking-[0.12em]">
+                      p{s.priority} · {s.task_type}
+                    </span>
+                  </div>
+                  <p className="text-[12px] text-ink/55 leading-snug">{s.description}</p>
+                  {s.rationale && (
+                    <p className="text-[11px] text-moss/60 mt-1 italic">{s.rationale}</p>
+                  )}
+                </div>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Error */}
       {error && (
