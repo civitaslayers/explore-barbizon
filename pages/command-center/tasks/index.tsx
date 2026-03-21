@@ -77,6 +77,147 @@ const emptyForm = {
   related_area: "" as RelatedArea | "",
 };
 
+// ---------------------------------------------------------------------------
+// TaskRow — extracted to avoid duplication between active and done sections
+// ---------------------------------------------------------------------------
+
+type TaskRowProps = {
+  task: Task;
+  isFirst: boolean;
+  runningId: string | null;
+  copiedId: string | null;
+  onRun: (task: Task) => void;
+  onCopyBrief: (task: Task) => void;
+  onStatusChange: (id: string, status: TaskStatus) => void;
+  onAssigneeChange: (id: string, assignee: string) => void;
+  onDelete: (id: string) => void;
+};
+
+function TaskRow({ task, isFirst, runningId, copiedId, onRun, onCopyBrief, onStatusChange, onAssigneeChange, onDelete }: TaskRowProps) {
+  return (
+    <tr className={`group ${!isFirst ? "border-t border-ink/8" : ""} hover:bg-ink/2 transition-colors`}>
+      <td className="px-4 py-3 text-[10px] text-ink/35">{task.priority}</td>
+      <td className="px-4 py-3">
+        <Link
+          href={`/command-center/tasks/${task.id}`}
+          className="text-ink no-underline hover:text-umber font-medium leading-snug"
+        >
+          {task.title}
+        </Link>
+        {task.description && (
+          <p className="text-[11px] text-ink/40 mt-0.5 line-clamp-1">{task.description}</p>
+        )}
+        {(task.execution_status ||
+          task.assigned_to ||
+          (task.next_step && task.next_step.trim()) ||
+          (task.last_run_at && (task.last_run_target ?? "").trim())) && (
+          <div className="flex flex-wrap gap-1 mt-1.5 items-center">
+            {task.execution_status && (
+              <span className={`text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded ${EXECUTION_STATUS_STYLE[task.execution_status] ?? "bg-ink/6 text-ink/45"}`}>
+                {task.execution_status.replace("_", " ")}
+              </span>
+            )}
+            {task.assigned_to && (
+              <span className="text-[9px] tracking-tight px-1.5 py-0.5 rounded border border-ink/10 text-ink/38">
+                {task.assigned_to}
+              </span>
+            )}
+            {task.next_step?.trim() && (
+              <span className="text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded border border-ink/10 text-ink/35" title={task.next_step.trim()}>
+                Next step
+              </span>
+            )}
+            {task.last_run_at && task.last_run_target?.trim() && (
+              <span className="text-[9px] tracking-tight px-1.5 py-0.5 rounded border border-ink/8 text-ink/32" title={`Last handoff: ${new Date(task.last_run_at).toLocaleString()}`}>
+                → {task.last_run_target.trim()}
+              </span>
+            )}
+          </div>
+        )}
+      </td>
+      <td className="px-4 py-3">
+        <select
+          value={task.status}
+          onChange={(e) => onStatusChange(task.id, e.target.value as TaskStatus)}
+          className={`text-[10px] uppercase tracking-[0.15em] px-2 py-1 rounded-full border-0 cursor-pointer focus:outline-none ${STATUS_STYLE[task.status]}`}
+        >
+          {STATUSES.map((s) => (
+            <option key={s} value={s}>{s.replace("_", " ")}</option>
+          ))}
+        </select>
+      </td>
+      <td className="px-4 py-3">
+        <select
+          value={task.assigned_to ?? ""}
+          onChange={(e) => onAssigneeChange(task.id, e.target.value)}
+          className={`text-[10px] uppercase tracking-[0.15em] px-2 py-0.5 rounded-full border-0 cursor-pointer focus:outline-none bg-transparent ${
+            task.assigned_to?.trim()
+              ? (AGENT_STYLE[task.assigned_to.trim().toLowerCase()] ?? "text-ink/45")
+              : "text-ink/25"
+          }`}
+        >
+          <option value="">—</option>
+          {ASSIGNEE_FILTER_PRESETS.map((a) => (
+            <option key={a} value={a}>{a}</option>
+          ))}
+        </select>
+      </td>
+      <td className="px-4 py-3">
+        {task.related_area && (
+          <span className="text-[10px] text-ink/40 uppercase tracking-[0.15em]">{task.related_area}</span>
+        )}
+      </td>
+      <td className="px-4 py-3">
+        <div className="flex items-center gap-2">
+          {task.assigned_to === "claude" &&
+            task.status !== "done" &&
+            task.execution_status !== "done" && (
+              <button
+                onClick={() => onRun(task)}
+                disabled={runningId !== null}
+                className={`text-[10px] px-2 py-0.5 rounded transition-colors ${
+                  runningId === task.id
+                    ? "bg-moss/15 text-moss cursor-wait"
+                    : runningId !== null
+                    ? "bg-ink/6 text-ink/20 cursor-not-allowed"
+                    : "bg-moss/10 text-moss hover:bg-moss/18"
+                }`}
+                title={runningId === task.id ? "Running…" : "Run with Claude"}
+              >
+                {runningId === task.id ? "Running…" : "Run"}
+              </button>
+            )}
+          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100">
+            <button
+              onClick={() => onCopyBrief(task)}
+              className="text-[10px] text-ink/25 hover:text-moss transition-colors"
+              title={`Copy ${task.assigned_to ?? "general"} brief`}
+            >
+              {copiedId === task.id ? "✓" : "▶"}
+            </button>
+            {task.status !== "done" && (
+              <button
+                onClick={() => onStatusChange(task.id, "done")}
+                className="text-[10px] text-ink/25 hover:text-green-600 transition-colors"
+                title="Mark done"
+              >
+                Done
+              </button>
+            )}
+            <button
+              onClick={() => onDelete(task.id)}
+              className="text-[10px] text-ink/25 hover:text-red-500 transition-colors"
+              title="Delete task"
+            >
+              Del
+            </button>
+          </div>
+        </div>
+      </td>
+    </tr>
+  );
+}
+
 const TasksPage: NextPageWithLayout = () => {
   const router = useRouter();
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -97,6 +238,7 @@ const TasksPage: NextPageWithLayout = () => {
   const [suggestError, setSuggestError] = useState<string | null>(null);
   const [acceptedIndexes, setAcceptedIndexes] = useState<Set<number>>(new Set());
   const [addingTasks, setAddingTasks] = useState(false);
+  const [showDone, setShowDone] = useState(false);
 
   const creationTemplate =
     creationTemplateId == null
@@ -309,6 +451,9 @@ const TasksPage: NextPageWithLayout = () => {
     return true;
   });
 
+  const activeTasks = filtered.filter((t) => t.status !== "done");
+  const doneTasks = filtered.filter((t) => t.status === "done");
+
   return (
     <div className="p-8">
       {/* Header */}
@@ -518,7 +663,8 @@ const TasksPage: NextPageWithLayout = () => {
             <span className="text-[10px] text-red-500">{runError}</span>
           )}
           <span className="text-[11px] text-ink/35">
-            {filtered.length} task{filtered.length !== 1 ? "s" : ""}
+            {activeTasks.length} task{activeTasks.length !== 1 ? "s" : ""}
+            {doneTasks.length > 0 && ` · ${doneTasks.length} done`}
           </span>
         </div>
       </div>
@@ -605,171 +751,83 @@ const TasksPage: NextPageWithLayout = () => {
 
       {/* Table */}
       {!loading && (
-        <div className="border border-ink/10 rounded-xl overflow-hidden">
-          {filtered.length === 0 ? (
-            <p className="text-sm text-ink/35 px-6 py-10 text-center">
-              No tasks match the current filters.
-            </p>
-          ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-ink/10 bg-ink/2">
-                  <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-ink/40 font-normal w-8">P</th>
-                  <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-ink/40 font-normal">Title</th>
-                  <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-ink/40 font-normal">Queue</th>
-                  <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-ink/40 font-normal">Assignee</th>
-                  <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-ink/40 font-normal">Area</th>
-                  <th className="px-4 py-2.5 w-16"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((task, i) => (
-                  <tr
-                    key={task.id}
-                    className={`group ${i > 0 ? "border-t border-ink/8" : ""} hover:bg-ink/2 transition-colors`}
-                  >
-                    <td className="px-4 py-3 text-[10px] text-ink/35">{task.priority}</td>
-                    <td className="px-4 py-3">
-                      <Link
-                        href={`/command-center/tasks/${task.id}`}
-                        className="text-ink no-underline hover:text-umber font-medium leading-snug"
-                      >
-                        {task.title}
-                      </Link>
-                      {task.description && (
-                        <p className="text-[11px] text-ink/40 mt-0.5 line-clamp-1">
-                          {task.description}
-                        </p>
-                      )}
-                      {(task.execution_status ||
-                        task.assigned_to ||
-                        (task.next_step && task.next_step.trim()) ||
-                        (task.last_run_at &&
-                          (task.last_run_target ?? "").trim())) && (
-                        <div className="flex flex-wrap gap-1 mt-1.5 items-center">
-                          {task.execution_status && (
-                            <span
-                              className={`text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded ${EXECUTION_STATUS_STYLE[task.execution_status] ?? "bg-ink/6 text-ink/45"}`}
-                            >
-                              {task.execution_status.replace("_", " ")}
-                            </span>
-                          )}
-                          {task.assigned_to && (
-                            <span className="text-[9px] tracking-tight px-1.5 py-0.5 rounded border border-ink/10 text-ink/38">
-                              {task.assigned_to}
-                            </span>
-                          )}
-                          {task.next_step?.trim() && (
-                            <span
-                              className="text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded border border-ink/10 text-ink/35"
-                              title={task.next_step.trim()}
-                            >
-                              Next step
-                            </span>
-                          )}
-                          {task.last_run_at &&
-                            task.last_run_target?.trim() && (
-                              <span
-                                className="text-[9px] tracking-tight px-1.5 py-0.5 rounded border border-ink/8 text-ink/32"
-                                title={`Last handoff: ${new Date(
-                                  task.last_run_at
-                                ).toLocaleString()}`}
-                              >
-                                → {task.last_run_target.trim()}
-                              </span>
-                            )}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      <select
-                        value={task.status}
-                        onChange={(e) =>
-                          handleStatusChange(task.id, e.target.value as TaskStatus)
-                        }
-                        className={`text-[10px] uppercase tracking-[0.15em] px-2 py-1 rounded-full border-0 cursor-pointer focus:outline-none ${STATUS_STYLE[task.status]}`}
-                      >
-                        {STATUSES.map((s) => (
-                          <option key={s} value={s}>{s.replace("_", " ")}</option>
-                        ))}
-                      </select>
-                    </td>
-                    <td className="px-4 py-3">
-                      <select
-                        value={task.assigned_to ?? ""}
-                        onChange={(e) => handleAssigneeChange(task.id, e.target.value)}
-                        className={`text-[10px] uppercase tracking-[0.15em] px-2 py-0.5 rounded-full border-0 cursor-pointer focus:outline-none bg-transparent ${
-                          task.assigned_to?.trim()
-                            ? (AGENT_STYLE[task.assigned_to.trim().toLowerCase()] ?? "text-ink/45")
-                            : "text-ink/25"
-                        }`}
-                      >
-                        <option value="">—</option>
-                        {ASSIGNEE_FILTER_PRESETS.map((a) => (
-                          <option key={a} value={a}>{a}</option>
-                        ))}
-                      </select>
-                    </td>
-                    <td className="px-4 py-3">
-                      {task.related_area && (
-                        <span className="text-[10px] text-ink/40 uppercase tracking-[0.15em]">
-                          {task.related_area}
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        {task.assigned_to === "claude" &&
-                          task.status !== "done" &&
-                          task.execution_status !== "done" && (
-                            <button
-                              onClick={() => handleRun(task)}
-                              disabled={runningId !== null}
-                              className={`text-[10px] px-2 py-0.5 rounded transition-colors ${
-                                runningId === task.id
-                                  ? "bg-moss/15 text-moss cursor-wait"
-                                  : runningId !== null
-                                  ? "bg-ink/6 text-ink/20 cursor-not-allowed"
-                                  : "bg-moss/10 text-moss hover:bg-moss/18"
-                              }`}
-                              title={runningId === task.id ? "Running…" : "Run with Claude"}
-                            >
-                              {runningId === task.id ? "Running…" : "Run"}
-                            </button>
-                          )}
-                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100">
-                          <button
-                            onClick={() => handleCopyBrief(task)}
-                            className="text-[10px] text-ink/25 hover:text-moss transition-colors"
-                            title={`Copy ${task.assigned_to ?? "general"} brief`}
-                          >
-                            {copiedId === task.id ? "✓" : "▶"}
-                          </button>
-                          {task.status !== "done" && (
-                            <button
-                              onClick={() => handleStatusChange(task.id, "done")}
-                              className="text-[10px] text-ink/25 hover:text-green-600 transition-colors"
-                              title="Mark done"
-                            >
-                              Done
-                            </button>
-                          )}
-                          <button
-                            onClick={() => handleDelete(task.id)}
-                            className="text-[10px] text-ink/25 hover:text-red-500 transition-colors"
-                            title="Delete task"
-                          >
-                            Del
-                          </button>
-                        </div>
-                      </div>
-                    </td>
+        <>
+          <div className="border border-ink/10 rounded-xl overflow-hidden">
+            {activeTasks.length === 0 && doneTasks.length === 0 ? (
+              <p className="text-sm text-ink/35 px-6 py-10 text-center">
+                No tasks match the current filters.
+              </p>
+            ) : activeTasks.length === 0 ? (
+              <p className="text-sm text-ink/35 px-6 py-10 text-center">
+                All matching tasks are done.
+              </p>
+            ) : (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-ink/10 bg-ink/2">
+                    <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-ink/40 font-normal w-8">P</th>
+                    <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-ink/40 font-normal">Title</th>
+                    <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-ink/40 font-normal">Queue</th>
+                    <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-ink/40 font-normal">Assignee</th>
+                    <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-ink/40 font-normal">Area</th>
+                    <th className="px-4 py-2.5 w-16"></th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {activeTasks.map((task, i) => (
+                    <TaskRow
+                      key={task.id}
+                      task={task}
+                      isFirst={i === 0}
+                      runningId={runningId}
+                      copiedId={copiedId}
+                      onRun={handleRun}
+                      onCopyBrief={handleCopyBrief}
+                      onStatusChange={handleStatusChange}
+                      onAssigneeChange={handleAssigneeChange}
+                      onDelete={handleDelete}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+          {/* Done tasks — collapsed by default */}
+          {doneTasks.length > 0 && (
+            <div className="mt-3">
+              <button
+                onClick={() => setShowDone((v) => !v)}
+                className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-ink/30 hover:text-ink/55 transition-colors py-1"
+              >
+                <span>{showDone ? "▾" : "▸"}</span>
+                <span>{doneTasks.length} done task{doneTasks.length !== 1 ? "s" : ""}</span>
+              </button>
+              {showDone && (
+                <div className="mt-2 border border-ink/8 rounded-xl overflow-hidden opacity-60">
+                  <table className="w-full text-sm">
+                    <tbody>
+                      {doneTasks.map((task, i) => (
+                        <TaskRow
+                          key={task.id}
+                          task={task}
+                          isFirst={i === 0}
+                          runningId={runningId}
+                          copiedId={copiedId}
+                          onRun={handleRun}
+                          onCopyBrief={handleCopyBrief}
+                          onStatusChange={handleStatusChange}
+                          onAssigneeChange={handleAssigneeChange}
+                          onDelete={handleDelete}
+                        />
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           )}
-        </div>
+        </>
       )}
     </div>
   );
