@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { spawn } from "child_process";
-import { getTask, createOutput } from "@/lib/commandCenter";
+import { getTask, getOutputsForTask, createOutput } from "@/lib/commandCenter";
 
 export const config = { api: { responseLimit: false } };
 
@@ -35,9 +35,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (!task) return res.status(404).json({ error: "Task not found" });
 
-  const output = (task.latest_output ?? "").trim();
+  // Prefer task.latest_output; fall back to the most recent output row.
+  let output = (task.latest_output ?? "").trim();
   if (!output) {
-    return res.status(400).json({ error: "No output to review. Run the task first." });
+    try {
+      const rows = await getOutputsForTask(id);
+      const latest = rows.find((r) => (r.response ?? "").trim().length > 0);
+      output = (latest?.response ?? "").trim();
+    } catch {
+      // ignore — will 400 below if still empty
+    }
+  }
+  if (!output) {
+    return res.status(400).json({ error: "No output to review. Add an output first." });
   }
 
   const prompt = buildReviewPrompt(task, output);

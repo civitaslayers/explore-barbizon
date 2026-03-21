@@ -944,17 +944,46 @@ function ChiefOfStaffSuggestionsBlock({
 // ReviewBlock — runs claude --print to verify latest output
 // ---------------------------------------------------------------------------
 
-function ReviewBlock({ taskId, hasOutput }: { taskId: string; hasOutput: boolean }) {
+function extractNextStep(review: string): string | null {
+  const match = review.match(/\*\*Recommended next step[^*]*\*\*[:\s]*(.*)/i);
+  if (!match) return null;
+  const step = match[1].trim();
+  return step.length > 3 ? step : null;
+}
+
+function buildFollowUpPrompt(task: Task, nextStep: string): string {
+  const mode = defaultAgentBriefModeFromAssignee(task.assigned_to);
+  const framing = mode !== "general"
+    ? `## Brief framing (${mode.charAt(0).toUpperCase() + mode.slice(1)})\n\n`
+    : "";
+  return [
+    framing + `## Follow-up task`,
+    `Title: ${(task.title ?? "").trim() || "—"}`,
+    task.description?.trim() ? `Description: ${task.description.trim()}` : "",
+    "",
+    "## Recommended next step (from Claude review)",
+    nextStep,
+    "",
+    ...(task.implementation_notes?.trim()
+      ? ["## Implementation notes", task.implementation_notes.trim(), ""]
+      : []),
+    "## Instruction",
+    "Carry out the recommended next step above. Keep changes minimal and scoped to what is described.",
+  ].filter((l) => l !== undefined).join("\n");
+}
+
+function ReviewBlock({ task, hasOutput }: { task: Task; hasOutput: boolean }) {
   const [reviewing, setReviewing] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   async function handleReview() {
     setReviewing(true);
     setResult(null);
     setError(null);
     try {
-      const res = await fetch(`/api/tasks/${taskId}/review`, { method: "POST" });
+      const res = await fetch(`/api/tasks/${task.id}/review`, { method: "POST" });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Review failed");
       setResult(json.review);
@@ -965,6 +994,15 @@ function ReviewBlock({ taskId, hasOutput }: { taskId: string; hasOutput: boolean
     }
   }
 
+  async function handleCopyFollowUp(nextStep: string) {
+    const prompt = buildFollowUpPrompt(task, nextStep);
+    await copyTextToClipboard(prompt);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  const nextStep = result ? extractNextStep(result) : null;
+
   return (
     <section>
       <h2 className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-3">
@@ -973,7 +1011,7 @@ function ReviewBlock({ taskId, hasOutput }: { taskId: string; hasOutput: boolean
       <button
         onClick={handleReview}
         disabled={reviewing || !hasOutput}
-        title={!hasOutput ? "No output to review — run the task first" : "Ask Claude to verify the output and suggest changes"}
+        title={!hasOutput ? "No output to review — add an output first" : "Ask Claude to verify the output and suggest changes"}
         className={`text-[11px] uppercase tracking-[0.15em] px-4 py-2 rounded border transition-colors disabled:opacity-40 ${
           reviewing
             ? "border-moss/30 text-moss/70 cursor-wait"
@@ -989,6 +1027,17 @@ function ReviewBlock({ taskId, hasOutput }: { taskId: string; hasOutput: boolean
         <div className="mt-4 rounded-lg border border-ink/12 bg-ink/[0.02] px-4 py-3">
           <p className="text-[9px] uppercase tracking-[0.18em] text-ink/30 mb-2">Claude review</p>
           <div className="text-[13px] text-ink/70 leading-relaxed whitespace-pre-wrap">{result}</div>
+          {nextStep && (
+            <div className="mt-4 pt-3 border-t border-ink/10 flex items-center gap-3">
+              <button
+                onClick={() => handleCopyFollowUp(nextStep)}
+                className="text-[10px] uppercase tracking-[0.15em] px-3 py-1.5 rounded border border-moss/25 text-moss/70 hover:text-moss hover:border-moss/45 transition-colors"
+              >
+                {copied ? "Copied ✓" : "Copy follow-up prompt"}
+              </button>
+              <span className="text-[11px] text-ink/35 italic truncate">{nextStep}</span>
+            </div>
+          )}
         </div>
       )}
     </section>
@@ -2401,7 +2450,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
 
       {/* Review */}
       <div className="mt-8 pt-8 border-t border-ink/12 mb-8">
-        <ReviewBlock taskId={task.id} hasOutput={hasOutput} />
+        <ReviewBlock task={task} hasOutput={hasOutput} />
       </div>
 
       {/* Attach area */}
