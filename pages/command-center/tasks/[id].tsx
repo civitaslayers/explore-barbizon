@@ -574,6 +574,31 @@ function AgentBriefBlock({
     kind: "ok" | "err";
     msg: string;
   } | null>(null);
+  const [autoRunning, setAutoRunning] = useState(false);
+  const [autoRunFeedback, setAutoRunFeedback] = useState<{
+    kind: "ok" | "err";
+    msg: string;
+  } | null>(null);
+
+  async function handleAutoRun() {
+    setAutoRunning(true);
+    setAutoRunFeedback(null);
+    try {
+      const res = await fetch(`/api/tasks/${task.id}/run`, { method: "POST" });
+      const json = await res.json();
+      if (!res.ok) {
+        setAutoRunFeedback({ kind: "err", msg: json.error ?? "Run failed" });
+        return;
+      }
+      setAutoRunFeedback({ kind: "ok", msg: "Done — output saved, moved to review" });
+      onUpdated({ ...task, execution_status: "review", latest_output: json.response_preview ?? task.latest_output });
+      setTimeout(() => setAutoRunFeedback(null), 6000);
+    } catch {
+      setAutoRunFeedback({ kind: "err", msg: "Run failed — is the dev server running?" });
+    } finally {
+      setAutoRunning(false);
+    }
+  }
 
   async function handleCopyBrief() {
     const ok = await copyTextToClipboard(brief);
@@ -780,6 +805,29 @@ function AgentBriefBlock({
             {runWithFeedback.msg}
           </p>
         ) : null}
+        {task.assigned_to === "claude" &&
+          task.status !== "done" &&
+          task.execution_status !== "done" && (
+            <div className="mt-3 pt-3 border-t border-ink/8">
+              <button
+                type="button"
+                onClick={handleAutoRun}
+                disabled={autoRunning || runWithBusyTool !== null}
+                className="text-[9px] uppercase tracking-[0.12em] px-3 py-1.5 rounded bg-moss/10 text-moss hover:bg-moss/18 transition-colors disabled:opacity-50 disabled:cursor-wait"
+              >
+                {autoRunning ? "Running…" : "Run automatically"}
+              </button>
+              {autoRunFeedback && (
+                <p
+                  className={`text-[10px] mt-2 ${
+                    autoRunFeedback.kind === "ok" ? "text-moss/85" : "text-red-600/85"
+                  }`}
+                >
+                  {autoRunFeedback.msg}
+                </p>
+              )}
+            </div>
+          )}
       </div>
 
       <pre className="text-[11px] leading-relaxed text-ink/65 font-mono whitespace-pre-wrap break-words max-h-72 overflow-y-auto rounded-lg border border-ink/10 bg-ink/[0.02] px-3 py-2.5">
