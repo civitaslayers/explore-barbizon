@@ -1,0 +1,2583 @@
+import type { NextPage } from "next";
+import type { ReactElement, ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/router";
+import Link from "next/link";
+import { CommandCenterLayout } from "@/components/CommandCenterLayout";
+import {
+  getTask,
+  updateTask,
+  getOutputsForTask,
+  createOutput,
+  deleteOutput,
+  getTaskLinks,
+  createTaskLink,
+  deleteTaskLink,
+} from "@/lib/commandCenter";
+import type {
+  Task,
+  Output,
+  TaskStatus,
+  TaskType,
+  ExecutionStatus,
+  RelatedArea,
+  TaskLink,
+} from "@/lib/commandCenter";
+import { supabase } from "@/lib/supabase";
+import {
+  AGENT_BRIEF_MODE_OPTIONS,
+  buildAgentTaskBrief,
+  copyTextToClipboard,
+  defaultAgentBriefModeFromAssignee,
+  type AgentBriefMode,
+} from "@/lib/taskBriefs";
+
+type ChiefSuggestionLevel = "note" | "warning" | "opportunity";
+
+type ChiefSuggestionCategory = "structure" | "execution" | "handoff" | "context";
+
+type ChiefSuggestion = {
+  id: string;
+  level: ChiefSuggestionLevel;
+  message: string;
+  category?: ChiefSuggestionCategory;
+};
+
+function hasMeaningfulLatestOutput(task: Task, outputs: Output[]): boolean {
+  if ((task.latest_output ?? "").trim().length > 0) return true;
+  return outputs.some((o) => (o.response ?? "").trim().length > 0);
+}
+
+/** Single derived cue for the Actions rail; no extra state or API. */
+function deriveNextAction(task: Task): { sentence: string; toolHint: string } {
+  const hasLatestOutput = (task.latest_output ?? "").trim().length > 0;
+  const exec = task.execution_status;
+  const toolHint = (task.assigned_to ?? "").trim() || "AI tool";
+
+  if (!hasLatestOutput) {
+    return { sentence: "Generate initial output", toolHint };
+  }
+  if (exec === "in_progress" || exec === "review") {
+    return { sentence: "Refine or structure current output", toolHint };
+  }
+  if (exec === "blocked") {
+    return { sentence: "Resolve blocker", toolHint };
+  }
+  if (exec === "done") {
+    return { sentence: "Review and finalize", toolHint };
+  }
+  return { sentence: "Continue work", toolHint };
+}
+
+function NextActionBlock({ task }: { task: Task }) {
+  const { sentence, toolHint } = deriveNextAction(task);
+  return (
+    <div
+      className="rounded-lg border border-ink/10 bg-ink/[0.02] px-3 py-2.5 mb-4"
+      aria-label="Next action"
+    >
+      <p className="text-[9px] uppercase tracking-[0.2em] text-ink/30 mb-1.5">
+        Next action
+      </p>
+      <p className="text-[13px] text-ink/70 leading-snug">{sentence}</p>
+      <p className="text-[11px] text-ink/45 leading-snug mt-1">
+        Suggested tool: {toolHint}
+      </p>
+    </div>
+  );
+}
+
+function deriveChiefOfStaffSuggestions(
+  task: Task,
+  taskLinks: TaskLink[],
+  outputs: Output[]
+): ChiefSuggestion[] {
+  const out: ChiefSuggestion[] = [];
+
+  const title = (task.title ?? "").trim();
+  const assignee = (task.assigned_to ?? "").trim();
+  const exec = task.execution_status;
+  const hasLatestSurface = hasMeaningfulLatestOutput(task, outputs);
+  const lastNote = (task.last_action_note ?? "").trim();
+  const nextStep = (task.next_step ?? "").trim();
+  const impl = (task.implementation_notes ?? "").trim();
+
+  if (!task.task_type) {
+    out.push({
+      id: "hygiene-task-type",
+      level: "note",
+      category: "structure",
+      message:
+        "No task type set. Consider classifying this task for clearer routing.",
+    });
+  }
+
+  if (task.execution_status == null) {
+    out.push({
+      id: "hygiene-execution-status",
+      level: "warning",
+      category: "structure",
+      message: assignee
+        ? "No execution status while someone is assigned. Set posture so handoffs stay legible."
+        : "No execution status. Set posture so handoffs stay legible.",
+    });
+  }
+
+  if (!assignee) {
+    out.push({
+      id: "hygiene-assignee",
+      level: "note",
+      category: "structure",
+      message: "No assignee yet. Naming who owns this reduces drift.",
+    });
+  }
+
+  if (title.length > 0 && title.length <= 3) {
+    out.push({
+      id: "hygiene-short-title",
+      level: "note",
+      category: "structure",
+      message: "Title is very short. A few more words usually improves scanability.",
+    });
+  }
+
+  if (taskLinks.length === 0) {
+    out.push({
+      id: "hygiene-no-links",
+      level: "note",
+      category: "structure",
+      message: "No linked entities. Link places or tours when work should stay anchored in the map or public layer.",
+    });
+  }
+
+  if (
+    task.execution_status &&
+    task.execution_status !== "done" &&
+    !nextStep
+  ) {
+    out.push({
+      id: "handoff-missing-next-step",
+      level: "note",
+      category: "handoff",
+      message:
+        "No next step set yet. A concrete next step reduces ambiguity for the assignee.",
+    });
+  }
+
+  if (exec === "in_progress" && !hasLatestSurface) {
+    out.push({
+      id: "exec-in-progress-no-output",
+      level: "warning",
+      category: "execution",
+      message:
+        "Execution is in progress but no latest output is recorded. Capture a short result or paste into latest output.",
+    });
+  }
+
+  if (exec === "review" && !hasLatestSurface) {
+    out.push({
+      id: "exec-review-no-output",
+      level: "warning",
+      category: "execution",
+      message:
+        "In review, but latest output is empty. Reviewers usually need something concrete to react to.",
+    });
+  }
+
+  if (exec === "done" && !hasLatestSurface && !impl) {
+    out.push({
+      id: "exec-done-no-output",
+      level: "warning",
+      category: "execution",
+      message:
+        "Marked done but no output is recorded. Consider capturing what shipped or decided.",
+    });
+  }
+
+  if (
+    exec === "done" &&
+    (task.status === "backlog" || task.status === "ready")
+  ) {
+    out.push({
+      id: "queue-lags-execution-done",
+      level: "note",
+      category: "structure",
+      message:
+        "Execution posture is done but queue status is still backlog or ready. Consider advancing queue status to review or done.",
+    });
+  }
+
+  if (exec === "todo" && hasLatestSurface) {
+    out.push({
+      id: "exec-todo-has-output",
+      level: "opportunity",
+      category: "execution",
+      message:
+        "There is recorded output while execution is still “todo”. You may want to move posture forward.",
+    });
+  }
+
+  if (exec === "review" && !(task.review_note ?? "").trim()) {
+    out.push({
+      id: "exec-review-no-review-note",
+      level: "note",
+      category: "execution",
+      message:
+        "In review — consider a short review note for the record.",
+    });
+  }
+
+  if (hasLatestSurface && !lastNote) {
+    out.push({
+      id: "handoff-output-no-note",
+      level: "note",
+      category: "handoff",
+      message:
+        "Output exists but no last action note. A one-line note helps the next actor land quickly.",
+    });
+  }
+
+  if (exec === "blocked" && !lastNote) {
+    out.push({
+      id: "handoff-blocked-no-context",
+      level: "warning",
+      category: "handoff",
+      message:
+        "Blocked without a last action note. A short reason (and next step if helpful) speeds unblock.",
+    });
+  }
+
+  const contextualTypes: TaskType[] = ["content", "map", "data"];
+  const tt = task.task_type;
+  if (tt && contextualTypes.includes(tt)) {
+    const hasPlaceOrTour = taskLinks.some(
+      (l) => l.entity_type === "location" || l.entity_type === "tour"
+    );
+    if (!hasPlaceOrTour) {
+      out.push({
+        id: "context-type-without-place",
+        level: "note",
+        category: "context",
+        message:
+          "This looks like map or editorial work but no place or tour is linked yet. Link when scope is known.",
+      });
+    }
+  }
+
+  if (taskLinks.length >= 5) {
+    out.push({
+      id: "context-many-links",
+      level: "note",
+      category: "context",
+      message:
+        "Several entities are linked. If scope feels fuzzy, consider narrowing or splitting the task.",
+    });
+  }
+
+  const levelRank = (l: ChiefSuggestionLevel) =>
+    l === "warning" ? 0 : l === "opportunity" ? 1 : 2;
+  return [...out].sort((a, b) => levelRank(a.level) - levelRank(b.level));
+}
+
+const CHIEF_LEVEL_LABEL: Record<ChiefSuggestionLevel, string> = {
+  warning: "Warning",
+  opportunity: "Opportunity",
+  note: "Note",
+};
+
+const CHIEF_LEVEL_STYLE: Record<ChiefSuggestionLevel, string> = {
+  warning: "border-umber/25 bg-umber/[0.06] text-umber/90",
+  opportunity: "border-moss/20 bg-moss/[0.06] text-moss/90",
+  note: "border-ink/12 bg-ink/[0.02] text-ink/50",
+};
+
+function HandoffReviewBlock({ task, outputs }: { task: Task; outputs: Output[] }) {
+  const hasOutput = hasMeaningfulLatestOutput(task, outputs);
+  const hasLastNote = (task.last_action_note ?? "").trim().length > 0;
+  const nextStepRaw = (task.next_step ?? "").trim();
+  const execLabel = task.execution_status
+    ? task.execution_status.replace("_", " ")
+    : "—";
+  const assigneeLabel = (task.assigned_to ?? "").trim() || "—";
+  const queueLabel = task.status.replace("_", " ");
+
+  return (
+    <section
+      className="mb-0"
+      aria-label="Work snapshot"
+    >
+      <h2 className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-1">
+        Work snapshot
+      </h2>
+      <p className="text-[11px] text-ink/38 leading-snug mb-4">
+        Read-only. Queue status is where the task sits in the pipeline; execution posture is how
+        work is going now. Advisory messages are in Task guidance above.
+      </p>
+
+      <dl className="grid grid-cols-[6.5rem_1fr] gap-x-3 gap-y-2 text-xs text-ink/65 mb-0">
+        <dt className="text-ink/40">Queue status</dt>
+        <dd className="min-w-0 capitalize">{queueLabel}</dd>
+        <dt className="text-ink/40">Execution posture</dt>
+        <dd className="min-w-0 capitalize">{execLabel}</dd>
+        <dt className="text-ink/40">Assignee</dt>
+        <dd className="min-w-0">{assigneeLabel}</dd>
+        <dt className="text-ink/40">Output</dt>
+        <dd className="min-w-0">{hasOutput ? "Yes" : "No"}</dd>
+        <dt className="text-ink/40">Last action</dt>
+        <dd className="min-w-0">{hasLastNote ? "Yes" : "No"}</dd>
+        <dt className="text-ink/40">Next step</dt>
+        <dd
+          className={`min-w-0 leading-snug ${
+            nextStepRaw
+              ? "text-ink/80 border-l-2 border-ink/20 pl-2 -ml-px"
+              : ""
+          }`}
+        >
+          {nextStepRaw || "—"}
+        </dd>
+      </dl>
+    </section>
+  );
+}
+
+function RunHandoffBlock({
+  task,
+  onUpdated,
+}: {
+  task: Task;
+  onUpdated: (t: Task) => void;
+}) {
+  const taskIdRef = useRef<string | null>(null);
+  const skipAutoTargetRef = useRef(false);
+
+  const [target, setTarget] = useState(
+    () =>
+      (task.assigned_to ?? "").trim() ||
+      (task.last_run_target ?? "").trim()
+  );
+  const [note, setNote] = useState("");
+  const [recording, setRecording] = useState(false);
+  const [feedback, setFeedback] = useState<{
+    kind: "ok" | "err";
+    msg: string;
+  } | null>(null);
+
+  useEffect(() => {
+    const assigned = (task.assigned_to ?? "").trim();
+    const lastRun = (task.last_run_target ?? "").trim();
+
+    if (taskIdRef.current !== task.id) {
+      taskIdRef.current = task.id;
+      skipAutoTargetRef.current = false;
+      setTarget(assigned || lastRun);
+      return;
+    }
+
+    if (skipAutoTargetRef.current) return;
+    if (lastRun) return;
+    setTarget(assigned);
+  }, [task.id, task.assigned_to, task.last_run_target]);
+
+  async function handleRecordHandoff(e: React.FormEvent) {
+    e.preventDefault();
+    const trimmedTarget = target.trim();
+    if (!trimmedTarget) {
+      setFeedback({ kind: "err", msg: "Choose or enter a handoff target." });
+      window.setTimeout(() => setFeedback(null), 4000);
+      return;
+    }
+    setRecording(true);
+    setFeedback(null);
+    try {
+      const updated = await updateTask(task.id, {
+        last_run_target: trimmedTarget,
+        last_run_note: note.trim() || null,
+        last_run_at: new Date().toISOString(),
+      });
+      onUpdated(updated);
+      setNote("");
+      skipAutoTargetRef.current = false;
+      const nextDefault = (updated.assigned_to ?? "").trim() || trimmedTarget;
+      setTarget(nextDefault);
+      setFeedback({ kind: "ok", msg: "Recorded." });
+      window.setTimeout(() => setFeedback(null), 2000);
+    } catch (err: unknown) {
+      setFeedback({
+        kind: "err",
+        msg: err instanceof Error ? err.message : "Could not record handoff.",
+      });
+      window.setTimeout(() => setFeedback(null), 4000);
+    } finally {
+      setRecording(false);
+    }
+  }
+
+  const savedTarget = (task.last_run_target ?? "").trim();
+  const savedNote = (task.last_run_note ?? "").trim();
+  const savedAt = task.last_run_at ? new Date(task.last_run_at) : null;
+  const hasRecordedRun = Boolean(savedTarget && task.last_run_at);
+
+  return (
+    <section
+      className="pt-6 mt-6 border-t border-ink/10"
+      aria-label="Manual handoff log"
+    >
+      <h2 className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-1">
+        Manual handoff log
+      </h2>
+      <p className="text-[11px] text-ink/38 leading-snug mb-4">
+        Fallback when you already handed off outside the brief flow — records
+        target, time, and note only. Does not change execution status.
+      </p>
+
+      {!hasRecordedRun ? (
+        <p className="text-[13px] text-ink/45 leading-snug mb-4">
+          No run recorded yet.
+        </p>
+      ) : (
+        <dl className="grid grid-cols-[6.5rem_1fr] gap-x-3 gap-y-2 text-xs text-ink/65 mb-4">
+          <dt className="text-ink/40">Target</dt>
+          <dd className="min-w-0 font-medium text-ink/75">{savedTarget}</dd>
+          <dt className="text-ink/40">Recorded</dt>
+          <dd className="min-w-0">
+            {savedAt
+              ? savedAt.toLocaleString(undefined, {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                })
+              : "—"}
+          </dd>
+          <dt className="text-ink/40">Note</dt>
+          <dd className="min-w-0 leading-snug">
+            {savedNote ? (
+              <span className="whitespace-pre-wrap">{savedNote}</span>
+            ) : (
+              <span className="text-ink/35">—</span>
+            )}
+          </dd>
+        </dl>
+      )}
+
+      <form onSubmit={handleRecordHandoff} className="space-y-2 pt-1 border-t border-ink/8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div>
+            <label
+              htmlFor="ccc-run-handoff-target"
+              className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1"
+            >
+              Handoff target
+            </label>
+            <input
+              id="ccc-run-handoff-target"
+              list="ccc-run-handoff-target-presets"
+              value={target}
+              onChange={(e) => {
+                skipAutoTargetRef.current = true;
+                setTarget(e.target.value);
+              }}
+              placeholder="claude, cursor, human…"
+              disabled={recording}
+              className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink placeholder-ink/30 focus:outline-none disabled:opacity-60"
+            />
+            <p className="mt-1 text-[10px] text-ink/38 leading-snug">
+              Defaults to assignee when empty
+            </p>
+            <datalist id="ccc-run-handoff-target-presets">
+              {RUN_HANDOFF_TARGET_PRESETS.map((p) => (
+                <option key={p} value={p} />
+              ))}
+            </datalist>
+          </div>
+          <div>
+            <label
+              htmlFor="ccc-run-handoff-note"
+              className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1"
+            >
+              Note (optional)
+            </label>
+            <input
+              id="ccc-run-handoff-note"
+              type="text"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Short handoff context…"
+              disabled={recording}
+              className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink placeholder-ink/30 focus:outline-none disabled:opacity-60"
+            />
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="submit"
+            disabled={recording}
+            className="text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded border border-ink/25 text-ink/55 hover:text-ink hover:border-ink/40 transition-colors disabled:opacity-50"
+          >
+            {recording ? "Recording…" : "Record handoff"}
+          </button>
+          {feedback && (
+            <span
+              className={`text-[10px] ${
+                feedback.kind === "ok" ? "text-moss/85" : "text-red-600/85"
+              }`}
+            >
+              {feedback.msg}
+            </span>
+          )}
+        </div>
+      </form>
+    </section>
+  );
+}
+
+/** Most recent row from `outputs` (API / runs / manual saves), surfaced above history. */
+function LatestExecutionResultBlock({ latest }: { latest: Output | null }) {
+  return (
+    <section
+      className="pt-6 mt-6 border-t border-ink/10"
+      aria-label="Latest execution result"
+    >
+      <h2 className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-1">
+        Latest execution result
+      </h2>
+      <p className="text-[11px] text-ink/38 leading-snug mb-4">
+        Most recent row from outputs (runs, CLI, or POST /api/tasks/…/outputs). Sorted by time.
+      </p>
+      {!latest ? (
+        <p className="text-[13px] text-ink/45 leading-snug">
+          No execution rows yet — run the task or add an output below.
+        </p>
+      ) : (
+        <>
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <span
+              className={`text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded ${AGENT_STYLE[latest.agent] ?? "bg-ink/8 text-ink/55"}`}
+            >
+              {latest.agent}
+            </span>
+            <span className="text-[10px] text-ink/30">v{latest.version}</span>
+          </div>
+          <dl className="grid grid-cols-[6.5rem_1fr] gap-x-3 gap-y-2 text-xs text-ink/65 mb-3">
+            <dt className="text-ink/40">Recorded</dt>
+            <dd className="min-w-0">
+              {new Date(latest.created_at).toLocaleString(undefined, {
+                dateStyle: "medium",
+                timeStyle: "short",
+              })}
+            </dd>
+            <dt className="text-ink/40">Status</dt>
+            <dd className="min-w-0">
+              {(latest.response ?? "").trim() ? "Has output" : "No output text"}
+            </dd>
+            <dt className="text-ink/40">Output</dt>
+            <dd className="min-w-0">
+              {(latest.response ?? "").trim() ? (
+                <div className="text-[13px] text-ink/75 leading-relaxed whitespace-pre-wrap max-h-56 overflow-y-auto rounded-lg border border-ink/10 bg-ink/[0.02] px-3 py-2.5 font-mono">
+                  {latest.response}
+                </div>
+              ) : (
+                <span className="text-ink/35">—</span>
+              )}
+            </dd>
+          </dl>
+        </>
+      )}
+    </section>
+  );
+}
+
+type RunWithBriefTool = "chatgpt" | "claude" | "cursor";
+
+const RUN_WITH_TOOL_LABEL: Record<RunWithBriefTool, string> = {
+  chatgpt: "ChatGPT",
+  claude: "Claude",
+  cursor: "Cursor",
+};
+
+function AgentBriefBlock({
+  task,
+  taskLinks,
+  locationMeta,
+  tourMeta,
+  onUpdated,
+  onRun,
+}: {
+  task: Task;
+  taskLinks: TaskLink[];
+  locationMeta: Record<string, { name: string; slug?: string }>;
+  tourMeta: Record<string, { name: string; slug?: string }>;
+  onUpdated: (t: Task) => void;
+  onRun?: () => Promise<void>;
+}) {
+  const [briefMode, setBriefMode] = useState<AgentBriefMode>(() =>
+    defaultAgentBriefModeFromAssignee(task.assigned_to)
+  );
+
+  useEffect(() => {
+    setBriefMode(defaultAgentBriefModeFromAssignee(task.assigned_to));
+  }, [task.id, task.assigned_to]);
+
+  const brief = useMemo(
+    () =>
+      buildAgentTaskBrief(task, taskLinks, locationMeta, tourMeta, briefMode),
+    [task, taskLinks, locationMeta, tourMeta, briefMode]
+  );
+  const [copied, setCopied] = useState(false);
+  const [recordHandoffOnRun, setRecordHandoffOnRun] = useState(true);
+  const [alignAssigneeOnRun, setAlignAssigneeOnRun] = useState(true);
+  const [runWithHandoffNote, setRunWithHandoffNote] = useState("");
+  const [runWithBusyTool, setRunWithBusyTool] = useState<RunWithBriefTool | null>(
+    null
+  );
+  const [runWithFeedback, setRunWithFeedback] = useState<{
+    kind: "ok" | "err";
+    msg: string;
+  } | null>(null);
+  const [autoRunning, setAutoRunning] = useState(false);
+  const [autoRunFeedback, setAutoRunFeedback] = useState<{
+    kind: "ok" | "err";
+    msg: string;
+  } | null>(null);
+
+  async function handleAutoRun() {
+    setAutoRunning(true);
+    setAutoRunFeedback(null);
+    try {
+      const res = await fetch(`/api/tasks/${task.id}/run`, { method: "POST" });
+      const json = await res.json();
+      if (!res.ok) {
+        setAutoRunFeedback({ kind: "err", msg: json.error ?? "Run failed" });
+        return;
+      }
+      setAutoRunFeedback({ kind: "ok", msg: "Done — output saved, moved to review" });
+      onUpdated({ ...task, execution_status: "review", latest_output: json.response_preview ?? task.latest_output });
+      await onRun?.();
+      setTimeout(() => setAutoRunFeedback(null), 6000);
+    } catch {
+      setAutoRunFeedback({ kind: "err", msg: "Run failed — is the dev server running?" });
+    } finally {
+      setAutoRunning(false);
+    }
+  }
+
+  async function handleCopyBrief() {
+    const ok = await copyTextToClipboard(brief);
+    if (!ok) return;
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 2000);
+  }
+
+  async function handleRunWithTool(tool: RunWithBriefTool) {
+    setBriefMode(tool);
+    setRunWithFeedback(null);
+    setRunWithBusyTool(tool);
+    const toolLabel = RUN_WITH_TOOL_LABEL[tool];
+
+    const patch: Partial<Omit<Task, "id" | "created_at" | "updated_at">> = {};
+    if (recordHandoffOnRun) {
+      patch.last_run_target = tool;
+      patch.last_run_at = new Date().toISOString();
+      patch.last_run_note = runWithHandoffNote.trim() || null;
+    }
+    if (alignAssigneeOnRun) {
+      patch.assigned_to = tool;
+    }
+
+    const mergedForBrief = { ...task, ...patch } as Task;
+    const text = buildAgentTaskBrief(
+      mergedForBrief,
+      taskLinks,
+      locationMeta,
+      tourMeta,
+      tool
+    );
+
+    try {
+      const copiedOk = await copyTextToClipboard(text);
+      if (!copiedOk) {
+        setRunWithFeedback({
+          kind: "err",
+          msg: "Could not copy to clipboard.",
+        });
+        window.setTimeout(() => setRunWithFeedback(null), 4000);
+        return;
+      }
+
+      patch.source_prompt = text;
+      try {
+        const updated = await updateTask(task.id, patch);
+        onUpdated(updated);
+      } catch (e: unknown) {
+        const saveErr =
+          e instanceof Error ? e.message : "Could not save to Command Center.";
+        setRunWithFeedback({
+          kind: "err",
+          msg: `Copied ${toolLabel} brief — not saved: ${saveErr}`,
+        });
+        window.setTimeout(() => setRunWithFeedback(null), 4000);
+        return;
+      }
+
+      if (recordHandoffOnRun) {
+        setRunWithHandoffNote("");
+      }
+
+      let msg = `Copied ${toolLabel} brief — Last brief sent saved`;
+      if (recordHandoffOnRun && alignAssigneeOnRun) {
+        msg += "; handoff + assignee updated";
+      } else if (recordHandoffOnRun) {
+        msg += "; handoff recorded";
+      } else if (alignAssigneeOnRun) {
+        msg += "; assignee updated";
+      }
+      setRunWithFeedback({ kind: "ok", msg });
+      window.setTimeout(() => setRunWithFeedback(null), 2000);
+    } finally {
+      setRunWithBusyTool(null);
+    }
+  }
+
+  return (
+    <section
+      className="border border-ink/15 rounded-xl p-6 mb-0 bg-ink/[0.03]"
+      aria-label="Agent brief"
+    >
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="min-w-0">
+          <h2 className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-1">
+            Agent brief
+          </h2>
+          <p className="text-[11px] text-ink/38 leading-snug">
+            Derived from saved task fields and linked entities — for paste into
+            your AI tool.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={handleCopyBrief}
+          disabled={runWithBusyTool !== null}
+          className="shrink-0 text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded border border-ink/20 text-ink/50 hover:text-ink hover:border-ink/40 transition-colors disabled:opacity-50"
+        >
+          {copied ? "Copied" : "Copy brief"}
+        </button>
+      </div>
+
+      <div
+        className="flex flex-wrap gap-1 p-0.5 rounded-lg border border-ink/10 bg-ink/[0.02] mb-1.5"
+        role="tablist"
+        aria-label="Brief mode"
+      >
+        {AGENT_BRIEF_MODE_OPTIONS.map(({ mode, label }) => {
+          const active = briefMode === mode;
+          return (
+            <button
+              key={mode}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              disabled={runWithBusyTool !== null}
+              onClick={() => setBriefMode(mode)}
+              className={`text-[10px] uppercase tracking-[0.12em] px-2.5 py-1 rounded-md transition-colors disabled:opacity-50 ${
+                active
+                  ? "bg-white border border-ink/18 text-ink/75 shadow-sm"
+                  : "text-ink/45 hover:text-ink/65 border border-transparent"
+              }`}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
+      <p className="text-[10px] text-ink/32 leading-snug mb-3">
+        Same task, framed for different tools.
+      </p>
+
+      <div className="mb-3 pt-3 border-t border-ink/10">
+        <p className="text-[9px] uppercase tracking-[0.2em] text-ink/35 mb-2">
+          Run with…
+        </p>
+        <div className="flex flex-wrap gap-x-4 gap-y-2 mb-2">
+          <label className="inline-flex items-center gap-2 text-[9px] uppercase tracking-[0.14em] text-ink/50 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              className="rounded border-ink/25 text-ink/70 focus:ring-ink/20 shrink-0"
+              checked={recordHandoffOnRun}
+              onChange={(e) => setRecordHandoffOnRun(e.target.checked)}
+              disabled={runWithBusyTool !== null}
+            />
+            Record handoff on run
+          </label>
+          <label className="inline-flex items-center gap-2 text-[9px] uppercase tracking-[0.14em] text-ink/50 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              className="rounded border-ink/25 text-ink/70 focus:ring-ink/20 shrink-0"
+              checked={alignAssigneeOnRun}
+              onChange={(e) => setAlignAssigneeOnRun(e.target.checked)}
+              disabled={runWithBusyTool !== null}
+            />
+            Align assignee on run
+          </label>
+        </div>
+        <div className="mb-3">
+          <label
+            htmlFor="ccc-run-with-handoff-note"
+            className="text-[9px] uppercase tracking-[0.2em] text-ink/30 block mb-1"
+          >
+            Handoff note (optional)
+          </label>
+          <input
+            id="ccc-run-with-handoff-note"
+            type="text"
+            value={runWithHandoffNote}
+            onChange={(e) => setRunWithHandoffNote(e.target.value)}
+            placeholder={
+              recordHandoffOnRun
+                ? "Saved with handoff when “Record handoff on run” is on…"
+                : "Turn on “Record handoff on run” to save a note with the run"
+            }
+            disabled={runWithBusyTool !== null || !recordHandoffOnRun}
+            className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink placeholder-ink/30 focus:outline-none disabled:opacity-60"
+          />
+        </div>
+        <div className="flex flex-wrap items-center gap-1.5">
+          {(["chatgpt", "claude", "cursor"] as const).map((tool) => (
+            <button
+              key={tool}
+              type="button"
+              disabled={runWithBusyTool !== null}
+              onClick={() => handleRunWithTool(tool)}
+              className="text-[9px] uppercase tracking-[0.12em] px-2 py-1 rounded border border-ink/18 text-ink/55 hover:text-ink hover:border-ink/32 transition-colors disabled:opacity-50"
+            >
+              {runWithBusyTool === tool
+                ? "…"
+                : `Run with ${RUN_WITH_TOOL_LABEL[tool]}`}
+            </button>
+          ))}
+        </div>
+        {runWithFeedback ? (
+          <p
+            className={`text-[10px] mt-2 ${
+              runWithFeedback.kind === "ok"
+                ? "text-moss/85"
+                : "text-red-600/85"
+            }`}
+          >
+            {runWithFeedback.msg}
+          </p>
+        ) : null}
+        {task.assigned_to === "claude" &&
+          task.status !== "done" &&
+          task.execution_status !== "done" && (
+            <div className="mt-3 pt-3 border-t border-ink/8">
+              <button
+                type="button"
+                onClick={handleAutoRun}
+                disabled={autoRunning || runWithBusyTool !== null}
+                className="text-[9px] uppercase tracking-[0.12em] px-3 py-1.5 rounded bg-moss/10 text-moss hover:bg-moss/18 transition-colors disabled:opacity-50 disabled:cursor-wait"
+              >
+                {autoRunning ? "Running…" : "Run automatically"}
+              </button>
+              {autoRunFeedback && (
+                <p
+                  className={`text-[10px] mt-2 ${
+                    autoRunFeedback.kind === "ok" ? "text-moss/85" : "text-red-600/85"
+                  }`}
+                >
+                  {autoRunFeedback.msg}
+                </p>
+              )}
+            </div>
+          )}
+      </div>
+
+      <pre className="text-[11px] leading-relaxed text-ink/65 font-mono whitespace-pre-wrap break-words max-h-72 overflow-y-auto rounded-lg border border-ink/10 bg-ink/[0.02] px-3 py-2.5">
+        {brief}
+      </pre>
+    </section>
+  );
+}
+
+function ChiefOfStaffSuggestionsBlock({
+  suggestions,
+}: {
+  suggestions: ChiefSuggestion[];
+}) {
+  return (
+    <section className="mb-0" aria-label="Task guidance">
+      <h2 className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-1">
+        Task guidance
+      </h2>
+      <p className="text-[11px] text-ink/38 leading-snug mb-4">
+        Single read-only advisory from the current task shape — no automation,
+        no rules engine. Nothing here applies changes automatically.
+      </p>
+      {suggestions.length === 0 ? (
+        <p className="text-sm text-ink/45 leading-relaxed">
+          No immediate suggestions. This task looks structurally sound.
+        </p>
+      ) : (
+        <ul className="space-y-2">
+          {suggestions.map((s) => (
+            <li
+              key={s.id}
+              className={`rounded-lg border px-3 py-2.5 ${CHIEF_LEVEL_STYLE[s.level]}`}
+            >
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mb-1">
+                <span className="text-[9px] uppercase tracking-[0.14em] opacity-90">
+                  {CHIEF_LEVEL_LABEL[s.level]}
+                </span>
+                {s.category && (
+                  <span className="text-[9px] uppercase tracking-[0.12em] text-ink/35">
+                    · {s.category}
+                  </span>
+                )}
+              </div>
+              <p className="text-[13px] text-ink/70 leading-snug">{s.message}</p>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// ReviewBlock — runs claude --print to verify latest output
+// ---------------------------------------------------------------------------
+
+function extractNextStep(review: string): string | null {
+  const match = review.match(/\*\*Recommended next step[^*]*\*\*[:\s]*(.*)/i);
+  if (!match) return null;
+  const step = match[1].trim();
+  return step.length > 3 ? step : null;
+}
+
+function buildFollowUpPrompt(task: Task, nextStep: string): string {
+  const mode = defaultAgentBriefModeFromAssignee(task.assigned_to);
+  const framing = mode !== "general"
+    ? `## Brief framing (${mode.charAt(0).toUpperCase() + mode.slice(1)})\n\n`
+    : "";
+  return [
+    framing + `## Follow-up task`,
+    `Title: ${(task.title ?? "").trim() || "—"}`,
+    task.description?.trim() ? `Description: ${task.description.trim()}` : "",
+    "",
+    "## Recommended next step (from Claude review)",
+    nextStep,
+    "",
+    ...(task.implementation_notes?.trim()
+      ? ["## Implementation notes", task.implementation_notes.trim(), ""]
+      : []),
+    "## Instruction",
+    "Carry out the recommended next step above. Keep changes minimal and scoped to what is described.",
+  ].filter((l) => l !== undefined).join("\n");
+}
+
+function ReviewBlock({ task, hasOutput }: { task: Task; hasOutput: boolean }) {
+  const [reviewing, setReviewing] = useState(false);
+  const [result, setResult] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  async function handleReview() {
+    setReviewing(true);
+    setResult(null);
+    setError(null);
+    try {
+      const res = await fetch(`/api/tasks/${task.id}/review`, { method: "POST" });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "Review failed");
+      setResult(json.review);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Review failed");
+    } finally {
+      setReviewing(false);
+    }
+  }
+
+  async function handleCopyFollowUp(nextStep: string) {
+    const prompt = buildFollowUpPrompt(task, nextStep);
+    await copyTextToClipboard(prompt);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  const nextStep = result ? extractNextStep(result) : null;
+
+  return (
+    <section>
+      <h2 className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-3">
+        Review output
+      </h2>
+      <button
+        onClick={handleReview}
+        disabled={reviewing || !hasOutput}
+        title={!hasOutput ? "No output to review — add an output first" : "Ask Claude to verify the output and suggest changes"}
+        className={`text-[11px] uppercase tracking-[0.15em] px-4 py-2 rounded border transition-colors disabled:opacity-40 ${
+          reviewing
+            ? "border-moss/30 text-moss/70 cursor-wait"
+            : "border-ink/20 text-ink/50 hover:border-moss/40 hover:text-moss"
+        }`}
+      >
+        {reviewing ? "Reviewing…" : "Review with Claude"}
+      </button>
+      {error && (
+        <p className="mt-3 text-xs text-red-600">{error}</p>
+      )}
+      {result && (
+        <div className="mt-4 rounded-lg border border-ink/12 bg-ink/[0.02] px-4 py-3">
+          <p className="text-[9px] uppercase tracking-[0.18em] text-ink/30 mb-2">Claude review</p>
+          <div className="text-[13px] text-ink/70 leading-relaxed whitespace-pre-wrap">{result}</div>
+          {nextStep && (
+            <div className="mt-4 pt-3 border-t border-ink/10 flex items-center gap-3">
+              <button
+                onClick={() => handleCopyFollowUp(nextStep)}
+                className="text-[10px] uppercase tracking-[0.15em] px-3 py-1.5 rounded border border-moss/25 text-moss/70 hover:text-moss hover:border-moss/45 transition-colors"
+              >
+                {copied ? "Copied ✓" : "Copy follow-up prompt"}
+              </button>
+              <span className="text-[11px] text-ink/35 italic truncate">{nextStep}</span>
+            </div>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
+
+type NextPageWithLayout = NextPage & {
+  getLayout?: (page: ReactElement) => ReactNode;
+};
+
+const STATUSES: TaskStatus[] = ["backlog", "ready", "in_progress", "review", "done"];
+/** Quick-pick labels for `outputs.agent` (free-text in DB; presets only). */
+const OUTPUT_AGENT_PRESETS: readonly string[] = ["chatgpt", "claude", "cursor", "manual"];
+const AREAS: RelatedArea[] = ["product", "content", "map", "database", "design", "engineering", "seo", "ops"];
+const TASK_TYPES: TaskType[] = [
+  "content",
+  "code",
+  "map",
+  "data",
+  "ops",
+  "design",
+  "research",
+  "other",
+];
+const EXECUTION_STATUSES: ExecutionStatus[] = ["todo", "in_progress", "review", "blocked", "done"];
+/** Quick actions only cycle through active handoff postures (not `todo`). */
+const EXECUTION_QUICK_ACTIONS: ExecutionStatus[] = ["in_progress", "review", "blocked", "done"];
+const ASSIGNEE_PRESETS = [
+  "human",
+  "chatgpt",
+  "claude",
+  "cursor",
+  "codex",
+  "openclaw",
+  "paperclip",
+  "unassigned",
+] as const;
+
+/** Presets for recording where a brief was handed (datalist); free text allowed. */
+const RUN_HANDOFF_TARGET_PRESETS = [
+  "human",
+  "claude",
+  "cursor",
+  "chatgpt",
+  "codex",
+  "openclaw",
+  "paperclip",
+] as const;
+
+const STATUS_STYLE: Record<TaskStatus, string> = {
+  backlog: "bg-ink/8 text-ink/50",
+  ready: "bg-umber/10 text-umber",
+  in_progress: "bg-moss/15 text-moss",
+  review: "bg-ink/15 text-ink/70",
+  done: "bg-ink text-cream",
+};
+
+const AGENT_STYLE: Record<string, string> = {
+  chatgpt: "bg-umber/10 text-umber",
+  claude: "bg-moss/15 text-moss",
+  cursor: "bg-ink/10 text-ink/60",
+  manual: "border border-ink/20 text-ink/50",
+};
+
+const AGENT_LANES = [
+  { id: "strategist", label: "Strategist", tool: "chatgpt" },
+  { id: "architect", label: "Architect", tool: "claude" },
+  { id: "implementer", label: "Implementer", tool: "cursor" },
+] as const;
+
+function AgentLanesBlock({
+  task,
+  onUpdated,
+}: {
+  task: Task;
+  onUpdated: (t: Task) => void;
+}) {
+  const [busyLaneId, setBusyLaneId] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{
+    kind: "ok" | "err";
+    msg: string;
+  } | null>(null);
+
+  const assigneeNorm = (task.assigned_to ?? "").trim().toLowerCase();
+
+  async function assignLane(lane: (typeof AGENT_LANES)[number]) {
+    setBusyLaneId(lane.id);
+    setFeedback(null);
+    try {
+      const updated = await updateTask(task.id, {
+        assigned_to: lane.tool,
+      });
+      onUpdated(updated);
+      setFeedback({ kind: "ok", msg: "Assignee updated" });
+      window.setTimeout(() => setFeedback(null), 2000);
+    } catch (e: unknown) {
+      setFeedback({
+        kind: "err",
+        msg: e instanceof Error ? e.message : "Could not assign",
+      });
+      window.setTimeout(() => setFeedback(null), 4000);
+    } finally {
+      setBusyLaneId(null);
+    }
+  }
+
+  return (
+    <div
+      className="rounded-lg border border-ink/10 bg-ink/[0.02] px-3 py-3 mb-4"
+      aria-label="Agent lanes"
+    >
+      <p className="text-[9px] uppercase tracking-[0.2em] text-ink/30 mb-1">
+        Agent lanes
+      </p>
+      <p className="text-[11px] text-ink/38 leading-snug mb-3">
+        Assignment only — set who owns the task. Use Run with… in the brief to
+        copy a tool-specific brief and optionally log the handoff.
+      </p>
+
+      <ul className="space-y-2">
+        {AGENT_LANES.map((lane) => {
+          const active = assigneeNorm === lane.tool;
+          const laneBusy = busyLaneId === lane.id;
+          const disabled = busyLaneId !== null;
+          return (
+            <li
+              key={lane.id}
+              className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between rounded-md border border-ink/8 bg-white/60 px-2.5 py-2"
+            >
+              <div className="min-w-0 flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span className="text-[12px] font-medium text-ink/75">{lane.label}</span>
+                <span
+                  className={`text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded ${AGENT_STYLE[lane.tool] ?? "bg-ink/8 text-ink/55"}`}
+                >
+                  {lane.tool}
+                </span>
+                {active ? (
+                  <span className="text-[9px] uppercase tracking-[0.1em] text-moss/80">
+                    · Active assignee
+                  </span>
+                ) : null}
+              </div>
+              <div className="flex flex-wrap gap-1.5 shrink-0">
+                <button
+                  type="button"
+                  disabled={disabled}
+                  onClick={() => assignLane(lane)}
+                  className="text-[9px] uppercase tracking-[0.12em] px-2 py-1 rounded border border-ink/18 text-ink/55 hover:text-ink hover:border-ink/32 transition-colors disabled:opacity-50"
+                >
+                  {laneBusy ? "…" : "Assign"}
+                </button>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+
+      {feedback ? (
+        <p
+          className={`text-[10px] mt-2 ${
+            feedback.kind === "ok" ? "text-moss/85" : "text-red-600/85"
+          }`}
+        >
+          {feedback.msg}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+const EXECUTION_STATUS_STYLE: Record<ExecutionStatus, string> = {
+  todo: "bg-ink/6 text-ink/50",
+  in_progress: "bg-moss/12 text-moss",
+  review: "bg-ink/12 text-ink/60",
+  blocked: "bg-umber/8 text-umber/90",
+  done: "bg-ink/15 text-ink/65",
+};
+
+const emptyOutputForm = {
+  agent: "claude",
+  prompt: "",
+  response: "",
+  version: 1,
+};
+
+function CopyableId({ id }: { id: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    if (typeof navigator?.clipboard?.writeText === "function") {
+      navigator.clipboard.writeText(id);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }
+  };
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <code className="text-xs font-mono text-ink/55 cursor-text px-1 py-0.5 rounded bg-ink/5 [user-select:all]">
+        {id}
+      </code>
+      <button
+        type="button"
+        onClick={handleCopy}
+        className="text-[9px] text-ink/35 hover:text-ink/60 transition-colors"
+      >
+        {copied ? "Copied" : "Copy"}
+      </button>
+    </span>
+  );
+}
+
+function sortKeyForLinkedLink(
+  link: TaskLink,
+  meta: Record<string, { name: string; slug?: string }> | undefined
+): string {
+  const m = meta?.[link.entity_id];
+  const name = (m?.name ?? "").trim();
+  const slug = (m?.slug ?? "").trim();
+  if (name) return name.toLowerCase();
+  if (slug) return slug.toLowerCase();
+  return link.entity_id.toLowerCase();
+}
+
+function sortTaskLinksByDisplayKey(
+  links: TaskLink[],
+  meta: Record<string, { name: string; slug?: string }>
+): TaskLink[] {
+  return [...links].sort((a, b) =>
+    sortKeyForLinkedLink(a, meta).localeCompare(sortKeyForLinkedLink(b, meta), undefined, {
+      sensitivity: "base",
+    })
+  );
+}
+
+function lineLooksLikeHttpUrl(line: string): boolean {
+  return /^https?:\/\//i.test(line.trim());
+}
+
+function ArtifactLinksReadonly({ text }: { text: string }) {
+  const lines = text.split("\n");
+  return (
+    <div className="space-y-1 font-mono text-[12px] leading-relaxed text-ink/70 max-h-40 overflow-y-auto">
+      {lines.map((line, i) => {
+        const trimmed = line.trim();
+        if (!trimmed) {
+          return <span key={i} className="block min-h-[0.5em]" />;
+        }
+        if (lineLooksLikeHttpUrl(line)) {
+          const href = trimmed;
+          return (
+            <div key={i}>
+              <a
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-ink/70 hover:text-ink hover:underline break-all"
+              >
+                {href}
+              </a>
+            </div>
+          );
+        }
+        return (
+          <div key={i} className="whitespace-pre-wrap break-all">
+            {line}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function sortOtherTaskLinks(links: TaskLink[]): TaskLink[] {
+  return [...links].sort(
+    (a, b) =>
+      a.entity_type.localeCompare(b.entity_type, undefined, { sensitivity: "base" }) ||
+      a.entity_id.localeCompare(b.entity_id, undefined, { sensitivity: "base" })
+  );
+}
+
+function linkMatchesLinkedFilter(
+  link: TaskLink,
+  meta: Record<string, { name: string; slug?: string }> | undefined,
+  q: string
+): boolean {
+  const needle = q.trim().toLowerCase();
+  if (!needle) return true;
+  const m = meta?.[link.entity_id];
+  const hay = [
+    link.entity_type,
+    link.entity_id,
+    m?.name,
+    m?.slug,
+  ]
+    .filter((v): v is string => typeof v === "string" && v.length > 0)
+    .map((s) => s.toLowerCase());
+  return hay.some((h) => h.includes(needle));
+}
+
+const TaskDetailPage: NextPageWithLayout = () => {
+  const router = useRouter();
+  const { id } = router.query;
+
+  const [task, setTask] = useState<Task | null>(null);
+  const [outputs, setOutputs] = useState<Output[]>([]);
+  const [taskLinks, setTaskLinks] = useState<TaskLink[]>([]);
+  const [locationMeta, setLocationMeta] = useState<Record<string, { name: string; slug?: string }>>({});
+  const [tourMeta, setTourMeta] = useState<Record<string, { name: string; slug?: string }>>({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const [attachSlug, setAttachSlug] = useState("");
+  const [attachError, setAttachError] = useState<string | null>(null);
+  const [attachSuccess, setAttachSuccess] = useState(false);
+  const [attaching, setAttaching] = useState(false);
+  const [attachTourSlug, setAttachTourSlug] = useState("");
+  const [attachTourError, setAttachTourError] = useState<string | null>(null);
+  const [attachTourSuccess, setAttachTourSuccess] = useState(false);
+  const [attachingTour, setAttachingTour] = useState(false);
+  const [unlinkingId, setUnlinkingId] = useState<string | null>(null);
+  const [linkedEntitiesFilter, setLinkedEntitiesFilter] = useState("");
+
+  const [editing, setEditing] = useState(false);
+  const [editForm, setEditForm] = useState<Partial<Task>>({});
+  const [saving, setSaving] = useState(false);
+  const [executionPatching, setExecutionPatching] = useState(false);
+  const [executionFeedback, setExecutionFeedback] = useState<{
+    kind: "ok" | "err";
+    msg: string;
+  } | null>(null);
+
+  const [showOutputForm, setShowOutputForm] = useState(false);
+  const [outputForm, setOutputForm] = useState(emptyOutputForm);
+  const [savingOutput, setSavingOutput] = useState(false);
+  const [outputError, setOutputError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!id || typeof id !== "string") return;
+    load(id);
+  }, [id]);
+
+  useEffect(() => {
+    async function fetchLocationMeta() {
+      const locationIds = taskLinks
+        .filter((l) => l.entity_type === "location")
+        .map((l) => l.entity_id);
+      if (locationIds.length === 0) {
+        setLocationMeta({});
+        return;
+      }
+      if (!supabase) {
+        setLocationMeta({});
+        return;
+      }
+      try {
+        const { data, error } = await supabase
+          .from("locations")
+          .select("id, name, slug")
+          .in("id", locationIds);
+        if (error) {
+          setLocationMeta({});
+          return;
+        }
+        const map: Record<string, { name: string; slug?: string }> = {};
+        for (const row of data ?? []) {
+          map[row.id] = { name: row.name ?? "", slug: row.slug ?? undefined };
+        }
+        setLocationMeta(map);
+      } catch {
+        setLocationMeta({});
+      }
+    }
+    fetchLocationMeta();
+  }, [taskLinks]);
+
+  useEffect(() => {
+    async function fetchTourMeta() {
+      const tourIds = taskLinks
+        .filter((l) => l.entity_type === "tour")
+        .map((l) => l.entity_id);
+      if (tourIds.length === 0) {
+        setTourMeta({});
+        return;
+      }
+      if (!supabase) {
+        setTourMeta({});
+        return;
+      }
+      try {
+        const { data, error } = await supabase
+          .from("tours")
+          .select("id, name, slug")
+          .in("id", tourIds);
+        if (error) {
+          setTourMeta({});
+          return;
+        }
+        const map: Record<string, { name: string; slug?: string }> = {};
+        for (const row of data ?? []) {
+          map[row.id] = { name: row.name ?? "", slug: row.slug ?? undefined };
+        }
+        setTourMeta(map);
+      } catch {
+        setTourMeta({});
+      }
+    }
+    fetchTourMeta();
+  }, [taskLinks]);
+
+  async function load(taskId: string) {
+    setLoading(true);
+    setError(null);
+    try {
+      const [t, o, links] = await Promise.all([
+        getTask(taskId),
+        getOutputsForTask(taskId),
+        getTaskLinks(taskId),
+      ]);
+      if (!t) {
+        setError("Task not found.");
+        return;
+      }
+      setTask(t);
+      setEditForm(t);
+      setOutputs(o);
+      setTaskLinks(links);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Failed to load task");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function refreshTaskLinks(taskId: string) {
+    const links = await getTaskLinks(taskId);
+    setTaskLinks(links);
+  }
+
+  async function handleAttachToPlace(e: React.FormEvent) {
+    e.preventDefault();
+    if (!task) return;
+
+    setAttachError(null);
+    const slug = attachSlug.trim();
+    if (!slug) {
+      setAttachError("Enter a location slug.");
+      return;
+    }
+
+    const normalizedSlug = slug.toLowerCase();
+    const locationLinksNow = taskLinks.filter((l) => l.entity_type === "location");
+    const slugAlreadyLinked = locationLinksNow.some((l) => {
+      const s = locationMeta[l.entity_id]?.slug;
+      return s != null && s.trim().toLowerCase() === normalizedSlug;
+    });
+    if (slugAlreadyLinked) {
+      setAttachError("This location is already linked to the task.");
+      return;
+    }
+
+    setAttaching(true);
+    try {
+      if (!supabase) throw new Error("Supabase not configured");
+
+      const { data, error } = await supabase
+        .from("locations")
+        .select("id")
+        .eq("slug", slug)
+        .maybeSingle();
+
+      if (error) throw new Error(error.message);
+
+      const resolvedLocationId = data?.id;
+      if (!resolvedLocationId) {
+        setAttachError(`No location found for slug "${slug}".`);
+        return;
+      }
+
+      // Helpers currently throw, but keep this page resilient if they return { error }.
+      const createResult: any = await createTaskLink({
+        task_id: task.id,
+        entity_type: "location",
+        entity_id: resolvedLocationId,
+      });
+      if (createResult?.error) {
+        throw new Error(
+          createResult.error.message ?? "Failed to attach location"
+        );
+      }
+
+      await refreshTaskLinks(task.id);
+      setAttachSlug("");
+      setAttachError(null);
+      setAttachSuccess(true);
+      setTimeout(() => setAttachSuccess(false), 2500);
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Failed to attach";
+      if (
+        message.toLowerCase().includes("duplicate") ||
+        message.toLowerCase().includes("unique")
+      ) {
+        setAttachError("This location is already linked to the task.");
+      } else {
+        setAttachError(message);
+      }
+    } finally {
+      setAttaching(false);
+    }
+  }
+
+  async function handleAttachTour(e: React.FormEvent) {
+    e.preventDefault();
+    if (!task) return;
+
+    setAttachTourError(null);
+    const slug = attachTourSlug.trim();
+    if (!slug) {
+      setAttachTourError("Enter a tour slug.");
+      return;
+    }
+
+    const normalizedTourSlug = slug.toLowerCase();
+    const tourLinksNow = taskLinks.filter((l) => l.entity_type === "tour");
+    const tourSlugAlreadyLinked = tourLinksNow.some((l) => {
+      const s = tourMeta[l.entity_id]?.slug;
+      return s != null && s.trim().toLowerCase() === normalizedTourSlug;
+    });
+    if (tourSlugAlreadyLinked) {
+      setAttachTourError("This tour is already linked to the task.");
+      return;
+    }
+
+    setAttachingTour(true);
+    try {
+      if (!supabase) throw new Error("Supabase not configured");
+
+      const { data, error } = await supabase
+        .from("tours")
+        .select("id")
+        .eq("slug", slug)
+        .maybeSingle();
+
+      if (error) throw new Error(error.message);
+
+      const resolvedTourId = data?.id;
+      if (!resolvedTourId) {
+        setAttachTourError(`No tour found for slug "${slug}".`);
+        return;
+      }
+
+      const createResult: any = await createTaskLink({
+        task_id: task.id,
+        entity_type: "tour",
+        entity_id: resolvedTourId,
+      });
+      if (createResult?.error) {
+        throw new Error(
+          createResult.error.message ?? "Failed to attach tour"
+        );
+      }
+
+      await refreshTaskLinks(task.id);
+      setAttachTourSlug("");
+      setAttachTourError(null);
+      setAttachTourSuccess(true);
+      setTimeout(() => setAttachTourSuccess(false), 2500);
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Failed to attach";
+      if (
+        message.toLowerCase().includes("duplicate") ||
+        message.toLowerCase().includes("unique")
+      ) {
+        setAttachTourError("This tour is already linked to the task.");
+      } else {
+        setAttachTourError(message);
+      }
+    } finally {
+      setAttachingTour(false);
+    }
+  }
+
+  async function handleUnlink(linkId: string) {
+    if (!task) return;
+    setUnlinkingId(linkId);
+    const link = taskLinks.find((l) => l.id === linkId);
+    const isTour = link?.entity_type === "tour";
+    const setErr = isTour ? setAttachTourError : setAttachError;
+    try {
+      const deleteResult: any = await deleteTaskLink(linkId);
+      if (deleteResult?.error) {
+        setErr(
+          deleteResult.error.message ?? (isTour ? "Failed to unlink tour" : "Failed to unlink location")
+        );
+        return;
+      }
+
+      await refreshTaskLinks(task.id);
+    } catch (e: unknown) {
+      const message =
+        e instanceof Error ? e.message : (isTour ? "Failed to unlink tour" : "Failed to unlink location");
+      setErr(message);
+    } finally {
+      setUnlinkingId(null);
+    }
+  }
+
+  async function handleSave() {
+    if (!task) return;
+    setSaving(true);
+    try {
+      const updated = await updateTask(task.id, {
+        title: editForm.title,
+        description: editForm.description ?? null,
+        status: editForm.status,
+        priority: editForm.priority,
+        related_area: editForm.related_area ?? null,
+        task_type: editForm.task_type ?? null,
+        execution_status: editForm.execution_status ?? null,
+        assigned_to: editForm.assigned_to?.trim() || null,
+        latest_output: editForm.latest_output?.trim() || null,
+        last_action_note: editForm.last_action_note?.trim() || null,
+        next_step: editForm.next_step?.trim() || null,
+        source_prompt: editForm.source_prompt?.trim() || null,
+        artifact_links: editForm.artifact_links?.trim() || null,
+        implementation_notes: editForm.implementation_notes?.trim() || null,
+        review_note: editForm.review_note?.trim() || null,
+      });
+      setTask(updated);
+      setEditing(false);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Failed to save");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleExecutionStatusQuick(next: ExecutionStatus) {
+    if (!task) return;
+    setExecutionPatching(true);
+    setExecutionFeedback(null);
+    try {
+      const updated = await updateTask(task.id, { execution_status: next });
+      setTask(updated);
+      setEditForm((f) => ({ ...f, ...updated }));
+      setExecutionFeedback({ kind: "ok", msg: "Updated" });
+      window.setTimeout(() => setExecutionFeedback(null), 2000);
+    } catch (e: unknown) {
+      setExecutionFeedback({
+        kind: "err",
+        msg: e instanceof Error ? e.message : "Could not update",
+      });
+      window.setTimeout(() => setExecutionFeedback(null), 4000);
+    } finally {
+      setExecutionPatching(false);
+    }
+  }
+
+  async function handleAddOutput(e: React.FormEvent) {
+    e.preventDefault();
+    if (!task) return;
+    setSavingOutput(true);
+    setOutputError(null);
+    try {
+      await createOutput({
+        task_id: task.id,
+        agent: outputForm.agent,
+        prompt: outputForm.prompt.trim() || null,
+        response: outputForm.response.trim() || null,
+        version: outputForm.version,
+      });
+      setOutputForm(emptyOutputForm);
+      setShowOutputForm(false);
+      const updated = await getOutputsForTask(task.id);
+      setOutputs(updated);
+    } catch (e: unknown) {
+      setOutputError(e instanceof Error ? e.message : "Failed to add output");
+    } finally {
+      setSavingOutput(false);
+    }
+  }
+
+  async function handleDeleteOutput(outputId: string) {
+    if (!confirm("Delete this output?")) return;
+    try {
+      await deleteOutput(outputId);
+      setOutputs((prev) => prev.filter((o) => o.id !== outputId));
+    } catch {
+      // reload on failure
+      if (task) {
+        const updated = await getOutputsForTask(task.id);
+        setOutputs(updated);
+      }
+    }
+  }
+
+  if (loading) {
+    return <div className="p-8 text-sm text-ink/40">Loading...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="p-8">
+        <p className="text-sm text-red-600 p-3 bg-red-50 rounded border border-red-200 mb-4">
+          {error}
+        </p>
+        <Link href="/command-center/tasks" className="text-sm text-ink/50 no-underline hover:text-ink">
+          ← Back to tasks
+        </Link>
+      </div>
+    );
+  }
+
+  if (!task) return null;
+
+  const hasOutput = hasMeaningfulLatestOutput(task, outputs);
+
+  const locationLinks = taskLinks.filter((l) => l.entity_type === "location");
+  const tourLinks = taskLinks.filter((l) => l.entity_type === "tour");
+  const otherLinks = taskLinks.filter(
+    (l) => l.entity_type !== "location" && l.entity_type !== "tour"
+  );
+
+  const locationLinksSorted = sortTaskLinksByDisplayKey(locationLinks, locationMeta);
+  const tourLinksSorted = sortTaskLinksByDisplayKey(tourLinks, tourMeta);
+  const otherLinksSorted = sortOtherTaskLinks(otherLinks);
+
+  const linkedFilterQuery = linkedEntitiesFilter;
+  const locationLinksFiltered = locationLinksSorted.filter((l) =>
+    linkMatchesLinkedFilter(l, locationMeta, linkedFilterQuery)
+  );
+  const tourLinksFiltered = tourLinksSorted.filter((l) =>
+    linkMatchesLinkedFilter(l, tourMeta, linkedFilterQuery)
+  );
+  const otherLinksFiltered = otherLinksSorted.filter((l) =>
+    linkMatchesLinkedFilter(l, undefined, linkedFilterQuery)
+  );
+  const linkedFilterActive = linkedFilterQuery.trim().length > 0;
+  const linkedFilterEmpty =
+    linkedFilterActive &&
+    locationLinksFiltered.length === 0 &&
+    tourLinksFiltered.length === 0 &&
+    otherLinksFiltered.length === 0;
+
+  function renderLinkedRow(
+    link: TaskLink,
+    meta: Record<string, { name: string; slug?: string }>,
+    basePath: string
+  ) {
+    const m = meta[link.entity_id];
+    return (
+      <li key={link.id} className="flex items-start gap-3 justify-between">
+        <div className="min-w-0 flex-1">
+          {m?.slug ? (
+            <>
+              <Link
+                href={`${basePath}/${m.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-ink/65 hover:text-ink hover:underline"
+              >
+                {m.name || link.entity_id}
+              </Link>
+              <p className="text-[10px] text-ink/35 font-mono mt-0.5 tracking-tight">
+                {m.slug}
+              </p>
+            </>
+          ) : (
+            <>
+              {m?.name ? (
+                <span className="text-ink/65">{m.name}</span>
+              ) : (
+                <CopyableId id={link.entity_id} />
+              )}
+            </>
+          )}
+          {m && (
+            <div className="mt-1">
+              <CopyableId id={link.entity_id} />
+            </div>
+          )}
+        </div>
+        <button
+          onClick={() => handleUnlink(link.id)}
+          className="text-[10px] text-ink/40 hover:text-ink transition-colors shrink-0 pt-0.5"
+          disabled={unlinkingId === link.id}
+          type="button"
+        >
+          {unlinkingId === link.id ? "Unlinking..." : "Unlink"}
+        </button>
+      </li>
+    );
+  }
+
+  return (
+    <div className="p-8 max-w-3xl">
+      {/* Back */}
+      <Link
+        href="/command-center/tasks"
+        className="text-[10px] uppercase tracking-[0.2em] text-ink/35 no-underline hover:text-ink transition-colors mb-4 inline-block"
+      >
+        ← Tasks
+      </Link>
+
+      {/* Linked entity summary */}
+      {taskLinks.length > 0 && (
+        <p className="text-[10px] text-ink/40 mb-4">
+          Linked: {locationLinks.length} location{locationLinks.length !== 1 ? "s" : ""},{" "}
+          {tourLinks.length} tour{tourLinks.length !== 1 ? "s" : ""},{" "}
+          {otherLinks.length} other
+        </p>
+      )}
+
+      {/* Identity */}
+      <div className="border border-ink/12 rounded-xl p-6 mb-6">
+        <div className="flex items-start justify-between mb-4">
+          {editing ? (
+            <input
+              value={editForm.title ?? ""}
+              onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+              className="font-serif text-xl tracking-tight text-ink bg-transparent border-b border-ink/30 focus:outline-none focus:border-ink w-full mr-4"
+            />
+          ) : (
+            <h1 className="font-serif text-xl tracking-tight leading-snug pr-4">
+              {task.title}
+            </h1>
+          )}
+          <div className="flex gap-2 shrink-0">
+            {editing ? (
+              <>
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded bg-ink text-cream hover:bg-ink/90 transition-colors disabled:opacity-50"
+                >
+                  {saving ? "Saving..." : "Save"}
+                </button>
+                <button
+                  onClick={() => { setEditing(false); setEditForm(task); }}
+                  className="text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded border border-ink/20 text-ink/50 hover:text-ink hover:border-ink/40 transition-colors"
+                >
+                  Cancel
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => setEditing(true)}
+                className="text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded border border-ink/20 text-ink/50 hover:text-ink hover:border-ink/40 transition-colors"
+              >
+                Edit
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Description */}
+        {editing ? (
+          <textarea
+            value={editForm.description ?? ""}
+            onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+            rows={3}
+            placeholder="Description..."
+            className="w-full rounded border border-ink/20 bg-white px-3 py-2 text-sm text-ink placeholder-ink/30 focus:outline-none resize-none mb-4"
+          />
+        ) : (
+          task.description && (
+            <p className="text-sm text-ink/65 leading-relaxed mb-4">{task.description}</p>
+          )
+        )}
+
+        {/* Queue — pipeline / admin */}
+        {editing ? (
+          <div className="mb-0">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-2">
+              Queue — pipeline / admin
+            </p>
+            <p className="text-[11px] text-ink/38 leading-snug mb-3">
+              Primary control for where the task sits in the work queue. Assignee is under Work
+              posture below.
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">Queue status</label>
+                <select
+                  value={editForm.status}
+                  onChange={(e) => setEditForm({ ...editForm, status: e.target.value as TaskStatus })}
+                  className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
+                >
+                  {STATUSES.map((s) => <option key={s} value={s}>{s.replace("_", " ")}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">Priority</label>
+                <select
+                  value={editForm.priority}
+                  onChange={(e) => setEditForm({ ...editForm, priority: Number(e.target.value) })}
+                  className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
+                >
+                  {[1, 2, 3, 4, 5].map((p) => <option key={p} value={p}>{p}</option>)}
+                </select>
+              </div>
+              <div className="col-span-2">
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">Area</label>
+                <select
+                  value={editForm.related_area ?? ""}
+                  onChange={(e) => setEditForm({ ...editForm, related_area: (e.target.value as RelatedArea) || null })}
+                  className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
+                >
+                  <option value="">—</option>
+                  {AREAS.map((a) => <option key={a} value={a}>{a}</option>)}
+                </select>
+              </div>
+              <div className="col-span-2">
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">Task type</label>
+                <select
+                  value={editForm.task_type ?? ""}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, task_type: (e.target.value as TaskType) || null })
+                  }
+                  className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
+                >
+                  <option value="">—</option>
+                  {TASK_TYPES.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="mb-0">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-2">Queue — pipeline / admin</p>
+            <p className="text-[11px] text-ink/38 leading-snug mb-3">
+              Queue status is the pipeline position. Execution posture is in Work posture below.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <span className={`text-[10px] uppercase tracking-[0.15em] px-2.5 py-1 rounded-full ${STATUS_STYLE[task.status]}`}>
+                {task.status.replace("_", " ")}
+              </span>
+              <span className="text-[10px] uppercase tracking-[0.15em] px-2.5 py-1 rounded-full bg-ink/6 text-ink/50">
+                Priority {task.priority}
+              </span>
+              {task.related_area && (
+                <span className="text-[10px] uppercase tracking-[0.15em] px-2.5 py-1 rounded-full border border-ink/15 text-ink/45">
+                  {task.related_area}
+                </span>
+              )}
+              {task.task_type && (
+                <span className="text-[10px] uppercase tracking-[0.15em] px-2.5 py-1 rounded-full border border-ink/12 text-ink/45">
+                  {task.task_type}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
+        <div className="flex gap-4 mt-4 pt-4 border-t border-ink/8">
+          <p className="text-[10px] text-ink/30">
+            Created {new Date(task.created_at).toLocaleDateString()}
+          </p>
+          <p className="text-[10px] text-ink/30">
+            Updated {new Date(task.updated_at).toLocaleDateString()}
+          </p>
+        </div>
+      </div>
+
+      {/* Work posture — execution (queue / pipeline is in Identity above) */}
+      <div className="border border-ink/12 rounded-xl p-6 mb-6">
+        <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-1">Work posture</p>
+        <p className="text-[11px] text-ink/38 leading-snug mb-4">
+          Execution posture only — how the work is going now. Queue position (backlog → done) is set
+          in the Identity block above; these fields are independent and are not synced automatically.
+        </p>
+        {editing ? (
+          <div className="mb-0">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-2">
+              Execution — assignee and posture
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">
+                  Execution posture
+                </label>
+                <select
+                  value={editForm.execution_status ?? ""}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, execution_status: (e.target.value as ExecutionStatus) || null })
+                  }
+                  className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
+                >
+                  <option value="">—</option>
+                  {EXECUTION_STATUSES.map((s) => (
+                    <option key={s} value={s}>
+                      {s.replace("_", " ")}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">
+                  Assignee / tool
+                </label>
+                <input
+                  list="ccc-task-assignee-presets"
+                  value={editForm.assigned_to ?? ""}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, assigned_to: e.target.value || null })
+                  }
+                  placeholder="human, claude, cursor…"
+                  className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink placeholder-ink/30 focus:outline-none"
+                />
+                <datalist id="ccc-task-assignee-presets">
+                  {ASSIGNEE_PRESETS.map((p) => (
+                    <option key={p} value={p} />
+                  ))}
+                </datalist>
+              </div>
+              <div className="col-span-2">
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">Next step</label>
+                <input
+                  type="text"
+                  value={editForm.next_step ?? ""}
+                  onChange={(e) => setEditForm({ ...editForm, next_step: e.target.value || null })}
+                  placeholder="e.g. Review latest output and approve"
+                  className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink placeholder-ink/30 focus:outline-none"
+                />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="mb-0">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-2">Execution snapshot</p>
+            <div className="rounded-lg border border-ink/10 bg-ink/[0.02] px-3 py-2.5 mb-2">
+              <dl className="grid grid-cols-[7.5rem_1fr] gap-x-2 gap-y-1.5 text-xs text-ink/65">
+                <dt className="text-ink/40">Assigned to</dt>
+                <dd className="min-w-0">{task.assigned_to?.trim() || "—"}</dd>
+                <dt className="text-ink/40">Execution posture</dt>
+                <dd className="min-w-0">
+                  {task.execution_status ? (
+                    <span
+                      className={`inline-block text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded ${EXECUTION_STATUS_STYLE[task.execution_status] ?? "bg-ink/8 text-ink/50"}`}
+                    >
+                      {task.execution_status.replace("_", " ")}
+                    </span>
+                  ) : (
+                    "—"
+                  )}
+                </dd>
+                <dt className="text-ink/40">Next step</dt>
+                <dd className="min-w-0 leading-snug">{task.next_step?.trim() || "—"}</dd>
+                <dt className="text-ink/40">Latest output</dt>
+                <dd className="min-w-0">{task.latest_output?.trim() ? "Present" : "—"}</dd>
+              </dl>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[9px] uppercase tracking-[0.2em] text-ink/30 shrink-0">Quick</span>
+              {EXECUTION_QUICK_ACTIONS.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  disabled={executionPatching}
+                  onClick={() => handleExecutionStatusQuick(s)}
+                  className={`text-[9px] uppercase tracking-[0.12em] px-2 py-1 rounded border transition-colors disabled:opacity-50 ${
+                    task.execution_status === s
+                      ? "border-ink/35 bg-ink/8 text-ink/70"
+                      : "border-ink/15 text-ink/50 hover:bg-ink/5 hover:border-ink/25"
+                  }`}
+                >
+                  {s.replace("_", " ")}
+                </button>
+              ))}
+              {executionFeedback && (
+                <span
+                  className={`text-[10px] ${
+                    executionFeedback.kind === "ok" ? "text-moss/90" : "text-red-600/90"
+                  }`}
+                >
+                  {executionFeedback.msg}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
+        <div className="mt-4 pt-4 border-t border-ink/8">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-3">Work state</p>
+          {editing ? (
+            <div className="space-y-3">
+              <div>
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">
+                  Last action note
+                </label>
+                <textarea
+                  value={editForm.last_action_note ?? ""}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, last_action_note: e.target.value })
+                  }
+                  rows={2}
+                  placeholder="e.g. Waiting for review before implementation"
+                  className="w-full rounded border border-ink/20 bg-white px-3 py-2 text-sm text-ink placeholder-ink/30 focus:outline-none resize-none"
+                />
+              </div>
+              <div>
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">
+                  Latest output
+                </label>
+                <textarea
+                  value={editForm.latest_output ?? ""}
+                  onChange={(e) => setEditForm({ ...editForm, latest_output: e.target.value })}
+                  rows={6}
+                  placeholder="Result, draft, or implementation summary…"
+                  className="w-full rounded border border-ink/20 bg-white px-3 py-2 text-sm text-ink placeholder-ink/30 focus:outline-none resize-y min-h-[120px] font-mono text-[13px] leading-relaxed"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div>
+                <p className="text-[9px] uppercase tracking-[0.2em] text-ink/30 mb-1">Last action</p>
+                {task.last_action_note ? (
+                  <p className="text-sm text-ink/60 leading-relaxed whitespace-pre-wrap">
+                    {task.last_action_note}
+                  </p>
+                ) : (
+                  <p className="text-xs text-ink/30">—</p>
+                )}
+              </div>
+              <div>
+                <p className="text-[9px] uppercase tracking-[0.2em] text-ink/30 mb-1">Latest output</p>
+                {task.latest_output ? (
+                  <div className="text-sm text-ink/70 leading-relaxed whitespace-pre-wrap max-h-64 overflow-y-auto rounded-lg border border-ink/10 bg-ink/[0.02] px-3 py-2.5">
+                    {task.latest_output}
+                  </div>
+                ) : (
+                  <p className="text-xs text-ink/30">—</p>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div className="mb-6">
+        <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-4">Actions</p>
+        <AgentLanesBlock
+          task={task}
+          onUpdated={(t) => {
+            setTask(t);
+            setEditForm((f) => ({ ...f, ...t }));
+          }}
+        />
+        <NextActionBlock task={task} />
+        <AgentBriefBlock
+          task={task}
+          taskLinks={taskLinks}
+          locationMeta={locationMeta}
+          tourMeta={tourMeta}
+          onUpdated={(t) => {
+            setTask(t);
+            setEditForm((f) => ({ ...f, ...t }));
+          }}
+          onRun={async () => {
+            const updated = await getOutputsForTask(task.id);
+            setOutputs(updated);
+          }}
+        />
+
+        <RunHandoffBlock
+          task={task}
+          onUpdated={(t) => {
+            setTask(t);
+            setEditForm((f) => ({ ...f, ...t }));
+          }}
+        />
+
+        <LatestExecutionResultBlock latest={outputs[0] ?? null} />
+
+        {/* Task outputs — structured (lighter) */}
+        <div className="mt-6 pt-6 border-t border-ink/8 text-ink/80">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-ink/30 mb-1">Task outputs</p>
+          <p className="text-[11px] text-ink/38 leading-snug mb-3">
+            Last brief sent is stored automatically when you use Run with…. You can paste or adjust
+            here manually if needed.
+          </p>
+          {editing ? (
+            <div className="space-y-3">
+              <div>
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">
+                  Last brief sent to tool
+                </label>
+                <textarea
+                  value={editForm.source_prompt ?? ""}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, source_prompt: e.target.value || null })
+                  }
+                  rows={4}
+                  placeholder="Exact brief last copied via Run with… (editable if you sent a variant)"
+                  className="w-full rounded border border-ink/20 bg-white px-3 py-2 text-sm text-ink placeholder-ink/30 focus:outline-none resize-y min-h-[80px]"
+                />
+              </div>
+              <div>
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">
+                  Artifact links
+                </label>
+                <textarea
+                  value={editForm.artifact_links ?? ""}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, artifact_links: e.target.value || null })
+                  }
+                  rows={3}
+                  placeholder="One URL or path per line…"
+                  className="w-full rounded border border-ink/20 bg-white px-3 py-2 text-sm text-ink placeholder-ink/30 focus:outline-none resize-y min-h-[72px] font-mono text-[13px]"
+                />
+              </div>
+              <div>
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">
+                  Implementation notes
+                </label>
+                <textarea
+                  value={editForm.implementation_notes ?? ""}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, implementation_notes: e.target.value || null })
+                  }
+                  rows={4}
+                  placeholder="What changed, what was built, key decisions…"
+                  className="w-full rounded border border-ink/20 bg-white px-3 py-2 text-sm text-ink placeholder-ink/30 focus:outline-none resize-y min-h-[88px]"
+                />
+              </div>
+              <div>
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">
+                  Review note
+                </label>
+                <textarea
+                  value={editForm.review_note ?? ""}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, review_note: e.target.value || null })
+                  }
+                  rows={2}
+                  placeholder="Approval, requested changes, reviewer comment…"
+                  className="w-full rounded border border-ink/20 bg-white px-3 py-2 text-sm text-ink placeholder-ink/30 focus:outline-none resize-none"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div>
+                <p className="text-[9px] uppercase tracking-[0.2em] text-ink/30 mb-1">
+                  Last brief sent to tool
+                </p>
+                {task.source_prompt?.trim() ? (
+                  <div className="text-sm text-ink/70 leading-relaxed whitespace-pre-wrap max-h-48 overflow-y-auto rounded-lg border border-ink/10 bg-ink/[0.02] px-3 py-2.5">
+                    {task.source_prompt}
+                  </div>
+                ) : (
+                  <p className="text-xs text-ink/30">— (use Run with… to capture)</p>
+                )}
+              </div>
+              <div>
+                <p className="text-[9px] uppercase tracking-[0.2em] text-ink/30 mb-1">Artifact links</p>
+                {task.artifact_links?.trim() ? (
+                  <div className="rounded-lg border border-ink/10 bg-ink/[0.02] px-3 py-2.5">
+                    <ArtifactLinksReadonly text={task.artifact_links} />
+                  </div>
+                ) : (
+                  <p className="text-xs text-ink/30">—</p>
+                )}
+              </div>
+              <div>
+                <p className="text-[9px] uppercase tracking-[0.2em] text-ink/30 mb-1">Implementation notes</p>
+                {task.implementation_notes?.trim() ? (
+                  <div className="text-sm text-ink/70 leading-relaxed whitespace-pre-wrap max-h-48 overflow-y-auto rounded-lg border border-ink/10 bg-ink/[0.02] px-3 py-2.5">
+                    {task.implementation_notes}
+                  </div>
+                ) : (
+                  <p className="text-xs text-ink/30">—</p>
+                )}
+              </div>
+              <div>
+                <p className="text-[9px] uppercase tracking-[0.2em] text-ink/30 mb-1">Review note</p>
+                {task.review_note?.trim() ? (
+                  <div className="text-sm text-ink/65 leading-relaxed whitespace-pre-wrap max-h-32 overflow-y-auto rounded-lg border border-ink/10 bg-ink/[0.02] px-3 py-2.5">
+                    {task.review_note}
+                  </div>
+                ) : (
+                  <p className="text-xs text-ink/30">—</p>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-6 pt-5 border-t border-ink/8 opacity-90">
+          <div className="flex items-baseline justify-between mb-3">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-ink/30">
+              Output history ({outputs.length})
+            </p>
+            <button
+              onClick={() => setShowOutputForm((v) => !v)}
+              className="text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded border border-ink/18 text-ink/55 hover:text-ink hover:border-ink/35 transition-colors"
+            >
+              {showOutputForm ? "Cancel" : "+ Add Output"}
+            </button>
+          </div>
+
+          {showOutputForm && (
+            <form
+              onSubmit={handleAddOutput}
+              className="mb-4 p-4 border border-ink/10 rounded-xl bg-ink/[0.02] space-y-3"
+            >
+              {outputError && (
+                <p className="text-xs text-red-600">{outputError}</p>
+              )}
+              <div className="flex gap-3">
+                <select
+                  value={outputForm.agent}
+                  onChange={(e) => setOutputForm({ ...outputForm, agent: e.target.value })}
+                  className="rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
+                >
+                  {OUTPUT_AGENT_PRESETS.map((a) => (
+                    <option key={a} value={a}>
+                      {a}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  min={1}
+                  value={outputForm.version}
+                  onChange={(e) => setOutputForm({ ...outputForm, version: Number(e.target.value) })}
+                  className="w-20 rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
+                  placeholder="v1"
+                />
+              </div>
+              <textarea
+                placeholder="Prompt (optional)"
+                value={outputForm.prompt}
+                onChange={(e) => setOutputForm({ ...outputForm, prompt: e.target.value })}
+                rows={2}
+                className="w-full rounded border border-ink/20 bg-white px-3 py-2 text-sm text-ink placeholder-ink/30 focus:outline-none resize-none"
+              />
+              <textarea
+                placeholder="Response / output"
+                value={outputForm.response}
+                onChange={(e) => setOutputForm({ ...outputForm, response: e.target.value })}
+                rows={4}
+                className="w-full rounded border border-ink/20 bg-white px-3 py-2 text-sm text-ink placeholder-ink/30 focus:outline-none resize-none"
+              />
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  disabled={savingOutput}
+                  className="text-[10px] uppercase tracking-[0.18em] px-4 py-2 rounded bg-ink text-cream hover:bg-ink/90 transition-colors disabled:opacity-50"
+                >
+                  {savingOutput ? "Saving..." : "Save Output"}
+                </button>
+              </div>
+            </form>
+          )}
+
+          <div className="space-y-3">
+            {outputs.length === 0 && (
+              <p className="text-sm text-ink/40 py-6 text-center rounded-lg bg-ink/[0.02] border border-ink/8">
+                No outputs recorded yet.
+              </p>
+            )}
+            {outputs.map((output) => (
+              <div
+                key={output.id}
+                className="border border-ink/8 rounded-xl p-4 group bg-ink/[0.015]"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className={`text-[10px] uppercase tracking-[0.15em] px-2 py-0.5 rounded-full ${AGENT_STYLE[output.agent] ?? "bg-ink/10 text-ink/60"}`}>
+                      {output.agent}
+                    </span>
+                    <span className="text-[10px] text-ink/30">v{output.version}</span>
+                    <span className="text-[10px] text-ink/30">
+                      {new Date(output.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => handleDeleteOutput(output.id)}
+                    className="text-[10px] text-ink/20 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                  >
+                    Del
+                  </button>
+                </div>
+                {output.prompt && (
+                  <div className="mb-2">
+                    <p className="text-[9px] uppercase tracking-[0.2em] text-ink/28 mb-1">Prompt</p>
+                    <p className="text-[11px] text-ink/50 leading-relaxed whitespace-pre-wrap">
+                      {output.prompt}
+                    </p>
+                  </div>
+                )}
+                {output.response && (
+                  <div>
+                    <p className="text-[9px] uppercase tracking-[0.2em] text-ink/28 mb-1">Response</p>
+                    <p className="text-sm text-ink/72 leading-relaxed whitespace-pre-wrap">
+                      {output.response}
+                    </p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Review */}
+      <div className="mt-8 pt-8 border-t border-ink/12 mb-8">
+        <ReviewBlock task={task} hasOutput={hasOutput} />
+      </div>
+
+      {/* Attach area */}
+      <div className="border border-ink/12 rounded-xl p-6 mb-6 bg-ink/[0.02]">
+        <p className="text-[10px] text-ink/35 uppercase tracking-[0.15em] mb-4">Attach entities</p>
+        <div className="space-y-4">
+          <div>
+            <p className="text-[10px] text-ink/30 mb-1.5">Attach to place</p>
+              <form onSubmit={handleAttachToPlace} className="flex gap-2 items-start">
+                <input
+                  value={attachSlug}
+                  onChange={(e) => {
+                    setAttachSlug(e.target.value);
+                    setAttachError(null);
+                    setAttachSuccess(false);
+                  }}
+                  placeholder="Location slug"
+                  className="flex-1 rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
+                  disabled={attaching}
+                />
+                <button
+                  type="submit"
+                  disabled={attaching}
+                  className="text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded bg-ink text-cream hover:bg-ink/90 transition-colors disabled:opacity-50"
+                >
+                  {attaching ? "Attaching..." : "Attach"}
+                </button>
+              </form>
+              {attachError && <p className="mt-1 text-xs text-red-600">{attachError}</p>}
+              {attachSuccess && <p className="mt-1 text-xs text-moss">Attached.</p>}
+            </div>
+            <div>
+              <p className="text-[10px] text-ink/30 mb-1.5">Attach tour</p>
+              <form onSubmit={handleAttachTour} className="flex gap-2 items-start">
+                <input
+                  value={attachTourSlug}
+                  onChange={(e) => {
+                    setAttachTourSlug(e.target.value);
+                    setAttachTourError(null);
+                    setAttachTourSuccess(false);
+                  }}
+                  placeholder="Tour slug"
+                  className="flex-1 rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
+                  disabled={attachingTour}
+                />
+                <button
+                  type="submit"
+                  disabled={attachingTour}
+                  className="text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded bg-ink text-cream hover:bg-ink/90 transition-colors disabled:opacity-50"
+                >
+                  {attachingTour ? "Attaching..." : "Attach"}
+                </button>
+              </form>
+              {attachTourError && <p className="mt-1 text-xs text-red-600">{attachTourError}</p>}
+              {attachTourSuccess && <p className="mt-1 text-xs text-moss">Attached.</p>}
+            </div>
+          </div>
+
+          <div className="mt-6 pt-5 border-t border-ink/8">
+            <p className="text-[10px] text-ink/35 uppercase tracking-[0.15em] mb-3">Linked entities</p>
+            {taskLinks.length === 0 ? (
+              <p className="text-sm text-ink/40">No entities linked to this task. Attach locations or tours above.</p>
+            ) : (
+            <>
+              <label className="sr-only" htmlFor="linked-entities-filter">
+                Filter linked entities
+              </label>
+              <input
+                id="linked-entities-filter"
+                value={linkedEntitiesFilter}
+                onChange={(e) => setLinkedEntitiesFilter(e.target.value)}
+                placeholder="Filter linked entities…"
+                className="w-full max-w-md rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink placeholder-ink/30 focus:outline-none mb-3"
+                type="search"
+                autoComplete="off"
+              />
+            {linkedFilterEmpty ? (
+              <p className="text-sm text-ink/40">No linked entities match this filter.</p>
+            ) : (
+            <div className="space-y-4">
+              {locationLinksFiltered.length > 0 && (
+                <div>
+                  <p className="text-[10px] text-ink/30 mb-1">Locations</p>
+                  <ul className="text-sm text-ink/65 space-y-1">
+                    {locationLinksFiltered.map((link) =>
+                      renderLinkedRow(link, locationMeta, "/places")
+                    )}
+                  </ul>
+                </div>
+              )}
+              {tourLinksFiltered.length > 0 && (
+                <div>
+                  <p className="text-[10px] text-ink/30 mb-1">Tours</p>
+                  <ul className="text-sm text-ink/65 space-y-1">
+                    {tourLinksFiltered.map((link) =>
+                      renderLinkedRow(link, tourMeta, "/tours")
+                    )}
+                  </ul>
+                </div>
+              )}
+              {otherLinksFiltered.length > 0 && (
+                <div>
+                  <p className="text-[10px] text-ink/30 mb-1.5">Other</p>
+                  <ul className="text-sm text-ink/65 space-y-1.5">
+                    {otherLinksFiltered.map((link) => (
+                      <li key={link.id} className="flex items-center gap-3 justify-between py-0.5">
+                        <span className="flex items-center gap-2">
+                          <span className="text-[10px] uppercase tracking-[0.1em] text-ink/40 w-20 shrink-0">{link.entity_type}</span>
+                          <CopyableId id={link.entity_id} />
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+            )}
+            </>
+            )}
+          </div>
+        </div>
+    </div>
+  );
+};
+
+TaskDetailPage.getLayout = (page: ReactElement) => (
+  <CommandCenterLayout>{page}</CommandCenterLayout>
+);
+
+export default TaskDetailPage;

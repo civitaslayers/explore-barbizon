@@ -1,0 +1,17 @@
+---
+description: Supabase and database conventions
+alwaysApply: true
+---
+
+Use Supabase/Postgres best practices.
+
+Database rules:
+- Prefer UUID primary keys.
+- Use created_at and updated_at timestamps on major tables.
+- Favor explicit foreign keys.
+- Design for easy querying from Next.js frontend.
+- Keep multilingual support structured and practical.
+- Prepare for RLS later, but do not overcomplicate early schema design.
+- Avoid polymorphic complexity unless clearly justified.
+- When suggesting SQL, make it clean and runnable in Supabase.
+- When changing schema, always explain migration impact on existing CCC features.

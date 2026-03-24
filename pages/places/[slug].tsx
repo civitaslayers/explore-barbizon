@@ -22,6 +22,20 @@ function haversineKm(
   return R * 2 * Math.atan2(Math.sqrt(c), Math.sqrt(1 - c));
 }
 
+/** Mapbox Static when available; otherwise hero image (absolute URL if NEXT_PUBLIC_SITE_URL is set). */
+function openGraphImageUrl(
+  place: Place,
+  heroImage: string,
+  mapboxAvailable: boolean,
+  siteBase: string
+): string {
+  if (mapboxAvailable) {
+    return staticMapUrl(place.longitude, place.latitude, 1200, 630, 15);
+  }
+  if (heroImage.startsWith("http")) return heroImage;
+  return siteBase ? `${siteBase}${heroImage.startsWith("/") ? heroImage : `/${heroImage}`}` : heroImage;
+}
+
 type PlacePageProps = {
   place: Place;
   relatedPlaces: Place[];
@@ -36,22 +50,35 @@ const PlacePage: NextPage<PlacePageProps> = ({
   const heroImage =
     place.heroImage ?? "/images/places/place-default.jpg";
 
+  const siteBase = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "";
+  const pageTitle = `${place.name} — Explore Barbizon`;
+  const metaDescription = place.shortDescription;
+  const ogImageUrl = openGraphImageUrl(place, heroImage, hasMapbox, siteBase);
+  const ogUrl = siteBase ? `${siteBase}/places/${place.slug}` : "";
+
   return (
     <>
       <Head>
-        <title>{place.name} — Explore Barbizon</title>
+        <title>{pageTitle}</title>
+        <meta name="description" content={metaDescription} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={metaDescription} />
+        <meta property="og:image" content={ogImageUrl} />
+        <meta property="og:type" content="website" />
+        {ogUrl ? <meta property="og:url" content={ogUrl} /> : null}
       </Head>
-      <article className="space-y-12 md:space-y-16">
+      <article className="space-y-12 md:space-y-16 xl:space-y-20">
         {/* Hero image and title */}
-        <section className="overflow-hidden rounded-3xl bg-ink">
-          <div className="relative h-64 md:h-80 lg:h-96">
+        <section className="overflow-hidden rounded-3xl bg-ink shadow-[0_24px_48px_-12px_rgba(17,17,17,0.18)] ring-1 ring-ink/10">
+          <div className="relative h-64 md:h-80 lg:h-96 xl:h-[26rem]">
             <div
-              className="absolute inset-0 bg-cover bg-center opacity-80 mix-blend-multiply"
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.82] mix-blend-multiply"
               style={{ backgroundImage: `url(${heroImage})` }}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/65 to-ink/30" />
-            <div className="fade-in-hero relative z-10 flex h-full items-end p-6 md:p-9 lg:p-10">
-              <div className="max-w-xl space-y-3 text-cream md:max-w-2xl">
+            <div className="absolute inset-0 bg-gradient-to-t from-ink/92 via-ink/55 to-ink/25" />
+            <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10" />
+            <div className="fade-in-hero relative z-10 flex h-full items-end p-6 md:p-9 lg:p-10 xl:p-12">
+              <div className="max-w-xl space-y-3 text-cream md:max-w-2xl xl:max-w-3xl">
                 <p className="eyebrow text-cream/70">
                   {place.category}
                 </p>
@@ -67,20 +94,20 @@ const PlacePage: NextPage<PlacePageProps> = ({
         </section>
 
         {/* About + Map layout */}
-        <section className="grid gap-10 md:grid-cols-[minmax(0,2.3fr)_minmax(0,2fr)] md:items-start">
+        <section className="grid gap-12 md:grid-cols-[minmax(0,2.3fr)_minmax(0,2fr)] md:items-start md:gap-10 xl:gap-16">
           {/* About this place & Historical context */}
-          <div className="space-y-10">
+          <div className="space-y-12 md:space-y-14">
             <section className="editorial-measure space-y-5">
               <p className="eyebrow">ABOUT THIS PLACE</p>
               <h2 className="heading-lg">{place.shortDescription}</h2>
-              <div className="space-y-4 text-sm leading-relaxed text-ink/85 md:text-base md:leading-relaxed">
+              <div className="space-y-4 text-sm leading-relaxed text-ink/85 md:text-base md:leading-relaxed xl:text-[1.0625rem] xl:leading-[1.65]">
                 <p>{place.description}</p>
               </div>
             </section>
 
-            <section className="editorial-measure space-y-4">
+            <section className="editorial-measure space-y-4 border-t border-ink/10 pt-10 md:pt-12">
               <p className="eyebrow">HISTORICAL CONTEXT</p>
-              <div className="space-y-4 text-sm leading-relaxed text-ink/80 md:text-base">
+              <div className="space-y-4 text-sm leading-relaxed text-ink/80 md:text-base xl:text-[1.0625rem] xl:leading-[1.65]">
                 <p>
                   {place.history ??
                     "This location is part of the wider field of Barbizon, where artists, walkers, and residents have long negotiated the boundary between village and forest. In time, this section will gather archival notes, excerpts from letters, and early guidebook descriptions that fix this place in a particular light."}
@@ -93,12 +120,12 @@ const PlacePage: NextPage<PlacePageProps> = ({
           <aside className="space-y-6">
             <section className="card space-y-4 p-5 md:p-6">
               <p className="eyebrow">MAP PREVIEW</p>
-              <div className="relative h-44 overflow-hidden rounded-2xl md:h-52">
+              <div className="relative h-44 overflow-hidden rounded-2xl bg-ink/[0.04] ring-1 ring-ink/10 md:h-52 xl:h-56">
                 {hasMapbox ? (
                   <img
                     src={staticMapUrl(place.longitude, place.latitude, 600, 400, 15)}
                     alt={`Map showing location of ${place.name}`}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover object-center"
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center rounded-2xl border border-dashed border-ink/25 bg-[radial-gradient(circle_at_top,_#f5f1e8,_#d6d0c3)] text-[11px] text-ink/60">
@@ -133,74 +160,77 @@ const PlacePage: NextPage<PlacePageProps> = ({
           </aside>
         </section>
 
-        {/* Related places */}
-        {relatedPlaces.length > 0 && (
-          <section className="space-y-6">
-            <header className="space-y-2 editorial-measure">
-              <p className="eyebrow">RELATED PLACES</p>
-              <h2 className="heading-lg">
-                Other {place.category.toLowerCase()}s in the atlas.
-              </h2>
-            </header>
-            <div className="grid gap-6 md:grid-cols-3">
-              {relatedPlaces.map((related) => (
-                <Link
-                  key={related.slug}
-                  href={`/places/${related.slug}`}
-                  className="card card-hover flex flex-col justify-between p-5 md:p-6"
-                >
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-ink/50">
-                    {related.category}
-                  </p>
-                  <h3 className="mt-1 font-serif text-base text-ink">
-                    {related.name}
-                  </h3>
-                  <p className="mt-2 text-xs leading-relaxed text-ink/75 md:text-[13px]">
-                    {related.shortDescription}
-                  </p>
-                  <span className="mt-4 text-[11px] uppercase tracking-[0.2em] text-ink/45">
-                    View place →
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
+        {/* Related + nearby (discovery) */}
+        {(relatedPlaces.length > 0 || nearbyPlaces.length > 0) && (
+          <div className="space-y-14 border-t border-ink/10 pt-12 md:space-y-16 md:pt-16 xl:space-y-20 xl:pt-20">
+            {relatedPlaces.length > 0 && (
+              <section className="space-y-7 md:space-y-8">
+                <header className="editorial-measure space-y-2">
+                  <p className="eyebrow">RELATED PLACES</p>
+                  <h2 className="heading-lg">
+                    Other {place.category.toLowerCase()}s in the atlas.
+                  </h2>
+                </header>
+                <div className="grid gap-5 sm:gap-6 md:grid-cols-3 xl:gap-8">
+                  {relatedPlaces.map((related) => (
+                    <Link
+                      key={related.slug}
+                      href={`/places/${related.slug}`}
+                      className="card card-hover flex flex-col justify-between p-5 md:p-6"
+                    >
+                      <p className="text-[11px] uppercase tracking-[0.2em] text-ink/50">
+                        {related.category}
+                      </p>
+                      <h3 className="mt-1 font-serif text-base text-ink">
+                        {related.name}
+                      </h3>
+                      <p className="mt-2 text-xs leading-relaxed text-ink/75 md:text-[13px]">
+                        {related.shortDescription}
+                      </p>
+                      <span className="mt-4 text-[11px] uppercase tracking-[0.2em] text-ink/45">
+                        View place →
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
 
-        {/* Nearby locations */}
-        {nearbyPlaces.length > 0 && (
-          <section className="space-y-6">
-            <header className="space-y-2 editorial-measure">
-              <p className="eyebrow">NEARBY LOCATIONS</p>
-              <h2 className="heading-lg">
-                Places within walking distance in the village and forest.
-              </h2>
-            </header>
-            <div className="grid gap-4 text-sm text-ink/80 md:grid-cols-3">
-              {nearbyPlaces.map((nearby) => (
-                <Link
-                  key={nearby.slug}
-                  href={`/places/${nearby.slug}`}
-                  className="group card card-hover space-y-1 p-4 md:p-5"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-[11px] uppercase tracking-[0.18em] text-ink/50">
-                      {nearby.category}
-                    </p>
-                    <p className="text-[11px] text-ink/35">
-                      {Math.round(haversineKm(place, nearby) * 1000)}&thinsp;m
-                    </p>
-                  </div>
-                  <p className="font-serif text-sm text-ink group-hover:underline group-hover:underline-offset-4">
-                    {nearby.name}
-                  </p>
-                  <p className="text-xs leading-relaxed text-ink/70">
-                    {nearby.shortDescription}
-                  </p>
-                </Link>
-              ))}
-            </div>
-          </section>
+            {nearbyPlaces.length > 0 && (
+              <section className="space-y-7 md:space-y-8">
+                <header className="editorial-measure space-y-2">
+                  <p className="eyebrow">NEARBY LOCATIONS</p>
+                  <h2 className="heading-lg">
+                    Places within walking distance in the village and forest.
+                  </h2>
+                </header>
+                <div className="grid gap-5 text-sm text-ink/80 sm:gap-6 md:grid-cols-3 xl:gap-8">
+                  {nearbyPlaces.map((nearby) => (
+                    <Link
+                      key={nearby.slug}
+                      href={`/places/${nearby.slug}`}
+                      className="group card card-hover space-y-1.5 p-5 md:p-6"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-[11px] uppercase tracking-[0.18em] text-ink/50">
+                          {nearby.category}
+                        </p>
+                        <p className="text-[11px] text-ink/35">
+                          {Math.round(haversineKm(place, nearby) * 1000)}&thinsp;m
+                        </p>
+                      </div>
+                      <p className="font-serif text-sm text-ink group-hover:underline group-hover:underline-offset-4">
+                        {nearby.name}
+                      </p>
+                      <p className="text-xs leading-relaxed text-ink/70">
+                        {nearby.shortDescription}
+                      </p>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
         )}
 
         <div className="text-xs text-ink/60">

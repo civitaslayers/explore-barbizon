@@ -1,0 +1,13 @@
+---
+description: UI rules for the Civitas Command Center
+alwaysApply: true
+---
+
+The Command Center is an internal operating system, not just an admin panel.
+
+UI principles:
+- Calm, structured, editorial, high-signal interface.
+- Prefer clarity over dashboard clutter.
+- Design for operational use: capture, organize, relate, decide, publish.
+- The internal UI should reflect systems thinking, not generic CRUD screens.
+- Avoid overbuilding controls before the information architecture is stable.

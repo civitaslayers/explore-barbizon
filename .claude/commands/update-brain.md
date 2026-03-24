@@ -8,6 +8,11 @@ Update the project brain files to reflect the current state of the repository.
 
 Do the following in order:
 
+0. **Sync task state from CCC**:
+   Go to the CCC tasks page and click the **→ brain** button.
+   This regenerates `brain/task-queue.md` from live Supabase task state.
+   Review the output and adjust manually if needed before proceeding.
+
 1. **Update `brain/current-state.md`**:
    - Change the **Status** line to reflect what is now true
    - Move completed work into **Last Completed** (keep the list to the most recent 10–15 items)
