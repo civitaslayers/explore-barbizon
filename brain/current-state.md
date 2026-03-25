@@ -1,6 +1,6 @@
 # Current State
 
-Last updated: 2026-03-21
+Last updated: 2026-03-25
 
 ---
 
@@ -18,6 +18,13 @@ The Command Center (CCC) is the active development surface — a complete intern
 
 ---
 
+## Last completed (2026-03-25 session)
+
+- **SQL migrations run:** All 4 pending migrations confirmed executed in Supabase — `seed-ccc-roadmap-tasks`, `seed-ccc-completed-tasks`, `seed-ccc-knowledge-base`, `add-show-in-editorial-to-locations`.
+- **TAVILY_API_KEY set:** Added to `~/.zshrc` — Tavily MCP now active.
+- **Place page visual refinement:** `pages/places/[slug].tsx` refined in Cursor.
+- **Large-screen layout width refinement:** `pages/places/index.tsx` and layout refined in Cursor.
+
 ## Last completed (2026-03-21 session)
 
 - **CCC knowledge base seeded:** Decisions (14), Memory (18 entries), Prompt Templates (6) — sourced from brain/ and docs/. Live in Supabase, visible in CCC Decisions/Memory/Prompts pages.
@@ -31,19 +38,10 @@ The Command Center (CCC) is the active development surface — a complete intern
 
 ---
 
-## Pending SQL to run in Supabase
-
-These migrations exist in the repo but have not yet been confirmed run:
-- `migrations/seed-ccc-roadmap-tasks.sql` — 30+ structured roadmap tasks
-- `migrations/seed-ccc-completed-tasks.sql` — records completed CCC work as done
-- `migrations/seed-ccc-knowledge-base.sql` — Decisions, Memory, Prompt Templates (may already be seeded)
-- `migrations/add-show-in-editorial-to-locations.sql` — show_in_editorial column + backfill
-
 ---
 
 ## Blockers
 
-- Tavily MCP inactive until `TAVILY_API_KEY` is set in shell env (`~/.zshrc`)
 - Hero video asset missing (`/public/videos/hero-barbizon.mp4`)
 
 ---
@@ -61,12 +59,12 @@ These migrations exist in the repo but have not yet been confirmed run:
 
 ## Recommended next step
 
-Place page visual refinement and large-screen layout audit — both are Cursor tasks with pre-populated briefs. Use "Copy brief" from the CCC task list and paste into Cursor.
+Finish populating the Forest & Nature category (data/schema), then audit and fix missing place thumbnails. Both are unblocked now that migrations have run.
 
 ---
 
 ## Files likely in play next
 
-- `pages/places/[slug].tsx` — place page refinement (cursor task)
-- `pages/places/index.tsx` — place index refinement (cursor task)
+- Supabase — Forest & Nature category data population
 - `pages/command-center/` — CCC iteration as needed
+- Place thumbnails audit — missing Mapbox Static images

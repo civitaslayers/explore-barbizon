@@ -1,6 +1,6 @@
 # Task Queue
 
-Last updated: 2026-03-24
+Last updated: 2026-03-25 (updated by Claude — completed tasks removed)
 
 Tasks are ordered by priority within each section.
 Move tasks between sections as status changes.
@@ -19,10 +19,6 @@ Task tags:
 ## Now
 *Unblocked tasks that can be started immediately.*
 
-- [ ] [infra,user-action] Set TAVILY_API_KEY in shell env
-- [ ] [infra,user-action] Run show_in_editorial SQL migration
-- [ ] [frontend] Place page visual refinement
-- [ ] [frontend] Large-screen layout width refinement
 - [ ] [schema] Finish populating Forest & Nature category
 
 ---
