@@ -1,0 +1,155 @@
+import Head from "next/head";
+import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
+import Link from "next/link";
+import { getAllStories } from "@/data/stories";
+import { supabase } from "@/lib/supabase";
+
+type StoryPageStory = {
+  slug: string;
+  title: string;
+  theme: string;
+  dek: string;
+  body: string;
+};
+
+type StoryPageProps = {
+  story: StoryPageStory;
+};
+
+function excerptFromBody(body: string | null, maxLen = 220): string {
+  if (!body?.trim()) return "";
+  const plain = body.replace(/\s+/g, " ").trim();
+  if (plain.length <= maxLen) return plain;
+  return `${plain.slice(0, maxLen).trimEnd()}…`;
+}
+
+function mapRowToPageStory(row: {
+  slug: string;
+  title: string;
+  subtitle: string | null;
+  body: string | null;
+  author: string | null;
+}): StoryPageStory {
+  const dek =
+    row.subtitle?.trim() ||
+    excerptFromBody(row.body) ||
+    "A short essay from the editorial notebook.";
+  const theme = row.author?.trim() || "Editorial";
+  const body = row.body?.trim() ?? "";
+  return { slug: row.slug, title: row.title, theme, dek, body };
+}
+
+async function getPublishedStorySlugs(): Promise<string[]> {
+  if (!supabase) throw new Error("Supabase not configured");
+
+  const { data, error } = await supabase
+    .from("stories")
+    .select("slug")
+    .eq("is_published", true);
+
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((r: { slug: string }) => r.slug);
+}
+
+async function getPublishedStoryBySlug(
+  slug: string
+): Promise<StoryPageStory | null> {
+  if (!supabase) throw new Error("Supabase not configured");
+
+  const { data, error } = await supabase
+    .from("stories")
+    .select("slug, title, subtitle, body, author")
+    .eq("slug", slug)
+    .eq("is_published", true)
+    .single();
+
+  if (error) {
+    if (error.code === "PGRST116") return null;
+    throw new Error(error.message);
+  }
+
+  if (!data) return null;
+  return mapRowToPageStory(
+    data as {
+      slug: string;
+      title: string;
+      subtitle: string | null;
+      body: string | null;
+      author: string | null;
+    }
+  );
+}
+
+const StoryPage: NextPage<StoryPageProps> = ({ story }) => {
+  return (
+    <>
+      <Head>
+        <title>{story.title} — Stories — Explore Barbizon</title>
+        <meta name="description" content={story.dek} />
+      </Head>
+
+      <article className="editorial-measure space-y-8">
+        <p className="text-xs text-ink/50">
+          <Link href="/stories" className="hover:text-ink">
+            ← Stories
+          </Link>
+        </p>
+
+        <header className="space-y-4">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-ink/50">
+            {story.theme}
+          </p>
+          <h1 className="font-serif text-3xl leading-tight text-ink md:text-4xl">
+            {story.title}
+          </h1>
+          <p className="text-base leading-relaxed text-ink/80">{story.dek}</p>
+        </header>
+
+        {story.body ? (
+          <div className="space-y-4 text-sm leading-[1.7] text-ink/90 md:text-base whitespace-pre-wrap">
+            {story.body}
+          </div>
+        ) : null}
+      </article>
+    </>
+  );
+};
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  try {
+    const slugs = await getPublishedStorySlugs();
+    const paths = slugs.map((slug) => ({ params: { slug } }));
+    return { paths, fallback: "blocking" };
+  } catch {
+    const paths = getAllStories().map((s) => ({ params: { slug: s.slug } }));
+    return { paths, fallback: false };
+  }
+};
+
+export const getStaticProps: GetStaticProps<StoryPageProps> = async ({
+  params
+}) => {
+  const slug = params?.slug;
+  if (typeof slug !== "string") {
+    return { notFound: true };
+  }
+
+  try {
+    const story = await getPublishedStoryBySlug(slug);
+    if (!story) return { notFound: true };
+    return { props: { story }, revalidate: 60 };
+  } catch {
+    const s = getAllStories().find((x) => x.slug === slug);
+    if (!s) return { notFound: true };
+    const story: StoryPageStory = {
+      slug: s.slug,
+      title: s.title,
+      theme: s.theme,
+      dek: s.dek,
+      body: ""
+    };
+    return { props: { story }, revalidate: 60 };
+  }
+};
+
+export default StoryPage;
