@@ -36,7 +36,7 @@ Task tags:
 - [ ] [data,user-action] Add real place images
 - [ ] [frontend] Card polish and image treatment pass
 - [ ] [frontend,schema] Boulder trails and climbing spots
-- [ ] [data] Document CCC API contract in docs/
+- [x] [data] Document CCC API contract in docs/
 - [ ] [data,schema] Create artists + artist_locations tables
 - [ ] [data,schema] Create stories + story_locations tables
 - [ ] [data,schema] Create visual_works + visual_work_locations tables
