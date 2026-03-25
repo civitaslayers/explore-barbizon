@@ -24,6 +24,10 @@ The Command Center (CCC) is the active development surface — a complete intern
 - **TAVILY_API_KEY set:** Added to `~/.zshrc` — Tavily MCP now active.
 - **Place page visual refinement:** `pages/places/[slug].tsx` refined in Cursor.
 - **Large-screen layout width refinement:** `pages/places/index.tsx` and layout refined in Cursor.
+- **Sitemap:** `pages/sitemap.xml.tsx` created — serves all published place slugs via Mapbox Static + static routes. Cached 1h.
+- **CCC API contract documented:** `docs/ccc-api-contract.md` — all 6 API routes with request/response shapes, dev-only flags, env vars, and dependencies.
+- **Thumbnail audit:** All 66 published places have coordinates — Mapbox Static thumbnails are generated correctly for all. No action needed.
+- **Tours blocker identified:** `tour_stops.tour_id` and `location_id` are `null` in Supabase — stops are not linked. `Replace data/tours.ts` task blocked until data is fixed.
 
 ## Last completed (2026-03-21 session)
 
@@ -59,12 +63,12 @@ The Command Center (CCC) is the active development surface — a complete intern
 
 ## Recommended next step
 
-Finish populating the Forest & Nature category (data/schema), then audit and fix missing place thumbnails. Both are unblocked now that migrations have run.
+Wire CCC task output viewer to display latest execution result (Cursor task). Also: link `tour_stops` FKs in Supabase to unblock the tours migration.
 
 ---
 
 ## Files likely in play next
 
-- Supabase — Forest & Nature category data population
-- `pages/command-center/` — CCC iteration as needed
-- Place thumbnails audit — missing Mapbox Static images
+- `pages/command-center/tasks/[id].tsx` — output viewer wiring (Cursor)
+- Supabase — fix `tour_stops.tour_id` + `location_id` nulls
+- Supabase — Forest & Nature category population (ChatGPT task)

@@ -1,6 +1,6 @@
 # Task Queue
 
-Last updated: 2026-03-25 (updated by Claude — completed tasks removed)
+Last updated: 2026-03-25
 
 Tasks are ordered by priority within each section.
 Move tasks between sections as status changes.
@@ -28,10 +28,10 @@ Task tags:
 
 - [ ] [data,schema] Add show_in_editorial column to locations table
 - [ ] [frontend] Wire CCC task output viewer to display latest execution result
-- [ ] [data] Audit and fix missing place thumbnails
+- [x] [data] Audit and fix missing place thumbnails
 - [ ] [data,user-action] Define and seed Forest & Nature subcategories
 - [x] [frontend] Create sitemap.xml for public place pages
-- [ ] [infra] Replace data/tours.ts with live Supabase query
+- [ ] [infra] Replace data/tours.ts with live Supabase query — BLOCKED: tour_stops FKs are null
 - [ ] [frontend] Stories page: wire stories table
 - [ ] [data,user-action] Add real place images
 - [ ] [frontend] Card polish and image treatment pass
