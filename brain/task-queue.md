@@ -30,7 +30,7 @@ Task tags:
 - [ ] [frontend] Wire CCC task output viewer to display latest execution result
 - [ ] [data] Audit and fix missing place thumbnails
 - [ ] [data,user-action] Define and seed Forest & Nature subcategories
-- [ ] [frontend] Create sitemap.xml for public place pages
+- [x] [frontend] Create sitemap.xml for public place pages
 - [ ] [infra] Replace data/tours.ts with live Supabase query
 - [ ] [frontend] Stories page: wire stories table
 - [ ] [data,user-action] Add real place images
