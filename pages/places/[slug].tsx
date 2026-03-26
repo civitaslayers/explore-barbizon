@@ -2,7 +2,11 @@ import Head from "next/head";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 import { getAllPlaces, type Place } from "@/data/places";
-import { getPublishedLocations, getPublishedSlugs } from "@/lib/supabase";
+import {
+  getLocationBySlug,
+  getPublishedLocations,
+  getPublishedSlugs
+} from "@/lib/supabase";
 import { staticMapUrl, hasMapbox } from "@/lib/mapbox";
 
 function haversineKm(
@@ -67,108 +71,139 @@ const PlacePage: NextPage<PlacePageProps> = ({
         <meta property="og:type" content="website" />
         {ogUrl ? <meta property="og:url" content={ogUrl} /> : null}
       </Head>
-      <article className="space-y-12 md:space-y-16 xl:space-y-20">
-        {/* Hero image and title */}
-        <section className="overflow-hidden rounded-3xl bg-ink shadow-[0_24px_48px_-12px_rgba(17,17,17,0.18)] ring-1 ring-ink/10">
-          <div className="relative h-64 md:h-80 lg:h-96 xl:h-[26rem]">
+      <article className="space-y-14 md:space-y-20 lg:space-y-24 xl:space-y-28">
+        <p className="text-xs text-ink/50">
+          <Link href="/places" className="no-underline hover:text-ink">
+            ← Places
+          </Link>
+        </p>
+
+        {/* Hero: atlas plate, calm framing */}
+        <header className="overflow-hidden rounded-2xl border border-ink/10 bg-ink shadow-card md:rounded-[1.75rem]">
+          <div className="relative h-[17rem] sm:h-72 md:h-[22rem] lg:h-[26rem] xl:h-[30rem]">
             <div
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.82] mix-blend-multiply"
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.78] mix-blend-multiply"
               style={{ backgroundImage: `url(${heroImage})` }}
+              aria-hidden
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-ink/92 via-ink/55 to-ink/25" />
-            <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10" />
-            <div className="fade-in-hero relative z-10 flex h-full items-end p-6 md:p-9 lg:p-10 xl:p-12">
-              <div className="max-w-xl space-y-3 text-cream md:max-w-2xl xl:max-w-3xl">
-                <p className="eyebrow text-cream/70">
-                  {place.category}
-                </p>
-                <h1 className="heading-xl text-cream">
-                  {place.name}
-                </h1>
-                <p className="text-[11px] uppercase tracking-[0.22em] text-cream/75">
-                  {place.location}
-                </p>
+            <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/50 to-ink/20" />
+            <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/[0.06]" />
+            <div className="fade-in-hero relative z-10 flex h-full flex-col justify-end p-6 md:p-9 lg:p-11 xl:p-14">
+              <div className="max-w-3xl space-y-4 text-cream xl:max-w-[40rem]">
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-cream/15 pb-4">
+                  <p className="eyebrow text-cream/60">{place.category}</p>
+                  <span className="hidden text-cream/25 sm:inline" aria-hidden>
+                    ·
+                  </span>
+                  <p className="font-sans text-[11px] uppercase tracking-[0.22em] text-cream/65">
+                    {place.location}
+                  </p>
+                </div>
+                <h1 className="heading-xl text-cream">{place.name}</h1>
               </div>
             </div>
           </div>
-        </section>
+        </header>
 
-        {/* About + Map layout */}
-        <section className="grid gap-12 md:grid-cols-[minmax(0,2.3fr)_minmax(0,2fr)] md:items-start md:gap-10 xl:gap-16">
-          {/* About this place & Historical context */}
-          <div className="space-y-12 md:space-y-14">
-            <section className="editorial-measure space-y-5">
-              <p className="eyebrow">ABOUT THIS PLACE</p>
-              <h2 className="heading-lg">{place.shortDescription}</h2>
-              <div className="space-y-4 text-sm leading-relaxed text-ink/85 md:text-base md:leading-relaxed xl:text-[1.0625rem] xl:leading-[1.65]">
-                <p>{place.description}</p>
+        <section className="grid gap-14 md:grid-cols-[minmax(0,1fr)_minmax(0,19.5rem)] md:items-start md:gap-12 lg:gap-16 xl:grid-cols-[minmax(0,1fr)_minmax(0,21rem)] xl:gap-20">
+          <div className="space-y-14 md:space-y-16 lg:space-y-20">
+            <section className="editorial-measure space-y-8">
+              <p className="font-serif text-[1.35rem] leading-[1.38] tracking-tight text-ink md:text-[1.5rem] md:leading-[1.36] lg:text-[1.65rem]">
+                {place.shortDescription}
+              </p>
+
+              <div className="space-y-4">
+                <p className="eyebrow">Description</p>
+                <div className="space-y-5 text-sm leading-[1.72] text-ink/88 md:text-base md:leading-[1.75] xl:text-[1.0625rem] xl:leading-[1.72]">
+                  <p>{place.description}</p>
+                </div>
               </div>
             </section>
 
-            <section className="editorial-measure space-y-4 border-t border-ink/10 pt-10 md:pt-12">
-              <p className="eyebrow">HISTORICAL CONTEXT</p>
-              <div className="space-y-4 text-sm leading-relaxed text-ink/80 md:text-base xl:text-[1.0625rem] xl:leading-[1.65]">
-                <p>
+            <section className="editorial-measure space-y-5 border-t border-ink/10 pt-12 md:pt-14 lg:pt-16">
+              <p className="eyebrow">Historical context</p>
+              <blockquote className="border-l-[3px] border-ink/15 pl-5 md:pl-7">
+                <p className="text-sm leading-[1.72] text-ink/78 md:text-base md:leading-[1.75] xl:text-[1.0625rem] xl:leading-[1.72]">
                   {place.history ??
                     "This location is part of the wider field of Barbizon, where artists, walkers, and residents have long negotiated the boundary between village and forest. In time, this section will gather archival notes, excerpts from letters, and early guidebook descriptions that fix this place in a particular light."}
                 </p>
-              </div>
+              </blockquote>
             </section>
           </div>
 
-          {/* Map preview and meta */}
-          <aside className="space-y-6">
-            <section className="card space-y-4 p-5 md:p-6">
-              <p className="eyebrow">MAP PREVIEW</p>
-              <div className="relative h-44 overflow-hidden rounded-2xl bg-ink/[0.04] ring-1 ring-ink/10 md:h-52 xl:h-56">
+          <aside className="space-y-8 md:pt-1">
+            <div className="space-y-5 border-t border-ink/10 pt-6 md:border-t-0 md:pt-0">
+              <p className="eyebrow">Orientation</p>
+              <dl className="grid gap-5 text-xs leading-relaxed">
+                <div>
+                  <dt className="text-[10px] uppercase tracking-[0.28em] text-ink/40">
+                    Category
+                  </dt>
+                  <dd className="mt-1.5 font-serif text-sm text-ink/90">
+                    {place.category}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[10px] uppercase tracking-[0.28em] text-ink/40">
+                    Location
+                  </dt>
+                  <dd className="mt-1.5 text-ink/80">{place.location}</dd>
+                </div>
+                <div>
+                  <dt className="text-[10px] uppercase tracking-[0.28em] text-ink/40">
+                    Coordinates
+                  </dt>
+                  <dd className="mt-1.5 font-mono text-[11px] text-ink/75 tabular-nums">
+                    {place.latitude.toFixed(3)}, {place.longitude.toFixed(3)}
+                  </dd>
+                </div>
+              </dl>
+              <p className="text-[11px] leading-relaxed text-ink/50">
+                One index point in the Barbizon atlas—selected for clarity on
+                the ground and in the archive.
+              </p>
+            </div>
+
+            <section className="space-y-4 border-t border-ink/10 pt-8">
+              <p className="eyebrow">On the map</p>
+              <div className="relative h-40 overflow-hidden rounded-xl bg-ink/[0.03] ring-1 ring-ink/8 md:h-48 xl:h-52">
                 {hasMapbox ? (
                   <img
-                    src={staticMapUrl(place.longitude, place.latitude, 600, 400, 15)}
+                    src={staticMapUrl(
+                      place.longitude,
+                      place.latitude,
+                      640,
+                      420,
+                      15
+                    )}
                     alt={`Map showing location of ${place.name}`}
                     className="h-full w-full object-cover object-center"
                   />
                 ) : (
-                  <div className="flex h-full items-center justify-center rounded-2xl border border-dashed border-ink/25 bg-[radial-gradient(circle_at_top,_#f5f1e8,_#d6d0c3)] text-[11px] text-ink/60">
-                    Map unavailable
+                  <div className="flex h-full items-center justify-center bg-[radial-gradient(circle_at_top,_#f5f1e8,_#e8e2d6)] text-[11px] text-ink/55">
+                    Map preview unavailable
                   </div>
                 )}
               </div>
-              <div className="space-y-1 text-xs text-ink/70">
-                <div>
-                  Coordinates:{" "}
-                  <span className="font-mono">
-                    {place.latitude.toFixed(3)}, {place.longitude.toFixed(3)}
-                  </span>
-                </div>
-                <div>
-                  View on{" "}
-                  <Link
-                    href="/map"
-                    className="underline-offset-4 hover:underline"
-                  >
-                    Explore Map
-                  </Link>
-                  .
-                </div>
-              </div>
-            </section>
-
-            <section className="space-y-2 text-xs text-ink/70">
-              <p>Category: {place.category}</p>
-              <p>Positioned within the Explore Barbizon atlas as one of a small number of carefully selected coordinates.</p>
+              <p className="text-xs text-ink/60">
+                <Link href="/map" className="underline-offset-4 hover:underline">
+                  Open the full map
+                </Link>
+              </p>
             </section>
           </aside>
         </section>
 
         {/* Related + nearby (discovery) */}
         {(relatedPlaces.length > 0 || nearbyPlaces.length > 0) && (
-          <div className="space-y-14 border-t border-ink/10 pt-12 md:space-y-16 md:pt-16 xl:space-y-20 xl:pt-20">
+          <div className="space-y-16 border-t border-ink/10 pt-14 md:space-y-20 md:pt-16 lg:space-y-24 lg:pt-20 xl:pt-24">
             {relatedPlaces.length > 0 && (
-              <section className="space-y-7 md:space-y-8">
-                <header className="editorial-measure space-y-2">
-                  <p className="eyebrow">RELATED PLACES</p>
-                  <h2 className="heading-lg">
-                    Other {place.category.toLowerCase()}s in the atlas.
+              <section className="space-y-8 md:space-y-10">
+                <header className="editorial-measure max-w-2xl space-y-3">
+                  <p className="eyebrow">Related places</p>
+                  <h2 className="heading-lg text-ink/95">
+                    Additional locations in the{" "}
+                    <span className="text-ink">{place.category}</span> group.
                   </h2>
                 </header>
                 <div className="grid gap-5 sm:gap-6 md:grid-cols-3 xl:gap-8">
@@ -197,11 +232,11 @@ const PlacePage: NextPage<PlacePageProps> = ({
             )}
 
             {nearbyPlaces.length > 0 && (
-              <section className="space-y-7 md:space-y-8">
-                <header className="editorial-measure space-y-2">
-                  <p className="eyebrow">NEARBY LOCATIONS</p>
-                  <h2 className="heading-lg">
-                    Places within walking distance in the village and forest.
+              <section className="space-y-8 md:space-y-10">
+                <header className="editorial-measure max-w-2xl space-y-3">
+                  <p className="eyebrow">Nearby</p>
+                  <h2 className="heading-lg text-ink/95">
+                    Within reach on foot—village lanes and forest edge.
                   </h2>
                 </header>
                 <div className="grid gap-5 text-sm text-ink/80 sm:gap-6 md:grid-cols-3 xl:gap-8">
@@ -233,11 +268,6 @@ const PlacePage: NextPage<PlacePageProps> = ({
           </div>
         )}
 
-        <div className="text-xs text-ink/60">
-          <Link href="/places" className="underline-offset-4 hover:underline">
-            ← Back to all places
-          </Link>
-        </div>
       </article>
     </>
   );
@@ -265,11 +295,10 @@ export const getStaticProps: GetStaticProps<PlacePageProps> = async ({
   }
 
   try {
-    // Fetch all published locations once; derive related + nearby from the set
-    const allPlaces = await getPublishedLocations();
-    const place = allPlaces.find((p) => p.slug === slug);
-
+    const place = await getLocationBySlug(slug);
     if (!place) return { notFound: true };
+
+    const allPlaces = await getPublishedLocations();
 
     const relatedPlaces = allPlaces
       .filter((p) => p.slug !== slug && p.category === place.category)

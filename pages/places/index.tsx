@@ -3,7 +3,7 @@ import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 import { useState, useMemo } from "react";
 import { getAllPlaces, type Place } from "@/data/places";
-import { getEditorialLocations } from "@/lib/supabase";
+import { getPublishedLocations } from "@/lib/supabase";
 import { staticMapUrl, hasMapbox } from "@/lib/mapbox";
 
 type PlacesIndexProps = {
@@ -113,7 +113,7 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({ places }) => {
 
 export const getStaticProps: GetStaticProps<PlacesIndexProps> = async () => {
   try {
-    const places = await getEditorialLocations();
+    const places = await getPublishedLocations();
     return { props: { places }, revalidate: 60 };
   } catch {
     return { props: { places: getAllPlaces() }, revalidate: 60 };

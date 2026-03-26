@@ -1,35 +1,53 @@
 import Head from "next/head";
 import Link from "next/link";
-import { type NextPage } from "next";
+import type { GetStaticProps, NextPage } from "next";
+import { getAllPlaces, type Place } from "@/data/places";
+import { getPublishedLocations } from "@/lib/supabase";
 
-const featuredPlaces = [
-  {
-    slug: "maison-millet",
-    name: "Maison Millet",
-    description: "The former home of Jean‑François Millet, now a quiet landmark on the village street.",
-    image: "/images/places/maison-millet.jpg"
-  },
-  {
-    slug: "auberge-ganne",
-    name: "Auberge Ganne",
-    description: "An inn turned museum, where walls once held sketches and evening conversations.",
-    image: "/images/places/auberge-ganne.jpg"
-  },
-  {
-    slug: "grande-rue",
-    name: "Grande Rue",
-    description: "The main street as a long, slow axis between stone houses and forest air.",
-    image: "/images/places/grande-rue.jpg"
-  },
-  {
-    slug: "forest-entrance",
-    name: "Forest Entrance",
-    description: "Where village paving gives way to sand paths, rock, and filtered light.",
-    image: "/images/places/forest-entrance.jpg"
+/** Prefer these slugs when present in published data (matches legacy static atlas). */
+const PREFERRED_FEATURED_SLUGS = [
+  "maison-millet",
+  "auberge-ganne",
+  "grande-rue",
+  "forest-entrance"
+] as const;
+
+type FeaturedPlaceCard = {
+  slug: string;
+  name: string;
+  description: string;
+  image: string;
+};
+
+function heroImageForSlug(slug: string): string {
+  const p = getAllPlaces().find((x) => x.slug === slug);
+  return p?.heroImage ?? "/images/places/place-default.jpg";
+}
+
+function buildFeaturedPlaces(places: Place[]): FeaturedPlaceCard[] {
+  const bySlug = new Map(places.map((p) => [p.slug, p]));
+  const picked: Place[] = [];
+  for (const slug of PREFERRED_FEATURED_SLUGS) {
+    const p = bySlug.get(slug);
+    if (p) picked.push(p);
   }
-];
+  for (const p of places) {
+    if (picked.length >= 4) break;
+    if (!picked.some((x) => x.slug === p.slug)) picked.push(p);
+  }
+  return picked.slice(0, 4).map((p) => ({
+    slug: p.slug,
+    name: p.name,
+    description: p.shortDescription,
+    image: heroImageForSlug(p.slug)
+  }));
+}
 
-const HomePage: NextPage = () => {
+type HomePageProps = {
+  featuredPlaces: FeaturedPlaceCard[];
+};
+
+const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
   return (
     <>
       <Head>
@@ -281,6 +299,22 @@ const HomePage: NextPage = () => {
       </div>
     </>
   );
+};
+
+export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
+  try {
+    const places = await getPublishedLocations();
+    return {
+      props: { featuredPlaces: buildFeaturedPlaces(places) },
+      revalidate: 60
+    };
+  } catch {
+    const places = getAllPlaces();
+    return {
+      props: { featuredPlaces: buildFeaturedPlaces(places) },
+      revalidate: 60
+    };
+  }
 };
 
 export default HomePage;
