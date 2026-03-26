@@ -1,3 +1,53 @@
+## 🎯 Current Focus — Explore Barbizon V1
+
+Priority is now strictly on the **public product experience**, not Command Center or schema expansion.
+
+### Recently Completed
+
+- [x] Places index wired to live Supabase data
+- [x] Place detail pages wired to live Supabase data (by slug)
+- [x] Homepage → product navigation cleaned (CTAs + featured places)
+- [x] Place detail page refined to editorial “quiet atlas” design
+
+---
+
+### Immediate Next (High Impact)
+
+1. **Assets (CRITICAL)**
+   - Add `/public/videos/hero-barbizon.mp4`
+   - Add real `/public/images/places/*.jpg`
+   - Replace placeholder visuals across homepage and place pages
+
+2. **Tours — Live Data Wiring**
+   - Connect `/tours/[slug]` to Supabase:
+     - `tours`
+     - `tour_stops`
+     - use `distance_meters`
+     - use `stop_narrative`
+
+3. **Tour Page Refinement**
+   - Apply same editorial design logic as place pages
+   - Improve narrative flow and stop sequence readability
+
+---
+
+### Next (After Above)
+
+- Forest & Nature layer population (first 5–10 key points)
+- Map refinement (after tours + assets)
+- Homepage visual polish (after real assets are in place)
+
+---
+
+### Paused / Deprioritized
+
+- Command Center (CCC) improvements
+- AI abstraction layer
+- Multi-town architecture
+- Schema expansion (stories, artists, visual_works, etc.)
+
+These resume only after Barbizon V1 feels complete.
+
 # Task Queue
 
 Last updated: 2026-03-25
@@ -19,10 +69,10 @@ Task tags:
 ## Now
 *Unblocked tasks that can be started immediately.*
 
-- [ ] [infra,user-action] Set TAVILY_API_KEY in shell env
-- [ ] [infra,user-action] Run show_in_editorial SQL migration
-- [ ] [frontend] Place page visual refinement
-- [ ] [frontend] Large-screen layout width refinement
+- [x] [infra,user-action] Set TAVILY_API_KEY in shell env
+- [x] [infra,user-action] Run show_in_editorial SQL migration
+- [x] [frontend] Place page visual refinement
+- [x] [frontend] Large-screen layout width refinement
 - [ ] [schema] Finish populating Forest & Nature category
 
 ---
