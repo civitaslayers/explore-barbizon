@@ -128,6 +128,7 @@ const PlacePage: NextPage<PlacePageProps> = ({
                     "This location is part of the wider field of Barbizon, where artists, walkers, and residents have long negotiated the boundary between village and forest. In time, this section will gather archival notes, excerpts from letters, and early guidebook descriptions that fix this place in a particular light."}
                 </p>
               </blockquote>
+              {place.history && <p className="mt-4 text-[11px] text-ink/40">Historical research: <a href="https://www.grappilles.fr" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-ink/60">grappilles.fr</a> — Barbizon Histoire et Patrimoine</p>}
             </section>
           </div>
 
