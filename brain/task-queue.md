@@ -1,59 +1,8 @@
-## 🎯 Current Focus — Explore Barbizon V1
-
-Priority is now strictly on the **public product experience**, not Command Center or schema expansion.
-
-### Recently Completed
-
-- [x] Places index wired to live Supabase data
-- [x] Place detail pages wired to live Supabase data (by slug)
-- [x] Homepage → product navigation cleaned (CTAs + featured places)
-- [x] Place detail page refined to editorial “quiet atlas” design
-
----
-
-### Immediate Next (High Impact)
-
-1. **Assets (CRITICAL)**
-   - Add `/public/videos/hero-barbizon.mp4`
-   - Add real `/public/images/places/*.jpg`
-   - Replace placeholder visuals across homepage and place pages
-
-2. **Tours — Live Data Wiring**
-   - Connect `/tours/[slug]` to Supabase:
-     - `tours`
-     - `tour_stops`
-     - use `distance_meters`
-     - use `stop_narrative`
-
-3. **Tour Page Refinement**
-   - Apply same editorial design logic as place pages
-   - Improve narrative flow and stop sequence readability
-
----
-
-### Next (After Above)
-
-- Forest & Nature layer population (first 5–10 key points)
-- Map refinement (after tours + assets)
-- Homepage visual polish (after real assets are in place)
-
----
-
-### Paused / Deprioritized
-
-- Command Center (CCC) improvements
-- AI abstraction layer
-- Multi-town architecture
-- Schema expansion (stories, artists, visual_works, etc.)
-
-These resume only after Barbizon V1 feels complete.
-
 # Task Queue
 
 Last updated: 2026-03-26
 
 Tasks are ordered by priority within each section.
-Move tasks between sections as status changes.
 Update this file whenever work is completed or blockers are resolved.
 
 Task tags:
@@ -69,7 +18,7 @@ Task tags:
 ## Now
 *Unblocked tasks that can be started immediately.*
 
-- [ ] [data,sql] Write Art & History narratives — Maison de Millet and Ferme du Couvent (grappilles.fr source)
+- [ ] [data,sql] Write Art & History narratives — Auberge Ganne, Chapelle, Maison Diaz, Parcours Mosaiques, Plaine Angelus
 - [ ] [data,sql] Fix Boucherie de l'Angelus description — remove fromagerie reference
 - [ ] [data,user-action] Verify and insert 3 pending ESS locations (78 Grande Rue gallery, Les Charmettes glass artisan)
 
@@ -78,7 +27,7 @@ Task tags:
 ## Next
 *Unblocked after Now tasks or after a specific blocker is resolved.*
 
-- [ ] [data,sql] Write remaining Art & History narratives (all 24 locations)
+- [ ] [data,sql] Write remaining Art & History narratives (all 21 locations)
 - [ ] [data,user-action] French translations of all narratives
 - [ ] [data,user-action] Credit grappilles.fr as source on platform
 - [ ] [frontend,user-action] Add real hero video asset (`/public/videos/hero-barbizon.mp4`)
