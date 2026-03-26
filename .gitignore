@@ -4,4 +4,6 @@ node_modules
 .env.local
 .env.*.local
 .DS_Store
-.claude/settings.local.jsontsconfig.tsbuildinfo
+.claude/settings.local.json
+.claude/worktrees/
+tsconfig.tsbuildinfo
