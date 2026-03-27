@@ -5,20 +5,20 @@ import type { Place } from "@/data/places";
 import { getCategoryGroup, GROUP_COLORS } from "@/lib/categoryGroups";
 
 // ---------------------------------------------------------------------------
-// SVG icons — one per category type, 32×32 viewBox
+// SVG icons — teardrop pin, 28×36 viewBox; glyph in head circle ~center (14,13)
 // ---------------------------------------------------------------------------
 
 const C = "#F5F1E8"; // cream
 
 const icon = (fill: string, content: string) =>
-  `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">` +
-  `<circle cx="16" cy="16" r="15" fill="${fill}" stroke="${C}" stroke-width="2"/>` +
+  `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">` +
+  `<path d="M14 1C7.373 1 2 6.373 2 13c0 9 12 22 12 22S26 22 26 13C26 6.373 20.627 1 14 1Z" fill="${fill}" stroke="${C}" stroke-width="1.5"/>` +
   content +
   `</svg>`;
 
-// Shared wrapper: stroked, round caps/joins, no fill
+// Glyph group: shift legacy 32×32-centered paths from (16,16) to (14,13)
 const g = (inner: string) =>
-  `<g stroke="${C}" stroke-linecap="round" stroke-linejoin="round" fill="none">${inner}</g>`;
+  `<g stroke="${C}" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" fill="none" transform="translate(-2, -3)">${inner}</g>`;
 
 const AH = GROUP_COLORS["Art & History"];
 const ES = GROUP_COLORS["Eat & Stay"];
@@ -63,6 +63,28 @@ const ICON_SVGS: Record<string, string> = {
     `<path stroke-width="1.8" d="M9 18L9 14Q9 13 10 13L22 13Q23 13 23 14L23 18"/>` +
     `<rect stroke-width="1.5" x="11" y="14" width="5.5" height="4" rx="1.5"/>`
   )),
+  "eb-shop": icon(ES, g(
+    `<path stroke-width="1.8" d="M9 13L10.5 9H21.5L23 13H9Z"/>` +
+    `<rect stroke-width="1.8" x="9" y="13" width="14" height="10" rx="1"/>` +
+    `<path stroke-width="1.8" d="M13 13Q13 16 16 16Q19 16 19 13"/>`
+  )),
+  "eb-food-shop": icon(ES, g(
+    `<rect stroke-width="1.8" x="8" y="11" width="16" height="12" rx="1.5"/>` +
+    `<path stroke-width="1.8" d="M8 15H24"/>` +
+    `<line stroke-width="1.8" x1="13" y1="15" x2="13" y2="23"/>` +
+    `<line stroke-width="1.8" x1="19" y1="15" x2="19" y2="23"/>`
+  )),
+  "eb-heritage": icon(AH, g(
+    `<rect stroke-width="1.8" x="9" y="10" width="14" height="12" rx="1"/>` +
+    `<line stroke-width="1.5" x1="12" y1="14" x2="20" y2="14"/>` +
+    `<line stroke-width="1.5" x1="12" y1="17" x2="20" y2="17"/>` +
+    `<line stroke-width="1.5" x1="12" y1="20" x2="17" y2="20"/>` +
+    `<line stroke-width="1.8" x1="9" y1="23" x2="23" y2="23"/>`
+  )),
+  "eb-monument": icon(AH, g(
+    `<path stroke-width="1.8" d="M16 9L19.5 23H12.5L16 9Z"/>` +
+    `<line stroke-width="1.8" x1="11" y1="23" x2="21" y2="23"/>`
+  )),
 
   // ── Forest & Nature ────────────────────────────────────────────────────────
   // Tree: triangle crown + trunk
@@ -90,7 +112,9 @@ const ICON_SVGS: Record<string, string> = {
   )),
   // Info: filled dot + serif stem
   "eb-info": icon(PR,
+    `<g transform="translate(-2, -3)">` +
     `<circle cx="16" cy="11" r="1.8" fill="${C}"/>` +
+    `</g>` +
     g(
       `<line stroke-width="2" x1="14" y1="15" x2="18" y2="15"/>` +
       `<line stroke-width="2" x1="16" y1="15" x2="16" y2="22"/>` +
@@ -112,22 +136,22 @@ const CATEGORY_ICON: Record<string, string> = {
   "Artist House":        "eb-gallery",
   "Museum":              "eb-museum",
   "Heritage Site":       "eb-museum",
-  "Heritage Plaque":     "eb-museum",
+  "Heritage Plaque":     "eb-heritage",
   "Open-Air Museum":     "eb-museum",
-  "Historic Paint Spot": "eb-museum",
+  "Historic Paint Spot": "eb-heritage",
   "Galerie d'Art":       "eb-gallery",
-  "Point of Interest":   "eb-museum",
-  "Cemetery":            "eb-museum",
+  "Point of Interest":   "eb-monument",
+  "Cemetery":            "eb-monument",
   "Art & History":       "eb-museum",
   // Eat & Stay
   "Restaurant":          "eb-restaurant",
-  "Boucherie":           "eb-restaurant",
-  "Boulangerie":         "eb-restaurant",
-  "Fromagerie":          "eb-restaurant",
-  "Epicerie":            "eb-restaurant",
-  "Traiteur":            "eb-restaurant",
-  "Boutique":            "eb-restaurant",
-  "Tabac / Presse":      "eb-restaurant",
+  "Boucherie":           "eb-food-shop",
+  "Boulangerie":         "eb-food-shop",
+  "Fromagerie":          "eb-food-shop",
+  "Epicerie":            "eb-food-shop",
+  "Traiteur":            "eb-food-shop",
+  "Boutique":            "eb-shop",
+  "Tabac / Presse":      "eb-shop",
   "Eat, Stay & Shop":    "eb-restaurant",
   "Salon de the":        "eb-cafe",
   "Hotel":               "eb-hotel",
@@ -190,7 +214,7 @@ function loadSVGImage(
   size: number
 ): Promise<void> {
   return new Promise((resolve, reject) => {
-    const img = new Image(size, size);
+    const img = new Image(28, 36);
     img.onload = () => {
       if (!map.hasImage(id)) map.addImage(id, img);
       resolve();
@@ -234,7 +258,7 @@ export default function MapGL({ locations }: Props) {
       // Load all SVG icons before adding layers
       await Promise.all(
         Object.entries(ICON_SVGS).map(
-          ([id, svg]) => loadSVGImage(map, id, svg, 32)
+          ([id, svg]) => loadSVGImage(map, id, svg, 36)
         )
       );
 
