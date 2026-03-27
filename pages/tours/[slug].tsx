@@ -18,7 +18,7 @@ const TourPage: NextPage<TourPageProps> = ({ tour, places }) => {
   return (
     <>
       <Head>
-        <title>{tour.title} — Explore Barbizon</title>
+        <title>{tour.title} — Visit Barbizon</title>
       </Head>
       <article className="space-y-10">
         <header className="editorial-measure space-y-3">

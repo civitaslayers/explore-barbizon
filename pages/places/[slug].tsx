@@ -55,7 +55,7 @@ const PlacePage: NextPage<PlacePageProps> = ({
     place.heroImage ?? "/images/places/place-default.jpg";
 
   const siteBase = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "";
-  const pageTitle = `${place.name} — Explore Barbizon`;
+  const pageTitle = `${place.name} — Visit Barbizon`;
   const metaDescription = place.shortDescription;
   const ogImageUrl = openGraphImageUrl(place, heroImage, hasMapbox, siteBase);
   const ogUrl = siteBase ? `${siteBase}/places/${place.slug}` : "";

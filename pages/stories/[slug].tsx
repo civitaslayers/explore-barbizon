@@ -84,7 +84,7 @@ const StoryPage: NextPage<StoryPageProps> = ({ story }) => {
   return (
     <>
       <Head>
-        <title>{story.title} — Stories — Explore Barbizon</title>
+        <title>{story.title} — Stories — Visit Barbizon</title>
         <meta name="description" content={story.dek} />
       </Head>
 

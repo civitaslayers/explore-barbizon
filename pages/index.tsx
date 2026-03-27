@@ -51,7 +51,7 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
   return (
     <>
       <Head>
-        <title>Explore Barbizon — Cultural Cartography</title>
+        <title>Visit Barbizon — Cultural Cartography</title>
       </Head>
 
       <div className="section-stack">
@@ -74,7 +74,7 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
               VILLAGE AT THE EDGE OF FONTAINEBLEAU
             </p>
             <h1 className="heading-xl text-cream">
-              Explore Barbizon
+              Visit Barbizon
             </h1>
             <div className="flex flex-wrap gap-3 pt-2">
               <Link
@@ -247,7 +247,7 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
           </header>
           <div className="editorial-measure space-y-4 text-sm leading-relaxed text-ink/80 md:text-base">
             <p>
-              Alongside contemporary photographs and maps, Explore Barbizon will
+              Alongside contemporary photographs and maps, Visit Barbizon will
               draw on historical postcards, guidebooks, and archival images. The
               village has been looked at and described for over a century; this
               project gathers some of those ways of seeing.

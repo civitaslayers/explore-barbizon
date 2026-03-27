@@ -50,7 +50,7 @@ const StoriesIndexPage: NextPage<StoriesIndexProps> = ({ stories }) => {
   return (
     <>
       <Head>
-        <title>Stories — Explore Barbizon</title>
+        <title>Stories — Visit Barbizon</title>
       </Head>
 
       <section className="space-y-10">

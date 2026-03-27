@@ -27,7 +27,7 @@ export function Layout({ children }: LayoutProps) {
             className="font-serif text-xs uppercase tracking-[0.26em] text-ink md:text-sm"
             onClick={() => setMenuOpen(false)}
           >
-            Explore Barbizon
+            Visit Barbizon
           </Link>
 
           {/* Desktop nav */}
@@ -89,7 +89,7 @@ export function Layout({ children }: LayoutProps) {
       <footer className="border-t border-ink/10 bg-cream/95">
         <div className="container max-w-content flex flex-col gap-8 py-10 text-xs text-ink/70 md:flex-row md:items-end md:justify-between">
           <div className="space-y-1">
-            <div className="font-serif text-sm text-ink">Explore Barbizon</div>
+            <div className="font-serif text-sm text-ink">Visit Barbizon</div>
             <div className="text-[11px] uppercase tracking-[0.22em]">
               Powered by Civitas Layers
             </div>

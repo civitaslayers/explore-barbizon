@@ -55,7 +55,7 @@ const MapPage: NextPage<MapPageProps> = ({ locations }) => {
   return (
     <>
       <Head>
-        <title>Explore Map — Explore Barbizon</title>
+        <title>Explore Map — Visit Barbizon</title>
       </Head>
 
       {/* Map container — fills the viewport below the nav */}

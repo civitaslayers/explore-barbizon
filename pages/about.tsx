@@ -5,7 +5,7 @@ const AboutPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>About — Explore Barbizon</title>
+        <title>About — Visit Barbizon</title>
       </Head>
       <section className="space-y-8">
         <header className="editorial-measure space-y-4">
@@ -19,7 +19,7 @@ const AboutPage: NextPage = () => {
 
         <div className="editorial-measure space-y-4 text-sm leading-relaxed text-ink/80 md:text-base">
           <p>
-            Explore Barbizon is a slow, editorial guide to a village on the edge
+            Visit Barbizon is a slow, editorial guide to a village on the edge
             of the Fontainebleau forest. It treats Barbizon less as a list of
             attractions and more as a field of relationships: studios and paths,
             weather and stone, rooms and routes.
@@ -31,7 +31,7 @@ const AboutPage: NextPage = () => {
             landscape over time.
           </p>
           <p>
-            Explore Barbizon is powered by Civitas Layers, a platform for
+            Visit Barbizon is powered by Civitas Layers, a platform for
             layered, place‑based narratives.
           </p>
         </div>

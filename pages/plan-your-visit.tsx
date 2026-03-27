@@ -13,7 +13,7 @@ const PlanYourVisitPage: NextPage<PlanPageProps> = ({ places, tours }) => {
   return (
     <>
       <Head>
-        <title>Plan Your Visit — Explore Barbizon</title>
+        <title>Plan Your Visit — Visit Barbizon</title>
       </Head>
 
       <section className="space-y-10">

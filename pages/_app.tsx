@@ -8,7 +8,7 @@ import "@/styles/globals.css";
 import { Layout } from "@/components/Layout";
 
 const DEFAULT_SITE_DESCRIPTION =
-  "Explore Barbizon — a curated cultural guide to the forest-edge village that inspired generations of artists.";
+  "Visit Barbizon — a curated cultural guide to the forest-edge village that inspired generations of artists.";
 
 const inter = Inter({
   subsets: ["latin"],

@@ -29,7 +29,7 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({ places }) => {
   return (
     <>
       <Head>
-        <title>Places — Explore Barbizon</title>
+        <title>Places — Visit Barbizon</title>
       </Head>
 
       <section className="space-y-10 xl:space-y-12">
