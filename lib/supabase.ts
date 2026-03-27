@@ -87,15 +87,24 @@ function toPlace(row: LocationRow): Place {
 export async function getPublishedLocations(): Promise<Place[]> {
   if (!supabase) throw new Error("Supabase not configured");
 
+  // Step 1: get all non-practical category IDs
+  const { data: cats } = await supabase
+    .from("categories")
+    .select("id")
+    .neq("layer", "Practical");
+
+  const allowedIds = (cats ?? []).map((c: { id: string }) => c.id);
+
+  // Step 2: fetch locations filtered to those categories
   const { data, error } = await supabase
     .from("locations")
     .select("*, categories(name)")
     .eq("is_published", true)
+    .in("category_id", allowedIds)
     .order("name");
 
   if (error) throw new Error(error.message);
   if (!data || data.length === 0) throw new Error("No published locations");
-
   return (data as LocationRow[]).map(toPlace);
 }
 
