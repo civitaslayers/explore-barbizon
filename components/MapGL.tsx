@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import type { Place } from "@/data/places";
+import type { Route } from "@/lib/supabase";
 import { getCategoryGroup, GROUP_COLORS } from "@/lib/categoryGroups";
 
 // ---------------------------------------------------------------------------
@@ -240,6 +241,27 @@ function buildGeoJSON(locations: Place[]): GeoJSON.FeatureCollection {
   };
 }
 
+function buildRoutesGeoJSON(routes: Route[]): GeoJSON.FeatureCollection {
+  return {
+    type: "FeatureCollection",
+    features: routes.map((r) => ({
+      type: "Feature",
+      geometry: r.geojson,
+      properties: {
+        id: r.id,
+        name: r.name,
+        slug: r.slug,
+        description: r.description ?? "",
+        distance_meters: r.distance_meters ?? 0,
+        duration_minutes: r.duration_minutes ?? 0,
+        difficulty: r.difficulty ?? "moderate",
+        start_lat: r.start_lat,
+        start_lng: r.start_lng,
+      },
+    })),
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Load a single SVG string as a Mapbox image
 // ---------------------------------------------------------------------------
@@ -265,11 +287,12 @@ function loadSVGImage(
 // Component
 // ---------------------------------------------------------------------------
 
-type Props = { locations: Place[] };
+type Props = { locations: Place[]; routes: Route[] };
 
-export default function MapGL({ locations }: Props) {
+export default function MapGL({ locations, routes }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
+  const routesRef = useRef<Route[]>([]);
 
   // Initialise map — runs once on mount
   useEffect(() => {
@@ -374,6 +397,106 @@ export default function MapGL({ locations }: Props) {
         },
       });
 
+      // ── Trail routes ──────────────────────────────────────────────────────
+      map.addSource("routes", {
+        type: "geojson",
+        data: buildRoutesGeoJSON(routes),
+      });
+
+      // Trail outline (slightly wider, darker — gives depth)
+      map.addLayer({
+        id: "route-outline",
+        type: "line",
+        source: "routes",
+        layout: { "line-join": "round", "line-cap": "round" },
+        paint: {
+          "line-color": "#2D4A1E",
+          "line-width": 5,
+          "line-opacity": 0.35,
+        },
+      });
+
+      // Trail fill
+      map.addLayer({
+        id: "route-line",
+        type: "line",
+        source: "routes",
+        layout: { "line-join": "round", "line-cap": "round" },
+        paint: {
+          "line-color": "#4A5E3A",
+          "line-width": 3,
+          "line-opacity": 0.85,
+          "line-dasharray": [2, 1.5],
+        },
+      });
+
+      // Hover highlight
+      map.addLayer({
+        id: "route-hover",
+        type: "line",
+        source: "routes",
+        layout: { "line-join": "round", "line-cap": "round" },
+        paint: {
+          "line-color": "#F5F1E8",
+          "line-width": 4,
+          "line-opacity": 0,
+        },
+      });
+
+      // Trail click → popup with navigate button
+      map.on("click", "route-line", (e) => {
+        if (!e.features?.[0]) return;
+        const props = e.features[0].properties as {
+          name: string;
+          description: string;
+          distance_meters: number;
+          duration_minutes: number;
+          difficulty: string;
+          start_lat: number;
+          start_lng: number;
+        };
+        const km = props.distance_meters
+          ? (props.distance_meters / 1000).toFixed(1)
+          : "?";
+        const hrs = props.duration_minutes
+          ? Math.floor(props.duration_minutes / 60) + "h" +
+            (props.duration_minutes % 60 ? (props.duration_minutes % 60) + "m" : "")
+          : "?";
+        const mapsUrl = `https://maps.apple.com/?daddr=${props.start_lat},${props.start_lng}&dirflg=w`;
+        const gmapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${props.start_lat},${props.start_lng}&travelmode=walking`;
+
+        new mapboxgl.Popup({ offset: 12, maxWidth: "280px" })
+          .setLngLat(e.lngLat)
+          .setHTML(
+            `<div style="font-family:system-ui,sans-serif;padding:2px 0">` +
+            `<p style="font-size:10px;text-transform:uppercase;letter-spacing:0.2em;color:rgba(17,17,17,0.4);margin:0 0 5px">Trail · ${props.difficulty ?? "moderate"}</p>` +
+            `<h3 style="font-family:Georgia,serif;font-size:15px;font-weight:400;color:#111;margin:0 0 6px;line-height:1.3">${props.name}</h3>` +
+            `<p style="font-size:11px;color:rgba(17,17,17,0.55);margin:0 0 8px">${km} km · ${hrs} · Loop</p>` +
+            (props.description
+              ? `<p style="font-size:11px;color:rgba(17,17,17,0.6);margin:0 0 12px;line-height:1.5">${props.description.substring(0, 120)}…</p>`
+              : "") +
+            `<div style="display:flex;gap:6px">` +
+            `<a href="${mapsUrl}" target="_blank" style="flex:1;font-size:10px;text-transform:uppercase;letter-spacing:0.15em;color:#F5F1E8;background:#4A5E3A;padding:7px 10px;border-radius:20px;text-decoration:none;text-align:center">Apple Maps</a>` +
+            `<a href="${gmapsUrl}" target="_blank" style="flex:1;font-size:10px;text-transform:uppercase;letter-spacing:0.15em;color:#F5F1E8;background:#4A5E3A;padding:7px 10px;border-radius:20px;text-decoration:none;text-align:center">Google Maps</a>` +
+            `</div>` +
+            `</div>`
+          )
+          .addTo(map);
+      });
+
+      // Hover cursor + highlight
+      map.on("mouseenter", "route-line", () => {
+        map.getCanvas().style.cursor = "pointer";
+        map.setPaintProperty("route-hover", "line-opacity", 0.6);
+      });
+      map.on("mouseleave", "route-line", () => {
+        map.getCanvas().style.cursor = "";
+        map.setPaintProperty("route-hover", "line-opacity", 0);
+      });
+
+      // Store routes ref for later updates
+      routesRef.current = routes;
+
       // Cluster click → zoom in
       map.on("click", "clusters", async (e) => {
         const features = map.queryRenderedFeatures(e.point, {
@@ -447,6 +570,16 @@ export default function MapGL({ locations }: Props) {
     };
     map.isStyleLoaded() ? update() : map.once("load", update);
   }, [locations]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const update = () => {
+      const src = map.getSource("routes") as mapboxgl.GeoJSONSource | undefined;
+      src?.setData(buildRoutesGeoJSON(routes));
+    };
+    map.isStyleLoaded() ? update() : map.once("load", update);
+  }, [routes]);
 
   return <div ref={containerRef} className="h-full w-full" />;
 }

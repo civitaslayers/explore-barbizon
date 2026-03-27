@@ -3,7 +3,7 @@ import type { GetStaticProps, NextPage } from "next";
 import dynamic from "next/dynamic";
 import { useEffect, useState, useMemo } from "react";
 import { getAllPlaces, type Place } from "@/data/places";
-import { getPublishedLocations } from "@/lib/supabase";
+import { getPublishedLocations, getPublishedRoutes, type Route } from "@/lib/supabase";
 import {
   GROUP_NAMES,
   GROUP_DOT_TAILWIND,
@@ -23,9 +23,9 @@ const MapGL = dynamic(() => import("@/components/MapGL"), {
   ),
 });
 
-type MapPageProps = { locations: Place[] };
+type MapPageProps = { locations: Place[]; routes: Route[] };
 
-const MapPage: NextPage<MapPageProps> = ({ locations }) => {
+const MapPage: NextPage<MapPageProps> = ({ locations, routes }) => {
   const [activeGroups, setActiveGroups] = useState<GroupName[]>([
     "Art & History",
     "Eat & Stay",
@@ -76,7 +76,7 @@ const MapPage: NextPage<MapPageProps> = ({ locations }) => {
         <div className="relative h-full w-full">
           {/* Map — always full width/height */}
           <div className="absolute inset-0">
-            <MapGL locations={visibleLocations} />
+            <MapGL locations={visibleLocations} routes={routes} />
           </div>
 
           {/* Floating controls — top left */}
@@ -188,10 +188,13 @@ const MapPage: NextPage<MapPageProps> = ({ locations }) => {
 
 export const getStaticProps: GetStaticProps<MapPageProps> = async () => {
   try {
-    const locations = await getPublishedLocations();
-    return { props: { locations }, revalidate: 60 };
+    const [locations, routes] = await Promise.all([
+      getPublishedLocations(),
+      getPublishedRoutes(),
+    ]);
+    return { props: { locations, routes }, revalidate: 60 };
   } catch {
-    return { props: { locations: getAllPlaces() }, revalidate: 60 };
+    return { props: { locations: getAllPlaces(), routes: [] }, revalidate: 60 };
   }
 };
 

@@ -108,6 +108,30 @@ export async function getPublishedLocations(): Promise<Place[]> {
   return (data as LocationRow[]).map(toPlace);
 }
 
+export type Route = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  distance_meters: number | null;
+  duration_minutes: number | null;
+  difficulty: string | null;
+  geojson: GeoJSON.LineString;
+  start_lat: number;
+  start_lng: number;
+};
+
+export async function getPublishedRoutes(): Promise<Route[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("routes")
+    .select("id, name, slug, description, distance_meters, duration_minutes, difficulty, geojson, start_lat, start_lng")
+    .eq("is_published", true)
+    .order("name");
+  if (error) return [];
+  return (data ?? []) as Route[];
+}
+
 /**
  * Fetch published locations for the editorial places listing.
  * Excludes utility categories (Parking, Bus Stop, etc.) via categories.show_in_editorial.
