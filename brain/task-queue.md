@@ -19,50 +19,46 @@ Task tags:
 ## Now
 *Unblocked tasks that can be started immediately.*
 
-- [ ] [frontend] Swap "Explore Barbizon" → "Visit Barbizon" in Layout component (nav, footer, page titles)
-- [ ] [frontend] Exclude Practical category from /places Supabase query
-- [ ] [frontend] Map sidebar: make hidden by default, open only on pin click or filter activation
-- [ ] [data,user-action] Coordinate audit: export all locations, verify each against Google Maps, fix wrong pins
-- [ ] [frontend] Map icons: implement subcategory-level icon set (see design-direction.md icon matrix)
-- [ ] [schema] Finish populating Forest & Nature category
+- [ ] [data,user-action] Coordinate audit: export all locations from Supabase, verify each pin against Google Maps, fix wrong coordinates
+- [ ] [data,user-action] Add ESS pending items: unnamed gallery at 78 Grande Rue, La Dame aux Coquelicots, confirm Boucherie cheese offering
+- [ ] [schema] Finish populating Forest & Nature category and subcategories
 
 ---
 
 ## Next
 *Unblocked after Now tasks or after a specific blocker is resolved.*
 
+### Content (highest priority — biggest visible gap)
+- [ ] [data,user-action] Write first historical story: Maison de Millet (source: grappilles.fr)
+- [ ] [data,user-action] Write first historical story: Ferme du Couvent (source: grappilles.fr)
+- [ ] [data,user-action] Write first guide story: Where to sleep in Barbizon
+- [ ] [data,user-action] Write first guide story: Where to eat in Barbizon
+- [ ] [data,user-action] Begin writing Art & History narratives for published locations (target: all 24)
+
 ### Design sprint
-- [ ] [frontend] Map page: full-screen redesign — floating controls, no persistent chrome, drawer sidebar UX
-- [ ] [frontend] Map mobile: bottom sheet pattern — peek state on pin tap, expand to full detail
 - [ ] [frontend] Homepage: full-bleed hero with map CTA visible above fold
 - [ ] [frontend] Places page: magazine grid — larger cards, full-bleed images, editorial feel
 - [ ] [frontend] Stories page: editorial long-form layout (lead image, generous whitespace, byline)
 - [ ] [frontend] Global aesthetic pass: more visual courage — bigger images, less timid spacing
 
 ### Schema
-- [ ] [schema] Add `type` field to stories table: values `history` | `guide`
-- [ ] [data,schema] Create stories + story_locations tables (if not yet done)
+- [ ] [schema] Add type field to stories table: values history or guide
+- [ ] [data,schema] Create stories + story_locations tables
 - [ ] [data,schema] Create artists + artist_locations tables
 - [ ] [data,schema] Add is_published, tour_type, difficulty to tours table
-- [ ] [data,schema] Create layers table + migrate categories.layer text → FK
-- [ ] [data,schema] Create routes table
+- [ ] [data,schema] Create layers table + migrate categories.layer text to FK
 - [ ] [data,schema] Create visual_works + visual_work_locations tables
 
-### Content
-- [ ] [data,user-action] Write first historical story: Maison de Millet (source: grappilles.fr)
-- [ ] [data,user-action] Write first historical story: Ferme du Couvent (source: grappilles.fr)
-- [ ] [data,user-action] Write first guide story: Where to sleep in Barbizon
-- [ ] [data,user-action] Write first guide story: Where to eat in Barbizon
-- [ ] [data,user-action] Begin writing Art & History narratives for published locations (target: all 24)
-- [ ] [data,user-action] Add ESS pending items: unnamed gallery at 78 Grande Rue, La Dame aux Coquelicots, confirm Boucherie cheese offering
+### Trails
+- [ ] [data,user-action] Download and import second trail GPX (Circuit Barbizon - Reserve de la Tillaie, 15.3km from AllTrails)
+- [ ] [data,user-action] Download and import additional Fontainebleau trails from AllTrails/Wikiloc
 
 ### Data
 - [ ] [data,user-action] Define and seed Forest & Nature subcategories
-- [ ] [data,user-action] Build first walking trail
 - [ ] [data,user-action] Seed historical visual works layer — postcards first
-- [ ] [data,user-action] Polish hero locations (images, lead text quality)
-- [ ] [data,user-action] Audit and fix missing place thumbnails
 - [ ] [data,user-action] Add real place images
+- [ ] [data,user-action] Polish hero locations
+- [ ] [data] Audit and fix missing place thumbnails
 
 ### CCC / dashboard
 - [ ] [frontend] Wire CCC task output viewer to display latest execution result
@@ -72,9 +68,8 @@ Task tags:
 - [ ] [frontend] Dashboard v1: single location editor
 
 ### Wiring
-- [ ] [frontend,schema] Boulder trails and climbing spots
-- [ ] [frontend] Wire tours page: tours + tour_stops to pages/tours/[slug].tsx
 - [ ] [frontend] Stories page: wire stories table to frontend
+- [ ] [frontend] Wire tours page: tours + tour_stops to pages/tours/[slug].tsx
 
 ---
 
@@ -87,17 +82,26 @@ Task tags:
 - [ ] [infra] Multi-town migration: town_settings, composite slugs, category_templates
 - [ ] [infra] QR infrastructure: generate and store qr_code_url on locations
 - [ ] [data,user-action] Events layer: temporary map pins for exhibitions and openings
-- [ ] [data,user-action] Improve featured places presentation
 - [ ] [data,user-action] Formally credit grappilles.fr as a source on the platform
 - [ ] [infra] Cloudflare Stream setup for video hosting (or Vimeo Pro fallback)
 - [ ] [frontend] French translations: all narratives and UI strings
-- [ ] [data,user-action] Potential new locations: Tumble Inn/Hôtel de la Forêt, Allée des Frères Farman
+- [ ] [data,user-action] Potential new locations: Tumble Inn/Hotel de la Foret, Allee des Freres Farman
 
 ---
 
 ## Blocked
 *Cannot proceed until the blocker is resolved.*
 
-- [ ] [frontend,user-action] Add real hero video asset (footage shot but not finalized — Hohem iSteady M7 + iPhone)
+- [ ] [frontend,user-action] Add real hero video asset (footage shot but not finalized)
 - [ ] [infra] Replace data/tours.ts with live Supabase query
 - [ ] [frontend] Card polish and image treatment pass (blocked on real images)
+
+---
+
+## Completed this session (2026-03-27)
+- [x] Visit Barbizon rebrand across all pages, nav, footer, meta
+- [x] Practical category excluded from /places editorial listing
+- [x] Map sidebar hidden by default, floating drawer on demand
+- [x] Map cluster bubbles color-matched to active layer
+- [x] Map icons redesigned: teardrop pins, subcategory-level Noun Project glyphs
+- [x] Trail routes: routes table created, Circuit des Peintres seeded, dashed line on map, GPS navigation popup
