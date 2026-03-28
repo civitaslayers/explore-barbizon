@@ -231,6 +231,7 @@ function buildGeoJSON(locations: Place[]): GeoJSON.FeatureCollection {
           group,
           iconId: getCategoryIconId(loc.category),
           shortDescription: loc.shortDescription ?? "",
+          route_slug: loc.route_slug ?? "",
         },
         geometry: {
           type: "Point",
@@ -288,9 +289,15 @@ function loadSVGImage(
 // Component
 // ---------------------------------------------------------------------------
 
-type Props = { locations: Place[]; routes: Route[]; showTrails: boolean };
+function hideAllRoutes(map: mapboxgl.Map) {
+  ["route-outline", "route-line", "route-hover"].forEach((id) => {
+    if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", "none");
+  });
+}
 
-export default function MapGL({ locations, routes, showTrails }: Props) {
+type Props = { locations: Place[]; routes: Route[] };
+
+export default function MapGL({ locations, routes }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const routesRef = useRef<Route[]>([]);
@@ -394,6 +401,20 @@ export default function MapGL({ locations, routes, showTrails }: Props) {
           "icon-image": ["get", "iconId"],
           "icon-size": 1,
           "icon-allow-overlap": true,
+          // Mapbox symbol layout supports icon-overlap; bundled types omit it.
+          // @ts-expect-error — icon-overlap
+          "icon-overlap": "always",
+          "symbol-sort-key": [
+            "match",
+            ["get", "group"],
+            "Forest & Nature",
+            3,
+            "Art & History",
+            2,
+            "Eat & Stay",
+            1,
+            0,
+          ],
           "icon-anchor": "center",
         },
       });
@@ -426,7 +447,11 @@ export default function MapGL({ locations, routes, showTrails }: Props) {
         id: "route-line",
         type: "line",
         source: "routes",
-        layout: { "line-join": "round", "line-cap": "round" },
+        layout: {
+          "line-join": "round",
+          "line-cap": "round",
+          visibility: "none",
+        },
         paint: {
           "line-color": ["get", "color"],
           "line-width": 3,
@@ -523,7 +548,7 @@ export default function MapGL({ locations, routes, showTrails }: Props) {
           });
       });
 
-      // Pin click → popup
+      // Pin click → popup (+ linked trail reveal)
       map.on("click", "unclustered-point", (e) => {
         if (!e.features?.[0]) return;
         const props = e.features[0].properties as {
@@ -531,10 +556,28 @@ export default function MapGL({ locations, routes, showTrails }: Props) {
           name: string;
           category: string;
           shortDescription: string;
+          route_slug: string;
         };
         const geom = e.features[0].geometry;
         if (geom.type !== "Point") return;
         const coords = geom.coordinates as [number, number];
+
+        if (props.route_slug) {
+          hideAllRoutes(map);
+          const src = map.getSource("routes") as mapboxgl.GeoJSONSource | undefined;
+          if (src) {
+            const activeRoute = routesRef.current.find(
+              (r) => r.slug === props.route_slug
+            );
+            if (activeRoute) {
+              src.setData(buildRoutesGeoJSON([activeRoute]));
+              ["route-outline", "route-line"].forEach((id) => {
+                if (map.getLayer(id))
+                  map.setLayoutProperty(id, "visibility", "visible");
+              });
+            }
+          }
+        }
 
         new mapboxgl.Popup({ offset: 18, maxWidth: "260px" })
           .setLngLat(coords)
@@ -548,7 +591,23 @@ export default function MapGL({ locations, routes, showTrails }: Props) {
             `<a href="/places/${props.slug}" style="font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:#7A5C3E;text-decoration:none">View place →</a>` +
             `</div>`
           )
+          .on("close", () => {
+            hideAllRoutes(map);
+            const src = map.getSource("routes") as mapboxgl.GeoJSONSource | undefined;
+            src?.setData(buildRoutesGeoJSON(routesRef.current));
+          })
           .addTo(map);
+      });
+
+      map.on("click", (e) => {
+        const features = map.queryRenderedFeatures(e.point, {
+          layers: ["unclustered-point", "clusters", "route-line"],
+        });
+        if (features.length === 0) {
+          hideAllRoutes(map);
+          const src = map.getSource("routes") as mapboxgl.GeoJSONSource | undefined;
+          src?.setData(buildRoutesGeoJSON(routesRef.current));
+        }
       });
 
       // Cursors
@@ -581,6 +640,7 @@ export default function MapGL({ locations, routes, showTrails }: Props) {
   }, [locations]);
 
   useEffect(() => {
+    routesRef.current = routes;
     const map = mapRef.current;
     if (!map) return;
     const update = () => {
@@ -589,21 +649,6 @@ export default function MapGL({ locations, routes, showTrails }: Props) {
     };
     map.isStyleLoaded() ? update() : map.once("load", update);
   }, [routes]);
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-    const apply = () => {
-      if (!map.isStyleLoaded()) return;
-      const visibility = showTrails ? "visible" : "none";
-      ["route-outline", "route-line", "route-hover"].forEach((id) => {
-        if (map.getLayer(id)) {
-          map.setLayoutProperty(id, "visibility", visibility);
-        }
-      });
-    };
-    map.isStyleLoaded() ? apply() : map.once("load", apply);
-  }, [showTrails]);
 
   return <div ref={containerRef} className="h-full w-full" />;
 }

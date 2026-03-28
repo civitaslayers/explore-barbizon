@@ -45,6 +45,7 @@ export type DbLocation = {
   show_in_editorial: boolean | null;
   created_at: string | null;
   updated_at: string | null;
+  route_slug?: string | null;
 };
 
 /** Shape returned by the joined query (locations + categories.name). */
@@ -73,6 +74,7 @@ function toPlace(row: LocationRow): Place {
     category: (row.categories?.name ?? "Studio") as PlaceCategory,
     latitude: row.latitude,
     longitude: row.longitude,
+    route_slug: row.route_slug ?? null,
   };
 }
 
@@ -98,7 +100,7 @@ export async function getPublishedLocations(): Promise<Place[]> {
   // Step 2: fetch locations filtered to those categories
   const { data, error } = await supabase
     .from("locations")
-    .select("*, categories(name)")
+    .select("*, categories!inner(name, layer), route_slug")
     .eq("is_published", true)
     .in("category_id", allowedIds)
     .order("name");
