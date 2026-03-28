@@ -11,6 +11,7 @@ export type Place = {
   category: PlaceCategory;
   latitude: number;
   longitude: number;
+  route_slug?: string | null;
 };
 
 export const places: Place[] = [
