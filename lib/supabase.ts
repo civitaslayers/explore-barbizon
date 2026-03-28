@@ -119,13 +119,14 @@ export type Route = {
   geojson: GeoJSON.LineString;
   start_lat: number;
   start_lng: number;
+  color: string | null;
 };
 
 export async function getPublishedRoutes(): Promise<Route[]> {
   if (!supabase) return [];
   const { data, error } = await supabase
     .from("routes")
-    .select("id, name, slug, description, distance_meters, duration_minutes, difficulty, geojson, start_lat, start_lng")
+    .select("id, name, slug, description, distance_meters, duration_minutes, difficulty, geojson, start_lat, start_lng, color")
     .eq("is_published", true)
     .order("name");
   if (error) return [];

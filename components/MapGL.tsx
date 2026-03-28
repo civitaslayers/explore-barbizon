@@ -257,6 +257,7 @@ function buildRoutesGeoJSON(routes: Route[]): GeoJSON.FeatureCollection {
         difficulty: r.difficulty ?? "moderate",
         start_lat: r.start_lat,
         start_lng: r.start_lng,
+        color: r.color ?? "#4A5E3A",
       },
     })),
   };
@@ -287,9 +288,9 @@ function loadSVGImage(
 // Component
 // ---------------------------------------------------------------------------
 
-type Props = { locations: Place[]; routes: Route[] };
+type Props = { locations: Place[]; routes: Route[]; showTrails: boolean };
 
-export default function MapGL({ locations, routes }: Props) {
+export default function MapGL({ locations, routes, showTrails }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const routesRef = useRef<Route[]>([]);
@@ -408,11 +409,15 @@ export default function MapGL({ locations, routes }: Props) {
         id: "route-outline",
         type: "line",
         source: "routes",
-        layout: { "line-join": "round", "line-cap": "round" },
+        layout: {
+          "line-join": "round",
+          "line-cap": "round",
+          visibility: "none",
+        },
         paint: {
-          "line-color": "#2D4A1E",
+          "line-color": ["get", "color"],
           "line-width": 5,
-          "line-opacity": 0.35,
+          "line-opacity": 0.3,
         },
       });
 
@@ -423,9 +428,9 @@ export default function MapGL({ locations, routes }: Props) {
         source: "routes",
         layout: { "line-join": "round", "line-cap": "round" },
         paint: {
-          "line-color": "#4A5E3A",
+          "line-color": ["get", "color"],
           "line-width": 3,
-          "line-opacity": 0.85,
+          "line-opacity": 0.9,
           "line-dasharray": [2, 1.5],
         },
       });
@@ -435,7 +440,11 @@ export default function MapGL({ locations, routes }: Props) {
         id: "route-hover",
         type: "line",
         source: "routes",
-        layout: { "line-join": "round", "line-cap": "round" },
+        layout: {
+          "line-join": "round",
+          "line-cap": "round",
+          visibility: "none",
+        },
         paint: {
           "line-color": "#F5F1E8",
           "line-width": 4,
@@ -580,6 +589,21 @@ export default function MapGL({ locations, routes }: Props) {
     };
     map.isStyleLoaded() ? update() : map.once("load", update);
   }, [routes]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const apply = () => {
+      if (!map.isStyleLoaded()) return;
+      const visibility = showTrails ? "visible" : "none";
+      ["route-outline", "route-line", "route-hover"].forEach((id) => {
+        if (map.getLayer(id)) {
+          map.setLayoutProperty(id, "visibility", visibility);
+        }
+      });
+    };
+    map.isStyleLoaded() ? apply() : map.once("load", apply);
+  }, [showTrails]);
 
   return <div ref={containerRef} className="h-full w-full" />;
 }
