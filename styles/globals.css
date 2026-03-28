@@ -140,7 +140,7 @@ a {
 @layer components {
   .fade-in-hero {
     opacity: 0;
-    animation: heroFadeIn 700ms ease-soft 80ms forwards;
+    animation: heroFadeIn .7s cubic-bezier(.22,.61,.36,1) 80ms forwards;
   }
 }
 

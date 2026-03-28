@@ -82,26 +82,32 @@ const PlacePage: NextPage<PlacePageProps> = ({
         <header className="overflow-hidden rounded-2xl border border-ink/10 bg-ink shadow-card md:rounded-[1.75rem]">
           <div className="relative h-[17rem] sm:h-72 md:h-[22rem] lg:h-[26rem] xl:h-[30rem]">
             <div
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.78] mix-blend-multiply"
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.78]"
               style={{ backgroundImage: `url(${heroImage})` }}
               aria-hidden
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/50 to-ink/20" />
-            <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/[0.06]" />
-            <div className="fade-in-hero relative z-10 flex h-full flex-col justify-end p-6 md:p-9 lg:p-11 xl:p-14">
-              <div className="max-w-3xl space-y-4 text-cream xl:max-w-[40rem]">
-                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-cream/15 pb-4">
-                  <p className="eyebrow text-cream/60">{place.category}</p>
-                  <span className="hidden text-cream/25 sm:inline" aria-hidden>
-                    ·
-                  </span>
-                  <p className="font-sans text-[11px] uppercase tracking-[0.22em] text-cream/65">
-                    {place.location}
-                  </p>
+            <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/60 to-ink/30">
+              <div className="fade-in-hero relative z-10 flex h-full flex-col justify-end p-6 md:p-9 lg:p-11 xl:p-14">
+                <div className="max-w-3xl space-y-4 text-cream xl:max-w-[40rem]">
+                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-cream/15 pb-4">
+                    <p className="eyebrow text-cream/60">{place.category}</p>
+                    <span className="hidden text-cream/25 sm:inline" aria-hidden>
+                      ·
+                    </span>
+                    <p className="font-sans text-[11px] uppercase tracking-[0.22em] text-cream/65">
+                      {place.location}
+                    </p>
+                  </div>
+                  <h1
+                    className="heading-xl text-cream"
+                    style={{ textShadow: "0 2px 16px rgba(0,0,0,0.7)" }}
+                  >
+                    {place.name}
+                  </h1>
                 </div>
-                <h1 className="heading-xl text-cream">{place.name}</h1>
               </div>
             </div>
+            <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/[0.06]" />
           </div>
         </header>
 

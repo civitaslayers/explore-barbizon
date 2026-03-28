@@ -46,6 +46,7 @@ export type DbLocation = {
   created_at: string | null;
   updated_at: string | null;
   route_slug?: string | null;
+  media?: { url: string; display_order: number }[] | null;
 };
 
 /** Shape returned by the joined query (locations + categories.name). */
@@ -69,7 +70,7 @@ function toPlace(row: LocationRow): Place {
     // narrative maps to the history/context field on the place page
     history: row.narrative ?? null,
     // heroImage comes from the media table (not yet wired); pages handle null
-    heroImage: null,
+    heroImage: (row.media ?? []).sort((a, b) => a.display_order - b.display_order)[0]?.url ?? null,
     // category comes from the joined categories.name — cast to PlaceCategory
     category: (row.categories?.name ?? "Studio") as PlaceCategory,
     latitude: row.latitude,
@@ -168,7 +169,7 @@ export async function getLocationBySlug(slug: string): Promise<Place | null> {
 
   const { data, error } = await supabase
     .from("locations")
-    .select("*, categories(name)")
+    .select("*, categories(name), media(url, display_order)")
     .eq("slug", slug)
     .eq("is_published", true)
     .single();
