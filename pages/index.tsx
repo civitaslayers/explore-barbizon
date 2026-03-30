@@ -1,4 +1,5 @@
 import Head from "next/head";
+import Image from "next/image";
 import Link from "next/link";
 import type { GetStaticProps, NextPage } from "next";
 import { getAllPlaces, type Place } from "@/data/places";
@@ -203,10 +204,15 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
                 href={`/places/${place.slug}`}
                 className="group card card-hover flex flex-col overflow-hidden"
               >
-                <div
-                  className="h-32 bg-ink/40 bg-cover bg-center transition-transform duration-500 ease-soft sm:h-40 group-hover:scale-[1.03]"
-                  style={{ backgroundImage: `url(${place.image})` }}
-                />
+                <div className="relative h-32 overflow-hidden bg-ink/40 sm:h-40">
+                  <Image
+                    src={place.image}
+                    alt=""
+                    fill
+                    sizes="(max-width: 768px) 100vw, 25vw"
+                    className="object-cover transition-transform duration-500 ease-soft group-hover:scale-[1.03]"
+                  />
+                </div>
                 <div className="flex flex-1 flex-col p-5 md:p-6">
                   <h3 className="font-serif text-sm text-ink md:text-base">
                     {place.name}

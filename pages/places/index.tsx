@@ -1,4 +1,5 @@
 import Head from "next/head";
+import Image from "next/image";
 import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 import { useState, useMemo } from "react";
@@ -77,11 +78,12 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({ places }) => {
               {/* Map thumbnail */}
               <div className="relative h-40 overflow-hidden">
                 {hasMapbox ? (
-                  <img
+                  <Image
                     src={staticMapUrl(place.longitude, place.latitude)}
                     alt={`Map location of ${place.name}`}
-                    className="h-full w-full object-cover transition-transform duration-500 ease-soft group-hover:scale-[1.04]"
-                    loading="lazy"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className="object-cover transition-transform duration-500 ease-soft group-hover:scale-[1.04]"
                   />
                 ) : (
                   <div className="h-full bg-ink/8" />

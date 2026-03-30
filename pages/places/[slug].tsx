@@ -1,4 +1,5 @@
 import Head from "next/head";
+import Image from "next/image";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 import { getAllPlaces, type Place } from "@/data/places";
@@ -81,10 +82,13 @@ const PlacePage: NextPage<PlacePageProps> = ({
         {/* Hero: atlas plate, calm framing */}
         <header className="overflow-hidden rounded-2xl border border-ink/10 bg-ink shadow-card md:rounded-[1.75rem]">
           <div className="relative h-[17rem] sm:h-72 md:h-[22rem] lg:h-[26rem] xl:h-[30rem]">
-            <div
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.78]"
-              style={{ backgroundImage: `url(${heroImage})` }}
-              aria-hidden
+            <Image
+              src={heroImage}
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover object-center opacity-[0.78]"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/60 to-ink/30">
               <div className="fade-in-hero relative z-10 flex h-full flex-col justify-end p-6 md:p-9 lg:p-11 xl:p-14">
@@ -175,7 +179,7 @@ const PlacePage: NextPage<PlacePageProps> = ({
               <p className="eyebrow">On the map</p>
               <div className="relative h-40 overflow-hidden rounded-xl bg-ink/[0.03] ring-1 ring-ink/8 md:h-48 xl:h-52">
                 {hasMapbox ? (
-                  <img
+                  <Image
                     src={staticMapUrl(
                       place.longitude,
                       place.latitude,
@@ -184,7 +188,9 @@ const PlacePage: NextPage<PlacePageProps> = ({
                       15
                     )}
                     alt={`Map showing location of ${place.name}`}
-                    className="h-full w-full object-cover object-center"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className="object-cover object-center"
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center bg-[radial-gradient(circle_at_top,_#f5f1e8,_#e8e2d6)] text-[11px] text-ink/55">
