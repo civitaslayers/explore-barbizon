@@ -1,22 +1,26 @@
 # Claude Code — Civitas Layers / ExploreBarbizon
 
+Last updated: 2026-03-28
+
 This repository uses a structured AI-assisted development workflow.
 
-Claude is responsible primarily for **architecture planning, safe implementation guidance, and validation**.
+Claude is the **primary thinking partner** — responsible for strategy, architecture, planning, schema design, review, and brain maintenance.
 
-Routine coding is typically executed through **Cursor** using scoped implementation prompts.
+Routine coding is executed through **Cursor** using scoped implementation prompts.
+
+GPT and Grok are available as supplementary reviewers and researchers.
 
 ---
 
 # Session Start Protocol
 
-At the beginning of each session follow the session start hook instructions.
+At the beginning of each session, follow the session start hook.
 
-Read:
+Read in this order:
 
-1. brain/current-state.md  
-2. brain/task-queue.md  
-3. brain/decisions.md  
+1. `brain/current-state.md`
+2. `brain/task-queue.md`
+3. `brain/decisions.md`
 
 These files represent the **operational brain** of the project.
 
@@ -24,7 +28,7 @@ These files represent the **operational brain** of the project.
 
 ## Conditional Context
 
-Only read additional documents if the task requires them.
+Only load additional documents if the task requires them.
 
 Read `docs/schema-reference.md` if the task touches:
 
@@ -42,13 +46,13 @@ Read `MAIN_BRAIN.md` if the task touches:
 - dashboard architecture
 - multi-town architecture
 
-Avoid loading unnecessary documents.
-
 Read `docs/agent-tooling.md` if the task involves:
 
 - writing code against Next.js, Supabase, or Mapbox APIs (use Context7)
 - external research on history, libraries, or APIs (use Tavily)
 - decomposing a large multi-step initiative (pilot Task Master)
+
+Avoid loading unnecessary documents.
 
 ---
 
@@ -68,16 +72,16 @@ Full setup and usage guidance: `docs/agent-tooling.md`
 
 Return only:
 
-Status  
+**Status**
 2 concise sentences describing the current project state.
 
-Top 3 Next Tasks  
+**Top 3 Next Tasks**
 Highest-priority unblocked tasks from task-queue.md.
 
-Blockers  
+**Blockers**
 Anything preventing implementation.
 
-Recommended Next Step  
+**Recommended Next Step**
 One small concrete action.
 
 ---
@@ -86,26 +90,44 @@ One small concrete action.
 
 Do not change stack architecture without explicit instruction.
 
-Frontend  
-Next.js — Pages Router
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js — Pages Router |
+| Database | Supabase |
+| Map | Mapbox GL JS |
+| Styling | Tailwind CSS |
+| Editorial layer | Webflow (temporary shell, being phased out) |
 
-Database  
-Supabase
+---
 
-Map  
-Mapbox GL JS
+# Claude's Responsibilities
 
-Styling  
-Tailwind CSS
+Claude handles:
 
-Editorial layer  
-Webflow (temporary shell)
+- strategy and task ordering
+- architecture decisions and schema planning
+- smallest-safe-step implementation plans for Cursor
+- post-implementation review
+- SQL queries and migrations (run by Luigi in Supabase SQL editor)
+- content narrative writing
+- brain file updates at end of session
+
+Claude may implement directly (without routing through Cursor) for:
+
+- XS tasks (1–2 files, bug fixes, SQL, content)
+- Tasks where the change is purely additive and low-risk
+- Schema review and validation
+
+Claude should hand off to Cursor for:
+
+- multi-file UI work
+- component iteration and visual refinement
+- debugging local build or lint issues
+- any task requiring file system access
 
 ---
 
 # Implementation Principles
-
-Always follow these rules:
 
 Prefer **refinement over rebuilds**.
 
@@ -125,111 +147,36 @@ Do not introduce new dependencies without clear justification.
 
 These fields are locked conventions.
 
-Use:
+| Use | Not |
+|---|---|
+| `layer` | `map_layer` |
+| `distance_meters` | `distance_km` |
+| `stop_narrative` | `notes` |
 
-layer  
-distance_meters  
-stop_narrative  
-
-Do not use:
-
-map_layer  
-distance_km  
-notes  
-
-Always verify field names before writing SQL.
+Always verify field names before writing SQL or referencing schema fields in code.
 
 ---
 
-# Slash Commands
+# Brain Update Responsibility
 
-| Command | Purpose |
-|--------|--------|
-| `/next-task` | Identify the next highest-priority task and route it to the correct agent |
-| `/session-summary` | Summarize completed work, remaining work, and the next recommended task |
-| `/update-brain` | Update brain/current-state.md and brain/task-queue.md |
-| `/schema-check` | Audit schema state and propose migrations |
-| `/ship-feature` | Validate implementation, commit, push, and update brain |
+Claude updates the brain files after every significant session.
 
----
+After completing work:
 
-# Agents
+1. Update `brain/current-state.md` — move completed items to Done, update blockers
+2. Trigger brain sync via `/api/brain/sync-tasks` or update `brain/task-queue.md` directly
+3. Commit brain updates with a clear message
 
-Agents divide responsibilities clearly.
-
-### civitas-architect
-
-Responsibilities:
-
-- architecture planning
-- schema evolution
-- migration sequencing
-- identifying impacted files
-- planning implementation steps
-
-Does **not implement code**.
+Use the `ship-feature` command after a completed feature.  
+Use the `update-brain` command after any significant state change.
 
 ---
 
-### civitas-implementer
+# Hard Constraints
 
-Responsibilities:
-
-- writing code
-- implementing scoped tasks
-- editing files
-- wiring UI to data
-
-Should operate on **small isolated steps only**.
-
----
-
-### civitas-content-ops
-
-Responsibilities:
-
-- SQL generation
-- content seeding
-- location inserts
-- media metadata
-- database population tasks
-
----
-
-### civitas-release-checker
-
-Responsibilities:
-
-- diff review
-- lint and build validation
-- schema consistency checks
-- release safety verification
-
----
-
-# Execution Workflow
-
-Typical session flow:
-
-1. `/next-task`  
-2. `/agent civitas-architect` (planning)  
-3. `/agent civitas-implementer` (implementation)  
-4. `/agent civitas-release-checker` (validation)  
-5. `/session-summary`  
-6. `/update-brain`
-
-Work in **small increments**.
-
-Never attempt large refactors in a single step.
-
----
-
-# Key Project Principle
-
-Do not make one AI do everything.
-
-ChatGPT provides **strategy**  
-Claude provides **architecture**  
-Cursor provides **implementation**
-
-This separation keeps the system stable and efficient.
+- Do not convert Pages Router to App Router
+- Do not rename existing slugs or IDs without a migration plan
+- Do not run `git push --force`
+- Do not expose secrets in committed files — `.env.local` is gitignored
+- Do not modify `MAIN_BRAIN.md` — it is the master reference document
+- Supabase project ref: `afqyrxtfbspghpfulvmy`

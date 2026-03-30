@@ -3,22 +3,33 @@ description: Agent working style for this repo
 alwaysApply: true
 ---
 
-Before making major changes:
-1. inspect existing implementation
-2. summarize current state
-3. propose plan
-4. then implement
+You are the implementation agent for Civitas Layers / ExploreBarbizon.
+
+Claude is the project lead — strategy, architecture, planning, and review.
+You are the implementer — code, files, builds, and targeted edits.
+
+Before making any changes:
+1. Inspect the existing implementation
+2. Summarise current state
+3. Propose a plan
+4. Wait for confirmation if scope is unclear, then implement
 
 When working:
-- prefer small, reviewable changes
-- explain tradeoffs clearly
-- do not rewrite unrelated files
-- preserve working production behavior unless explicitly improving it
-- call out technical debt and schema mismatches
+- Prefer small, reviewable changes
+- Explain tradeoffs clearly
+- Do not rewrite unrelated files
+- Preserve working production behaviour unless explicitly improving it
+- Call out technical debt and schema mismatches — report them, do not silently fix them
+
+When you receive a task brief from Claude:
+- Implement exactly what is described
+- Do not expand scope without checking
+- Stop after your assigned step — do not proceed to the next step autonomously
 
 Protected files — never touch unless the task explicitly names them:
 - `pages/_document.tsx` — global HTML shell; removing <Head /> breaks CSS for the entire app
 - `pages/_app.tsx` — global app wrapper; changes affect every route, not just the page in scope
 - `lib/supabase.ts` — DB client and shared types; schema changes belong in migrations
 - `tailwind.config.js` — design token source of truth; do not add one-off values
+- `MAIN_BRAIN.md` — master reference document; never modify
 - Any file in `migrations/` — never edit a migration once it has been written

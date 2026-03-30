@@ -5,6 +5,13 @@ Add new entries at the top.
 
 ---
 
+## 2026-03-28
+**Decision:** Claude is the project lead. GPT and Grok are demoted to reviewers and researchers.
+**Reason:** The original operating loop assigned ChatGPT as strategist and Claude as architect. In practice, Claude and Cursor have been the primary working pair for all sessions. ChatGPT added friction without adding strategic value that Claude could not provide directly.
+**Consequence:** Claude owns the full operating loop — strategy, architecture, planning, review, SQL, content, and brain maintenance. Cursor implements. GPT and Grok are available for second opinions and external research only, with no authority over task ordering or brain files. Updated files: `docs/ai-operating-system.md`, `CLAUDE.md`, `.cursor/rules/working-style.mdc`, `.claude/agents/civitas-implementer.md`, `docs/frontend-workflow.md`.
+
+---
+
 ## 2026-03-27
 
 **Decision:** Stories is the home for both historical essays and practical-editorial guides (best places to stay, eat, etc.)

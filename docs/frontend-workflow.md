@@ -1,23 +1,25 @@
 # Frontend Workflow
 
-Source: extracted from MAIN_BRAIN.md
-Last updated: March 2026
+Last updated: 2026-03-28
 
 ---
 
 ## Tool Division
 
-Using Claude alone for visual website design is too slow and does not produce the desired level of contemporary refinement.
+| Role | Responsibility |
+|---|---|
+| Claude | strategy, architecture, task planning, prompts, SQL, content, review |
+| Cursor | code implementation, UI iteration, component changes, page refinement |
+| GPT / Grok | research, second opinions on architecture — not in the implementation loop |
 
-**Recommended division:**
-- ChatGPT / Claude = strategy, structure, copy, feature planning, prompts
-- Cursor = actual code implementation, UI iteration, component changes, page refinement
+Claude alone is too slow for visual iteration. Cursor handles the actual file edits and build feedback loop.  
+Claude plans → Cursor implements → Claude reviews.
 
 ---
 
 ## Correct Way to Work with Cursor
 
-Do not keep prompting for full rebuilds.
+Do not prompt for full rebuilds.  
 Use Cursor in refinement passes:
 
 1. Build structure once
@@ -31,42 +33,52 @@ Use Cursor in refinement passes:
 ## Practical Workflow
 
 Keep open at all times during development:
-- Cursor
-- local browser preview
+
+- Cursor (with the relevant files open)
+- local browser preview at `http://localhost:3000`
 - terminal running `npm run dev`
 
 ---
 
 ## Local Dev Setup
 
-### Local project warning
-Do not actively develop this project inside Google Drive or similar synced folders.
+### Local project path
 
-Use a purely local path such as:
-- `~/Projects/explore-barbizon`
-- `/Users/.../Documents/Projects/explore-barbizon`
+Do not develop this project inside Google Drive or any synced folder.
 
-**Why:** Google Drive interfered with local dev behavior and likely with file watching / build reliability.
+Use a purely local path:
 
-### Standard startup flow
-From the local project folder:
 ```
+~/Projects/explore-barbizon
+~/Documents/Projects/explore-barbizon
+```
+
+Google Drive interferes with file watching and build reliability.
+
+### Standard startup
+
+```bash
 npm install
 npm run dev
 ```
-Then open `http://localhost:3000`
 
 ---
 
 ## Tailwind / Build Notes
 
-A Tailwind build error occurred due to Cursor introducing a non-existent utility class inside `@apply`.
+Cursor has previously introduced non-existent utility classes inside `@apply`, causing build failures.
 
-**Example invalid class that caused an error:**
-- `shadow-card/60`
+**Example of an invalid class that caused an error:**
 
-**Resolution principle:**
-- Avoid invented Tailwind utility classes inside `@apply`
+```css
+/* ❌ do not do this */
+@apply shadow-card/60;
+```
+
+**Rules:**
+
+- Never use invented Tailwind utility classes inside `@apply`
+- Check `tailwind.config.js` before using any custom token
 - Prefer valid built-in classes or direct custom CSS where needed
 
-This is a recurring caution for AI-assisted front-end work.
+This is a recurring issue in AI-assisted frontend work — always verify against `tailwind.config.js` before committing.
