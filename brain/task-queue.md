@@ -1,6 +1,6 @@
 # Task Queue
 
-Last updated: 2026-03-28
+Last updated: 2026-03-30
 
 Task tags:
 - frontend
@@ -15,6 +15,12 @@ Task tags:
 ## Now
 *Unblocked tasks that can be started immediately.*
 
+- [ ] [frontend,schema] Wire tours/[slug].tsx to live Supabase
+      data (tours + tour_stops tables)
+- [ ] [data,user-action] Populate Forest & Nature layer —
+      first 5–10 locations in Supabase
+- [ ] [frontend] Stories index + article page — Pass 6
+      (design not yet done)
 - [ ] [data,user-action] Continue replacing Unsplash placeholders with real photos — send location name + URL pairs, SQL updates run instantly
 - [ ] [frontend] Wire media to place cards on the Places listing page (same pattern as hero — join media in query, render first image)
 - [ ] [user-action] Commit and push today's frontend changes to Vercel (media wiring, mix-blend fix, animation fix)
@@ -62,7 +68,6 @@ Task tags:
 
 ### Wiring
 - [ ] [frontend] Stories page: wire stories table to frontend
-- [ ] [frontend] Wire tours page: tours + tour_stops to pages/tours/[slug].tsx
 
 ---
 
@@ -88,6 +93,14 @@ Task tags:
 ---
 
 ## Done (recent)
+- [x] [frontend] Stitch 2.0 design system — Passes 1–5
+- [x] [frontend] Newsreader font + token system upgrade
+- [x] [frontend] Navigation overhaul + BottomNav component
+- [x] [frontend] Homepage cinematic hero + Atlas Cards
+- [x] [frontend] Places index tab filters + Atlas Card grid
+- [x] [frontend] Place detail chip labels + italic lead
+- [x] [frontend] Tour page editorial layout (Stitch)
+- [x] [docs] design-direction.md rewritten for Stitch 2.0
 - [x] [data,sql] 72 cover images seeded across ESS (36), Art & History (21), Forest & Nature (15) layers
 - [x] [frontend] Wire media table to place page hero (getLocationBySlug + toPlace adapter)
 - [x] [frontend] Fix mix-blend-multiply blackening hero images

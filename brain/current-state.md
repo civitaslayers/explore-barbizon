@@ -1,6 +1,6 @@
 # Current State
 
-Last updated: 2026-03-28
+Last updated: 2026-03-30
 
 ---
 
@@ -46,22 +46,42 @@ GPX sources: Cirkwi / Balad'Nature (official Fontainebleau Tourisme).
 
 ---
 
-## Frontend — place page
+## Public Product (Explore Barbizon V1)
 
-- Hero image wired to `media` table: `getLocationBySlug` joins `media`, `toPlace` uses `media[0].url`
-- `mix-blend-multiply` removed from hero image div (was blackening all photos)
-- `fade-in-hero` animation bug fixed: `ease-soft` (Tailwind class) replaced with `cubic-bezier(.22,.61,.36,1)` in `globals.css`
-- Place name, category eyebrow, and location text now correctly overlaid on hero image
-- Default fallback image: `/images/places/place-default.jpg`
+**Design system:** Stitch 2.0 design overhaul complete (March 2026).
+All five design passes shipped in a single session.
 
----
+**What is live and working:**
+- Homepage: cinematic video hero (hero-barbizon.mp4 in place),
+  Atlas Card featured enclaves, Choose Your Path section
+- Places index: tab filter row, Atlas Card grid, Archive Directory
+  header
+- Place detail: chip category label, italic serif lead, Archive
+  Directory back link, chip labels on related/nearby
+- Tour page: full Stitch editorial layout — italic serif header,
+  stats aside, alternating stop grid with timeline anchor,
+  archival quote block
+- Navigation: simplified top bar (Visit Barbizon wordmark links
+  to /), BottomNav with 4 tabs (Atlas / Trails / Stories / Places)
+- All pages wired to live Supabase data with static fallback
 
-## Frontend — map
+**Design tokens in place:**
+- Newsreader (serif display) + Inter (sans UI)
+- Surface hierarchy tokens, chip palette, shadow-ambient,
+  ink-gradient, .chip component
+- docs/design-direction.md rewritten to reflect Stitch 2.0 system
 
-- Trail routes rendered as colored lines on the map
-- Per-trail hover/click reveal wired via `route_slug` on location pins
-- `showTrails` toggle removed — trails show per-pin interaction instead
-- Trail pin icons distinct from place pins
+**Current limitations:**
+- Tour page uses static data/tours.ts — not yet wired to Supabase
+- Forest & Nature layer has no location data in Supabase
+- Stories page exists but has no content
+- Hero video is live; place images are still mostly placeholders
+- Map requires Mapbox token to render pins
+
+**Overall status:**
+Visual shell is now cohesive and design-system-driven.
+Next priority is content depth: wire tours to Supabase,
+populate Forest & Nature, begin Stories.
 
 ---
 
