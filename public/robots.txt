@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /command-center
+Disallow: /api/
+Allow: /
+
+Sitemap: https://explorebarbizon.com/sitemap.xml

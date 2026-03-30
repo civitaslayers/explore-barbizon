@@ -90,20 +90,11 @@ function toPlace(row: LocationRow): Place {
 export async function getPublishedLocations(): Promise<Place[]> {
   if (!supabase) throw new Error("Supabase not configured");
 
-  // Step 1: get all non-practical category IDs
-  const { data: cats } = await supabase
-    .from("categories")
-    .select("id")
-    .neq("layer", "Practical");
-
-  const allowedIds = (cats ?? []).map((c: { id: string }) => c.id);
-
-  // Step 2: fetch locations filtered to those categories
   const { data, error } = await supabase
     .from("locations")
-    .select("*, categories!inner(name, layer), route_slug")
+    .select("*, categories!inner(name, layer), media(url, display_order)")
     .eq("is_published", true)
-    .in("category_id", allowedIds)
+    .neq("categories.layer", "Practical")
     .order("name");
 
   if (error) throw new Error(error.message);
@@ -126,37 +117,14 @@ export type Route = {
 };
 
 export async function getPublishedRoutes(): Promise<Route[]> {
-  if (!supabase) return [];
+  if (!supabase) throw new Error("Supabase not configured");
   const { data, error } = await supabase
     .from("routes")
     .select("id, name, slug, description, distance_meters, duration_minutes, difficulty, geojson, start_lat, start_lng, color")
     .eq("is_published", true)
     .order("name");
-  if (error) return [];
-  return (data ?? []) as Route[];
-}
-
-/**
- * Fetch published locations for the editorial places listing.
- * Excludes utility categories (Parking, Bus Stop, etc.) via categories.show_in_editorial.
- * Requires: `alter table categories add column show_in_editorial boolean not null default true`
- * Throws if Supabase is not configured or the query fails.
- */
-export async function getEditorialLocations(): Promise<Place[]> {
-  if (!supabase) throw new Error("Supabase not configured");
-
-  const { data, error } = await supabase
-    .from("locations")
-    .select("*, categories!inner(name, show_in_editorial)")
-    .eq("is_published", true)
-    .eq("show_in_editorial", true)
-    .eq("categories.show_in_editorial", true)
-    .order("name");
-
   if (error) throw new Error(error.message);
-  if (!data || data.length === 0) throw new Error("No editorial locations");
-
-  return (data as LocationRow[]).map(toPlace);
+  return (data ?? []) as Route[];
 }
 
 /**
