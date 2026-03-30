@@ -50,8 +50,16 @@ a {
     @apply inline-flex items-center justify-center rounded-full px-7 py-3.5 text-[11px] font-medium uppercase tracking-[0.24em] transition-all duration-250 ease-soft;
   }
 
+  .chip {
+    @apply inline-block px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-[10px] font-sans tracking-[0.12em] uppercase;
+  }
+
+  .ink-gradient {
+    background: radial-gradient(circle at center, #5f6f52, #47573b);
+  }
+
   .btn-primary {
-    @apply bg-ink text-cream shadow-card hover:-translate-y-0.5 hover:shadow-card hover:bg-ink/95;
+    @apply ink-gradient text-cream shadow-ambient hover:-translate-y-0.5;
   }
 
   .btn-secondary {

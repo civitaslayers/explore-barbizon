@@ -1,5 +1,4 @@
 import Head from "next/head";
-import Image from "next/image";
 import Link from "next/link";
 import type { GetStaticProps, NextPage } from "next";
 import { getAllPlaces, type Place } from "@/data/places";
@@ -18,6 +17,7 @@ type FeaturedPlaceCard = {
   name: string;
   description: string;
   image: string;
+  category: string;
 };
 
 function heroImageForSlug(slug: string): string {
@@ -40,7 +40,8 @@ function buildFeaturedPlaces(places: Place[]): FeaturedPlaceCard[] {
     slug: p.slug,
     name: p.name,
     description: p.shortDescription,
-    image: heroImageForSlug(p.slug)
+    image: heroImageForSlug(p.slug),
+    category: p.category
   }));
 }
 
@@ -57,36 +58,40 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
 
       <div className="section-stack">
         {/* 1. HERO SECTION */}
-        <section className="relative -mx-4 flex min-h-[78vh] items-center overflow-hidden rounded-[2.25rem] bg-ink px-4 py-14 md:-mx-8 md:px-10 md:py-20">
+        <section className="relative -mx-4 -mt-12 flex min-h-screen flex-col justify-end overflow-hidden bg-ink md:-mx-8 md:-mt-20">
           <video
             autoPlay
             muted
             loop
             playsInline
-            poster="/images/hero-barbizon.jpg"
-            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-85 mix-blend-multiply"
+            poster="/images/places/place-default.jpg"
+            className="absolute inset-0 h-full w-full object-cover opacity-90"
           >
             <source src="/videos/hero-barbizon.mp4" type="video/mp4" />
           </video>
-          <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/60 to-ink/25" />
 
-          <div className="fade-in-hero relative z-10 max-w-xl space-y-7 text-cream md:max-w-2xl">
-            <p className="eyebrow text-cream/70">
-              VILLAGE AT THE EDGE OF FONTAINEBLEAU
+          <div className="absolute inset-0 bg-gradient-to-t from-ink/60 via-ink/20 to-transparent" />
+
+          <div className="fade-in-hero relative z-10 max-w-3xl space-y-6 p-8 md:p-14 lg:p-20">
+            <p className="font-sans text-[10px] uppercase tracking-[0.35em] text-cream/60">
+              A Cultural Atlas
             </p>
-            <h1 className="heading-xl text-cream">
-              Visit Barbizon
+
+            <h1 className="font-serif text-[3.2rem] italic leading-[0.95] tracking-tight text-cream md:text-[5rem] lg:text-[6rem]">
+              Barbizon:
+              <br />
+              The Artists&apos;
+              <br />
+              Village
             </h1>
+
             <div className="flex flex-wrap gap-3 pt-2">
-              <Link
-                href="/map"
-                className="btn btn-primary"
-              >
+              <Link href="/map" className="btn btn-primary text-[10px]">
                 Explore the Map
               </Link>
               <Link
                 href="/places"
-                className="btn btn-secondary border-cream/70 text-cream/90 hover:bg-cream/10"
+                className="btn btn-secondary border-cream/40 text-[10px] text-cream hover:border-cream/70 hover:bg-cream/10"
               >
                 Discover the Village
               </Link>
@@ -123,10 +128,10 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
         <section className="space-y-8">
           <header className="space-y-3 editorial-measure">
             <p className="eyebrow">
-              EXPLORE THE VILLAGE
+              CHOOSE YOUR PATH
             </p>
             <h2 className="heading-lg">
-              Three ways to begin.
+              Three ways into Barbizon.
             </h2>
           </header>
           <div className="grid gap-5 md:grid-cols-3 md:gap-7">
@@ -135,6 +140,9 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
               className="group card card-hover flex flex-col justify-between p-7 md:p-8"
             >
               <div className="space-y-4">
+                <span className="chip mb-3 inline-block">
+                  Curated Tours
+                </span>
                 <h3 className="font-serif text-base text-ink md:text-lg">
                   Explore the Map
                 </h3>
@@ -171,6 +179,9 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
               className="group card card-hover flex flex-col justify-between p-7 md:p-8"
             >
               <div className="space-y-4">
+                <span className="chip mb-3 inline-block">
+                  Village Stories
+                </span>
                 <h3 className="font-serif text-base text-ink md:text-lg">
                   Read the Stories
                 </h3>
@@ -190,34 +201,35 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
         <section className="space-y-8">
           <header className="space-y-3 editorial-measure">
             <p className="eyebrow">
-              FEATURED PLACES
+              FEATURED ENCLAVES
             </p>
             <h2 className="heading-lg">
-              First coordinates to pin.
+              Places that define the village.
             </h2>
           </header>
 
-          <div className="grid gap-6 md:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             {featuredPlaces.map((place) => (
               <Link
                 key={place.slug}
                 href={`/places/${place.slug}`}
-                className="group card card-hover flex flex-col overflow-hidden"
+                className="group relative block aspect-[3/4] overflow-hidden rounded-2xl"
               >
-                <div className="relative h-32 overflow-hidden bg-ink/40 sm:h-40">
-                  <Image
-                    src={place.image}
-                    alt=""
-                    fill
-                    sizes="(max-width: 768px) 100vw, 25vw"
-                    className="object-cover transition-transform duration-500 ease-soft group-hover:scale-[1.03]"
-                  />
-                </div>
-                <div className="flex flex-1 flex-col p-5 md:p-6">
-                  <h3 className="font-serif text-sm text-ink md:text-base">
+                <div
+                  className="absolute inset-0 bg-ink/40 bg-cover bg-center transition-transform duration-700 ease-soft group-hover:scale-105"
+                  style={{ backgroundImage: `url(${place.image})` }}
+                />
+
+                <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/20 to-transparent" />
+
+                <div className="absolute bottom-0 left-0 right-0 border-t border-white/10 bg-surface-variant/60 p-5 backdrop-blur-sm">
+                  <p className="mb-1 font-sans text-[9px] uppercase tracking-[0.25em] text-cream/60">
+                    {place.category}
+                  </p>
+                  <h3 className="font-serif text-base italic leading-tight text-cream">
                     {place.name}
                   </h3>
-                  <p className="mt-2 text-xs leading-relaxed text-ink/75 md:text-[13px]">
+                  <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-cream/70">
                     {place.description}
                   </p>
                 </div>

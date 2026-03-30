@@ -1,5 +1,4 @@
 import Head from "next/head";
-import Image from "next/image";
 import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 import { useState, useMemo } from "react";
@@ -34,76 +33,69 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({ places }) => {
       </Head>
 
       <section className="space-y-10 xl:space-y-12">
-        <header className="editorial-measure space-y-4">
-          <p className="eyebrow">PLACES TO TRACE</p>
-          <h1 className="font-serif text-3xl leading-tight tracking-tight text-ink md:text-4xl xl:text-[2.5rem]">
-            Studios, paths, and small museums along the forest edge.
+        <header className="space-y-5">
+          <p className="font-sans text-[10px] uppercase tracking-[0.35em] text-ink/50">
+            Archive Directory
+          </p>
+          <h1 className="font-serif text-4xl italic leading-[1.05] tracking-tight text-ink md:text-5xl">
+            Places of Barbizon
           </h1>
-          <p className="text-sm leading-relaxed text-ink/80 md:text-base xl:text-[1.0625rem] xl:leading-[1.65]">
-            A small, evolving index of places in and around Barbizon. Each is
-            less a destination than a vantage point: a room, a path, a clearing
-            from which to look.
+          <p className="max-w-xl text-sm leading-relaxed text-on-surface-variant md:text-base">
+            Discover the historic ateliers, quiet inns, and forest clearings that
+            defined the Pre-Impressionist era. Each location is a chapter in the
+            narrative of nature&apos;s awakening.
           </p>
         </header>
 
         {/* Category filters */}
-        <div className="flex flex-wrap gap-2">
+        <div className="-mx-4 flex gap-0 overflow-x-auto border-b border-outline-variant/30 pb-1 scrollbar-none px-4 md:mx-0 md:px-0">
           {categories.map((cat) => (
             <button
               key={cat}
+              type="button"
               onClick={() => setActiveCategory(cat)}
-              className={`rounded-full border px-4 py-1.5 text-[11px] uppercase tracking-[0.2em] transition-all duration-250 ease-soft ${
-                activeCategory === cat
-                  ? "border-ink bg-ink text-cream"
-                  : "border-ink/20 text-ink/60 hover:border-ink/50 hover:text-ink"
-              }`}
+              className={`-mb-px flex-shrink-0 border-b-2 px-4 pb-3 font-sans text-[10px] uppercase tracking-[0.2em] transition-all duration-300 ${activeCategory === cat
+                ? "border-ink font-medium text-ink"
+                : "border-transparent text-ink/40 hover:text-ink/70"
+                }`}
             >
               {cat}
             </button>
           ))}
         </div>
 
-        <p className="text-xs text-ink/40">
-          {filtered.length} {filtered.length === 1 ? "place" : "places"}
-          {activeCategory !== "All" && ` · ${activeCategory}`}
-        </p>
-
-        <div className="grid gap-6 md:grid-cols-3 xl:gap-8">
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 xl:gap-8">
           {filtered.map((place) => (
             <Link
               key={place.slug}
               href={`/places/${place.slug}`}
-              className="card card-hover group flex flex-col overflow-hidden"
+              className="group relative block aspect-[4/3] overflow-hidden rounded-2xl bg-ink/10"
             >
-              {/* Map thumbnail */}
-              <div className="relative h-40 overflow-hidden">
-                {hasMapbox ? (
-                  <Image
-                    src={staticMapUrl(place.longitude, place.latitude)}
-                    alt={`Map location of ${place.name}`}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                    className="object-cover transition-transform duration-500 ease-soft group-hover:scale-[1.04]"
-                  />
-                ) : (
-                  <div className="h-full bg-ink/8" />
-                )}
-              </div>
+              {hasMapbox ? (
+                <img
+                  src={staticMapUrl(place.longitude, place.latitude)}
+                  alt={`Map location of ${place.name}`}
+                  className="absolute inset-0 h-full w-full object-cover opacity-80 transition-transform duration-700 ease-soft group-hover:scale-105"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="absolute inset-0 bg-ink/8" />
+              )}
 
-              {/* Content */}
-              <div className="flex flex-1 flex-col p-5 md:p-6">
-                <p className="eyebrow">{place.category}</p>
-                <h3 className="mt-1 font-serif text-base text-ink">
+              <div className="absolute inset-0 bg-gradient-to-t from-ink/75 via-ink/20 to-transparent" />
+
+              <div className="absolute bottom-0 left-0 right-0 p-5">
+                <span className="chip mb-2 inline-block">
+                  {place.category}
+                </span>
+                <h3 className="font-serif text-lg italic leading-tight text-cream">
                   {place.name}
                 </h3>
                 {place.shortDescription && (
-                  <p className="mt-2 text-xs leading-relaxed text-ink/70 md:text-[13px]">
+                  <p className="mt-1.5 line-clamp-2 text-[11px] leading-relaxed text-cream/70">
                     {place.shortDescription}
                   </p>
                 )}
-                <span className="mt-auto pt-4 text-[11px] uppercase tracking-[0.2em] text-ink/40">
-                  View place →
-                </span>
               </div>
             </Link>
           ))}

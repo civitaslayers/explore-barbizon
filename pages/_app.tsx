@@ -3,7 +3,7 @@ import type { AppProps } from "next/app";
 import type { ReactElement, ReactNode } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Inter } from "next/font/google";
 import "@/styles/globals.css";
 import { Layout } from "@/components/Layout";
 
@@ -13,11 +13,6 @@ const DEFAULT_SITE_DESCRIPTION =
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter"
-});
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  variable: "--font-playfair"
 });
 
 type NextPageWithLayout = NextPage & {
@@ -42,7 +37,7 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
         </Head>
       )}
       <div
-        className={`${inter.variable} ${playfair.variable} font-sans bg-cream text-ink min-h-screen`}
+        className={`${inter.variable} font-sans bg-cream text-ink min-h-screen`}
       >
         {getLayout(<Component {...pageProps} />)}
       </div>

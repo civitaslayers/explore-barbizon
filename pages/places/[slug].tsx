@@ -73,9 +73,12 @@ const PlacePage: NextPage<PlacePageProps> = ({
         {ogUrl ? <meta property="og:url" content={ogUrl} /> : null}
       </Head>
       <article className="space-y-14 md:space-y-20 lg:space-y-24 xl:space-y-28">
-        <p className="text-xs text-ink/50">
-          <Link href="/places" className="no-underline hover:text-ink">
-            ← Places
+        <p className="font-sans text-[10px] uppercase tracking-[0.25em] text-ink/40">
+          <Link
+            href="/places"
+            className="no-underline transition-colors duration-200 hover:text-ink"
+          >
+            ← Archive Directory
           </Link>
         </p>
 
@@ -93,8 +96,8 @@ const PlacePage: NextPage<PlacePageProps> = ({
             <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/60 to-ink/30">
               <div className="fade-in-hero relative z-10 flex h-full flex-col justify-end p-6 md:p-9 lg:p-11 xl:p-14">
                 <div className="max-w-3xl space-y-4 text-cream xl:max-w-[40rem]">
-                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-cream/15 pb-4">
-                    <p className="eyebrow text-cream/60">{place.category}</p>
+                  <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2">
+                    <span className="chip">{place.category}</span>
                     <span className="hidden text-cream/25 sm:inline" aria-hidden>
                       ·
                     </span>
@@ -102,10 +105,7 @@ const PlacePage: NextPage<PlacePageProps> = ({
                       {place.location}
                     </p>
                   </div>
-                  <h1
-                    className="heading-xl text-cream"
-                    style={{ textShadow: "0 2px 16px rgba(0,0,0,0.7)" }}
-                  >
+                  <h1 className="font-serif text-[2.2rem] italic leading-[1.0] tracking-tight text-cream md:text-[3rem] lg:text-[3.5rem]">
                     {place.name}
                   </h1>
                 </div>
@@ -118,7 +118,7 @@ const PlacePage: NextPage<PlacePageProps> = ({
         <section className="grid gap-14 md:grid-cols-[minmax(0,1fr)_minmax(0,19.5rem)] md:items-start md:gap-12 lg:gap-16 xl:grid-cols-[minmax(0,1fr)_minmax(0,21rem)] xl:gap-20">
           <div className="space-y-14 md:space-y-16 lg:space-y-20">
             <section className="editorial-measure space-y-8">
-              <p className="font-serif text-[1.35rem] leading-[1.38] tracking-tight text-ink md:text-[1.5rem] md:leading-[1.36] lg:text-[1.65rem]">
+              <p className="max-w-2xl font-serif text-xl italic leading-snug text-ink/80 md:text-2xl">
                 {place.shortDescription}
               </p>
 
@@ -226,9 +226,9 @@ const PlacePage: NextPage<PlacePageProps> = ({
                       href={`/places/${related.slug}`}
                       className="card card-hover flex flex-col justify-between p-5 md:p-6"
                     >
-                      <p className="text-[11px] uppercase tracking-[0.2em] text-ink/50">
+                      <span className="chip mb-2 inline-block">
                         {related.category}
-                      </p>
+                      </span>
                       <h3 className="mt-1 font-serif text-base text-ink">
                         {related.name}
                       </h3>
@@ -260,9 +260,9 @@ const PlacePage: NextPage<PlacePageProps> = ({
                       className="group card card-hover space-y-1.5 p-5 md:p-6"
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <p className="text-[11px] uppercase tracking-[0.18em] text-ink/50">
+                        <span className="chip mb-2 inline-block">
                           {nearby.category}
-                        </p>
+                        </span>
                         <p className="text-[11px] text-ink/35">
                           {Math.round(haversineKm(place, nearby) * 1000)}&thinsp;m
                         </p>
