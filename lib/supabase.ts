@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import type { Database } from "./supabase.types";
 import type { Place, PlaceCategory } from "@/data/places";
 
 // ---------------------------------------------------------------------------
@@ -15,7 +16,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
  */
 export const supabase =
   supabaseUrl && supabaseAnonKey
-    ? createClient(supabaseUrl, supabaseAnonKey)
+    ? createClient<Database>(supabaseUrl, supabaseAnonKey)
     : null;
 
 // ---------------------------------------------------------------------------
@@ -124,7 +125,7 @@ export async function getPublishedRoutes(): Promise<Route[]> {
     .eq("is_published", true)
     .order("name");
   if (error) throw new Error(error.message);
-  return (data ?? []) as Route[];
+  return (data ?? []) as unknown as Route[];
 }
 
 /**

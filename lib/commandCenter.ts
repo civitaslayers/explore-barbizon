@@ -207,7 +207,7 @@ export async function getTaskLinks(taskId: string): Promise<TaskLink[]> {
     .eq("task_id", taskId)
     .order("created_at", { ascending: false });
   if (error) throw new Error(error.message);
-  return data ?? [];
+  return (data ?? []) as TaskLink[];
 }
 
 export async function createTaskLink(
@@ -220,7 +220,7 @@ export async function createTaskLink(
     .select()
     .single();
   if (error) throw new Error(error.message);
-  return data;
+  return data as TaskLink;
 }
 
 export async function deleteTaskLink(id: string): Promise<void> {
@@ -241,7 +241,7 @@ export async function getOutputsForTask(taskId: string): Promise<Output[]> {
     .eq("task_id", taskId)
     .order("created_at", { ascending: false });
   if (error) throw new Error(error.message);
-  return data ?? [];
+  return (data ?? []) as Output[];
 }
 
 export async function getRecentOutputs(limit = 5): Promise<Output[]> {
@@ -252,7 +252,7 @@ export async function getRecentOutputs(limit = 5): Promise<Output[]> {
     .order("created_at", { ascending: false })
     .limit(limit);
   if (error) throw new Error(error.message);
-  return data ?? [];
+  return (data ?? []) as Output[];
 }
 
 export async function createOutput(
@@ -265,7 +265,7 @@ export async function createOutput(
     .select()
     .single();
   if (error) throw new Error(error.message);
-  return data;
+  return data as Output;
 }
 
 export async function deleteOutput(id: string): Promise<void> {
@@ -285,7 +285,7 @@ export async function getDecisions(): Promise<Decision[]> {
     .select("*")
     .order("created_at", { ascending: false });
   if (error) throw new Error(error.message);
-  return data ?? [];
+  return (data ?? []) as Decision[];
 }
 
 export async function createDecision(
@@ -298,7 +298,7 @@ export async function createDecision(
     .select()
     .single();
   if (error) throw new Error(error.message);
-  return data;
+  return data as Decision;
 }
 
 export async function updateDecision(
@@ -313,7 +313,7 @@ export async function updateDecision(
     .select()
     .single();
   if (error) throw new Error(error.message);
-  return data;
+  return data as Decision;
 }
 
 export async function deleteDecision(id: string): Promise<void> {
@@ -333,7 +333,7 @@ export async function getMemory(): Promise<Memory[]> {
     .select("*")
     .order("updated_at", { ascending: false });
   if (error) throw new Error(error.message);
-  return data ?? [];
+  return (data ?? []) as Memory[];
 }
 
 export async function upsertMemory(
@@ -346,7 +346,7 @@ export async function upsertMemory(
     .select()
     .single();
   if (error) throw new Error(error.message);
-  return data;
+  return data as Memory;
 }
 
 export async function deleteMemory(id: string): Promise<void> {
@@ -366,7 +366,7 @@ export async function getPromptTemplates(): Promise<PromptTemplate[]> {
     .select("*")
     .order("name");
   if (error) throw new Error(error.message);
-  return data ?? [];
+  return (data ?? []) as PromptTemplate[];
 }
 
 export async function createPromptTemplate(
@@ -379,7 +379,7 @@ export async function createPromptTemplate(
     .select()
     .single();
   if (error) throw new Error(error.message);
-  return data;
+  return data as PromptTemplate;
 }
 
 export async function updatePromptTemplate(
@@ -394,7 +394,7 @@ export async function updatePromptTemplate(
     .select()
     .single();
   if (error) throw new Error(error.message);
-  return data;
+  return data as PromptTemplate;
 }
 
 export async function deletePromptTemplate(id: string): Promise<void> {
