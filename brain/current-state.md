@@ -124,5 +124,4 @@ Historical archive built by Luigi's father-in-law. Primary research source for A
 - Art & History and Forest & Nature layers have all Unsplash placeholders
 - Place cards on the Places listing page do not yet show images (media not wired to card component)
 - French translations of all English narratives deferred
-- Homepage full-bleed hero video: structure built in Webflow with placeholder URL; final footage pending
 - Stories, Artists, Visual Works tables not yet created
