@@ -1,321 +1,199 @@
 # Civitas Layers — AI Operating System
 
-Last updated: 2026-03-28
+Last updated: 2026-03-31
 
 This repository uses a structured AI-assisted development workflow.
-
-The goal is to run AI tools as a coordinated team — each doing what it does best.
+The goal is to run AI tools as a coordinated team, each doing only what it does best.
 
 ---
 
-# AI Roles
+# Tool Roles
 
-The development workflow uses three roles.
+## Claude (claude.ai) — Lead & Planner
 
-## Claude — Lead (Strategy + Architecture + Review)
-
-Claude is the primary thinking partner for this project.
+The starting point for every session and every decision.
 
 Responsibilities:
+- architecture planning and schema decisions
+- workflow direction and task routing
+- prompt generation for all other tools
+- content review and editorial quality checks
+- fact-checking direction and source verification
+- design review before Cursor implementation
+- brain file oversight
 
-- defining what should be built next
-- breaking large ideas into engineering tasks
-- architecture planning and schema design
-- identifying risks and impacted files
-- reviewing Cursor's output
-- updating brain files after significant work
-- SQL, migrations, and content operations
-- maintaining project clarity across sessions
+Claude points you to the right tool with the right prompt.
+Claude does not implement code directly.
 
-Claude operates from the brain files and project knowledge.  
-Claude plans before Cursor implements.  
-Claude reviews after Cursor implements.  
-Claude updates the brain at the end of each session.
+---
+
+## Claude Code (Cursor terminal) — Executor
+
+Runs inside Cursor's terminal. Shares the same working directory.
+
+Responsibilities:
+- brain file updates (`/update-brain`)
+- commit and push sequences (`/ship-feature`)
+- typecheck and lint validation
+- shell commands and repo maintenance
+
+Claude Code operates on explicit prompts from Claude (claude.ai).
+It does not plan — it executes.
 
 ---
 
 ## Cursor — Implementer
 
-Cursor is responsible for code execution inside the repository.
-
 Responsibilities:
+- writing and editing code
+- UI iteration and component-level changes
+- scoped file edits based on Claude's prompts
+- local build and lint checks
 
-- writing and editing files
-- implementing scoped tasks from Claude's plans
-- debugging
-- running local builds and lint checks
-
-Cursor should receive **precise instructions with clear file scope**.  
-Cursor should not redesign systems or make architectural decisions.  
-Cursor should not touch files outside its stated scope.
+Cursor receives precise prompts with named files and explicit constraints.
+Cursor does not redesign systems or touch unrelated files.
 
 ---
 
-## GPT / Grok — Reviewer and Researcher
-
-GPT and Grok are available as supplementary reviewers and research tools.
+## Stitch — Design
 
 Responsibilities:
+- UI mockups and design exploration
+- visual direction proposals
 
-- second opinion on architecture or design decisions
-- external research (history, APIs, libraries)
-- reviewing diffs when a fresh set of eyes is useful
-- generating alternative approaches for comparison
+All Stitch output must be reviewed by Claude against the Tailwind token system
+before being briefed to Cursor. Mismatches (off-token colours, spacing) are caught here.
 
-GPT and Grok do **not** drive the operating loop.  
-They do **not** update brain files.  
-They do **not** have authority over task ordering.
+---
 
-Use them selectively — they are extra sets of eyes, not the primary decision-makers.
+## Perplexity — Sourced Research
+
+Primary tool for historical and cultural research requiring cited sources.
+
+Responsibilities:
+- Barbizon history, artists, locations, archival context
+- heritage listings and institutional records
+- fact-checking content before it enters Supabase
+
+Stronger than GPT/Grok for traceable citations.
+Use when the factual integrity policy requires a verifiable source.
+
+---
+
+## GPT — Strategy & Structured Thinking
+
+Responsibilities:
+- task decomposition and planning
+- risk analysis
+- reviewing Claude outputs from a second perspective
+
+---
+
+## Grok — Live Web Search
+
+Responsibilities:
+- current web search (news, recent publications, updated records)
+- quick lookups that don't require citation depth
+
+---
+
+# Research Source Hierarchy
+
+For all historical and cultural content, sources must be evaluated in order of authority.
+
+## Tier 1 — Primary institutional sources (authoritative)
+- Base Mérimée / POP (French heritage listings)
+- Archives de Seine-et-Marne
+- Gallica / BnF (Bibliothèque nationale de France)
+- Musée d'Orsay collection records
+- Musée des Peintres de Barbizon
+- ONF (Office national des forêts) for trail and forest data
+
+## Tier 2 — Verified secondary sources
+- Peer-reviewed publications and exhibition catalogues
+- Established museum collection notes
+- Documented scholar attributions with named sources
+
+## Tier 3 — Research starting points (must be verified)
+- grappilles.fr — valuable local archive built by a knowledgeable researcher,
+  but represents one person's work and must be cross-checked against Tier 1 sources
+  before any claim is published
+- GPT, Grok, Perplexity outputs — useful for orientation, never for final facts
+- Wikipedia — useful for leads, never as a primary citation
+
+## Policy
+- No historical claim enters Supabase without a Tier 1 or verified Tier 2 source
+- grappilles.fr is credited as a research contribution, not as a primary authority
+- If a claim cannot be verified, it is either held pending verification or
+  flagged with appropriate uncertainty in the editorial text
+- geo_confidence on visual_work_locations must reflect the actual source quality,
+  not the desired outcome
 
 ---
 
 # The Operating Loop
 
-Each development session follows the same cycle.
+## Every session starts in claude.ai
 
----
+1. State the goal
+2. Claude reads current brain state (ask Claude to check if needed)
+3. Claude proposes the task, the tool, and the prompt
+4. Execute in the directed tool
+5. Return to claude.ai to verify output and plan next step
 
-## Step 1 — Orient (Claude)
+## Code tasks
+claude.ai → Cursor prompt → Cursor implements → Claude Code validates + commits
 
-Start each session by loading the brain.
+## Content tasks
+claude.ai → research direction → Perplexity/Grok research → claude.ai review
+→ fact-check against Tier 1 sources → SQL generation → Supabase SQL editor
 
-Claude reads:
-
-```
-brain/current-state.md
-brain/task-queue.md
-brain/decisions.md
-```
-
-Claude returns:
-
-- current project status (2 sentences)
-- top 3 unblocked tasks
-- active blockers
-- recommended next step
-
-This is the session start protocol. Follow `brain/session-start.md`.
-
----
-
-## Step 2 — Plan (Claude)
-
-Claude plans the implementation for the chosen task.
-
-Claude returns:
-
-- files involved
-- smallest safe steps
-- schema dependencies (if any)
-- risks
-- first implementation step
-
-For XS tasks, planning and implementation may happen in the same Claude session.  
-For S and M tasks, Claude hands a scoped implementation prompt to Cursor.
-
----
-
-## Step 3 — Implement (Cursor)
-
-Cursor executes one implementation step at a time.
-
-Example instruction:
-
-```
-Implement step 1 only.
-
-Files allowed:
-pages/tours/[slug].tsx
-lib/supabase/tours.ts
-
-Constraints:
-- no unrelated refactors
-- preserve schema fields
-- preserve styling
-- stop after this step
-```
-
----
-
-## Step 4 — Review (Claude)
-
-Claude reviews Cursor's output.
-
-Checks include:
-
-- schema field naming (layer / distance_meters / stop_narrative)
-- architectural consistency with decisions.md
-- unnecessary complexity or side effects
-- potential regressions
-- TypeScript and lint cleanliness
-
-If changes are minor or purely editorial (SQL, content, config), Claude may handle them directly without routing through Cursor.
-
----
-
-## Step 5 — Brain Update (Claude)
-
-Claude updates the brain files at the end of each session.
-
-```
-brain/current-state.md  — move completed items, update blockers
-brain/task-queue.md     — reflect new state (or trigger /sync-tasks)
-```
-
-Use the `update-brain` command or the CCC sync endpoint.
+## Design tasks
+Stitch mockup → claude.ai design review against token system → Cursor prompt → implementation
 
 ---
 
 # Task Size System
 
-Work must be broken into task sizes.
-
-### XS — micro tasks
-
-Examples:
-
-- bug fix
-- UI tweak
-- SQL query
-- content insert
-
-Usually touches 1–2 files.  
-Claude may handle directly without Cursor.
-
----
+### XS — micro task
+Bug fix, UI tweak, SQL query. 1–2 files.
 
 ### S — small feature
-
-Examples:
-
-- wiring a Supabase query
-- implementing a page component
-- adding a new map layer
-
-Usually touches 2–5 files.  
-Claude plans → Cursor implements.
-
----
+Supabase query, page component. 2–5 files.
 
 ### M — subsystem
-
-Examples:
-
-- stories layer
-- tours data integration
-- dashboard module
-- Edge Function proxy
-
-Claude plans in slices → Cursor implements slice by slice.
-
----
+Stories layer, tours integration, dashboard module.
+Claude plans → Cursor implements in slices.
 
 ### L — architecture change
-
-Examples:
-
-- multi-town migration
-- major schema redesign
-
-Must be broken into S and M tasks before any implementation begins.  
-Claude architects → Claude reviews each slice → Cursor implements.
+Multi-town migration, major schema redesign.
+Must be decomposed into smaller tasks before any implementation begins.
 
 ---
 
-# Token Efficiency Rules
+# Validation Rules
 
-Start new Claude sessions frequently.
+These checks are mandatory before any commit.
 
-Avoid vague prompts — always specify the task and relevant files.
+**Code:**
+- `npx tsc --noEmit` — no TypeScript errors
+- `npm run lint` — no lint errors
+- No placeholder strings in user-facing pages (TODO, "Coming soon", "Future…")
+- No secrets or tokens in staged files
 
-Load brain files at session start. Load strategy files only when needed.
+**Content:**
+- Every published historical claim has a named Tier 1 or Tier 2 source
+- geo_confidence is set on every visual_work_locations row
+- No coordinates marked `exact` unless a primary documentary source confirms them
 
-Do not load `MAIN_BRAIN.md` for routine coding sessions.
-
-Use agents for role separation — the `.claude/agents/` directory defines scoped behaviour for each role.
-
----
-
-# Prompt Templates
-
-## Claude Planning Prompt
-
-```
-Follow session-start protocol.
-
-Task:
-[paste task]
-
-Return:
-- understanding of task
-- files to inspect
-- smallest safe implementation plan
-- schema dependencies
-- risks
-- first implementation step
-```
+Use `/ship-feature` in Claude Code for code validation and commits.
+Content validation is flagged by Claude (claude.ai) before SQL is generated.
 
 ---
 
-## Cursor Implementation Prompt
+# Token Efficiency
 
-```
-Implement only this step:
-
-[paste step]
-
-Files allowed:
-[list files]
-
-Constraints:
-- no unrelated refactors
-- preserve styling
-- preserve schema field names
-- stop after this step
-```
-
----
-
-## Review / Research Prompt (GPT or Grok)
-
-```
-Review this implementation for Civitas Layers / ExploreBarbizon.
-
-Context:
-[paste relevant context]
-
-What to check:
-[paste specific concerns]
-
-Return: findings only — no code changes.
-```
-
----
-
-# Recommended Repository Structure
-
-```
-.claude/        agents, commands, hooks, settings
-brain/          operational memory (current-state, task-queue, decisions)
-docs/           reference material (schema, design, workflow, tooling)
-components/     UI components
-pages/          Next.js pages and API routes
-lib/            Supabase client, utilities, command center helpers
-```
-
-Brain files represent project memory.  
-Docs contain reference material.  
-`.claude/` contains agents and commands.
-
----
-
-# Key Principle
-
-Each tool does what it does best.
-
-Claude leads — strategy, architecture, review, brain maintenance.  
-Cursor implements — code, files, builds.  
-GPT and Grok assist — research and second opinions.
-
-This system creates a faster and safer development workflow.
+- Start new Claude Code sessions frequently
+- Load only the brain files relevant to the current task
+- The session-start hook loads the minimum required context automatically
+- Avoid loading MAIN_BRAIN.md unless the task touches strategy or architecture
