@@ -96,7 +96,7 @@ Do not change stack architecture without explicit instruction.
 | Database | Supabase |
 | Map | Mapbox GL JS |
 | Styling | Tailwind CSS |
-| Editorial layer | Webflow (temporary shell, being phased out) |
+| Editorial layer | Next.js (Stories, About — all surfaces on Vercel) |
 
 ---
 

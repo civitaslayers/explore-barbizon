@@ -5,6 +5,13 @@ Add new entries at the top.
 
 ---
 
+## March 2026
+**Decision:** Webflow retired. All surfaces now on Next.js deployed via Vercel.
+**Reason:** Platform fully migrated. Webflow no longer serves any active role in the stack.
+**Consequence:** Remove all Webflow references from stack docs. Do not route any new editorial work to Webflow.
+
+---
+
 ## 2026-03-31
 **Decision:** Map preview on place pages links to `/map?location=[slug]`; map page auto-enables the location's layer group on arrival.
 **Reason:** Deep-linking to a specific location on the map requires both the URL param and the layer being visible. Silently enabling the group on arrival is better UX than showing a blank map.

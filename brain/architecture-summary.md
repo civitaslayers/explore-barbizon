@@ -25,7 +25,7 @@ Civitas Layers is not a normal tourism website. It is a civic geo-narrative plat
 | Mapbox | Spatial engine |
 | Next.js | Real product layer |
 | Tailwind | Styling |
-| Webflow | Editorial shell (temporary / being phased out) |
+| Webflow | Retired — all surfaces now on Next.js / Vercel |
 
 ### Supabase project details
 
