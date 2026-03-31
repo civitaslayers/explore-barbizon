@@ -21,12 +21,13 @@ function rowToStory(row: {
   subtitle: string | null;
   body: string | null;
   author: string | null;
+  theme: string | null;
 }): Story {
   const dek =
     row.subtitle?.trim() ||
     excerptFromBody(row.body) ||
     "A short essay from the editorial notebook.";
-  const theme = row.author?.trim() || "Editorial";
+  const theme = row.theme?.trim() || row.author?.trim() || "Editorial";
   return { slug: row.slug, title: row.title, dek, theme };
 }
 
@@ -35,7 +36,7 @@ async function getPublishedStoriesFromSupabase(): Promise<Story[]> {
 
   const { data, error } = await supabase
     .from("stories")
-    .select("slug, title, subtitle, body, author")
+    .select("slug, title, subtitle, body, author, theme")
     .eq("is_published", true)
     .order("published_at", { ascending: false })
     .order("created_at", { ascending: false });

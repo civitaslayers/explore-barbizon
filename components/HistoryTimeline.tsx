@@ -46,11 +46,17 @@ const events: TimelineEvent[] = [
     )
   },
   {
-    date: "1848",
+    date: "1847",
     tag: "art",
-    headline: "Théodore Rousseau settles permanently in Barbizon.",
-    detail:
-      "After years of Salon rejection, Théodore Rousseau moved to Barbizon full time. His precise, tender studies of specific trees and clearings helped define the school's approach: the landscape as subject in itself, not backdrop."
+    headline: "Théodore Rousseau settles permanently at 55 Grande Rue.",
+    detail: (
+      <>
+        Rousseau rented a house on the Grande Rue and installed his studio in the
+        adjoining barn. The following year the Revolution of 1848 brought him his
+        first official recognition — a state commission and, for the first time,
+        acceptance at the Salon. He never left Barbizon.
+      </>
+    )
   },
   {
     date: "1849",
@@ -90,6 +96,26 @@ const events: TimelineEvent[] = [
     )
   },
   {
+    date: "1861",
+    tag: "forest",
+    headline: "Napoleon III decrees the first nature reserve in history.",
+    detail: (
+      <>
+        After years of campaigning by Rousseau and other painters, Napoleon III set
+        aside 1,097 hectares of Fontainebleau as an &quot;artistic reserve&quot; on
+        13 August 1861 — the first land anywhere to be protected by law. The
+        argument was made in aesthetic terms: the landscape had value because
+        artists had taught people to see it.{" "}
+        <a
+          href="/stories/paths-to-the-forest"
+          className="underline underline-offset-4 hover:text-ink transition-colors"
+        >
+          Read the essay →
+        </a>
+      </>
+    )
+  },
+  {
     date: "1867",
     tag: "art",
     headline: "Barbizon painters receive recognition at the Paris Exposition.",
@@ -102,13 +128,6 @@ const events: TimelineEvent[] = [
     headline: "Death of Millet. Barbizon becomes a site of pilgrimage.",
     detail:
       "With Millet's death and Rousseau's a few years earlier, the founding generation passed. Yet interest in Barbizon intensified — a new kind of cultural tourism took root."
-  },
-  {
-    date: "1879",
-    tag: "forest",
-    headline: "Fontainebleau becomes France's first protected natural reserve.",
-    detail:
-      "Following a campaign by Rousseau, Millet, and other painters, the French state designated protected zones within Fontainebleau. It is among Europe's earliest formal conservation decisions."
   },
   {
     date: "1890s",
@@ -125,9 +144,9 @@ const events: TimelineEvent[] = [
       "Historians drew the direct line: Monet, Pissarro, and Renoir worked in the shadow of what Rousseau, Millet, and Corot established at Barbizon. The practice of painting light outdoors — Barbizon planted that seed."
   },
   {
-    date: "1980s",
+    date: "1987",
     tag: "legacy",
-    headline: "Auberge Ganne restored and reopened as the Musée des Peintres.",
+    headline: "Auberge Ganne reopens as the Musée des Peintres de Barbizon.",
     detail:
       "The inn where painters once paid in sketches was carefully restored. The painted walls — still visible beneath layers of time — were preserved behind glass."
   },

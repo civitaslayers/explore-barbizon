@@ -6,6 +6,20 @@ Add new entries at the top.
 ---
 
 ## 2026-03-31
+**Decision:** Stories body field is stored and rendered as Markdown (GFM + breaks).
+**Reason:** Enables inline hyperlinks to places and other stories without a rich text editor or schema change.
+**Consequence:** All future story body copy must be written in Markdown. Raw HTML is not sanitized — content must come from trusted editorial sources only (noted in code comment).
+
+---
+
+## 2026-03-31
+**Decision:** stories.theme is a dedicated column, not reused from author.
+**Reason:** author and theme are semantically different fields. Reusing author for theme was a temporary hack that broke the stories index display.
+**Consequence:** Every story INSERT must include a theme value. Fallback chain (theme → author → "Editorial") is in place for legacy rows.
+
+---
+
+## 2026-03-31
 **Decision:** Add /history as a top-level nav page; retire /plan-your-visit from nav.
 **Reason:** Site architecture review identified overlap between pages. /history gives a dedicated home to the historical dimension (timeline, postcards, artists, sources). /plan-your-visit was thin and duplicated what Map and Places already offered.
 **Consequence:** Nav is now: Map · Places · History · Stories · About. /plan-your-visit route is preserved in the codebase but not linked from nav — content to be folded into /about when that page is expanded. The homepage "Barbizon Through Time" section now points to /history rather than containing inline copy.

@@ -87,6 +87,13 @@ populate Forest & Nature, begin Stories.
 
 ## Last completed
 
+- [x] Created 3 published stories: rooms-of-light, paths-to-the-forest, inn-paintings-dinner
+- [x] Story body renders as Markdown via marked (breaks + gfm), prose-story CSS class
+- [x] RelatedStories component — related essays + places in this essay, wired per slug
+- [x] HistoryTimeline fact-corrected: Rousseau 1847, forest reserve 1861, museum 1987
+- [x] Timeline story links: 1830s → inn-paintings-dinner, 1847 → rooms-of-light, 1853 → paths-to-the-forest, 1861 → paths-to-the-forest
+- [x] stories.theme column added; queries updated in index and slug pages; fallback chain: theme → author → "Editorial"
+- [x] atelier-rouge identified as fictional placeholder — not yet removed from data/places.ts
 - [x] Created pages/history.tsx — History page with timeline, postcards placeholder, artists grid, sources
 - [x] Created components/HistoryTimeline.tsx — client component with filter toolbar and expandable rows
 - [x] Updated nav: Map · Places · History · Stories · About (removed Plan Your Visit)

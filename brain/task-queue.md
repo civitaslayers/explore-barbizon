@@ -30,6 +30,9 @@ Task tags:
 ## Next
 *Unblocked after Now tasks or after a specific blocker is resolved.*
 
+- [ ] [data] Remove or unpublish atelier-rouge from data/places.ts and Supabase — fictional placeholder with no real-world referent
+- [ ] [content] Write 4th story essay — consider: "The Gleaners and What They Were Looking At" (Millet / field / social dimension) or "How the Forest Became a Picture" (Corot / plein air / Fontainebleau)
+- [ ] [content] Add theme value to all future story INSERTs (theme column is now required in practice)
 - [ ] [content] Write first Stories essay — History page is live and provides the factual scaffolding
 - [ ] [frontend] Expand /about to absorb /plan-your-visit practical content (getting there, parking, seasons)
 - [ ] [data] Seed artists table and wire /history artists grid to Supabase (replace static cards)

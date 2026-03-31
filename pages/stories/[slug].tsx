@@ -32,12 +32,13 @@ function mapRowToPageStory(row: {
   subtitle: string | null;
   body: string | null;
   author: string | null;
+  theme: string | null;
 }): StoryPageStory {
   const dek =
     row.subtitle?.trim() ||
     excerptFromBody(row.body) ||
     "A short essay from the editorial notebook.";
-  const theme = row.author?.trim() || "Editorial";
+  const theme = row.theme?.trim() || row.author?.trim() || "Editorial";
   const body = row.body?.trim() ?? "";
   return { slug: row.slug, title: row.title, theme, dek, body };
 }
@@ -61,7 +62,7 @@ async function getPublishedStoryBySlug(
 
   const { data, error } = await supabase
     .from("stories")
-    .select("slug, title, subtitle, body, author")
+    .select("slug, title, subtitle, body, author, theme")
     .eq("slug", slug)
     .eq("is_published", true)
     .single();
@@ -79,6 +80,7 @@ async function getPublishedStoryBySlug(
       subtitle: string | null;
       body: string | null;
       author: string | null;
+      theme: string | null;
     }
   );
 }
@@ -144,7 +146,7 @@ const RELATED: Record<string, ComponentProps<typeof RelatedStories>> = {
 
 const StoryPage: NextPage<StoryPageProps> = ({ story }) => {
   const bodyHtml = story.body
-    ? marked(story.body, { breaks: true, gfm: true, async: false })
+    ? marked(story.body, { breaks: true, gfm: true })
     : "";
   const related = RELATED[story.slug];
 
