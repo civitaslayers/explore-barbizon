@@ -141,6 +141,50 @@ const RELATED: Record<string, ComponentProps<typeof RelatedStories>> = {
         category: "Museum"
       }
     ]
+  },
+  "the-gleaners": {
+    stories: [
+      {
+        slug: "rooms-of-light",
+        title: "Rooms of Light in a Forest Village",
+        theme: "Studio"
+      },
+      {
+        slug: "paths-to-the-forest",
+        title: "Paths to the Forest Edge",
+        theme: "Landscape"
+      }
+    ],
+    places: [
+      { slug: "maison-millet", name: "Maison Millet", category: "Studio" },
+      { slug: "grande-rue", name: "Grande Rue", category: "Walk" }
+    ]
+  },
+  "how-the-forest-became-a-picture": {
+    stories: [
+      {
+        slug: "paths-to-the-forest",
+        title: "Paths to the Forest Edge",
+        theme: "Landscape"
+      },
+      {
+        slug: "the-gleaners",
+        title: "The Gleaners and What They Were Looking At",
+        theme: "Landscape"
+      }
+    ],
+    places: [
+      {
+        slug: "forest-entrance",
+        name: "Forest Entrance",
+        category: "Landscape"
+      },
+      {
+        slug: "sentier-des-peintres",
+        name: "Sentier des Peintres",
+        category: "Walk"
+      }
+    ]
   }
 };
 

@@ -295,12 +295,18 @@ function hideAllRoutes(map: mapboxgl.Map) {
   });
 }
 
-type Props = { locations: Place[]; routes: Route[] };
+type Props = {
+  locations: Place[];
+  allLocations?: Place[];
+  routes: Route[];
+  focusSlug?: string;
+};
 
-export default function MapGL({ locations, routes }: Props) {
+export default function MapGL({ locations, allLocations, routes, focusSlug }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const routesRef = useRef<Route[]>([]);
+  const focusPopupRef = useRef<mapboxgl.Popup | null>(null);
 
   // Initialise map — runs once on mount
   useEffect(() => {
@@ -649,6 +655,54 @@ export default function MapGL({ locations, routes }: Props) {
     };
     map.isStyleLoaded() ? update() : map.once("load", update);
   }, [routes]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !focusSlug) return;
+
+    const source = allLocations ?? locations;
+    const target = source.find((l) => l.slug === focusSlug);
+    if (!target) return;
+
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+    const fly = () => {
+      focusPopupRef.current?.remove();
+      focusPopupRef.current = null;
+
+      map.flyTo({
+        center: [target.longitude, target.latitude],
+        zoom: 16,
+        duration: 1200,
+      });
+
+      timeoutId = setTimeout(() => {
+        focusPopupRef.current?.remove();
+        const popup = new mapboxgl.Popup({ offset: 18, maxWidth: "260px" })
+          .setLngLat([target.longitude, target.latitude])
+          .setHTML(
+            `<div style="font-family:system-ui,sans-serif;padding:2px 0">` +
+              `<p style="font-size:10px;text-transform:uppercase;letter-spacing:0.2em;color:rgba(17,17,17,0.4);margin:0 0 5px">${target.category}</p>` +
+              `<h3 style="font-family:Georgia,serif;font-size:15px;font-weight:400;color:#111;margin:0 0 ${target.shortDescription ? "7px" : "10px"};line-height:1.3">${target.name}</h3>` +
+              (target.shortDescription
+                ? `<p style="font-size:11px;color:rgba(17,17,17,0.6);margin:0 0 10px;line-height:1.55">${target.shortDescription}</p>`
+                : "") +
+              `<a href="/places/${target.slug}" style="font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:#7A5C3E;text-decoration:none">View place →</a>` +
+              `</div>`
+          )
+          .addTo(map);
+        focusPopupRef.current = popup;
+      }, 1300);
+    };
+
+    map.isStyleLoaded() ? fly() : map.once("load", fly);
+
+    return () => {
+      if (timeoutId !== undefined) clearTimeout(timeoutId);
+      focusPopupRef.current?.remove();
+      focusPopupRef.current = null;
+    };
+  }, [focusSlug, locations, allLocations]);
 
   return <div ref={containerRef} className="h-full w-full" />;
 }

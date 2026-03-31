@@ -23,8 +23,20 @@ const events: TimelineEvent[] = [
     date: "1822",
     tag: "art",
     headline: "First painters arrive from Paris, drawn by the light.",
-    detail:
-      "Camille Corot and contemporaries made early excursions to paint in the Fontainebleau region. The village of Barbizon, with its simple inn and proximity to the forest edge, proved a practical base. The practice of painting directly outdoors — en plein air — began in earnest."
+    detail: (
+      <>
+        Camille Corot and contemporaries made early excursions to paint in the
+        Fontainebleau region. The village of Barbizon, with its simple inn and
+        proximity to the forest edge, proved a practical base. The practice of
+        painting directly outdoors — en plein air — began in earnest.{" "}
+        <a
+          href="/stories/how-the-forest-became-a-picture"
+          className="underline underline-offset-4 hover:text-ink transition-colors"
+        >
+          Read the essay →
+        </a>
+      </>
+    )
   },
   {
     date: "1830s",
@@ -72,6 +84,13 @@ const events: TimelineEvent[] = [
           className="underline underline-offset-4 hover:text-ink transition-colors"
         >
           Read the essay →
+        </a>
+        {" "}
+        <a
+          href="/stories/the-gleaners"
+          className="underline underline-offset-4 hover:text-ink transition-colors"
+        >
+          And the fields he painted →
         </a>
       </>
     )

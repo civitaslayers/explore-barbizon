@@ -177,9 +177,13 @@ const PlacePage: NextPage<PlacePageProps> = ({
 
             <section className="space-y-4 border-t border-ink/10 pt-8">
               <p className="eyebrow">On the map</p>
-              <div className="relative h-40 overflow-hidden rounded-xl bg-ink/[0.03] ring-1 ring-ink/8 md:h-48 xl:h-52">
+              <Link
+                href={`/map?location=${place.slug}`}
+                className="group relative block h-40 overflow-hidden rounded-xl bg-ink/[0.03] ring-1 ring-ink/8 md:h-48 xl:h-52 transition-opacity hover:opacity-90"
+                aria-label={`Open ${place.name} on the full map`}
+              >
                 {hasMapbox ? (
-                  <Image
+                  <img
                     src={staticMapUrl(
                       place.longitude,
                       place.latitude,
@@ -188,21 +192,17 @@ const PlacePage: NextPage<PlacePageProps> = ({
                       15
                     )}
                     alt={`Map showing location of ${place.name}`}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    className="object-cover object-center"
+                    className="h-full w-full object-cover object-center"
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center bg-[radial-gradient(circle_at_top,_#f5f1e8,_#e8e2d6)] text-[11px] text-ink/55">
                     Map preview unavailable
                   </div>
                 )}
-              </div>
-              <p className="text-xs text-ink/60">
-                <Link href="/map" className="underline-offset-4 hover:underline">
-                  Open the full map
-                </Link>
-              </p>
+                <span className="absolute bottom-3 right-3 rounded-full bg-cream/90 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-ink/70 backdrop-blur-sm transition-colors group-hover:bg-cream">
+                  Open on map →
+                </span>
+              </Link>
             </section>
           </aside>
         </section>

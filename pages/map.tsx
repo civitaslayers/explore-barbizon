@@ -1,6 +1,7 @@
 import Head from "next/head";
 import type { GetStaticProps, NextPage } from "next";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/router";
 import { useEffect, useState, useMemo } from "react";
 import { getAllPlaces, type Place } from "@/data/places";
 import { getPublishedLocations, getPublishedRoutes, type Route } from "@/lib/supabase";
@@ -26,6 +27,12 @@ const MapGL = dynamic(() => import("@/components/MapGL"), {
 type MapPageProps = { locations: Place[]; routes: Route[] };
 
 const MapPage: NextPage<MapPageProps> = ({ locations, routes }) => {
+  const router = useRouter();
+  const focusSlug =
+    typeof router.query.location === "string"
+      ? router.query.location
+      : undefined;
+
   const [activeGroups, setActiveGroups] = useState<GroupName[]>([
     "Art & History",
     "Eat & Stay",
@@ -42,6 +49,16 @@ const MapPage: NextPage<MapPageProps> = ({ locations, routes }) => {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [sidebarOpen]);
+
+  useEffect(() => {
+    if (!focusSlug || !router.isReady) return;
+    const target = locations.find((l) => l.slug === focusSlug);
+    if (!target) return;
+    const group = getCategoryGroup(target.category);
+    setActiveGroups((prev) =>
+      prev.includes(group) ? prev : [...prev, group]
+    );
+  }, [focusSlug, router.isReady, locations]);
 
   const toggleGroup = (group: GroupName) =>
     setActiveGroups((prev) =>
@@ -76,7 +93,12 @@ const MapPage: NextPage<MapPageProps> = ({ locations, routes }) => {
         <div className="relative h-full w-full">
           {/* Map — always full width/height */}
           <div className="absolute inset-0">
-            <MapGL locations={visibleLocations} routes={routes} />
+            <MapGL
+              locations={visibleLocations}
+              allLocations={locations}
+              routes={routes}
+              focusSlug={focusSlug}
+            />
           </div>
 
           {/* Floating controls — top left */}
