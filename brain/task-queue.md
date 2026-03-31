@@ -15,12 +15,11 @@ Task tags:
 ## Now
 *Unblocked tasks that can be started immediately.*
 
+- [ ] [data] Remove or unpublish atelier-rouge — fictional placeholder, no real-world referent in Barbizon
 - [ ] [frontend,schema] Wire tours/[slug].tsx to live Supabase
       data (tours + tour_stops tables)
 - [ ] [data,user-action] Populate Forest & Nature layer —
       first 5–10 locations in Supabase
-- [ ] [frontend] Stories index + article page — Pass 6
-      (design not yet done)
 - [ ] [data,user-action] Continue replacing Unsplash placeholders with real photos — send location name + URL pairs, SQL updates run instantly
 - [ ] [frontend] Wire media to place cards on the Places listing page (same pattern as hero — join media in query, render first image)
 - [ ] [user-action] Commit and push today's frontend changes to Vercel (media wiring, mix-blend fix, animation fix)
@@ -30,13 +29,11 @@ Task tags:
 ## Next
 *Unblocked after Now tasks or after a specific blocker is resolved.*
 
-- [ ] [data] Remove or unpublish atelier-rouge from data/places.ts and Supabase — fictional placeholder with no real-world referent
-- [ ] [content] Write 4th story essay — consider: "The Gleaners and What They Were Looking At" (Millet / field / social dimension) or "How the Forest Became a Picture" (Corot / plein air / Fontainebleau)
-- [ ] [content] Add theme value to all future story INSERTs (theme column is now required in practice)
-- [ ] [content] Write first Stories essay — History page is live and provides the factual scaffolding
 - [ ] [frontend] Expand /about to absorb /plan-your-visit practical content (getting there, parking, seasons)
 - [ ] [data] Seed artists table and wire /history artists grid to Supabase (replace static cards)
 - [ ] [content] Source first historical postcard images for /history section 2
+- [ ] [content] Essay 6 — conservation / 1861 reserve / Rousseau as activist (theme: Forest)
+- [ ] [content] Add theme value to all future story INSERTs (theme column is now required in practice)
 
 ### Content (highest priority — biggest visible gap)
 - [ ] [data,user-action] Write first historical story: Maison de Millet (source: grappilles.fr)
@@ -57,7 +54,7 @@ Task tags:
 - [ ] [data,user-action] Consider additional Fontainebleau trails: Sentier bleu no.6 Gorges d'Apremont, Parcours FB Fontainebleau-Barbizon
 
 ### Schema
-- [ ] [data,schema] Create stories + story_locations tables
+- [x] [data,schema] Create stories + story_locations tables
 - [ ] [data,schema] Create artists + artist_locations tables
 - [ ] [data,schema] Create visual_works + visual_work_locations tables
 - [ ] [data,schema] Add is_published, tour_type, difficulty to tours table
@@ -75,7 +72,7 @@ Task tags:
 - [ ] [frontend] Dashboard v1: single location editor
 
 ### Wiring
-- [ ] [frontend] Stories page: wire stories table to frontend
+- [x] [frontend] Stories page: wire stories table to frontend
 
 ---
 
@@ -121,3 +118,5 @@ Task tags:
 - [x] [frontend] Per-trail hover/click reveal on map (route_slug approach, showTrails toggle removed)
 - [x] [infra] Supabase Edge Function image-search deployed (v3)
 - [x] [infra] ANTHROPIC_API_KEY stored as Supabase secret
+- [x] [frontend] Stories index + article pages — Supabase wired, Markdown body, RelatedStories, five essays published
+- [x] [frontend] Nav: Map · Places · History · Stories · About; /plan-your-visit retired from nav (route preserved)

@@ -2,6 +2,8 @@
 
 Last updated: 2026-03-31
 
+**Status:** Five stories published and cross-linked. History page live. Map deep-links working with layer auto-enable. Nav finalised: Map · Places · History · Stories · About.
+
 ---
 
 ## Platform identity
@@ -52,7 +54,7 @@ GPX sources: Cirkwi / Balad'Nature (official Fontainebleau Tourisme).
 All five design passes shipped in a single session.
 
 **What is live and working:**
-- Homepage: cinematic video hero (hero-barbizon.mp4 in place),
+- Homepage: cinematic video hero (asset path wired; final file pending — see Blockers),
   Atlas Card featured enclaves, Choose Your Path section
 - Places index: tab filter row, Atlas Card grid, Archive Directory
   header
@@ -74,32 +76,47 @@ All five design passes shipped in a single session.
 **Current limitations:**
 - Tour page uses static data/tours.ts — not yet wired to Supabase
 - Forest & Nature layer has no location data in Supabase
-- Stories page exists but has no content
-- Hero video live in production via Git LFS (Vercel LFS enabled)
+- Further stories and essay 6 planned (see Next tasks)
+- Hero video file still pending — see Blockers (`/public/videos/hero-barbizon.mp4`); pipeline (Git LFS / Vercel) ready when asset lands
 - Place images are still mostly placeholders
 - Map requires Mapbox token to render pins
 
 **Overall status:**
-Visual shell is now cohesive and design-system-driven. Video hero live in production.
-Next priority is content depth: wire tours to Supabase,
-populate Forest & Nature, begin Stories.
+Visual shell is cohesive and design-system-driven; History page and five cross-linked stories are live; map deep-links work with layer auto-enable.
+Next priority: data cleanup (atelier-rouge), expand About, seed artists and postcards, essay 6 — plus wire tours to Supabase and Forest & Nature locations.
 
 ---
 
 ## Last completed
 
-- [x] Created 3 published stories: rooms-of-light, paths-to-the-forest, inn-paintings-dinner
-- [x] Story body renders as Markdown via marked (breaks + gfm), prose-story CSS class
-- [x] RelatedStories component — related essays + places in this essay, wired per slug
+- [x] Created pages/history.tsx — History page with HistoryTimeline, postcards placeholder, artists grid, sources
+- [x] Created components/HistoryTimeline.tsx — filterable, expandable rows, cross-links to stories
 - [x] HistoryTimeline fact-corrected: Rousseau 1847, forest reserve 1861, museum 1987
-- [x] Timeline story links: 1830s → inn-paintings-dinner, 1847 → rooms-of-light, 1853 → paths-to-the-forest, 1861 → paths-to-the-forest
-- [x] stories.theme column added; queries updated in index and slug pages; fallback chain: theme → author → "Editorial"
-- [x] atelier-rouge identified as fictional placeholder — not yet removed from data/places.ts
-- [x] Created pages/history.tsx — History page with timeline, postcards placeholder, artists grid, sources
-- [x] Created components/HistoryTimeline.tsx — client component with filter toolbar and expandable rows
-- [x] Updated nav: Map · Places · History · Stories · About (removed Plan Your Visit)
+- [x] Timeline story links: 1822 → how-the-forest-became-a-picture, 1830s → inn-paintings-dinner, 1847 → rooms-of-light, 1849 → the-gleaners, 1853 → paths-to-the-forest, 1861 → paths-to-the-forest
+- [x] Nav updated: Map · Places · History · Stories · About — /plan-your-visit removed from nav, route preserved
 - [x] Homepage section 6 replaced with /history teaser card
-- [x] /plan-your-visit route preserved but removed from nav
+- [x] Published 5 stories: rooms-of-light (Studio), paths-to-the-forest (Landscape), inn-paintings-dinner (Village life), the-gleaners (Landscape), how-the-forest-became-a-picture (Art)
+- [x] Story body renders as Markdown via marked (GFM + breaks), prose-story CSS class
+- [x] RelatedStories component — related essays + places, wired per slug in [slug].tsx
+- [x] stories.theme column added; fallback chain: theme → author → Editorial
+- [x] All 5 stories cross-linked: inline body links, RELATED blocks, timeline story links
+- [x] Map preview on place pages clickable → /map?location=[slug]
+- [x] MapGL: focusSlug prop — flies to location and opens popup on load
+- [x] Map deep-link auto-enables layer group via getCategoryGroup before flyTo
+- [x] atelier-rouge identified as fictional placeholder — not yet removed from data/places.ts or Supabase
+
+## Blockers
+
+- Hero video asset still missing (`/public/videos/hero-barbizon.mp4`)
+- atelier-rouge is a fictional placeholder in `data/places.ts` — needs removal or unpublish
+
+## Next tasks
+
+1. Remove or unpublish atelier-rouge
+2. Expand `/about` to absorb `/plan-your-visit` practical content
+3. Seed artists table and wire `/history` artists grid to Supabase
+4. Source first historical postcard images for `/history` section 2
+5. Write essay 6 — conservation / 1861 reserve / Rousseau as activist
 
 ---
 
@@ -124,4 +141,4 @@ Historical archive built by Luigi's father-in-law. Primary research source for A
 - Art & History and Forest & Nature layers have all Unsplash placeholders
 - Place cards on the Places listing page do not yet show images (media not wired to card component)
 - French translations of all English narratives deferred
-- Stories, Artists, Visual Works tables not yet created
+- Artists and Visual Works tables not yet created (stories table live)

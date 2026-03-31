@@ -6,23 +6,30 @@ Add new entries at the top.
 ---
 
 ## 2026-03-31
-**Decision:** Stories body field is stored and rendered as Markdown (GFM + breaks).
+**Decision:** Map preview on place pages links to `/map?location=[slug]`; map page auto-enables the location's layer group on arrival.
+**Reason:** Deep-linking to a specific location on the map requires both the URL param and the layer being visible. Silently enabling the group on arrival is better UX than showing a blank map.
+**Consequence:** `getCategoryGroup` is the shared mapping between `map.tsx` and `MapGL.tsx`. Any new category must be added to that mapping or deep-links for that category will not auto-enable correctly.
+
+---
+
+## 2026-03-31
+**Decision:** Stories body field stored and rendered as Markdown (GFM + breaks via marked).
 **Reason:** Enables inline hyperlinks to places and other stories without a rich text editor or schema change.
-**Consequence:** All future story body copy must be written in Markdown. Raw HTML is not sanitized — content must come from trusted editorial sources only (noted in code comment).
+**Consequence:** All future story body copy must be written in Markdown. Content must come from trusted editorial sources — no sanitization is currently applied.
 
 ---
 
 ## 2026-03-31
 **Decision:** stories.theme is a dedicated column, not reused from author.
-**Reason:** author and theme are semantically different fields. Reusing author for theme was a temporary hack that broke the stories index display.
-**Consequence:** Every story INSERT must include a theme value. Fallback chain (theme → author → "Editorial") is in place for legacy rows.
+**Reason:** author and theme are semantically different. Reusing author for theme was a temporary hack that broke the stories index display.
+**Consequence:** Every story INSERT must include a theme value. Fallback chain (theme → author → Editorial) is in place for legacy rows.
 
 ---
 
 ## 2026-03-31
-**Decision:** Add /history as a top-level nav page; retire /plan-your-visit from nav.
-**Reason:** Site architecture review identified overlap between pages. /history gives a dedicated home to the historical dimension (timeline, postcards, artists, sources). /plan-your-visit was thin and duplicated what Map and Places already offered.
-**Consequence:** Nav is now: Map · Places · History · Stories · About. /plan-your-visit route is preserved in the codebase but not linked from nav — content to be folded into /about when that page is expanded. The homepage "Barbizon Through Time" section now points to /history rather than containing inline copy.
+**Decision:** Add `/history` as a top-level nav page; retire `/plan-your-visit` from nav.
+**Reason:** Site architecture review identified overlap between pages. `/history` gives a dedicated home to the historical dimension. `/plan-your-visit` was thin and duplicated Map and Places.
+**Consequence:** Nav is now: Map · Places · History · Stories · About. `/plan-your-visit` route preserved but not linked from nav — content to be folded into `/about`.
 
 ---
 
