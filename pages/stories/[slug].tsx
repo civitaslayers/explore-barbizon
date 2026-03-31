@@ -74,7 +74,7 @@ async function getPublishedStoryBySlug(
 
   if (!data) return null;
   return mapRowToPageStory(
-    data as {
+    data as unknown as {
       slug: string;
       title: string;
       subtitle: string | null;

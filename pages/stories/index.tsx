@@ -44,7 +44,16 @@ async function getPublishedStoriesFromSupabase(): Promise<Story[]> {
   if (error) throw new Error(error.message);
   if (!data?.length) throw new Error("No published stories");
 
-  return data.map(rowToStory);
+  return (
+    data as unknown as Array<{
+      slug: string;
+      title: string;
+      subtitle: string | null;
+      body: string | null;
+      author: string | null;
+      theme: string | null;
+    }>
+  ).map(rowToStory);
 }
 
 const StoriesIndexPage: NextPage<StoriesIndexProps> = ({ stories }) => {
