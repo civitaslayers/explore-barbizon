@@ -75,11 +75,12 @@ All five design passes shipped in a single session.
 - Tour page uses static data/tours.ts — not yet wired to Supabase
 - Forest & Nature layer has no location data in Supabase
 - Stories page exists but has no content
-- Hero video is live; place images are still mostly placeholders
+- Hero video live in production via Git LFS (Vercel LFS enabled)
+- Place images are still mostly placeholders
 - Map requires Mapbox token to render pins
 
 **Overall status:**
-Visual shell is now cohesive and design-system-driven.
+Visual shell is now cohesive and design-system-driven. Video hero live in production.
 Next priority is content depth: wire tours to Supabase,
 populate Forest & Nature, begin Stories.
 

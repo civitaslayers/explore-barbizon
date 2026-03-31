@@ -101,6 +101,8 @@ Task tags:
 ---
 
 ## Done (recent)
+- [x] [infra] Git LFS configured for mp4 assets
+- [x] [infra] Vercel LFS enabled — hero video live in production
 - [x] [frontend] Stitch 2.0 design system — Passes 1–5
 - [x] [frontend] Newsreader font + token system upgrade
 - [x] [frontend] Navigation overhaul + BottomNav component
