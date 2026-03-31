@@ -64,7 +64,7 @@ All five design passes shipped in a single session.
   stats aside, alternating stop grid with timeline anchor,
   archival quote block
 - Navigation: simplified top bar (Visit Barbizon wordmark links
-  to /), BottomNav with 4 tabs (Atlas / Trails / Stories / Places)
+  to /) — Map · Places · History · Stories · About
 - All pages wired to live Supabase data with static fallback
 
 **Design tokens in place:**
