@@ -9,10 +9,11 @@ type LayoutProps = {
 };
 
 const navLinks = [
-  { href: "/map", label: "Explore Map" },
+  { href: "/map", label: "Map" },
   { href: "/places", label: "Places" },
+  { href: "/history", label: "History" },
   { href: "/stories", label: "Stories" },
-  { href: "/plan-your-visit", label: "Plan Your Visit" },
+  { href: "/about", label: "About" },
 ];
 
 export function Layout({ children }: LayoutProps) {

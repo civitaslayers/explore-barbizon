@@ -1,6 +1,9 @@
 import Head from "next/head";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Link from "next/link";
+import type { ComponentProps } from "react";
+import { marked } from "marked";
+import RelatedStories from "@/components/RelatedStories";
 import { getAllStories } from "@/data/stories";
 import { supabase } from "@/lib/supabase";
 
@@ -80,7 +83,71 @@ async function getPublishedStoryBySlug(
   );
 }
 
+const RELATED: Record<string, ComponentProps<typeof RelatedStories>> = {
+  "rooms-of-light": {
+    stories: [
+      {
+        slug: "inn-paintings-dinner",
+        title: "The Inn Where Paintings Paid for Dinner",
+        theme: "Village life"
+      }
+    ],
+    places: [
+      { slug: "maison-millet", name: "Maison Millet", category: "Studio" },
+      { slug: "grande-rue", name: "Grande Rue", category: "Walk" }
+    ]
+  },
+  "paths-to-the-forest": {
+    stories: [
+      {
+        slug: "inn-paintings-dinner",
+        title: "The Inn Where Paintings Paid for Dinner",
+        theme: "Village life"
+      }
+    ],
+    places: [
+      {
+        slug: "forest-entrance",
+        name: "Forest Entrance",
+        category: "Landscape"
+      },
+      {
+        slug: "sentier-des-peintres",
+        name: "Sentier des Peintres",
+        category: "Walk"
+      }
+    ]
+  },
+  "inn-paintings-dinner": {
+    stories: [
+      {
+        slug: "rooms-of-light",
+        title: "Rooms of Light in a Forest Village",
+        theme: "Studio"
+      },
+      {
+        slug: "paths-to-the-forest",
+        title: "Paths to the Forest Edge",
+        theme: "Landscape"
+      }
+    ],
+    places: [
+      { slug: "auberge-ganne", name: "Auberge Ganne", category: "Museum" },
+      {
+        slug: "musee-de-barbizon",
+        name: "Musée de Barbizon",
+        category: "Museum"
+      }
+    ]
+  }
+};
+
 const StoryPage: NextPage<StoryPageProps> = ({ story }) => {
+  const bodyHtml = story.body
+    ? marked(story.body, { breaks: true, gfm: true, async: false })
+    : "";
+  const related = RELATED[story.slug];
+
   return (
     <>
       <Head>
@@ -106,10 +173,12 @@ const StoryPage: NextPage<StoryPageProps> = ({ story }) => {
         </header>
 
         {story.body ? (
-          <div className="space-y-4 text-sm leading-[1.7] text-ink/90 md:text-base whitespace-pre-wrap">
-            {story.body}
-          </div>
+          <div
+            className="prose-story"
+            dangerouslySetInnerHTML={{ __html: bodyHtml }}
+          />
         ) : null}
+        {related ? <RelatedStories {...related} /> : null}
       </article>
     </>
   );

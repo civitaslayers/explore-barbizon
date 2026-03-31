@@ -256,21 +256,21 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
         {/* 6. BARBIZON THROUGH TIME */}
         <section className="space-y-8">
           <header className="space-y-3 editorial-measure">
-            <p className="eyebrow">
-              BARBIZON THROUGH TIME
-            </p>
-            <h2 className="heading-lg">
-              Postcards, archives, and quiet documents.
-            </h2>
+            <p className="eyebrow">BARBIZON THROUGH TIME</p>
+            <h2 className="heading-lg">Two centuries of looking.</h2>
           </header>
-          <div className="editorial-measure space-y-4 text-sm leading-relaxed text-ink/80 md:text-base">
-            <p>
-              Alongside contemporary photographs and maps, Visit Barbizon will
-              draw on historical postcards, guidebooks, and archival images. The
-              village has been looked at and described for over a century; this
-              project gathers some of those ways of seeing.
+          <Link
+            href="/history"
+            className="group card card-hover flex flex-col justify-between p-7 md:p-8 editorial-measure"
+          >
+            <p className="text-sm leading-relaxed text-ink/75 md:text-[15px]">
+              Historical postcards, a visual timeline, and the archive of
+              sources behind this project.
             </p>
-          </div>
+            <span className="mt-5 text-[11px] uppercase tracking-[0.2em] text-ink/50">
+              Explore the history →
+            </span>
+          </Link>
         </section>
 
         {/* 7. VISITOR INFO */}

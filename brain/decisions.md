@@ -5,6 +5,20 @@ Add new entries at the top.
 
 ---
 
+## 2026-03-31
+**Decision:** Add /history as a top-level nav page; retire /plan-your-visit from nav.
+**Reason:** Site architecture review identified overlap between pages. /history gives a dedicated home to the historical dimension (timeline, postcards, artists, sources). /plan-your-visit was thin and duplicated what Map and Places already offered.
+**Consequence:** Nav is now: Map · Places · History · Stories · About. /plan-your-visit route is preserved in the codebase but not linked from nav — content to be folded into /about when that page is expanded. The homepage "Barbizon Through Time" section now points to /history rather than containing inline copy.
+
+---
+
+## 2026-03-31
+**Decision:** History page content order: timeline → postcards/images → artists index → sources.
+**Reason:** Timeline is the most complete and visually distinctive content; it earns the lead position. Postcards follow as the next archival layer (placeholder for now). Artists index grounds the abstract history in people. Sources/grappilles.fr credit comes last — important but not the entry point.
+**Consequence:** When postcards and artists DB tables are wired, this page becomes the primary historical reference for the platform without restructuring.
+
+---
+
 ## 2026-03-28
 **Decision:** Claude is the project lead. GPT and Grok are demoted to reviewers and researchers.
 **Reason:** The original operating loop assigned ChatGPT as strategist and Claude as architect. In practice, Claude and Cursor have been the primary working pair for all sessions. ChatGPT added friction without adding strategic value that Claude could not provide directly.

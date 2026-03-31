@@ -1,6 +1,6 @@
 # Task Queue
 
-Last updated: 2026-03-30
+Last updated: 2026-03-31
 
 Task tags:
 - frontend
@@ -29,6 +29,11 @@ Task tags:
 
 ## Next
 *Unblocked after Now tasks or after a specific blocker is resolved.*
+
+- [ ] [content] Write first Stories essay — History page is live and provides the factual scaffolding
+- [ ] [frontend] Expand /about to absorb /plan-your-visit practical content (getting there, parking, seasons)
+- [ ] [data] Seed artists table and wire /history artists grid to Supabase (replace static cards)
+- [ ] [content] Source first historical postcard images for /history section 2
 
 ### Content (highest priority — biggest visible gap)
 - [ ] [data,user-action] Write first historical story: Maison de Millet (source: grappilles.fr)

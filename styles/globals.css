@@ -152,3 +152,13 @@ a {
   }
 }
 
+.prose-story p {
+  @apply text-sm leading-[1.7] text-ink/90 md:text-base mb-4;
+}
+.prose-story a {
+  @apply underline underline-offset-4 text-ink hover:text-ink/70 transition-colors;
+}
+.prose-story p:last-child {
+  @apply mb-0;
+}
+

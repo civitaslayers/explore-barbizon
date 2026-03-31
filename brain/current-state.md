@@ -1,6 +1,6 @@
 # Current State
 
-Last updated: 2026-03-30
+Last updated: 2026-03-31
 
 ---
 
@@ -82,6 +82,16 @@ All five design passes shipped in a single session.
 Visual shell is now cohesive and design-system-driven.
 Next priority is content depth: wire tours to Supabase,
 populate Forest & Nature, begin Stories.
+
+---
+
+## Last completed
+
+- [x] Created pages/history.tsx — History page with timeline, postcards placeholder, artists grid, sources
+- [x] Created components/HistoryTimeline.tsx — client component with filter toolbar and expandable rows
+- [x] Updated nav: Map · Places · History · Stories · About (removed Plan Your Visit)
+- [x] Homepage section 6 replaced with /history teaser card
+- [x] /plan-your-visit route preserved but removed from nav
 
 ---
 
