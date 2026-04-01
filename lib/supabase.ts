@@ -169,3 +169,141 @@ export async function getPublishedSlugs(): Promise<string[]> {
 
   return (data ?? []).map((row: { slug: string }) => row.slug);
 }
+
+// ---------------------------------------------------------------------------
+// Tour types
+// ---------------------------------------------------------------------------
+
+export type DbTour = {
+  id: string;
+  town_id: string | null;
+  name: string;
+  slug: string;
+  description: string | null;
+  duration_minutes: number | null;
+  distance_meters: number | null;
+  cover_image_url: string | null;
+};
+
+export type DbTourStop = {
+  id: string;
+  tour_id: string;
+  location_id: string;
+  stop_order: number;
+  stop_narrative: string | null;
+  locations: {
+    name: string;
+    slug: string;
+    short_description: string | null;
+  } | null;
+};
+
+export type TourWithStops = DbTour & { stops: DbTourStop[] };
+
+/**
+ * Fetch all tours for Barbizon with their stops, ordered by stop_order.
+ */
+export async function getPublishedTours(): Promise<TourWithStops[]> {
+  if (!supabase) throw new Error("Supabase not configured");
+
+  const townRes = await supabase
+    .from("towns")
+    .select("id")
+    .eq("slug", "barbizon")
+    .single();
+  if (townRes.error || !townRes.data) throw new Error("Barbizon town not found");
+
+  const { data, error } = await supabase
+    .from("tours")
+    .select(
+      `
+      id, town_id, name, slug, description, duration_minutes, distance_meters, cover_image_url,
+      tour_stops (
+        id, tour_id, location_id, stop_order, stop_narrative,
+        locations ( name, slug, short_description )
+      )
+    `
+    )
+    .eq("town_id", townRes.data.id)
+    .order("name");
+
+  if (error) throw new Error(error.message);
+  if (!data?.length) throw new Error("No tours found");
+
+  return (data as (DbTour & { tour_stops?: DbTourStop[] })[]).map((row) => {
+    const { tour_stops, ...rest } = row;
+    return {
+      ...rest,
+      stops: [...(tour_stops ?? [])].sort(
+        (a, b) => a.stop_order - b.stop_order
+      ),
+    };
+  });
+}
+
+/**
+ * Fetch a single tour by slug with its stops.
+ */
+export async function getTourBySlugFromSupabase(
+  slug: string
+): Promise<TourWithStops | null> {
+  if (!supabase) throw new Error("Supabase not configured");
+
+  const townRes = await supabase
+    .from("towns")
+    .select("id")
+    .eq("slug", "barbizon")
+    .single();
+  if (townRes.error || !townRes.data) return null;
+
+  const { data, error } = await supabase
+    .from("tours")
+    .select(
+      `
+      id, town_id, name, slug, description, duration_minutes, distance_meters, cover_image_url,
+      tour_stops (
+        id, tour_id, location_id, stop_order, stop_narrative,
+        locations ( name, slug, short_description )
+      )
+    `
+    )
+    .eq("slug", slug)
+    .eq("town_id", townRes.data.id)
+    .single();
+
+  if (error) {
+    if (error.code === "PGRST116") return null;
+    throw new Error(error.message);
+  }
+
+  const row = data as DbTour & { tour_stops?: DbTourStop[] };
+  const { tour_stops, ...rest } = row;
+  return {
+    ...rest,
+    stops: [...(tour_stops ?? [])].sort(
+      (a, b) => a.stop_order - b.stop_order
+    ),
+  };
+}
+
+/**
+ * Fetch all tour slugs for getStaticPaths.
+ */
+export async function getPublishedTourSlugs(): Promise<string[]> {
+  if (!supabase) throw new Error("Supabase not configured");
+
+  const townRes = await supabase
+    .from("towns")
+    .select("id")
+    .eq("slug", "barbizon")
+    .single();
+  if (townRes.error || !townRes.data) return [];
+
+  const { data, error } = await supabase
+    .from("tours")
+    .select("slug")
+    .eq("town_id", townRes.data.id);
+
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((t: { slug: string }) => t.slug);
+}

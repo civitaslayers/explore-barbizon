@@ -1,6 +1,7 @@
 import Head from "next/head";
 import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
+import { getPublishedTours, getPublishedLocations } from "@/lib/supabase";
 import { getAllPlaces, type Place } from "@/data/places";
 import { getAllTours, type Tour } from "@/data/tours";
 
@@ -96,15 +97,23 @@ const PlanYourVisitPage: NextPage<PlanPageProps> = ({ places, tours }) => {
 };
 
 export const getStaticProps: GetStaticProps<PlanPageProps> = async () => {
-  const places = getAllPlaces();
-  const tours = getAllTours();
-
-  return {
-    props: {
-      places,
-      tours
-    }
-  };
+  try {
+    const toursData = await getPublishedTours();
+    const tours = toursData.map((t) => ({
+      slug: t.slug,
+      title: t.name,
+      summary: t.description ?? "",
+      durationHours: Math.round((t.duration_minutes ?? 120) / 60),
+      stops: t.stops.map((s) => s.location_id),
+    }));
+    const places = await getPublishedLocations();
+    return { props: { places, tours }, revalidate: 60 };
+  } catch {
+    return {
+      props: { places: getAllPlaces(), tours: getAllTours() },
+      revalidate: 60,
+    };
+  }
 };
 
 export default PlanYourVisitPage;

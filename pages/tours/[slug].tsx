@@ -2,223 +2,189 @@ import Head from "next/head";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 import {
-  getAllTours,
-  getTourBySlug,
-  getPlacesForTour,
-  type Tour
-} from "@/data/tours";
-import type { Place } from "@/data/places";
+  getTourBySlugFromSupabase,
+  getPublishedTourSlugs,
+  type TourWithStops,
+} from "@/lib/supabase";
+import { getAllTours, getTourBySlug, getPlacesForTour } from "@/data/tours";
 
-type TourPageProps = {
-  tour: Tour;
-  places: Place[];
+// Static fallback shape — matches what the page needs
+type StaticStop = {
+  stop_order: number;
+  stop_narrative: string | null;
+  locations: {
+    name: string;
+    slug: string;
+    short_description: string | null;
+  } | null;
 };
 
-const TourPage: NextPage<TourPageProps> = ({ tour, places }) => {
+type TourPageProps =
+  | { source: "supabase"; tour: TourWithStops }
+  | {
+      source: "static";
+      tour: {
+        name: string;
+        slug: string;
+        description: string;
+        duration_minutes: number;
+        distance_meters: number | null;
+      };
+      stops: StaticStop[];
+    };
+
+function formatDuration(minutes: number | null): string {
+  if (!minutes) return "";
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h === 0) return `${m} min`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}min`;
+}
+
+function formatDistance(meters: number | null): string {
+  if (!meters) return "";
+  return meters >= 1000
+    ? `${(meters / 1000).toFixed(1)} km`
+    : `${meters} m`;
+}
+
+const TourPage: NextPage<TourPageProps> = (props) => {
+  const tour = props.tour;
+  const stops = props.source === "supabase" ? props.tour.stops : props.stops;
+
   return (
     <>
       <Head>
-        <title>{tour.title} — Visit Barbizon</title>
+        <title>{tour.name} — Explore Barbizon</title>
       </Head>
-
-      <article>
-        {/* ── BACK LINK ───────────────────────────────────── */}
-        <p className="mb-10 font-sans text-[10px] uppercase tracking-[0.25em] text-ink/40">
-          <Link
-            href="/map"
-            className="no-underline hover:text-ink transition-colors duration-200"
-          >
-            ← Trail Routes
-          </Link>
-        </p>
-
-        {/* ── HEADER ──────────────────────────────────────── */}
-        <section className="mb-16 md:flex md:items-end md:gap-16">
-          <div className="md:w-2/3 space-y-5">
-            <p className="font-sans text-[10px] uppercase tracking-[0.35em] text-ink/50">
-              Trail Guide · Barbizon
+      <article className="space-y-10">
+        <header className="editorial-measure space-y-3">
+          <p className="text-xs uppercase tracking-[0.25em] text-ink/60">
+            WALKING TOUR
+          </p>
+          <h1 className="font-serif text-3xl leading-tight text-ink md:text-4xl">
+            {tour.name}
+          </h1>
+          {tour.description && (
+            <p className="text-sm leading-relaxed text-ink/80 md:text-base">
+              {tour.description}
             </p>
-            <h1 className="font-serif italic text-[3rem] md:text-[4.5rem] lg:text-[5.5rem] tracking-tight leading-[0.95] text-ink">
-              {tour.title}
-            </h1>
-            <p className="text-base leading-relaxed text-on-surface-variant max-w-xl">
-              {tour.summary}
-            </p>
+          )}
+          <div className="flex gap-4 text-xs text-ink/60">
+            {formatDuration(tour.duration_minutes) && (
+              <span>{formatDuration(tour.duration_minutes)}</span>
+            )}
+            {formatDistance(tour.distance_meters) && (
+              <span>{formatDistance(tour.distance_meters)}</span>
+            )}
           </div>
+        </header>
 
-          {/* Stats aside */}
-          <div className="mt-10 md:mt-0 md:w-1/3 flex items-center gap-6 border-l border-outline-variant/30 pl-6">
-            <div>
-              <span className="block font-serif italic text-2xl text-moss">
-                {tour.durationHours}–{tour.durationHours + 1}h
-              </span>
-              <span className="block font-sans text-[10px] tracking-widest uppercase text-ink/50 mt-0.5">
-                Estimated time
-              </span>
-            </div>
-            <div className="h-8 w-px bg-outline-variant/30" />
-            <div>
-              <span className="block font-serif italic text-2xl text-moss">
-                {places.length} stops
-              </span>
-              <span className="block font-sans text-[10px] tracking-widest uppercase text-ink/50 mt-0.5">
-                Along the route
-              </span>
-            </div>
-          </div>
-        </section>
-
-        {/* ── ROUTE MAP PLACEHOLDER ───────────────────────── */}
-        <section className="mb-24">
-          <div className="relative w-full aspect-[21/9] rounded-2xl overflow-hidden bg-surface-container-low flex items-center justify-center">
-            <p className="font-sans text-[10px] uppercase tracking-[0.3em] text-ink/30">
-              Route map · Coming soon
-            </p>
-            {/* Glassmorphic label */}
-            <div className="absolute bottom-5 left-5 bg-surface-variant/70 backdrop-blur-md px-4 py-2 rounded-lg border border-white/20">
-              <p className="font-sans text-[10px] tracking-widest uppercase text-on-surface-variant">
-                Digital Cartography
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* ── STOP NARRATIVE GRID ─────────────────────────── */}
-        <div className="relative">
-          {/* Vertical timeline line — desktop only */}
-          <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-outline-variant/20 -translate-x-1/2" />
-
-          <div className="space-y-24 md:space-y-32">
-            {places.map((place, index) => {
-              const isEven = index % 2 === 0;
-              const stopNumber = String(index + 1).padStart(2, "0");
-              const heroImg =
-                place.heroImage ?? "/images/places/place-default.jpg";
-
-              return (
-                <div
-                  key={place.slug}
-                  className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-start"
-                >
-                  {/* Content block — alternates left/right */}
-                  <div
-                    className={`md:col-span-5 space-y-6 ${
-                      isEven ? "md:col-start-1 md:text-right" : "md:col-start-8"
-                    }`}
-                  >
-                    {/* Stop number + title */}
-                    <div
-                      className={`flex items-center gap-4 ${
-                        isEven ? "md:flex-row-reverse" : ""
-                      }`}
-                    >
-                      <span className="w-11 h-11 rounded-full ink-gradient text-cream flex items-center justify-center font-serif italic text-lg shadow-ambient flex-shrink-0">
-                        {stopNumber}
-                      </span>
-                      <h2 className="font-serif italic text-2xl md:text-3xl text-ink leading-tight">
-                        {place.name}
-                      </h2>
-                    </div>
-
-                    {/* Image */}
-                    <Link
-                      href={`/places/${place.slug}`}
-                      className={`block relative overflow-hidden rounded-2xl group ${
-                        isEven ? "aspect-video" : "aspect-square"
-                      }`}
-                    >
-                      <div
-                        className="absolute inset-0 bg-cover bg-center bg-ink/20 transition-transform duration-700 ease-soft group-hover:scale-105"
-                        style={{ backgroundImage: `url(${heroImg})` }}
-                      />
-                      <div className="absolute inset-0 bg-primary/10 group-hover:bg-transparent transition-colors duration-500" />
-                    </Link>
-
-                    {/* Description */}
-                    <p className="font-sans text-sm leading-relaxed text-on-surface-variant">
-                      {place.shortDescription}
-                    </p>
-
-                    {/* Category chip + place link */}
-                    <div
-                      className={`flex items-center gap-3 ${
-                        isEven ? "md:justify-end" : ""
-                      }`}
-                    >
-                      <span className="chip">{place.category}</span>
+        {stops.length > 0 && (
+          <section className="space-y-4">
+            <h2 className="font-serif text-sm uppercase tracking-[0.2em] text-ink/70">
+              PLACES ALONG THE ROUTE
+            </h2>
+            <ol className="space-y-6 text-sm text-ink/80">
+              {stops.map((stop, index) => (
+                <li key={stop.stop_order} className="flex gap-3">
+                  <span className="text-[11px] uppercase tracking-[0.2em] text-ink/40 pt-0.5">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <div className="space-y-1">
+                    {stop.locations ? (
                       <Link
-                        href={`/places/${place.slug}`}
-                        className="font-sans text-[10px] uppercase tracking-[0.2em] text-ink/40 no-underline hover:text-ink transition-colors duration-200"
+                        href={`/places/${stop.locations.slug}`}
+                        className="font-serif text-sm text-ink hover:underline underline-offset-4"
                       >
-                        View place →
+                        {stop.locations.name}
                       </Link>
-                    </div>
+                    ) : null}
+                    {stop.locations?.short_description && (
+                      <p className="text-xs text-ink/60">
+                        {stop.locations.short_description}
+                      </p>
+                    )}
+                    {stop.stop_narrative && (
+                      <p className="text-xs leading-relaxed text-ink/75 mt-1">
+                        {stop.stop_narrative}
+                      </p>
+                    )}
                   </div>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
 
-                  {/* Spacer for timeline gap — desktop only */}
-                  <div className="hidden md:block md:col-span-2" />
-                </div>
-              );
-            })}
-          </div>
+        <div className="text-xs text-ink/60">
+          <Link
+            href="/plan-your-visit"
+            className="underline-offset-4 hover:underline"
+          >
+            ← Back to Plan Your Visit
+          </Link>
         </div>
-
-        {/* ── ARCHIVAL QUOTE ──────────────────────────────── */}
-        <section className="mt-32 pt-20 border-t border-outline-variant/20 flex flex-col items-center text-center">
-          <div className="text-moss mb-8 opacity-40">
-            <svg width="48" height="48" viewBox="0 0 48 48" fill="currentColor">
-              <path d="M14 8C9.6 8 6 11.6 6 16v8c0 4.4 3.6 8 8 8h2l-4 8h6l5-8.9V16c0-4.4-3.6-8-8-8h-1zm20 0c-4.4 0-8 3.6-8 8v8c0 4.4 3.6 8 8 8h2l-4 8h6l5-8.9V16c0-4.4-3.6-8-8-8h-1z" />
-            </svg>
-          </div>
-          <blockquote className="font-serif italic text-2xl md:text-3xl lg:text-4xl text-ink max-w-3xl leading-snug mb-8">
-            {
-              '"The forest does not belong to those who own it, but to those who know how to look at it."'
-            }
-          </blockquote>
-          <cite className="font-sans tracking-widest text-[10px] uppercase text-ink/40">
-            — Théodore Rousseau, Barbizon, c. 1850
-          </cite>
-        </section>
       </article>
     </>
   );
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const tours = getAllTours();
-  const paths = tours.map((tour) => ({
-    params: { slug: tour.slug }
-  }));
-
-  return {
-    paths,
-    fallback: false
-  };
+  try {
+    const slugs = await getPublishedTourSlugs();
+    return {
+      paths: slugs.map((slug) => ({ params: { slug } })),
+      fallback: "blocking",
+    };
+  } catch {
+    const tours = getAllTours();
+    return {
+      paths: tours.map((t) => ({ params: { slug: t.slug } })),
+      fallback: false,
+    };
+  }
 };
 
 export const getStaticProps: GetStaticProps<TourPageProps> = async ({
-  params
+  params,
 }) => {
   const slug = params?.slug;
-  if (typeof slug !== "string") {
-    return { notFound: true };
+  if (typeof slug !== "string") return { notFound: true };
+
+  try {
+    const tour = await getTourBySlugFromSupabase(slug);
+    if (!tour) return { notFound: true };
+    return { props: { source: "supabase", tour }, revalidate: 60 };
+  } catch {
+    const staticTour = getTourBySlug(slug);
+    if (!staticTour) return { notFound: true };
+    const places = getPlacesForTour(staticTour);
+    const stops: StaticStop[] = places.map((p, i) => ({
+      stop_order: i + 1,
+      stop_narrative: null,
+      locations: {
+        name: p.name,
+        slug: p.slug,
+        short_description: p.shortDescription ?? null,
+      },
+    }));
+    return {
+      props: {
+        source: "static",
+        tour: {
+          name: staticTour.title,
+          slug: staticTour.slug,
+          description: staticTour.summary,
+          duration_minutes: staticTour.durationHours * 60,
+          distance_meters: null,
+        },
+        stops,
+      },
+      revalidate: 60,
+    };
   }
-
-  const tour = getTourBySlug(slug);
-
-  if (!tour) {
-    return { notFound: true };
-  }
-
-  const places = getPlacesForTour(tour);
-
-  return {
-    props: {
-      tour,
-      places
-    }
-  };
 };
 
 export default TourPage;
-
