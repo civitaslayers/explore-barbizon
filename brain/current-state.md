@@ -21,9 +21,9 @@ Last updated: 2026-03-31
 |---|---|---|
 | Eat, Stay & Shop | 36 | 36 |
 | Art & History | 21 | 21 |
-| Forest & Nature | 15 | 15 |
+| Forest & Nature | 16 | 16 |
 | Practical | 17 | 0 |
-| **Total** | **89** | **72** |
+| **Total** | **90** | **73** |
 
 All 72 media rows are cover images. Practical layer intentionally has no images.
 ~10 ESS locations now have real photos from tourism sites and business pages; the rest have Unsplash placeholders pending real photo replacement.
@@ -75,7 +75,7 @@ All five design passes shipped in a single session.
 
 **Current limitations:**
 - Tour page uses static data/tours.ts — not yet wired to Supabase
-- Forest & Nature layer has no location data in Supabase
+- Forest & Nature layer is complete: 16 locations published, all fully populated (short_description, full_description, narrative), all show_in_editorial = true, all show_on_map = true. Coordinates verified and corrected where needed (L'Éléphant, Dormoir/Cavalière pin offset).
 - Further stories and essay 6 planned (see Next tasks)
 - Hero video file still pending — see Blockers (`/public/videos/hero-barbizon.mp4`); pipeline (Git LFS / Vercel) ready when asset lands
 - Place images are still mostly placeholders
@@ -83,7 +83,7 @@ All five design passes shipped in a single session.
 
 **Overall status:**
 Visual shell is cohesive and design-system-driven; History page and five cross-linked stories are live; map deep-links work with layer auto-enable.
-Next priority: data cleanup (atelier-rouge), expand About, seed artists and postcards, essay 6 — plus wire tours to Supabase and Forest & Nature locations.
+Next priority: data cleanup (atelier-rouge), expand About, seed artists and postcards, essay 6 — plus wire tours to Supabase.
 
 ---
 

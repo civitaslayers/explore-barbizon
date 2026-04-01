@@ -18,8 +18,7 @@ Task tags:
 - [ ] [data] Remove or unpublish atelier-rouge — fictional placeholder, no real-world referent in Barbizon
 - [ ] [frontend,schema] Wire tours/[slug].tsx to live Supabase
       data (tours + tour_stops tables)
-- [ ] [data,user-action] Populate Forest & Nature layer —
-      first 5–10 locations in Supabase
+- [x] [data] Finish populating Forest & Nature category
 - [ ] [data,user-action] Continue replacing Unsplash placeholders with real photos — send location name + URL pairs, SQL updates run instantly
 - [ ] [frontend] Wire media to place cards on the Places listing page (same pattern as hero — join media in query, render first image)
 - [ ] [user-action] Commit and push today's frontend changes to Vercel (media wiring, mix-blend fix, animation fix)
