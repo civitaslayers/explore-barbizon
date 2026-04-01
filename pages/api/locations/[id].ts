@@ -34,7 +34,7 @@ export default async function handler(
   }
 
   const { id } = req.query;
-  if (typeof id !== "string" || !id) {
+  if (!id || Array.isArray(id)) {
     return res.status(400).json({ error: "Invalid id" });
   }
 
@@ -70,18 +70,36 @@ export default async function handler(
     return res.status(400).json({ error: "No updatable fields in body" });
   }
 
-  const { data, error } = await supabase
+  const { data: existing, error: fetchError } = await supabase
     .from("locations")
-    .update(
-      payload as Database["public"]["Tables"]["locations"]["Update"]
-    )
+    .select("id")
     .eq("id", id)
-    .select()
-    .single();
+    .maybeSingle();
 
-  if (error) {
-    return res.status(400).json({ error: error.message });
+  if (fetchError || !existing) {
+    return res.status(404).json({ error: "Location not found" });
   }
 
-  return res.status(200).json(data);
+  const { error: updateError } = await supabase
+    .from("locations")
+    .update(payload as Database["public"]["Tables"]["locations"]["Update"])
+    .eq("id", id);
+
+  if (updateError) {
+    return res.status(500).json({ error: updateError.message });
+  }
+
+  const { data: updated, error: refetchError } = await supabase
+    .from("locations")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (refetchError || !updated) {
+    return res
+      .status(500)
+      .json({ error: "Update succeeded but refetch failed" });
+  }
+
+  return res.status(200).json(updated);
 }
