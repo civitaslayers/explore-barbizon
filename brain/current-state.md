@@ -1,14 +1,6 @@
 # Current State
 
-<!--
-FORMAT GUIDE — read before editing
-- Status: one sentence, present tense, honest
-- Last Completed: bullet list, newest first, max 15 items. Each item = "[area] what was done"
-- Blockers: only real blockers. If nothing is blocked, write "(none)"
-- Next Tasks: max 5 items, ordered by priority. Each item = action verb + what + why if not obvious
-- Next Session Starting Point: one sentence. The first thing to do next session.
-- Update this file after every significant work block.
--->
+> **Format guide:** Status = one sentence present tense. Last Completed = newest first, max 15, area tag in brackets. Blockers = real blockers only. Next Tasks = max 5, priority order, actionable verbs. Update after every significant work block.
 
 Last updated: 2026-04-01
 

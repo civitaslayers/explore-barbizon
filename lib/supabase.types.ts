@@ -90,6 +90,7 @@ export type Database = {
           address: string | null
           category_id: string | null
           created_at: string | null
+          curation_order: number | null
           full_description: string | null
           id: string
           is_featured: boolean | null
@@ -115,6 +116,7 @@ export type Database = {
           address?: string | null
           category_id?: string | null
           created_at?: string | null
+          curation_order?: number | null
           full_description?: string | null
           id?: string
           is_featured?: boolean | null
@@ -140,6 +142,7 @@ export type Database = {
           address?: string | null
           category_id?: string | null
           created_at?: string | null
+          curation_order?: number | null
           full_description?: string | null
           id?: string
           is_featured?: boolean | null
@@ -385,8 +388,10 @@ export type Database = {
           published_at: string | null
           slug: string
           subtitle: string | null
+          theme: string | null
           title: string
           town_id: string | null
+          type: string
           updated_at: string
         }
         Insert: {
@@ -400,8 +405,10 @@ export type Database = {
           published_at?: string | null
           slug: string
           subtitle?: string | null
+          theme?: string | null
           title: string
           town_id?: string | null
+          type?: string
           updated_at?: string
         }
         Update: {
@@ -415,8 +422,10 @@ export type Database = {
           published_at?: string | null
           slug?: string
           subtitle?: string | null
+          theme?: string | null
           title?: string
           town_id?: string | null
+          type?: string
           updated_at?: string
         }
         Relationships: [
@@ -577,36 +586,45 @@ export type Database = {
           cover_image_url: string | null
           created_at: string | null
           description: string | null
+          difficulty: string | null
           distance_meters: number | null
           duration_minutes: number | null
           id: string
           is_premium: boolean | null
+          is_published: boolean
           name: string
           slug: string
+          tour_type: string | null
           town_id: string | null
         }
         Insert: {
           cover_image_url?: string | null
           created_at?: string | null
           description?: string | null
+          difficulty?: string | null
           distance_meters?: number | null
           duration_minutes?: number | null
           id?: string
           is_premium?: boolean | null
+          is_published?: boolean
           name: string
           slug: string
+          tour_type?: string | null
           town_id?: string | null
         }
         Update: {
           cover_image_url?: string | null
           created_at?: string | null
           description?: string | null
+          difficulty?: string | null
           distance_meters?: number | null
           duration_minutes?: number | null
           id?: string
           is_premium?: boolean | null
+          is_published?: boolean
           name?: string
           slug?: string
+          tour_type?: string | null
           town_id?: string | null
         }
         Relationships: [
@@ -805,3 +823,9 @@ export type CompositeTypes<
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
+
+export const Constants = {
+  public: {
+    Enums: {},
+  },
+} as const
