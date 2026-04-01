@@ -60,14 +60,17 @@ All five design passes shipped in a single session.
   header
 - Place detail: chip category label, italic serif lead, Archive
   Directory back link, chip labels on related/nearby
-- Tour page: full Stitch editorial layout — italic serif header,
-  stats aside, alternating stop grid with timeline anchor,
-  archival quote block
 - Navigation: simplified top bar (Visit Barbizon wordmark links
   to /) — Map · Places · History · Stories · About
 - All pages wired to live Supabase data with static fallback
-- Tours pages wired to live Supabase data (tours + tour_stops with stop_narrative)
 - /tours/[slug] resolves both live tours: circuit-des-peintres, parcours-mosaiques-walk
+
+**UX / design progress**
+- Tours pages wired to live Supabase data (tours + tour_stops with stop_narrative)
+- Tour detail page refined to editorial standard: dark hero flush with nav, full-width description, trail map preview using GeoJSON from routes table (umber line, auto-fit bbox), orientation sidebar, full-width stop list below
+- Per-stop links: name → place page, "View on map →" → /map with trail + location params (map URL param handling pending)
+- Cloudflare R2 live at media.explorebarbizon.com; upload script at scripts/upload-to-r2.mjs
+- First real R2 asset: places/elephant-de-barbizon.jpg
 
 **Design tokens in place:**
 - Newsreader (serif display) + Inter (sans UI)
@@ -84,7 +87,7 @@ All five design passes shipped in a single session.
 
 **Overall status:**
 Visual shell is cohesive and design-system-driven; History page and five cross-linked stories are live; map deep-links work with layer auto-enable.
-Next priority: data cleanup (atelier-rouge), expand About, seed artists and postcards, essay 6 — align Tour.stops typing (slugs vs UUIDs) in data/tours.ts where Supabase paths differ.
+Next priority: data cleanup (atelier-rouge), expand About, seed artists and postcards, essay 6 — Tour.stops typing tracked in task queue.
 
 ---
 

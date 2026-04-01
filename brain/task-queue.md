@@ -16,7 +16,6 @@ Task tags:
 *Unblocked tasks that can be started immediately.*
 
 - [ ] [data] Remove or unpublish atelier-rouge — fictional placeholder, no real-world referent in Barbizon
-- [x] [frontend] Wire tours page to Supabase
 - [x] [data] Finish populating Forest & Nature category
 - [x] [data] Thumbnail audit — all layers checked, one gap fixed (L'Éléphant)
 - [ ] [data,user-action] Continue replacing Unsplash placeholders with real photos — send location name + URL pairs, SQL updates run instantly
@@ -29,14 +28,15 @@ Task tags:
 *Unblocked after Now tasks or after a specific blocker is resolved.*
 
 - [x] [infra,user-action] Set up Cloudflare R2 bucket for media assets
+- [ ] [frontend] Map page: read ?trail and ?location URL params — pre-select trail and highlight location on load
+- [ ] [data] Seed Parcours des Mosaïques stop-by-stop — 19 mosaic locations with GPS already in Supabase; wire as tour_stops to parcours-mosaiques-walk
+- [ ] [data,frontend] Add media to tour stops — images per stop for circuit-des-peintres
+- [ ] [data] Align Tour.stops type in data/tours.ts — currently slugs, Supabase branch fills with UUIDs
 - [ ] [frontend] Expand /about to absorb /plan-your-visit practical content (getting there, parking, seasons)
 - [ ] [data] Seed artists table and wire /history artists grid to Supabase (replace static cards)
 - [ ] [content] Source first historical postcard images for /history section 2
 - [ ] [content] Essay 6 — conservation / 1861 reserve / Rousseau as activist (theme: Forest)
 - [ ] [content] Add theme value to all future story INSERTs (theme column is now required in practice)
-- [ ] [data] Align Tour.stops type in data/tours.ts — currently slugs, Supabase branch fills with UUIDs
-- [ ] [data,frontend] Add media to tour stops — images per stop for circuit-des-peintres
-- [ ] [data] Seed Parcours des Mosaïques stop-by-stop — 19 mosaic locations with GPS already in Supabase; wire as tour_stops to parcours-mosaiques-walk tour
 
 ### Content (highest priority — biggest visible gap)
 - [ ] [data,user-action] Write first historical story: Maison de Millet (source: grappilles.fr)
@@ -100,6 +100,8 @@ Task tags:
 ---
 
 ## Done (recent)
+- [x] [frontend] Wire tours page to Supabase
+- [x] [frontend] Tour page editorial design refinement
 - [x] [infra] Git LFS configured for mp4 assets
 - [x] [infra] Vercel LFS enabled — hero video live in production
 - [x] [frontend] Stitch 2.0 design system — Passes 1–5
