@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 /**
- * Minimal password gate for /command-center in production.
+ * Minimal password gate for /command-center and /dashboard in production.
  * Uses HTTP Basic Auth — browser shows a native password dialog.
  *
  * Set COMMAND_CENTER_PASSWORD in your production env vars.
@@ -29,5 +29,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: "/command-center/:path*",
+  matcher: ["/command-center/:path*", "/dashboard/:path*"],
 };
