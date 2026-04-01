@@ -66,6 +66,8 @@ All five design passes shipped in a single session.
 - Navigation: simplified top bar (Visit Barbizon wordmark links
   to /) — Map · Places · History · Stories · About
 - All pages wired to live Supabase data with static fallback
+- Tours pages wired to live Supabase data (tours + tour_stops with stop_narrative)
+- /tours/[slug] resolves both live tours: circuit-des-peintres, parcours-mosaiques-walk
 
 **Design tokens in place:**
 - Newsreader (serif display) + Inter (sans UI)
@@ -74,7 +76,6 @@ All five design passes shipped in a single session.
 - docs/design-direction.md rewritten to reflect Stitch 2.0 system
 
 **Current limitations:**
-- Tour page uses static data/tours.ts — not yet wired to Supabase
 - Forest & Nature layer is complete: 16 locations published, all fully populated (short_description, full_description, narrative), all show_in_editorial = true, all show_on_map = true. Coordinates verified and corrected where needed (L'Éléphant, Dormoir/Cavalière pin offset).
 - Further stories and essay 6 planned (see Next tasks)
 - Hero video file still pending — see Blockers (`/public/videos/hero-barbizon.mp4`); pipeline (Git LFS / Vercel) ready when asset lands
@@ -83,7 +84,7 @@ All five design passes shipped in a single session.
 
 **Overall status:**
 Visual shell is cohesive and design-system-driven; History page and five cross-linked stories are live; map deep-links work with layer auto-enable.
-Next priority: data cleanup (atelier-rouge), expand About, seed artists and postcards, essay 6 — plus wire tours to Supabase.
+Next priority: data cleanup (atelier-rouge), expand About, seed artists and postcards, essay 6 — align Tour.stops typing (slugs vs UUIDs) in data/tours.ts where Supabase paths differ.
 
 ---
 

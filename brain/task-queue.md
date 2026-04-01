@@ -16,8 +16,7 @@ Task tags:
 *Unblocked tasks that can be started immediately.*
 
 - [ ] [data] Remove or unpublish atelier-rouge — fictional placeholder, no real-world referent in Barbizon
-- [ ] [frontend,schema] Wire tours/[slug].tsx to live Supabase
-      data (tours + tour_stops tables)
+- [x] [frontend] Wire tours page to Supabase
 - [x] [data] Finish populating Forest & Nature category
 - [x] [data] Thumbnail audit — all layers checked, one gap fixed (L'Éléphant)
 - [ ] [data,user-action] Continue replacing Unsplash placeholders with real photos — send location name + URL pairs, SQL updates run instantly
@@ -35,6 +34,7 @@ Task tags:
 - [ ] [content] Source first historical postcard images for /history section 2
 - [ ] [content] Essay 6 — conservation / 1861 reserve / Rousseau as activist (theme: Forest)
 - [ ] [content] Add theme value to all future story INSERTs (theme column is now required in practice)
+- [ ] [data] Align Tour.stops type in data/tours.ts — currently slugs, Supabase branch fills with UUIDs
 
 ### Content (highest priority — biggest visible gap)
 - [ ] [data,user-action] Write first historical story: Maison de Millet (source: grappilles.fr)
