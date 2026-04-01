@@ -41,11 +41,11 @@ export type DbLocation = {
   is_published: boolean | null;
   is_premium: boolean | null;
   is_featured: boolean | null;
-  curation_order: number | null;
   qr_code_url: string | null;
   show_on_map: boolean | null;
   show_in_editorial: boolean | null;
   created_at: string | null;
+  curation_order: number | null;
   updated_at: string | null;
   route_slug?: string | null;
   media?: { url: string; display_order: number }[] | null;

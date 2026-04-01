@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
-/**
- * Minimal password gate for /command-center and /dashboard in production.
- * Uses HTTP Basic Auth — browser shows a native password dialog.
- *
- * Set COMMAND_CENTER_PASSWORD in your production env vars.
- * The username field is ignored; only the password is checked.
- * Has no effect in development (NODE_ENV !== "production").
- */
+// Protects both /command-center and /dashboard.
+// Browser caches Basic Auth credentials per realm — a single login
+// covers both routes for the browser session.
+//
+// Production only: HTTP Basic Auth; username ignored; password from COMMAND_CENTER_PASSWORD.
+// No effect when NODE_ENV !== "production".
 export function middleware(req: NextRequest) {
   if (process.env.NODE_ENV !== "production") return NextResponse.next();
 

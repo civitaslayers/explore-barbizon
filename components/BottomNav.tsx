@@ -61,6 +61,7 @@ const tabs = [
 
 export default function BottomNav() {
   const router = useRouter();
+  if (router.pathname.startsWith("/dashboard")) return null;
 
   return (
     <nav className="fixed bottom-0 left-0 w-full z-50 bg-cream/90 backdrop-blur-md rounded-t-2xl shadow-[0_-4px_40px_rgba(121,91,61,0.04)] md:hidden">
