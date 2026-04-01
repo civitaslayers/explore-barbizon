@@ -94,7 +94,6 @@ Task tags:
 *Cannot proceed until the blocker is resolved.*
 
 - [ ] [frontend,user-action] Add real hero video asset (footage not yet final)
-- [ ] [infra] Replace data/tours.ts with live Supabase query
 
 ---
 
