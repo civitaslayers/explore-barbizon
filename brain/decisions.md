@@ -5,6 +5,44 @@ Add new entries at the top.
 
 ---
 
+<!--
+FORMAT GUIDE — read before editing
+- Newest decision at the TOP
+- Each entry: ## [YYYY-MM-DD] followed by Decision / Reason / Consequence
+- Never delete old decisions — they are a permanent log
+- Migration risk: none | low | breaking
+-->
+
+## 2026-04-01
+**Decision:** `brain/task-queue.md` is a generated read-only cache — never edit it manually  
+**Reason:** Manual edits drift from Supabase CCC state. The `→ brain` sync button in CCC is the only authoritative write path.  
+**Consequence:** Add "Generated — do not edit manually. Use CCC → brain to sync." header to `brain/task-queue.md`. All task status changes happen in CCC first.
+
+---
+
+## 2026-04-01
+**Decision:** `data/tours.ts` static file is retained as a graceful fallback, not removed yet  
+**Reason:** `pages/tours/[slug].tsx` tries Supabase first and catches errors to fall back to static data. This is a valid resilience pattern while tour data in Supabase is incomplete.  
+**Consequence:** Do not delete `data/tours.ts` until both tours have complete stop data in Supabase and the fallback has been tested as unnecessary. Log removal as a task.
+
+---
+
+## 2026-04-01
+**Decision:** Hero video remains repo-hosted until full edited version is ready  
+**Reason:** Current clip at `/public/videos/hero-barbizon.mp4` is a working placeholder. Full edit pending (iPhone + Hohem iSteady M7). Migration to Cloudflare Stream happens at that point.  
+**Consequence:** Do not treat hero video as a blocker. It is live. Track Cloudflare Stream setup as a separate task triggered when the full edit is done.  
+**Migration risk:** none
+
+---
+
+## 2026-04-01
+**Decision:** `is_published`, `tour_type`, `difficulty` added to `tours` table  
+**Reason:** Missing `is_published` meant all tours were effectively always public with no publish control. `tour_type` and `difficulty` added at the same time as they are low-risk and complete the proposed schema.  
+**Consequence:** Both existing tours set to `is_published = true`. Any new tour defaults to `false` and must be explicitly published. Query layers that render tours should now filter on `is_published = true`.  
+**Migration risk:** low
+
+---
+
 ## March 2026
 **Decision:** Webflow retired. All surfaces now on Next.js deployed via Vercel.
 **Reason:** Platform fully migrated. Webflow no longer serves any active role in the stack.
