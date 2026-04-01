@@ -3,14 +3,188 @@ import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 import { useState, useMemo } from "react";
 import { getAllPlaces, type Place } from "@/data/places";
-import { getPublishedLocations } from "@/lib/supabase";
+import { getPublishedLocations, supabase } from "@/lib/supabase";
 import { staticMapUrl, hasMapbox } from "@/lib/mapbox";
+
+type CuratedRow = {
+  slug: string;
+  name: string;
+  short_description: string | null;
+  is_premium: boolean | null;
+  curation_order: number | null;
+  categories: { name: string; layer: string; slug: string } | null;
+  media: { url: string; display_order: number | null }[] | null;
+};
+
+type CuratedPlace = {
+  slug: string;
+  name: string;
+  shortDescription: string;
+  heroImage: string | null;
+  isPremium: boolean;
+};
 
 type PlacesIndexProps = {
   places: Place[];
+  whereToEat: CuratedPlace[];
+  whereToStay: CuratedPlace[];
 };
 
-const PlacesIndexPage: NextPage<PlacesIndexProps> = ({ places }) => {
+const EAT_STAY_SHOP_LAYER = "Eat, Stay & Shop";
+
+const FOOD_CATEGORY_SLUGS = new Set([
+  "restaurant",
+  "boucherie",
+  "boulangerie",
+  "fromagerie",
+  "epicerie",
+  "traiteur",
+  "salon-de-the",
+]);
+
+const FOOD_CATEGORY_NAMES = new Set([
+  "Restaurant",
+  "Boucherie",
+  "Boulangerie",
+  "Fromagerie",
+  "Epicerie",
+  "Traiteur",
+  "Salon de the",
+]);
+
+function isFoodCategory(name: string, slug: string): boolean {
+  if (FOOD_CATEGORY_SLUGS.has(slug.toLowerCase())) return true;
+  return FOOD_CATEGORY_NAMES.has(name);
+}
+
+function isStayCategory(name: string, slug: string): boolean {
+  return name === "Hotel" || slug.toLowerCase() === "hotel";
+}
+
+function rowToCurated(row: CuratedRow): CuratedPlace {
+  const urls = [...(row.media ?? [])].sort(
+    (a, b) => (a.display_order ?? 0) - (b.display_order ?? 0)
+  );
+  return {
+    slug: row.slug,
+    name: row.name,
+    shortDescription: row.short_description?.trim() ?? "",
+    heroImage: urls[0]?.url ?? null,
+    isPremium: row.is_premium === true,
+  };
+}
+
+function sortFeaturedRows(rows: CuratedRow[]): CuratedRow[] {
+  return [...rows].sort((a, b) => {
+    const ao = a.curation_order;
+    const bo = b.curation_order;
+    if (ao != null && bo != null && ao !== bo) return ao - bo;
+    if (ao != null && bo == null) return -1;
+    if (ao == null && bo != null) return 1;
+    return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+  });
+}
+
+async function getFeaturedEatStayCurated(): Promise<{
+  whereToEat: CuratedPlace[];
+  whereToStay: CuratedPlace[];
+}> {
+  if (!supabase) throw new Error("Supabase not configured");
+
+  const { data, error } = await supabase
+    .from("locations")
+    .select(
+      "slug, name, short_description, is_premium, curation_order, categories!inner(name, layer, slug), media(url, display_order)"
+    )
+    .eq("is_published", true)
+    .eq("is_featured", true)
+    .eq("categories.layer", EAT_STAY_SHOP_LAYER)
+    .order("curation_order", { ascending: true, nullsFirst: false })
+    .order("name");
+
+  if (error) throw new Error(error.message);
+
+  const rows = (data ?? []) as unknown as CuratedRow[];
+  const ordered = sortFeaturedRows(rows);
+
+  const eatRows = ordered.filter((r) => {
+    const c = r.categories;
+    if (!c) return false;
+    return isFoodCategory(c.name, c.slug);
+  });
+  const stayRows = ordered.filter((r) => {
+    const c = r.categories;
+    if (!c) return false;
+    return isStayCategory(c.name, c.slug);
+  });
+
+  return {
+    whereToEat: eatRows.map(rowToCurated),
+    whereToStay: stayRows.map(rowToCurated),
+  };
+}
+
+function CuratedSection({
+  eyebrow,
+  items,
+}: {
+  eyebrow: string;
+  items: CuratedPlace[];
+}) {
+  if (items.length === 0) return null;
+
+  return (
+    <div className="space-y-4">
+      <p className="font-sans text-[10px] uppercase tracking-[0.35em] text-ink/50">
+        {eyebrow}
+      </p>
+      <div className="-mx-4 flex gap-4 overflow-x-auto px-4 pb-1 scrollbar-none snap-x snap-mandatory md:mx-0 md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:px-0 md:pb-0">
+        {items.map((place) => (
+          <Link
+            key={place.slug}
+            href={`/places/${place.slug}`}
+            className="flex w-[72vw] max-w-[20rem] flex-shrink-0 snap-start flex-col overflow-hidden rounded-xl border border-outline-variant/40 bg-surface transition-colors hover:border-ink/25 md:w-auto md:max-w-none"
+          >
+            <div className="relative aspect-[16/10] bg-ink/8">
+              {place.heroImage ? (
+                <img
+                  src={place.heroImage}
+                  alt=""
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                />
+              ) : null}
+            </div>
+            <div className="flex flex-1 flex-col p-4">
+              <div className="flex items-start justify-between gap-2">
+                <h3 className="font-serif text-base italic leading-snug text-ink">
+                  {place.name}
+                </h3>
+                {place.isPremium ? (
+                  <span
+                    className="mt-1 inline-flex h-1.5 w-1.5 flex-shrink-0 rounded-full bg-ink/35"
+                    aria-hidden
+                  />
+                ) : null}
+              </div>
+              {place.shortDescription ? (
+                <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-ink/65">
+                  {place.shortDescription}
+                </p>
+              ) : null}
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const PlacesIndexPage: NextPage<PlacesIndexProps> = ({
+  places,
+  whereToEat,
+  whereToStay,
+}) => {
   const [activeCategory, setActiveCategory] = useState("All");
 
   const categories = useMemo(() => {
@@ -46,6 +220,11 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({ places }) => {
             narrative of nature&apos;s awakening.
           </p>
         </header>
+
+        <div className="space-y-10">
+          <CuratedSection eyebrow="Where to eat" items={whereToEat} />
+          <CuratedSection eyebrow="Where to stay" items={whereToStay} />
+        </div>
 
         {/* Category filters */}
         <div className="-mx-4 flex gap-0 overflow-x-auto border-b border-outline-variant/30 pb-1 scrollbar-none px-4 md:mx-0 md:px-0">
@@ -108,9 +287,30 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({ places }) => {
 export const getStaticProps: GetStaticProps<PlacesIndexProps> = async () => {
   try {
     const places = await getPublishedLocations();
-    return { props: { places }, revalidate: 60 };
+    let whereToEat: CuratedPlace[] = [];
+    let whereToStay: CuratedPlace[] = [];
+    if (supabase) {
+      try {
+        const curated = await getFeaturedEatStayCurated();
+        whereToEat = curated.whereToEat;
+        whereToStay = curated.whereToStay;
+      } catch {
+        // Curated sections stay empty if query fails (e.g. column not deployed yet).
+      }
+    }
+    return {
+      props: { places, whereToEat, whereToStay },
+      revalidate: 60,
+    };
   } catch {
-    return { props: { places: getAllPlaces() }, revalidate: 60 };
+    return {
+      props: {
+        places: getAllPlaces(),
+        whereToEat: [],
+        whereToStay: [],
+      },
+      revalidate: 60,
+    };
   }
 };
 
