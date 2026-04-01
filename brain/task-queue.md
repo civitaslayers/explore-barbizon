@@ -29,7 +29,7 @@ Task tags:
 ## Next
 *Unblocked after Now tasks or after a specific blocker is resolved.*
 
-- [ ] [infra,user-action] Set up Cloudflare R2 bucket for media assets
+- [x] [infra,user-action] Set up Cloudflare R2 bucket for media assets
 - [ ] [frontend] Expand /about to absorb /plan-your-visit practical content (getting there, parking, seasons)
 - [ ] [data] Seed artists table and wire /history artists grid to Supabase (replace static cards)
 - [ ] [content] Source first historical postcard images for /history section 2
