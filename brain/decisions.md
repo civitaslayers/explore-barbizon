@@ -5,13 +5,31 @@ Add new entries at the top.
 
 ---
 
-<!--
-FORMAT GUIDE — read before editing
-- Newest decision at the TOP
-- Each entry: ## [YYYY-MM-DD] followed by Decision / Reason / Consequence
-- Never delete old decisions — they are a permanent log
-- Migration risk: none | low | breaking
--->
+> **Format guide:** Newest entry at top. Format: `## YYYY-MM-DD` / **Decision** / **Reason** / **Consequence** / **Migration risk** (schema/data decisions only). Never delete old entries.
+
+## 2026-04-01
+**Decision:** `stories.type` added with values `'history'` and `'guide'`; all existing stories set to `'history'`  
+**Reason:** Practical visitor content ("where to sleep", "where to eat") belongs in a different editorial register from cultural essays. Same `/stories` route, different visual treatment per type.  
+**Consequence:** `/stories` page renders two sections — essays (history) above with full editorial layout; practical guides (guide) below with a card/list treatment. New guide-type stories must set `type = 'guide'` on insert. CHECK constraint enforces valid values.  
+**Migration risk:** low  
+
+---
+
+## 2026-04-01
+**Decision:** `is_premium` on locations means eligible for featured placement in curated Places sections — not a visitor-facing paywall  
+**Reason:** Monetisation model: local businesses pay to be prioritised in curated callout sections ("Best tables", "Where to stay") on `/places`. `is_premium` gates eligibility; `is_featured` gates whether they are currently featured.  
+**Consequence:** Curated sections on `/places` query `is_featured = true` ordered by `curation_order` ASC (nulls last), then name. In the future, `is_premium = true` is a prerequisite for `is_featured = true` for commercial listings. Do not expose `is_premium` as a label to visitors — it is an internal commercial flag only.  
+**Migration risk:** none  
+
+---
+
+## 2026-04-01
+**Decision:** `curation_order` integer column added to `locations`  
+**Reason:** `is_featured` boolean alone cannot control ordering within curated sections. Manual ordering needed to prioritise premium/featured businesses without arbitrary sort fallbacks.  
+**Consequence:** Curated section queries: `WHERE is_featured = true ORDER BY curation_order ASC NULLS LAST, name ASC`. Set `curation_order` manually in Supabase for any featured location. NULL = falls back to name sort.  
+**Migration risk:** low  
+
+---
 
 ## 2026-04-01
 **Decision:** `brain/task-queue.md` is a generated read-only cache — never edit it manually  
