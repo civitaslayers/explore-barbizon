@@ -1,6 +1,6 @@
 # Task Queue
 
-Last updated: 2026-03-31
+Last updated: 2026-04-01
 
 Task tags:
 - frontend
@@ -19,6 +19,7 @@ Task tags:
 - [ ] [frontend,schema] Wire tours/[slug].tsx to live Supabase
       data (tours + tour_stops tables)
 - [x] [data] Finish populating Forest & Nature category
+- [x] [data] Thumbnail audit — all layers checked, one gap fixed (L'Éléphant)
 - [ ] [data,user-action] Continue replacing Unsplash placeholders with real photos — send location name + URL pairs, SQL updates run instantly
 - [ ] [frontend] Wire media to place cards on the Places listing page (same pattern as hero — join media in query, render first image)
 - [ ] [user-action] Commit and push today's frontend changes to Vercel (media wiring, mix-blend fix, animation fix)
@@ -28,6 +29,7 @@ Task tags:
 ## Next
 *Unblocked after Now tasks or after a specific blocker is resolved.*
 
+- [ ] [infra,user-action] Set up Cloudflare R2 bucket for media assets
 - [ ] [frontend] Expand /about to absorb /plan-your-visit practical content (getting there, parking, seasons)
 - [ ] [data] Seed artists table and wire /history artists grid to Supabase (replace static cards)
 - [ ] [content] Source first historical postcard images for /history section 2
@@ -60,7 +62,7 @@ Task tags:
 - [ ] [data,schema] Create layers table + migrate categories.layer text → FK (do last)
 
 ### Data
-- [ ] [data,user-action] Audit and fix missing place thumbnails on card components
+- [x] [data,user-action] Audit and fix missing place thumbnails on card components
 - [ ] [data,user-action] Polish hero locations (lead text quality, coordinate accuracy)
 - [ ] [data,user-action] Seed historical visual works layer — postcards first
 

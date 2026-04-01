@@ -1,6 +1,6 @@
 # Current State
 
-Last updated: 2026-03-31
+Last updated: 2026-04-01
 
 **Status:** Five stories published and cross-linked. History page live. Map deep-links working with layer auto-enable. Nav finalised: Map · Places · History · Stories · About.
 
@@ -78,7 +78,7 @@ All five design passes shipped in a single session.
 - Forest & Nature layer is complete: 16 locations published, all fully populated (short_description, full_description, narrative), all show_in_editorial = true, all show_on_map = true. Coordinates verified and corrected where needed (L'Éléphant, Dormoir/Cavalière pin offset).
 - Further stories and essay 6 planned (see Next tasks)
 - Hero video file still pending — see Blockers (`/public/videos/hero-barbizon.mp4`); pipeline (Git LFS / Vercel) ready when asset lands
-- Place images are still mostly placeholders
+- Most places use Unsplash placeholder images; L'Éléphant de Barbizon has a real committed photo at `/public/images/places/elephant-de-barbizon.jpg`. Image hosting infrastructure not yet set up — Cloudflare R2 identified as the solution; task queued.
 - Map requires Mapbox token to render pins
 
 **Overall status:**
@@ -138,7 +138,8 @@ Historical archive built by Luigi's father-in-law. Primary research source for A
 ## Known gaps / pending
 
 - ~26 ESS locations still have Unsplash placeholder images (real photos being collected)
-- Art & History and Forest & Nature layers have all Unsplash placeholders
+- Art & History and most of Forest & Nature still use Unsplash placeholders; L'Éléphant uses the committed asset above
+- Media hosting: Cloudflare R2 not yet provisioned (task queued)
 - Place cards on the Places listing page do not yet show images (media not wired to card component)
 - French translations of all English narratives deferred
 - Artists and Visual Works tables not yet created (stories table live)
