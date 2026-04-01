@@ -41,6 +41,7 @@ export type DbLocation = {
   is_published: boolean | null;
   is_premium: boolean | null;
   is_featured: boolean | null;
+  curation_order: number | null;
   qr_code_url: string | null;
   show_on_map: boolean | null;
   show_in_editorial: boolean | null;
