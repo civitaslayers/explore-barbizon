@@ -195,6 +195,8 @@ export type DbTourStop = {
     name: string;
     slug: string;
     short_description: string | null;
+    latitude: number;
+    longitude: number;
   } | null;
 };
 
@@ -220,7 +222,7 @@ export async function getPublishedTours(): Promise<TourWithStops[]> {
       id, town_id, name, slug, description, duration_minutes, distance_meters, cover_image_url,
       tour_stops (
         id, tour_id, location_id, stop_order, stop_narrative,
-        locations ( name, slug, short_description )
+        locations ( name, slug, short_description, latitude, longitude )
       )
     `
     )
@@ -263,7 +265,7 @@ export async function getTourBySlugFromSupabase(
       id, town_id, name, slug, description, duration_minutes, distance_meters, cover_image_url,
       tour_stops (
         id, tour_id, location_id, stop_order, stop_narrative,
-        locations ( name, slug, short_description )
+        locations ( name, slug, short_description, latitude, longitude )
       )
     `
     )
@@ -306,4 +308,30 @@ export async function getPublishedTourSlugs(): Promise<string[]> {
 
   if (error) throw new Error(error.message);
   return (data ?? []).map((t: { slug: string }) => t.slug);
+}
+
+/**
+ * Fetch a simplified route path for a tour by its slug.
+ * Returns every 20th coordinate from the GeoJSON LineString to keep the URL short.
+ * Returns null if no matching route exists.
+ */
+export async function getRouteByTourSlug(
+  tourSlug: string
+): Promise<[number, number][] | null> {
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("routes")
+    .select("geojson")
+    .eq("slug", tourSlug)
+    .single();
+
+  if (error || !data?.geojson) return null;
+
+  const line = data.geojson as unknown as GeoJSON.LineString;
+  const coords: [number, number][] = (line.coordinates ?? []) as [
+    number,
+    number,
+  ][];
+  return coords.filter((_: unknown, i: number) => i % 20 === 0);
 }
