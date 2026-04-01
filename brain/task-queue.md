@@ -35,6 +35,8 @@ Task tags:
 - [ ] [content] Essay 6 — conservation / 1861 reserve / Rousseau as activist (theme: Forest)
 - [ ] [content] Add theme value to all future story INSERTs (theme column is now required in practice)
 - [ ] [data] Align Tour.stops type in data/tours.ts — currently slugs, Supabase branch fills with UUIDs
+- [ ] [data,frontend] Add media to tour stops — images per stop for circuit-des-peintres
+- [ ] [data] Seed Parcours des Mosaïques stop-by-stop — 19 mosaic locations with GPS already in Supabase; wire as tour_stops to parcours-mosaiques-walk tour
 
 ### Content (highest priority — biggest visible gap)
 - [ ] [data,user-action] Write first historical story: Maison de Millet (source: grappilles.fr)
