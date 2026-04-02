@@ -20,6 +20,7 @@ module.exports = {
         ink: "#111111",
         umber: "#7A5C3E",
         moss: "#5F6F52",
+        forest: "#4A5E3A",
         "secondary-container": "#fed6b0",
         "on-secondary-container": "#795b3d",
         surface: "#faf9f9",
