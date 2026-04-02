@@ -100,7 +100,7 @@ const HistoryPage: NextPage = () => {
               Historical content on this platform is researched against
               institutional primary sources: Base Mérimée / POP, the Archives
               de Seine-et-Marne, Gallica / BnF, and the Musée des Peintres de
-              Barbizon. Local archival research by Pierre Gaudin (grappilles.fr)
+              Barbizon. Local archival research (grappilles.fr)
               informs many narratives and is credited as a valued research
               contribution.
             </p>
