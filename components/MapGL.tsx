@@ -232,6 +232,7 @@ function buildGeoJSON(locations: Place[]): GeoJSON.FeatureCollection {
           iconId: getCategoryIconId(loc.category),
           shortDescription: loc.shortDescription ?? "",
           route_slug: loc.route_slug ?? "",
+          placeSlug: (loc as Place & { placeSlug?: string | null }).placeSlug ?? "",
         },
         geometry: {
           type: "Point",
@@ -563,6 +564,7 @@ export default function MapGL({ locations, allLocations, routes, focusSlug }: Pr
           category: string;
           shortDescription: string;
           route_slug: string;
+          placeSlug: string;
         };
         const geom = e.features[0].geometry;
         if (geom.type !== "Point") return;
@@ -585,6 +587,8 @@ export default function MapGL({ locations, allLocations, routes, focusSlug }: Pr
           }
         }
 
+        const href = props.placeSlug ? `/places/${props.placeSlug}` : null;
+
         new mapboxgl.Popup({ offset: 18, maxWidth: "260px" })
           .setLngLat(coords)
           .setHTML(
@@ -594,7 +598,9 @@ export default function MapGL({ locations, allLocations, routes, focusSlug }: Pr
             (props.shortDescription
               ? `<p style="font-size:11px;color:rgba(17,17,17,0.6);margin:0 0 10px;line-height:1.55">${props.shortDescription}</p>`
               : "") +
-            `<a href="/places/${props.slug}" style="font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:#7A5C3E;text-decoration:none">View place →</a>` +
+            (href
+              ? `<a href="${href}" style="font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:#7A5C3E;text-decoration:none">View place →</a>`
+              : "") +
             `</div>`
           )
           .on("close", () => {
@@ -664,6 +670,10 @@ export default function MapGL({ locations, allLocations, routes, focusSlug }: Pr
     const target = source.find((l) => l.slug === focusSlug);
     if (!target) return;
 
+    const targetPlaceSlug =
+      (target as Place & { placeSlug?: string | null }).placeSlug ?? "";
+    const focusHref = targetPlaceSlug ? `/places/${targetPlaceSlug}` : null;
+
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
     const fly = () => {
@@ -687,7 +697,9 @@ export default function MapGL({ locations, allLocations, routes, focusSlug }: Pr
               (target.shortDescription
                 ? `<p style="font-size:11px;color:rgba(17,17,17,0.6);margin:0 0 10px;line-height:1.55">${target.shortDescription}</p>`
                 : "") +
-              `<a href="/places/${target.slug}" style="font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:#7A5C3E;text-decoration:none">View place →</a>` +
+              (focusHref
+                ? `<a href="${focusHref}" style="font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:#7A5C3E;text-decoration:none">View place →</a>`
+                : "") +
               `</div>`
           )
           .addTo(map);

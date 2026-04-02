@@ -3,8 +3,8 @@ import type { GetStaticProps, NextPage } from "next";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useEffect, useState, useMemo } from "react";
-import { getAllPlaces, type Place } from "@/data/places";
-import { getPublishedLocations, getPublishedRoutes, type Route } from "@/lib/supabase";
+import { getAllPlaces, type Place, type PlaceCategory } from "@/data/places";
+import { getMapPins, getPublishedRoutes, type MapPin, type Route } from "@/lib/supabase";
 import {
   GROUP_NAMES,
   GROUP_DOT_TAILWIND,
@@ -24,9 +24,30 @@ const MapGL = dynamic(() => import("@/components/MapGL"), {
   ),
 });
 
-type MapPageProps = { locations: Place[]; routes: Route[] };
+type MapPageProps = { pins: MapPin[]; routes: Route[] };
 
-const MapPage: NextPage<MapPageProps> = ({ locations, routes }) => {
+function mapPinToMapGLPlace(
+  pin: MapPin
+): Place & { placeSlug: string | null; allCategories: string[] } {
+  return {
+    slug: pin.slug,
+    name: pin.name,
+    location: "Barbizon",
+    shortDescription: pin.shortDescription,
+    description: "",
+    history: null,
+    heroImage: null,
+    category: pin.category as PlaceCategory,
+    latitude: pin.latitude,
+    longitude: pin.longitude,
+    route_slug: pin.routeSlug ?? null,
+    placeSlug: pin.placeSlug,
+    allCategories: pin.allCategories,
+  };
+}
+
+const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
+  const locations = useMemo(() => pins.map(mapPinToMapGLPlace), [pins]);
   const router = useRouter();
   const focusSlug =
     typeof router.query.location === "string"
@@ -54,10 +75,13 @@ const MapPage: NextPage<MapPageProps> = ({ locations, routes }) => {
     if (!focusSlug || !router.isReady) return;
     const target = locations.find((l) => l.slug === focusSlug);
     if (!target) return;
-    const group = getCategoryGroup(target.category);
-    setActiveGroups((prev) =>
-      prev.includes(group) ? prev : [...prev, group]
-    );
+    const groups = (target.allCategories ?? [target.category])
+      .map(getCategoryGroup)
+      .filter((g, i, arr) => arr.indexOf(g) === i);
+    setActiveGroups((prev) => {
+      const missing = groups.filter((g) => !prev.includes(g));
+      return missing.length ? [...prev, ...missing] : prev;
+    });
   }, [focusSlug, router.isReady, locations]);
 
   const toggleGroup = (group: GroupName) =>
@@ -68,7 +92,9 @@ const MapPage: NextPage<MapPageProps> = ({ locations, routes }) => {
   const visibleLocations = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return locations.filter((l) => {
-      const inGroup = activeGroups.includes(getCategoryGroup(l.category));
+      const inGroup = (l.allCategories ?? [l.category]).some((cat) =>
+        activeGroups.includes(getCategoryGroup(cat))
+      );
       if (!inGroup) return false;
       if (!q) return true;
       return (
@@ -210,13 +236,21 @@ const MapPage: NextPage<MapPageProps> = ({ locations, routes }) => {
 
 export const getStaticProps: GetStaticProps<MapPageProps> = async () => {
   try {
-    const [locations, routes] = await Promise.all([
-      getPublishedLocations(),
-      getPublishedRoutes(),
-    ]);
-    return { props: { locations, routes }, revalidate: 60 };
+    const [pins, routes] = await Promise.all([getMapPins(), getPublishedRoutes()]);
+    return { props: { pins, routes }, revalidate: 60 };
   } catch {
-    return { props: { locations: getAllPlaces(), routes: [] }, revalidate: 60 };
+    const fallbackPins: MapPin[] = getAllPlaces().map((p) => ({
+      slug: p.slug,
+      name: p.name,
+      shortDescription: p.shortDescription,
+      latitude: p.latitude,
+      longitude: p.longitude,
+      category: p.category,
+      allCategories: [p.category],
+      placeSlug: p.slug,
+      routeSlug: p.route_slug ?? null,
+    }));
+    return { props: { pins: fallbackPins, routes: [] }, revalidate: 60 };
   }
 };
 

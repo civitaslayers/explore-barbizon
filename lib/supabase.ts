@@ -104,6 +104,85 @@ export async function getPublishedLocations(): Promise<Place[]> {
   return (data as LocationRow[]).map(toPlace);
 }
 
+export type MapPin = {
+  slug: string;
+  name: string;
+  shortDescription: string;
+  latitude: number;
+  longitude: number;
+  category: string;
+  allCategories: string[];
+  placeSlug: string | null;
+  routeSlug: string | null;
+};
+
+export async function getMapPins(): Promise<MapPin[]> {
+  if (!supabase) throw new Error("Supabase not configured");
+
+  const { data: placesData, error: placesError } = await supabase
+    .from("places")
+    .select(
+      `
+      slug,
+      name,
+      short_description,
+      latitude,
+      longitude,
+      place_functions!inner (
+        is_primary,
+        categories ( name )
+      )
+    `
+    )
+    .eq("is_published", true)
+    .eq("show_on_map", true);
+
+  if (placesError) throw new Error(placesError.message);
+
+  const placePins: MapPin[] = ((placesData ?? []) as any[]).map((row) => {
+    const fns = (row.place_functions ?? []) as {
+      is_primary: boolean;
+      categories: { name: string } | null;
+    }[];
+    const primary = fns.find((f) => f.is_primary) ?? fns[0];
+
+    return {
+      slug: row.slug,
+      name: row.name,
+      shortDescription: row.short_description ?? "",
+      latitude: row.latitude,
+      longitude: row.longitude,
+      category: primary?.categories?.name ?? "Point of Interest",
+      allCategories: fns.map((f) => f.categories?.name).filter(Boolean) as string[],
+      placeSlug: row.slug,
+      routeSlug: null,
+    };
+  });
+
+  const { data: locsData, error: locsError } = await supabase
+    .from("locations")
+    .select("slug, name, short_description, latitude, longitude, route_slug, categories!inner(name, layer)")
+    .eq("is_published", true)
+    .is("place_id", null)
+    .neq("categories.layer", "Practical");
+
+  if (locsError) throw new Error(locsError.message);
+
+  const locationPins: MapPin[] = ((locsData ?? []) as any[]).map((row) => ({
+    slug: row.slug,
+    name: row.name,
+    shortDescription: row.short_description ?? "",
+    latitude: row.latitude,
+    longitude: row.longitude,
+    category: (row.categories as any)?.name ?? "Point of Interest",
+    allCategories: [(row.categories as any)?.name ?? "Point of Interest"],
+    placeSlug: null,
+    routeSlug: row.route_slug ?? null,
+  }));
+
+  return [...placePins, ...locationPins];
+}
+
 export type Route = {
   id: string;
   name: string;
