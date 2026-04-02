@@ -1,49 +1,51 @@
-# Current State
-
 > **Format guide:** Status = one sentence present tense. Last Completed = newest first, max 15, area tag in brackets. Blockers = real blockers only. Next Tasks = max 5, priority order, actionable verbs. Update after every significant work block.
 
-Last updated: 2026-04-01
+# Current State
+
+Last updated: 2026-04-02
 
 ## Status
 
-Platform is live at explorebarbizon.com with four complete content layers, 5 published stories, and a working AI operating system (CCC + brain files). Primary gap is editorial content depth and a few schema items.
+Platform is live with unified place pages (7 places), 9 published stories (6 history + 3 guides), a working content dashboard, and a clean schema foundation for the Civitas multi-town model.
 
 ---
 
 ## Last Completed
 
-- [schema] Added `is_published`, `tour_type`, `difficulty` to `tours` table — both existing tours set to published
-- [content] Wrote and published 5 stories (all published in Supabase)
-- [schema] Confirmed UNIQUE constraints exist on slug columns for locations, categories, tours, stories
-- [content] Hero video deployed (repo-hosted placeholder at `/public/videos/hero-barbizon.mp4` — full edited version pending, will migrate to Cloudflare Stream)
-- [schema] Created `stories` + `story_locations` tables — wired to frontend
-- [map] Trail/routes system live: 5 seeded trails with GeoJSON, dashed-line rendering, click-to-reveal
-- [map] Map icon system redesigned to subcategory-level teardrop pins (Noun Project SVGs)
-- [media] Cover images seeded across ESS, Art & History, Forest & Nature locations via SQL
-- [frontend] Hero image pipeline wired: `getLocationBySlug` joins `media` table; CSS blend/fade bugs resolved
-- [ai-ops] AI operating system rewritten: Claude as lead, Cursor as implementer, GPT/Grok as supplementary
-- [ai-ops] CCC (Command Center) live at `/command-center` — password protected, task management, dispatch loop
-- [data] Four complete content layers populated (ESS, Art & History, Forest & Nature, Practical)
+- [frontend] Unified place page template live — source: 'place' renders history + function sections + JSON-LD; source: 'location' preserves legacy path
+- [schema] places + place_functions tables created; locations.place_id FK added
+- [data] 7 unified place records seeded with full historical narratives, SEO fields, og_image_url, and place_functions
+- [data] 14 location links established (locations.place_id → places)
+- [data] les-pleiades-hotel duplicate deleted; address corrections applied (Galerie Frédéric Got → 19 GR, Maison Barye → 26 GR)
+- [content] 4 new stories published: "How the Forest Was Saved", "A Day in Barbizon", "Where to Stay in Barbizon", "Where to Eat in Barbizon"
+- [content] Stories layer now 9 published pieces — 6 history essays, 3 guide pieces
+- [schema] stories.type column added (history | guide); all 5 existing stories set to history
+- [schema] locations.curation_order column added
+- [frontend] /stories page split into Essays + "In the village" sections by type
+- [frontend] /places page gained curated "Where to eat" + "Where to stay" featured sections
+- [data] 10 locations featured and ordered (5 restaurants + 5 hotels) with curation_order
+- [data] Villa Albertine + La Bastide de Barbizon added as hotel locations
+- [schema] tours gained is_published, tour_type, difficulty; both tours set to published
+- [frontend] Dashboard v1 complete — overview, locations list, location editor (PATCH API), stories list, places list
 
 ---
 
 ## Blockers
 
-- Supabase Edge Function proxy not yet built — blocks two features (not yet defined which)
-- Hero video full edit pending — current repo file is a placeholder clip
+- Hero video full edit pending — current clip at /public/videos/hero-barbizon.mp4 is a placeholder; migrate to Cloudflare Stream when ready
 
 ---
 
 ## Next Tasks
 
-1. **Verify 4 trail pin coordinates** against Google Maps — Futaie du Bas-Breau, Parcours FB, Sentier bleu no.6, Sentier des Peintres (factual integrity issue, ~30 min)
-2. **Write Art & History narratives** for published locations — target all 21, start with Maison de Millet and Auberge Ganne (core editorial differentiator)
-3. **Remove `data/tours.ts` static fallback** once both tours have complete Supabase data — currently a safety net; `pages/tours/[slug].tsx` tries Supabase first and falls back gracefully
-4. **Dashboard v1** — move from backlog to active: login screen → overview → locations list → location editor (content velocity blocker at scale)
-5. **Create `artists` + `artist_locations` tables** — next schema step per implementation sequence in `docs/schema-reference.md`
+1. **Smoke test /dashboard/places in browser** — confirm 7 places listed with correct function counts
+2. **Add place editor to dashboard** — /dashboard/places/[id] currently read-only; needs edit form for name, narratives, SEO fields, is_published toggle
+3. **Update map to query places** — map currently shows multiple pins for merged places; update MapGL to use places table for single pin with composite function chips on click
+4. **Write 4 remaining Art & History narratives** — Le Dormoir de Lantara, Maison Théodore Rousseau, Médaillon Rousseau-Millet, Musée de L'Esquisse (all unpublished pending narrative)
+5. **Wire artists grid to Supabase** — artists + artist_locations schema step; prerequisite for visual works layer
 
 ---
 
 ## Next Session Starting Point
 
-Run trail coordinate verification for the 4 unconfirmed pins, then move directly into writing the first Art & History narrative (Maison de Millet).
+Smoke test /dashboard/places in browser to confirm 7 places. Then write the Cursor brief for the map update — single pin per place using the places table, composite function chips on the map card popup.
