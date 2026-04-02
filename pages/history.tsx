@@ -97,17 +97,18 @@ const HistoryPage: NextPage = () => {
           </header>
           <div className="editorial-measure space-y-4 text-sm leading-relaxed text-ink/80 md:text-base">
             <p>
-              Historical content on this platform draws primarily on
-              grappilles.fr, a detailed archive of Barbizon built over many
-              years by local historian Pierre Gaudin. Additional sources include
-              the Archives de Seine-et-Marne, Base Mérimée / POP, Gallica /
-              BnF, and the Musée des Peintres de Barbizon.
+              Historical content on this platform is researched against
+              institutional primary sources: Base Mérimée / POP, the Archives
+              de Seine-et-Marne, Gallica / BnF, and the Musée des Peintres de
+              Barbizon. Local archival research by Pierre Gaudin (grappilles.fr)
+              informs many narratives and is credited as a valued research
+              contribution.
             </p>
             <p>
               Factual integrity is a core principle of this project. Dates,
               names, and locations are only published when confirmed against at
-              least one primary source. Geographic attributions for historical
-              works are marked with an explicit confidence level.
+              least one institutional source. Geographic attributions for
+              historical works are marked with an explicit confidence level.
             </p>
             <p>
               <a
