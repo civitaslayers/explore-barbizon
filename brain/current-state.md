@@ -6,30 +6,22 @@ Last updated: 2026-04-02
 
 ## Status
 
-Platform is live with unified place pages (7 places), 9 published stories (6 history + 3 guides), a working content dashboard, and a clean schema foundation for the Civitas multi-town model.
+Location database is comprehensively cleaned and enriched — 6 duplicates eliminated, 12+ location narratives written or rewritten from sourced research, 4 new locations created, all place records complete.
 
 ---
 
 ## Last Completed
 
-- [map] Map rewritten to query places + unmerged locations — single pin per place, multi-layer visibility via allCategories
-- [data] Val'et des Fromages seeded — place + 2 functions (Fromagerie primary, Restaurant secondary) + location linked
-- [frontend] Place editor live — /dashboard/places/[id] edit form + PATCH API /api/places/[id]
-- [frontend] Unified place page template live — source: 'place' renders history + function sections + JSON-LD; source: 'location' preserves legacy path
-- [schema] places + place_functions tables created; locations.place_id FK added
-- [data] 7 unified place records seeded with full historical narratives, SEO fields, og_image_url, and place_functions
-- [data] 14 location links established (locations.place_id → places)
-- [data] les-pleiades-hotel duplicate deleted; address corrections applied (Galerie Frédéric Got → 19 GR, Maison Barye → 26 GR)
-- [content] 4 new stories published: "How the Forest Was Saved", "A Day in Barbizon", "Where to Stay in Barbizon", "Where to Eat in Barbizon"
-- [content] Stories layer now 9 published pieces — 6 history essays, 3 guide pieces
-- [schema] stories.type column added (history | guide); all 5 existing stories set to history
-- [schema] locations.curation_order column added
-- [frontend] /stories page split into Essays + "In the village" sections by type
-- [frontend] /places page gained curated "Where to eat" + "Where to stay" featured sections
-- [data] 10 locations featured and ordered (5 restaurants + 5 hotels) with curation_order
-- [data] Villa Albertine + La Bastide de Barbizon added as hotel locations
-- [schema] tours gained is_published, tour_type, difficulty; both tours set to published
-- [frontend] Dashboard v1 complete — overview, locations list, location editor (PATCH API), stories list, places list
+- [content] Stories themes filled — all 9 stories now have theme values
+- [data] 3 unpublished locations published — dormoir-de-lantara, maison-theodore-rousseau, musee-de-lesquisse
+- [data] barbizonvillagedespeintres.wordpress.com added as Tier 3 source (Jean-Michel Mahenc; credited in docs + /history)
+- [content] All 8 place records now complete — no missing narratives or SEO descriptions
+- [content] Val'et des Fromages — historical_narrative and seo_description written
+- [content] 7 location narratives — dormoir-de-lantara, maison-de-rousseau, musee-de-lesquisse, medallion-millet-rousseau, cimetiere-barbizon, allee-john-constable, via-veneto-glaces
+- [data] 6 duplicate locations eliminated — medallion-rousseau-millet, lesquisse-hotel-bar, maison-theodore-rousseau, besharat-gallery-ess, musee-millet, parcours-mosaiques
+- [data] Médaillon Millet & Rousseau — GPS corrected, narratives merged, tour stop re-pointed
+- [data] L'Esquisse, Via Veneto Glaces, Librairie Cyrano, Le Royal, Maison 45, Tabac de Barbizon, L'Ermitage Saint Antoine — records/narratives updated from sourced research
+- [data] Galerie 41 + Cercle Laure Henry locations created; Cercle verified not Mairie-owned
 
 ---
 
@@ -41,13 +33,13 @@ Platform is live with unified place pages (7 places), 9 published stories (6 his
 
 ## Next Tasks
 
-1. Write 4 remaining Art & History narratives — Le Dormoir de Lantara, Maison Théodore Rousseau, Médaillon Rousseau-Millet, Musée de L'Esquisse
-2. Remove atelier-rouge fictional placeholder location
-3. Wire artists grid to Supabase — artists + artist_locations schema prerequisite
-4. Add function chips to map popup — show all place functions on click, not just primary category label
+1. Wire artists grid to Supabase — artists + artist_locations schema prerequisite
+2. Verify coordinates for four trail pins — Futaie du Bas-Breau, Parcours FB, Sentier bleu no.6, Sentier des Peintres
+3. Source historical postcard images for the /history page
+4. Expand /about to absorb practical visitor content
 
 ---
 
 ## Next Session Starting Point
 
-Write the 4 unpublished Art & History narratives, starting with Le Dormoir de Lantara.
+Move to artists grid schema design (Supabase artists + artist_locations), after verifying trail coordinates if map accuracy is blocking content.

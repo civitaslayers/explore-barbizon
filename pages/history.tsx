@@ -120,6 +120,22 @@ const HistoryPage: NextPage = () => {
                 Visit grappilles.fr →
               </a>
             </p>
+            <p>
+              Local village knowledge is further informed by{" "}
+              <a
+                href="https://barbizonvillagedespeintres.wordpress.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-ink/60 underline-offset-4 hover:underline"
+              >
+                Barbizon, le Guide →
+              </a>
+              , a blog by Jean-Michel Mahenc, former president of the Barbizon
+              Tourism Office, covering village life, restaurants, boutiques and
+              trails. Like grappilles.fr, it is treated as Tier 3 research —
+              orientation and leads only; anything we publish is checked against
+              institutional sources above.
+            </p>
           </div>
         </section>
       </div>

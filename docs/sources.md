@@ -1,6 +1,6 @@
 # Research Sources — Civitas Layers / ExploreBarbizon
 
-Last updated: 2026-03-31
+Last updated: 2026-04-02
 
 This file is the canonical reference for approved research sources.
 It is tied to the factual integrity policy in `brain/decisions.md`.
@@ -88,19 +88,8 @@ in the `source` field of the relevant Supabase record, not necessarily in
 the public-facing copy (unless it adds editorial value).
 
 grappilles.fr is credited in the platform's About or colophon section.
-```
 
----
-
-After writing both files, commit with:
-```
-docs: rewrite AI operating system and sources policy
-
-- Updated tool roles to reflect claude.ai → Claude Code → Cursor workflow
-- Added Perplexity, Stitch, Grok to tool roster with clear role boundaries
-- Introduced research source tier system (Tier 1/2/3)
-- Clarified grappilles.fr policy: credited research starting point, not primary authority
-- Removed Webflow references
-- Added content validation rules alongside code validation
-
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+barbizonvillagedespeintres.wordpress.com (Jean-Michel Mahenc) is credited on
+`/history` under Sources & provenance, with the same Tier 3 rules as
+grappilles.fr: valuable local orientation, not sole authority for published
+claims.
