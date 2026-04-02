@@ -12,6 +12,7 @@ Platform is live with unified place pages (7 places), 9 published stories (6 his
 
 ## Last Completed
 
+- [frontend] Place editor live — /dashboard/places/[id] edit form + PATCH API /api/places/[id]
 - [frontend] Unified place page template live — source: 'place' renders history + function sections + JSON-LD; source: 'location' preserves legacy path
 - [schema] places + place_functions tables created; locations.place_id FK added
 - [data] 7 unified place records seeded with full historical narratives, SEO fields, og_image_url, and place_functions
@@ -38,14 +39,13 @@ Platform is live with unified place pages (7 places), 9 published stories (6 his
 
 ## Next Tasks
 
-1. **Smoke test /dashboard/places in browser** — confirm 7 places listed with correct function counts
-2. **Add place editor to dashboard** — /dashboard/places/[id] currently read-only; needs edit form for name, narratives, SEO fields, is_published toggle
-3. **Update map to query places** — map currently shows multiple pins for merged places; update MapGL to use places table for single pin with composite function chips on click
-4. **Write 4 remaining Art & History narratives** — Le Dormoir de Lantara, Maison Théodore Rousseau, Médaillon Rousseau-Millet, Musée de L'Esquisse (all unpublished pending narrative)
-5. **Wire artists grid to Supabase** — artists + artist_locations schema step; prerequisite for visual works layer
+1. Update map to query places — map shows duplicate pins for merged places; use places table with composite function chips on click
+2. Write 4 remaining Art & History narratives — Le Dormoir de Lantara, Maison Théodore Rousseau, Médaillon Rousseau-Millet, Musée de L'Esquisse
+3. Remove atelier-rouge fictional placeholder location
+4. Wire artists grid to Supabase — artists + artist_locations schema prerequisite
 
 ---
 
 ## Next Session Starting Point
 
-Smoke test /dashboard/places in browser to confirm 7 places. Then write the Cursor brief for the map update — single pin per place using the places table, composite function chips on the map card popup.
+Update map to query places table instead of locations for merged place pins.
