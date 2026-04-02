@@ -171,6 +171,161 @@ export async function getPublishedSlugs(): Promise<string[]> {
   return (data ?? []).map((row: { slug: string }) => row.slug);
 }
 
+/** Published location slugs — alias for combining paths with {@link getPublishedPlaceSlugs}. */
+export async function getPublishedLocationSlugs(): Promise<string[]> {
+  return getPublishedSlugs();
+}
+
+// ---------------------------------------------------------------------------
+// Places (unified building / site pages)
+// ---------------------------------------------------------------------------
+
+export type PlaceFunction = {
+  id: string;
+  label: string;
+  description: string | null;
+  website: string | null;
+  phone: string | null;
+  opening_hours: Record<string, string> | null;
+  display_order: number;
+  is_primary: boolean;
+  category: {
+    name: string;
+    slug: string;
+    layer: string;
+    color: string | null;
+  } | null;
+};
+
+export type PlaceFull = {
+  id: string;
+  name: string;
+  slug: string;
+  address: string | null;
+  latitude: number;
+  longitude: number;
+  short_description: string | null;
+  historical_narrative: string | null;
+  seo_title: string | null;
+  seo_description: string | null;
+  og_image_url: string | null;
+  is_published: boolean;
+  functions: PlaceFunction[];
+  heroImage: string | null;
+};
+
+type PlaceBySlugRow = {
+  id: string;
+  name: string;
+  slug: string;
+  address: string | null;
+  latitude: number;
+  longitude: number;
+  short_description: string | null;
+  historical_narrative: string | null;
+  seo_title: string | null;
+  seo_description: string | null;
+  og_image_url: string | null;
+  is_published: boolean;
+  place_functions:
+    | {
+        id: string;
+        label: string;
+        description: string | null;
+        website: string | null;
+        phone: string | null;
+        opening_hours: Record<string, string> | null;
+        display_order: number;
+        is_primary: boolean;
+        categories: {
+          name: string;
+          slug: string;
+          layer: string;
+          color: string | null;
+        } | null;
+      }[]
+    | null;
+  locations:
+    | { media: { url: string; display_order: number | null }[] | null }[]
+    | null;
+};
+
+export async function getPlaceBySlug(slug: string): Promise<PlaceFull | null> {
+  if (!supabase) throw new Error("Supabase not configured");
+
+  const { data, error } = await supabase
+    .from("places")
+    .select(
+      `
+      *,
+      place_functions (
+        id, label, description, website, phone, opening_hours,
+        display_order, is_primary,
+        categories ( name, slug, layer, color )
+      ),
+      locations ( media ( url, display_order ) )
+    `
+    )
+    .eq("slug", slug)
+    .eq("is_published", true)
+    .single();
+
+  if (error) {
+    if (error.code === "PGRST116") return null;
+    throw new Error(error.message);
+  }
+  if (!data) return null;
+
+  const row = data as unknown as PlaceBySlugRow;
+  const allMedia = (row.locations ?? [])
+    .flatMap((l) => l.media ?? [])
+    .sort(
+      (a, b) => (a.display_order ?? 0) - (b.display_order ?? 0)
+    );
+  const heroImage = allMedia[0]?.url ?? null;
+
+  const functions: PlaceFunction[] = (row.place_functions ?? [])
+    .sort((a, b) => a.display_order - b.display_order)
+    .map((pf) => ({
+      id: pf.id,
+      label: pf.label,
+      description: pf.description,
+      website: pf.website,
+      phone: pf.phone,
+      opening_hours: pf.opening_hours,
+      display_order: pf.display_order,
+      is_primary: pf.is_primary,
+      category: pf.categories ?? null,
+    }));
+
+  return {
+    id: row.id,
+    name: row.name,
+    slug: row.slug,
+    address: row.address,
+    latitude: row.latitude,
+    longitude: row.longitude,
+    short_description: row.short_description,
+    historical_narrative: row.historical_narrative,
+    seo_title: row.seo_title,
+    seo_description: row.seo_description,
+    og_image_url: row.og_image_url,
+    is_published: row.is_published,
+    functions,
+    heroImage,
+  };
+}
+
+export async function getPublishedPlaceSlugs(): Promise<string[]> {
+  if (!supabase) throw new Error("Supabase not configured");
+  const { data, error } = await supabase
+    .from("places")
+    .select("slug")
+    .eq("is_published", true);
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((r: { slug: string }) => r.slug);
+}
+
 // ---------------------------------------------------------------------------
 // Tour types
 // ---------------------------------------------------------------------------

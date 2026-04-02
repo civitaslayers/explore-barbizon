@@ -102,6 +102,7 @@ export type Database = {
           narrative: string | null
           opening_hours: Json | null
           phone: string | null
+          place_id: string | null
           qr_code_url: string | null
           route_slug: string | null
           short_description: string | null
@@ -128,6 +129,7 @@ export type Database = {
           narrative?: string | null
           opening_hours?: Json | null
           phone?: string | null
+          place_id?: string | null
           qr_code_url?: string | null
           route_slug?: string | null
           short_description?: string | null
@@ -154,6 +156,7 @@ export type Database = {
           narrative?: string | null
           opening_hours?: Json | null
           phone?: string | null
+          place_id?: string | null
           qr_code_url?: string | null
           route_slug?: string | null
           short_description?: string | null
@@ -170,6 +173,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "locations_place_id_fkey"
+            columns: ["place_id"]
+            isOneToOne: false
+            referencedRelation: "places"
             referencedColumns: ["id"]
           },
           {
@@ -283,6 +293,128 @@ export type Database = {
             columns: ["task_id"]
             isOneToOne: false
             referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      place_functions: {
+        Row: {
+          category_id: string | null
+          created_at: string | null
+          description: string | null
+          display_order: number
+          id: string
+          is_primary: boolean
+          label: string
+          opening_hours: Json | null
+          phone: string | null
+          place_id: string
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_primary?: boolean
+          label: string
+          opening_hours?: Json | null
+          phone?: string | null
+          place_id: string
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_primary?: boolean
+          label?: string
+          opening_hours?: Json | null
+          phone?: string | null
+          place_id?: string
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "place_functions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "place_functions_place_id_fkey"
+            columns: ["place_id"]
+            isOneToOne: false
+            referencedRelation: "places"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      places: {
+        Row: {
+          address: string | null
+          created_at: string | null
+          historical_narrative: string | null
+          id: string
+          is_published: boolean
+          latitude: number
+          longitude: number
+          name: string
+          og_image_url: string | null
+          seo_description: string | null
+          seo_title: string | null
+          short_description: string | null
+          slug: string
+          town_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string | null
+          historical_narrative?: string | null
+          id?: string
+          is_published?: boolean
+          latitude: number
+          longitude: number
+          name: string
+          og_image_url?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
+          short_description?: string | null
+          slug: string
+          town_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string | null
+          historical_narrative?: string | null
+          id?: string
+          is_published?: boolean
+          latitude?: number
+          longitude?: number
+          name?: string
+          og_image_url?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
+          short_description?: string | null
+          slug?: string
+          town_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "places_town_id_fkey"
+            columns: ["town_id"]
+            isOneToOne: false
+            referencedRelation: "towns"
             referencedColumns: ["id"]
           },
         ]
