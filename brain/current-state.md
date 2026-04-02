@@ -12,6 +12,8 @@ Platform is live with unified place pages (7 places), 9 published stories (6 his
 
 ## Last Completed
 
+- [map] Map rewritten to query places + unmerged locations — single pin per place, multi-layer visibility via allCategories
+- [data] Val'et des Fromages seeded — place + 2 functions (Fromagerie primary, Restaurant secondary) + location linked
 - [frontend] Place editor live — /dashboard/places/[id] edit form + PATCH API /api/places/[id]
 - [frontend] Unified place page template live — source: 'place' renders history + function sections + JSON-LD; source: 'location' preserves legacy path
 - [schema] places + place_functions tables created; locations.place_id FK added
@@ -39,13 +41,13 @@ Platform is live with unified place pages (7 places), 9 published stories (6 his
 
 ## Next Tasks
 
-1. Update map to query places — map shows duplicate pins for merged places; use places table with composite function chips on click
-2. Write 4 remaining Art & History narratives — Le Dormoir de Lantara, Maison Théodore Rousseau, Médaillon Rousseau-Millet, Musée de L'Esquisse
-3. Remove atelier-rouge fictional placeholder location
-4. Wire artists grid to Supabase — artists + artist_locations schema prerequisite
+1. Write 4 remaining Art & History narratives — Le Dormoir de Lantara, Maison Théodore Rousseau, Médaillon Rousseau-Millet, Musée de L'Esquisse
+2. Remove atelier-rouge fictional placeholder location
+3. Wire artists grid to Supabase — artists + artist_locations schema prerequisite
+4. Add function chips to map popup — show all place functions on click, not just primary category label
 
 ---
 
 ## Next Session Starting Point
 
-Update map to query places table instead of locations for merged place pins.
+Write the 4 unpublished Art & History narratives, starting with Le Dormoir de Lantara.
