@@ -40,6 +40,7 @@ before any claim is published.
 | Source | Notes |
 |---|---|
 | grappilles.fr | Valuable local archive — credited as research contribution, not primary authority |
+| barbizonvillagedespeintres.wordpress.com | Blog by Jean-Michel Mahenc, former Président de l'Office du Tourisme de Barbizon. Rich in village anecdote, commerce listings, celebrity history, restaurants and trails. Not updated since ~2015 but historically valuable. Same policy as grappilles.fr. |
 | cpbarbizon.wordpress.com | Second site by the same author as grappilles.fr — same rules apply |
 | Perplexity | Good for sourced research leads; citations must be traced to originals |
 | GPT / Grok / Claude | Useful for orientation; never cite AI output as a source |
