@@ -6,40 +6,44 @@ Last updated: 2026-04-02
 
 ## Status
 
-Location database is comprehensively cleaned and enriched — 6 duplicates eliminated, 12+ location narratives written or rewritten from sourced research, 4 new locations created, all place records complete.
+Major location data entry session complete — 20+ locations inserted or corrected, all known duplicates eliminated, a database-level proximity guard deployed, and the mairie map fully processed as a Tier 1 source.
 
 ---
 
 ## Last Completed
 
-- [content] Stories themes filled — all 9 stories now have theme values
-- [data] 3 unpublished locations published — dormoir-de-lantara, maison-theodore-rousseau, musee-de-lesquisse
-- [data] barbizonvillagedespeintres.wordpress.com added as Tier 3 source (Jean-Michel Mahenc; credited in docs + /history)
-- [content] All 8 place records now complete — no missing narratives or SEO descriptions
-- [content] Val'et des Fromages — historical_narrative and seo_description written
-- [content] 7 location narratives — dormoir-de-lantara, maison-de-rousseau, musee-de-lesquisse, medallion-millet-rousseau, cimetiere-barbizon, allee-john-constable, via-veneto-glaces
-- [data] 6 duplicate locations eliminated — medallion-rousseau-millet, lesquisse-hotel-bar, maison-theodore-rousseau, besharat-gallery-ess, musee-millet, parcours-mosaiques
-- [data] Médaillon Millet & Rousseau — GPS corrected, narratives merged, tour stop re-pointed
-- [data] L'Esquisse, Via Veneto Glaces, Librairie Cyrano, Le Royal, Maison 45, Tabac de Barbizon, L'Ermitage Saint Antoine — records/narratives updated from sourced research
-- [data] Galerie 41 + Cercle Laure Henry locations created; Cercle verified not Mairie-owned
+- [data] Proximity guard migration deployed — trigger blocks any new pin within 15m of existing pin unless allow_proximity_override = true; all legitimate close pairs marked
+- [data] All known duplicate pins eliminated — besharat-gallery, besharat-suites, la-folie-barbizon-heritage, musee-de-lesquisse, maison-barye, hotel-les-pleiades all deleted
+- [data] Canonical single pins confirmed: besharat-gallery-suites (40 GR), la-folie-barbizon-hotel (5 GR), lesquisse (73 GR), les-pleiades-heritage (21 GR covers hotel+spa+restaurant+heritage+Daubigny)
+- [data] Coordinates verified and corrected for 15+ locations this session — Le Gaulois, Boucherie Angélus, Épicerie Végétale, Via Veneto, La Bohème, Nunchi, Parcours Mosaïques, Sentier des Peintres, Office de Tourisme, Bus stop Angélus, La Folie Barbizon, Les Pléiades, L'Ombrage, Tumble Inn, Manoir Saint-Hérem
+- [data] Galerie d'Art / Cemetery / Point of Interest categories corrected to Art & History layer (were wrongly in ESS/Practical)
+- [data] 8 new heritage/POI locations inserted from mairie map — Coz Ker (34), Mairie (13), L'Ombrage (18), La Poste (20), Villa Élisabeth (30), Tumble Inn (4 rue René Ménard), Manoir Saint-Hérem (14 rue JF Millet, heritage plaque — abandoned), Villa Bernard
+- [data] Hôtel Le Manoir Saint-Hérem recategorised from Hotel → Heritage Plaque (building is abandoned and closed for many years)
+- [data] Galerie 39, Besharat Gallery & Suites, Arte Milenario (Rolando Arevalo), La Bohème inserted with full descriptions, verified contact details, opening hours
+- [data] La Bohème narrative corrected — Eiffel/Millet son claim removed (belongs to no. 34 Coz Ker next door); Café Bouvard → La Bonne Auberge → La Bohème lineage confirmed Tier 1
+- [data] 6 existing narratives enriched from mairie map — Bas-Bréau (Hôtel Siron correction), La Juxtaposition (Barye history in narrative only, not name), Cercle Laure Henry, Maison Charles Jacque, Maison de Rousseau, La Folie heritage
+- [data] Mairie map (carte_Barbizon_mairie.pdf) fully processed as Tier 1 source — all Circuit des Lieux Célèbres entries cross-referenced
+- [data] Duplicate ATM/La Poste consolidated — atm-poste-barbizon deleted, la-poste-barbizon kept
 
 ---
 
 ## Blockers
 
-- Hero video full edit pending — current clip at /public/videos/hero-barbizon.mp4 is a placeholder; migrate to Cloudflare Stream when ready
+- Hero video full edit pending — current clip at /public/videos/hero-barbizon.mp4 is placeholder; migrate to Cloudflare Stream when ready
+- 3 coordinate pairs still need Luigi verification: L'Ombrage (18 GR — current pin too close to Bas-Bréau), Maison de Charles Jacque (24 GR), Villa Albertine vs Nunchi (33 vs 36 bis GR)
 
 ---
 
 ## Next Tasks
 
-1. Wire artists grid to Supabase — artists + artist_locations schema prerequisite
-2. Verify coordinates for four trail pins — Futaie du Bas-Breau, Parcours FB, Sentier bleu no.6, Sentier des Peintres
-3. Source historical postcard images for the /history page
-4. Expand /about to absorb practical visitor content
+1. Provide verified coordinates for L'Ombrage (18), Maison Charles Jacque (24), Villa Albertine — then proximity guard will clear
+2. Continue location data entry down the Grande Rue — next unreviewed stretch is roughly nos. 41–63
+3. Verify coordinates for four trail pins — Futaie du Bas-Breau, Parcours FB, Sentier bleu no.6, Sentier des Peintres (currently shares pin with Parcours Mosaïques at Place Marc Jacquet parking — confirm this is correct)
+4. Wire artists grid to Supabase — artists + artist_locations schema prerequisite
+5. Source historical postcard images for /history page
 
 ---
 
 ## Next Session Starting Point
 
-Move to artists grid schema design (Supabase artists + artist_locations), after verifying trail coordinates if map accuracy is blocking content.
+Provide the three outstanding coordinates (L'Ombrage, Maison Charles Jacque, Villa Albertine), then continue location data entry from no. 41 Grande Rue northward.
