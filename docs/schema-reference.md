@@ -73,8 +73,12 @@ Note: `show_in_editorial` controls whether a category's locations are eligible f
 | show_in_editorial | boolean | NO | false |
 | created_at | timestamptz | YES | now() |
 | updated_at | timestamptz | YES | now() |
-
+| route_slug | text | YES | — |
+| allow_proximity_override | boolean | YES | false |
+| internal_notes | text | YES | — |
 FKs: `town_id` → `towns.id`, `category_id` → `categories.id`
+
+Note: `internal_notes` is a private operational field — owner info, local knowledge, sourcing flags, unverified claims. Never expose in public-facing queries or API responses.
 
 ---
 
