@@ -119,56 +119,15 @@ export type MapPin = {
 export async function getMapPins(): Promise<MapPin[]> {
   if (!supabase) throw new Error("Supabase not configured");
 
-  const { data: placesData, error: placesError } = await supabase
-    .from("places")
-    .select(
-      `
-      slug,
-      name,
-      short_description,
-      latitude,
-      longitude,
-      place_functions!inner (
-        is_primary,
-        categories ( name )
-      )
-    `
-    )
-    .eq("is_published", true)
-    .eq("show_on_map", true);
-
-  if (placesError) throw new Error(placesError.message);
-
-  const placePins: MapPin[] = ((placesData ?? []) as any[]).map((row) => {
-    const fns = (row.place_functions ?? []) as {
-      is_primary: boolean;
-      categories: { name: string } | null;
-    }[];
-    const primary = fns.find((f) => f.is_primary) ?? fns[0];
-
-    return {
-      slug: row.slug,
-      name: row.name,
-      shortDescription: row.short_description ?? "",
-      latitude: row.latitude,
-      longitude: row.longitude,
-      category: primary?.categories?.name ?? "Point of Interest",
-      allCategories: fns.map((f) => f.categories?.name).filter(Boolean) as string[],
-      placeSlug: row.slug,
-      routeSlug: null,
-    };
-  });
-
   const { data: locsData, error: locsError } = await supabase
     .from("locations")
     .select("slug, name, short_description, latitude, longitude, route_slug, categories!inner(name, layer)")
     .eq("is_published", true)
-    .is("place_id", null)
     .neq("categories.layer", "Practical");
 
   if (locsError) throw new Error(locsError.message);
 
-  const locationPins: MapPin[] = ((locsData ?? []) as any[]).map((row) => ({
+  return ((locsData ?? []) as any[]).map((row) => ({
     slug: row.slug,
     name: row.name,
     shortDescription: row.short_description ?? "",
@@ -179,8 +138,6 @@ export async function getMapPins(): Promise<MapPin[]> {
     placeSlug: null,
     routeSlug: row.route_slug ?? null,
   }));
-
-  return [...placePins, ...locationPins];
 }
 
 export type Route = {
@@ -250,16 +207,16 @@ export async function getPublishedSlugs(): Promise<string[]> {
   return (data ?? []).map((row: { slug: string }) => row.slug);
 }
 
-/** Published location slugs — alias for combining paths with {@link getPublishedPlaceSlugs}. */
+/** Published location slugs for place pages and pre-rendering. */
 export async function getPublishedLocationSlugs(): Promise<string[]> {
   return getPublishedSlugs();
 }
 
 // ---------------------------------------------------------------------------
-// Places (unified building / site pages)
+// Locations (unified building / site pages)
 // ---------------------------------------------------------------------------
 
-export type PlaceFunction = {
+export type LocationFunction = {
   id: string;
   label: string;
   description: string | null;
@@ -276,7 +233,7 @@ export type PlaceFunction = {
   } | null;
 };
 
-export type PlaceFull = {
+export type LocationFull = {
   id: string;
   name: string;
   slug: string;
@@ -284,99 +241,58 @@ export type PlaceFull = {
   latitude: number;
   longitude: number;
   short_description: string | null;
-  historical_narrative: string | null;
-  seo_title: string | null;
-  seo_description: string | null;
-  og_image_url: string | null;
+  narrative: string | null;
   is_published: boolean;
-  functions: PlaceFunction[];
+  functions: LocationFunction[];
   heroImage: string | null;
 };
 
-type PlaceBySlugRow = {
-  id: string;
-  name: string;
-  slug: string;
-  address: string | null;
-  latitude: number;
-  longitude: number;
-  short_description: string | null;
-  historical_narrative: string | null;
-  seo_title: string | null;
-  seo_description: string | null;
-  og_image_url: string | null;
-  is_published: boolean;
-  place_functions:
-    | {
-        id: string;
-        label: string;
-        description: string | null;
-        website: string | null;
-        phone: string | null;
-        opening_hours: Record<string, string> | null;
-        display_order: number;
-        is_primary: boolean;
-        categories: {
-          name: string;
-          slug: string;
-          layer: string;
-          color: string | null;
-        } | null;
-      }[]
-    | null;
-  locations:
-    | { media: { url: string; display_order: number | null }[] | null }[]
-    | null;
-};
-
-export async function getPlaceBySlug(slug: string): Promise<PlaceFull | null> {
+export async function getLocationFull(
+  slug: string
+): Promise<LocationFull | null> {
   if (!supabase) throw new Error("Supabase not configured");
-
   const { data, error } = await supabase
-    .from("places")
+    .from("locations")
     .select(
       `
-      *,
-      place_functions (
+      id, name, slug, address, latitude, longitude,
+      short_description, narrative, is_published,
+      location_functions (
         id, label, description, website, phone, opening_hours,
         display_order, is_primary,
         categories ( name, slug, layer, color )
       ),
-      locations ( media ( url, display_order ) )
+      media ( url, display_order )
     `
     )
     .eq("slug", slug)
     .eq("is_published", true)
     .single();
-
   if (error) {
     if (error.code === "PGRST116") return null;
     throw new Error(error.message);
   }
   if (!data) return null;
-
-  const row = data as unknown as PlaceBySlugRow;
-  const allMedia = (row.locations ?? [])
-    .flatMap((l) => l.media ?? [])
-    .sort(
-      (a, b) => (a.display_order ?? 0) - (b.display_order ?? 0)
-    );
-  const heroImage = allMedia[0]?.url ?? null;
-
-  const functions: PlaceFunction[] = (row.place_functions ?? [])
-    .sort((a, b) => a.display_order - b.display_order)
-    .map((pf) => ({
-      id: pf.id,
-      label: pf.label,
-      description: pf.description,
-      website: pf.website,
-      phone: pf.phone,
-      opening_hours: pf.opening_hours,
-      display_order: pf.display_order,
-      is_primary: pf.is_primary,
-      category: pf.categories ?? null,
+  const row = data as any;
+  const heroImage =
+    (row.media ?? [])
+      .sort(
+        (a: any, b: any) =>
+          (a.display_order ?? 0) - (b.display_order ?? 0)
+      )[0]?.url ?? null;
+  const functions: LocationFunction[] = (row.location_functions ?? [])
+    .sort((a: any, b: any) => a.display_order - b.display_order)
+    .map((lf: any) => ({
+      id: lf.id,
+      label: lf.label,
+      description: lf.description,
+      website: lf.website,
+      phone: lf.phone,
+      opening_hours: lf.opening_hours,
+      display_order: lf.display_order,
+      is_primary: lf.is_primary,
+      category: lf.categories ?? null,
     }));
-
   return {
     id: row.id,
     name: row.name,
@@ -385,24 +301,11 @@ export async function getPlaceBySlug(slug: string): Promise<PlaceFull | null> {
     latitude: row.latitude,
     longitude: row.longitude,
     short_description: row.short_description,
-    historical_narrative: row.historical_narrative,
-    seo_title: row.seo_title,
-    seo_description: row.seo_description,
-    og_image_url: row.og_image_url,
+    narrative: row.narrative,
     is_published: row.is_published,
     functions,
     heroImage,
   };
-}
-
-export async function getPublishedPlaceSlugs(): Promise<string[]> {
-  if (!supabase) throw new Error("Supabase not configured");
-  const { data, error } = await supabase
-    .from("places")
-    .select("slug")
-    .eq("is_published", true);
-  if (error) throw new Error(error.message);
-  return (data ?? []).map((r: { slug: string }) => r.slug);
 }
 
 // ---------------------------------------------------------------------------

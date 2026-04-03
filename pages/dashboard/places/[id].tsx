@@ -253,9 +253,9 @@ export const getServerSideProps: GetServerSideProps<DashboardPlaceEditProps> =
     }
 
     const { data, error } = await supabase
-      .from("places")
+      .from("locations")
       .select(
-        "id, slug, name, address, short_description, historical_narrative, seo_title, seo_description, og_image_url, is_published, show_on_map"
+        "id, slug, name, address, short_description, narrative, is_published, show_on_map"
       )
       .eq("id", id)
       .single();
@@ -270,10 +270,7 @@ export const getServerSideProps: GetServerSideProps<DashboardPlaceEditProps> =
       name: string;
       address: string | null;
       short_description: string | null;
-      historical_narrative: string | null;
-      seo_title: string | null;
-      seo_description: string | null;
-      og_image_url: string | null;
+      narrative: string | null;
       is_published: boolean;
       show_on_map: boolean;
     };
@@ -286,10 +283,10 @@ export const getServerSideProps: GetServerSideProps<DashboardPlaceEditProps> =
           name: row.name,
           address: row.address,
           short_description: row.short_description,
-          historical_narrative: row.historical_narrative,
-          seo_title: row.seo_title,
-          seo_description: row.seo_description,
-          og_image_url: row.og_image_url,
+          historical_narrative: row.narrative,
+          seo_title: null,
+          seo_description: null,
+          og_image_url: null,
           is_published: row.is_published,
           show_on_map: row.show_on_map,
         },

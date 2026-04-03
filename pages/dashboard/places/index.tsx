@@ -23,9 +23,9 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async () => {
     return { props: { rows: [] } };
   }
 
-  const { data, error } = await supabase.from("places").select(`
+  const { data, error } = await supabase.from("locations").select(`
       id, name, slug, is_published,
-      place_functions ( count )
+      location_functions ( count )
     `);
 
   if (error || !data) {
@@ -34,19 +34,19 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async () => {
   }
 
   const rows: DashboardPlaceRow[] = (
-    data as {
+    data as unknown as {
       id: string;
       name: string;
       slug: string;
       is_published: boolean;
-      place_functions: { count: number }[] | null;
+      location_functions: { count: number }[] | null;
     }[]
   ).map((row) => ({
     id: row.id,
     name: row.name,
     slug: row.slug,
     is_published: row.is_published,
-    functionCount: row.place_functions?.[0]?.count ?? 0,
+    functionCount: row.location_functions?.[0]?.count ?? 0,
   }));
 
   rows.sort((a, b) => a.name.localeCompare(b.name));

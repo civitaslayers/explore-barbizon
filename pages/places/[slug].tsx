@@ -5,13 +5,10 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { getAllPlaces, type Place } from "@/data/places";
 import {
-  getLocationBySlug,
-  getPlaceBySlug,
-  getPublishedLocations,
+  getLocationFull,
   getPublishedLocationSlugs,
-  getPublishedPlaceSlugs,
-  type PlaceFull,
-  type PlaceFunction,
+  type LocationFull,
+  type LocationFunction,
 } from "@/lib/supabase";
 import { staticMapUrl, hasMapbox } from "@/lib/mapbox";
 import { buildPlaceSchema } from "@/lib/seo";
@@ -56,10 +53,10 @@ function functionChipClasses(layer: string | null | undefined): string {
   return "bg-ink/8 text-ink/50";
 }
 
-function UnifiedPlaceArticle({ place }: { place: PlaceFull }) {
+function UnifiedPlaceArticle({ place }: { place: LocationFull }) {
   const heroImage = place.heroImage;
   const narrativeParagraphs =
-    place.historical_narrative
+    place.narrative
       ?.split(/\n\n/)
       .map((p) => p.trim())
       .filter(Boolean) ?? [];
@@ -148,7 +145,7 @@ function HistorySection({ paragraphs }: { paragraphs: string[] }) {
   );
 }
 
-function practicalBlock(fn: PlaceFunction): ReactNode {
+function practicalBlock(fn: LocationFunction): ReactNode {
   const hasWebsite = Boolean(fn.website?.trim());
   const hasPhone = Boolean(fn.phone?.trim());
   const hoursEntries = fn.opening_hours
@@ -212,7 +209,7 @@ function practicalBlock(fn: PlaceFunction): ReactNode {
   );
 }
 
-function FunctionSection({ fn }: { fn: PlaceFunction }) {
+function FunctionSection({ fn }: { fn: LocationFunction }) {
   return (
     <section className="border-t border-ink/10 pt-12 md:pt-14 lg:pt-16">
       <div className="editorial-measure">
@@ -468,7 +465,7 @@ function LegacyLocationPlaceArticle({
 }
 
 type PlacePageProps =
-  | { source: "place"; place: PlaceFull }
+  | { source: "place"; place: LocationFull }
   | {
       source: "location";
       location: Place;
@@ -479,22 +476,15 @@ type PlacePageProps =
 const PlacePage: NextPage<PlacePageProps> = (props) => {
   if (props.source === "place") {
     const { place } = props;
-    const metaDescription =
-      place.seo_description ?? place.short_description ?? "";
-    const ogImage = place.og_image_url ?? place.heroImage ?? "";
+    const metaDescription = place.short_description ?? "";
+    const ogImage = place.heroImage ?? "";
     return (
       <>
         <Head>
-          <title>{place.seo_title ?? `${place.name} — Barbizon`}</title>
+          <title>{`${place.name} — Barbizon`}</title>
           <meta name="description" content={metaDescription} />
-          <meta
-            property="og:title"
-            content={place.seo_title ?? place.name}
-          />
-          <meta
-            property="og:description"
-            content={place.seo_description ?? ""}
-          />
+          <meta property="og:title" content={place.name} />
+          <meta property="og:description" content={metaDescription} />
           <meta property="og:image" content={ogImage} />
           <meta property="og:type" content="place" />
           <link
@@ -545,10 +535,8 @@ const PlacePage: NextPage<PlacePageProps> = (props) => {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   try {
-    const placeSlugs = await getPublishedPlaceSlugs();
-    const locationSlugs = await getPublishedLocationSlugs();
-    const allSlugs = [...new Set([...placeSlugs, ...locationSlugs])];
-    const paths = allSlugs.map((slug) => ({ params: { slug } }));
+    const slugs = await getPublishedLocationSlugs();
+    const paths = slugs.map((slug) => ({ params: { slug } }));
     return { paths, fallback: "blocking" };
   } catch {
     const paths = getAllPlaces().map((p) => ({ params: { slug: p.slug } }));
@@ -565,37 +553,14 @@ export const getStaticProps: GetStaticProps<PlacePageProps> = async ({
   }
 
   try {
-    const placeRecord = await getPlaceBySlug(slug);
+    const placeRecord = await getLocationFull(slug);
     if (placeRecord) {
       return {
         props: { source: "place" as const, place: placeRecord },
         revalidate: 60,
       };
     }
-
-    const location = await getLocationBySlug(slug);
-    if (!location) return { notFound: true };
-
-    const allPlaces = await getPublishedLocations();
-
-    const relatedPlaces = allPlaces
-      .filter((p) => p.slug !== slug && p.category === location.category)
-      .slice(0, 3);
-
-    const nearbyPlaces = allPlaces
-      .filter((p) => p.slug !== slug && p.category !== location.category)
-      .sort((a, b) => haversineKm(location, a) - haversineKm(location, b))
-      .slice(0, 3);
-
-    return {
-      props: {
-        source: "location" as const,
-        location,
-        relatedPlaces,
-        nearbyPlaces,
-      },
-      revalidate: 60,
-    };
+    return { notFound: true };
   } catch {
     const allPlaces = getAllPlaces();
     const place = allPlaces.find((p) => p.slug === slug);

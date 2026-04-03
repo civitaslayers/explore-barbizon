@@ -48,14 +48,11 @@ export default async function handler(
   }
 
   const { error } = await supabase
-    .from("places")
+    .from("locations")
     .update({
       name: b.name.trim(),
       short_description: nullableString(b.short_description),
-      historical_narrative: nullableString(b.historical_narrative),
-      seo_title: nullableString(b.seo_title),
-      seo_description: nullableString(b.seo_description),
-      og_image_url: nullableString(b.og_image_url),
+      narrative: nullableString(b.historical_narrative),
       address: nullableString(b.address),
       is_published: b.is_published,
       show_on_map: b.show_on_map,

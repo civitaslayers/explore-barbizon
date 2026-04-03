@@ -1,6 +1,6 @@
-import type { PlaceFull } from "@/lib/supabase";
+import type { LocationFull } from "@/lib/supabase";
 
-export function buildPlaceSchema(place: PlaceFull) {
+export function buildPlaceSchema(place: LocationFull) {
   const primary =
     place.functions.find((f) => f.is_primary) ?? place.functions[0];
   const layer = primary?.category?.layer ?? "";
@@ -25,7 +25,7 @@ export function buildPlaceSchema(place: PlaceFull) {
     "@context": "https://schema.org",
     "@type": type,
     name: place.name,
-    description: place.seo_description ?? place.short_description ?? undefined,
+    description: place.short_description ?? undefined,
     address: {
       "@type": "PostalAddress",
       streetAddress: place.address ?? undefined,
@@ -39,6 +39,6 @@ export function buildPlaceSchema(place: PlaceFull) {
       longitude: place.longitude,
     },
     url: `https://explorebarbizon.com/places/${place.slug}`,
-    image: place.og_image_url ?? place.heroImage ?? undefined,
+    image: place.heroImage ?? undefined,
   };
 }
