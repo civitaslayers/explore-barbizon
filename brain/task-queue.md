@@ -19,7 +19,6 @@ Task tags:
 ## Now
 *Unblocked tasks that can be started immediately.*
 
-- [user-action] Provide verified coordinates for L'Ombrage (18 GR), Maison Charles Jacque (24 GR), Villa Albertine (33 GR) — proximity guard is blocking these three records until coordinates are correct
 - [user-action] Confirm whether Sentier des Peintres and Parcours des Mosaïques correctly share the Place Marc Jacquet parking pin — or if Sentier has a distinct starting point
 - [data] Continue location data entry — next unreviewed stretch is nos. 41–63 Grande Rue
 
