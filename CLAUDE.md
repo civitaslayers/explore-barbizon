@@ -152,6 +152,7 @@ These fields are locked conventions.
 | `layer` | `map_layer` |
 | `distance_meters` | `distance_km` |
 | `stop_narrative` | `notes` |
+| `Artist House` category | Historical Barbizon School painters' homes only (19th century) — use `Galerie d'Art` for any living or contemporary artist studios |
 
 Always verify field names before writing SQL or referencing schema fields in code.
 
