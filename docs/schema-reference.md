@@ -1,6 +1,6 @@
 # Schema Reference
 
-Last updated: 2026-03-13
+Last updated: 2026-04-03
 Source: Live Supabase project `afqyrxtfbspghpfulvmy` (Civitas Layers' Project, eu-west-2, Postgres 17)
 
 ---
@@ -64,6 +64,7 @@ Note: `show_in_editorial` controls whether a category's locations are eligible f
 | address | text | YES | — |
 | phone | text | YES | — |
 | website | text | YES | — |
+| booking_url | text | YES | — |
 | opening_hours | jsonb | YES | — |
 | is_published | boolean | YES | false |
 | is_premium | boolean | YES | false |
@@ -79,6 +80,8 @@ Note: `show_in_editorial` controls whether a category's locations are eligible f
 FKs: `town_id` → `towns.id`, `category_id` → `categories.id`
 
 Note: `internal_notes` is a private operational field — owner info, local knowledge, sourcing flags, unverified claims. Never expose in public-facing queries or API responses.
+
+Note: `booking_url` is used for accommodation entries only — links to Booking.com or Airbnb listings. Never used for non-accommodation categories.
 
 ---
 
