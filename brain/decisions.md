@@ -1,3 +1,17 @@
+## 2026-04-03
+**Decision:** Migrate `places` + `place_functions` tables to `locations` + `location_functions`. Drop `places` and `place_functions`.
+**Reason:** `places` was a parallel spatial table causing silent duplicate pins, stale coordinates, and split query paths. A single `locations` table with `location_functions` for multi-service venues is simpler, safer, and scales correctly to future towns.
+**Consequence:** All 8 former `places` entries now live in `locations`. `location_functions` replaces `place_functions` with FK to `locations.id`. Code in `lib/supabase.ts`, `pages/places/[slug].tsx`, dashboard pages, and `pages/api/places/[id].ts` updated. `getMapPins()` now queries `locations` only.
+
+---
+
+## 2026-04-03
+**Decision:** `Artist House` category is reserved for historical Barbizon School painters' homes (19th century) only. Living or contemporary artist studios use `Galerie d'Art`.
+**Reason:** Prevents miscategorisation of active galleries as historical sites.
+**Consequence:** Galerie Atelier Drochon correctly categorised as `Galerie d'Art`. Any future living artist studio follows the same rule.
+
+---
+
 ## 2026-04-02
 **Decision:** Database proximity guard deployed — trigger blocks inserts/updates placing a pin within 15m of an existing published pin in the same town.
 **Reason:** Repeated duplicate pins were being created across sessions, requiring manual cleanup each time. A hard database constraint removes the possibility of accidental duplication.

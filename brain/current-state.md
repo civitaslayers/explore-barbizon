@@ -6,12 +6,18 @@ Last updated: 2026-04-03
 
 ## Status
 
-Major data entry and schema session complete — 40+ locations inserted or corrected, four new categories added, booking_url column deployed, and the full hotel/accommodation layer properly categorised.
+Single-table spatial architecture complete — places/place_functions dropped, all 8 entries migrated to locations/location_functions, 106 published locations, codebase updated and building cleanly.
 
 ---
 
 ## Last Completed
 
+- [schema] places + place_functions tables dropped — all data migrated to locations + location_functions
+- [schema] location_functions table created — multi-service venues now use FK to locations.id
+- [schema] Galerie Atelier Drochon inserted — 79 Grande Rue, category Galerie d'Art
+- [schema] Artist House category rule documented — historical Barbizon School only
+- [schema] booking_url and internal_notes added to schema-reference.md
+- [data] Duplicate pins resolved across places/locations tables — one address one pin rule enforced
 - [data] booking_url column added to locations — 10 properties populated with Booking.com URLs, Villa Albertine and Le Chic with Airbnb
 - [data] Les Pléiades reinserted (was lost in duplicate cleanup) — full content, Daubigny narrative, proximity override set
 - [schema] New categories added: Nightclub, Chambre d'hôtes, Chambre d'hôtes split from Hotel — accommodation layer now clean
@@ -38,15 +44,14 @@ Major data entry and schema session complete — 40+ locations inserted or corre
 
 ## Next Tasks
 
-1. Update docs/schema-reference.md — add booking_url and internal_notes columns to locations table (Cursor)
-2. Continue location data entry — nos. 41–63 Grande Rue still unreviewed
-3. Confirm Sentier des Peintres starting pin — shares Place Marc Jacquet parking or distinct point?
-4. Wire artists grid to Supabase — artists + artist_locations schema
-5. Source historical postcard images for /history page
+1. Continue location data entry — nos. 41–63 Grande Rue still unreviewed
+2. Confirm Sentier des Peintres starting pin — Place Marc Jacquet or distinct point?
+3. Wire artists grid to Supabase — artists + artist_locations schema
+4. Source historical postcard images for /history page
+5. Update supabase.types.ts to reflect location_functions FK
 
 ---
 
 ## Next Session Starting Point
 
-Update schema-reference.md for new columns, then continue Grande Rue data entry from no. 41.
-Do not touch any other files.
+Continue Grande Rue data entry from no. 41. Check supabase.types.ts for location_functions.

@@ -85,6 +85,28 @@ Note: `booking_url` is used for accommodation entries only — links to Booking.
 
 ---
 
+### `location_functions`
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| id | uuid | NO | uuid_generate_v4() |
+| location_id | uuid | NO | — |
+| category_id | uuid | YES | — |
+| label | text | NO | — |
+| description | text | YES | — |
+| website | text | YES | — |
+| phone | text | YES | — |
+| opening_hours | jsonb | YES | — |
+| display_order | integer | NO | 0 |
+| is_primary | boolean | NO | false |
+| created_at | timestamptz | YES | now() |
+
+FK: `location_id` → `locations.id` (CASCADE DELETE), `category_id` → `categories.id`
+
+Note: Use when a single business operates multiple distinct services at the same address (e.g. a hotel that also has a restaurant and a bar). Do NOT use for separate businesses sharing an address — those get separate `locations` rows with their own pins.
+
+---
+
 ### `media`
 
 | Column | Type | Nullable | Default |
@@ -156,13 +178,15 @@ Note: `id` has no default — it is expected to mirror `auth.users.id` from Supa
 ### Foreign Key Map
 
 ```
-categories.town_id        → towns.id
-locations.town_id         → towns.id
-locations.category_id     → categories.id
-media.location_id         → locations.id
-tours.town_id             → towns.id
-tour_stops.tour_id        → tours.id
-tour_stops.location_id    → locations.id
+categories.town_id              → towns.id
+locations.town_id               → towns.id
+locations.category_id           → categories.id
+location_functions.location_id  → locations.id
+location_functions.category_id  → categories.id
+media.location_id               → locations.id
+tours.town_id                   → towns.id
+tour_stops.tour_id              → tours.id
+tour_stops.location_id          → locations.id
 ```
 
 ---
@@ -191,6 +215,16 @@ These override any default assumptions in queries, migrations, or AI-assisted se
 - No unique constraints visible on slug columns (may exist as indexes, not visible through information_schema)
 
 ---
+
+### Data rules — locations vs location_functions
+
+**One address, one business** → one `locations` row. No `location_functions` needed.
+
+**One address, one business, multiple services** (e.g. hotel + restaurant + bar under same brand) → one `locations` row + multiple `location_functions` rows. One pin on the map.
+
+**One address, multiple independent businesses** (e.g. three separate shops at 38B Grande Rue) → separate `locations` rows per business. Separate pins on the map.
+
+**Never use `location_functions` for independent businesses sharing an address.** Each business gets its own `locations` row, own slug, own pin, own page.
 
 ---
 
