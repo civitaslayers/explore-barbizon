@@ -329,6 +329,15 @@ export default function MapGL({ locations, allLocations, routes, focusSlug }: Pr
       "top-right"
     );
 
+    map.addControl(
+      new mapboxgl.GeolocateControl({
+        trackUserLocation: true,
+        showUserHeading: true,
+        showAccuracyCircle: true,
+      }),
+      "top-right"
+    );
+
     map.on("load", async () => {
       // Load all SVG icons before adding layers
       await Promise.all(

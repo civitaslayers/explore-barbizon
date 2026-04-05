@@ -12,6 +12,7 @@ Single-table spatial architecture complete — places/place_functions dropped, a
 
 ## Last Completed
 
+- [map] Added GeolocateControl to MapGL.tsx — real-time GPS dot with heading cone and accuracy circle
 - [schema] places + place_functions tables dropped — all data migrated to locations + location_functions
 - [schema] location_functions table created — multi-service venues now use FK to locations.id
 - [schema] Galerie Atelier Drochon inserted — 79 Grande Rue, category Galerie d'Art
