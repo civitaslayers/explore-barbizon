@@ -12,6 +12,7 @@ Session complete — coordinate corrections, new Lunetier category, Dormoir de L
 
 ## Last Completed
 
+- [data] Removed atelier-rouge fictional placeholder from data/places.ts, data/highlights.ts, data/tours.ts
 - [fix] Map popup "View place" link restored — getMapPins() locationPins were setting placeSlug: null; changed to placeSlug: row.slug in lib/supabase.ts
 - [data] Le Dormoir de Lantara fully enriched — coordinates corrected (slug was dormoir-de-lantara not dormoir-lantara), two historical images added to media table (Le Gray 1852, Lepère 1890), full descriptions and narrative rewritten with sourced Lantara biography
 - [media] R2 bucket restructured — all media now under locations/{slug}/ prefix; places/ folder retired; elephant-de-barbizon.jpg and dormoir images migrated; media table URLs updated

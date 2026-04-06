@@ -7,12 +7,6 @@ export type Highlight = {
 
 export const highlights: Highlight[] = [
   {
-    slug: "atelier-rouge",
-    title: "Atelier Rouge, North Light",
-    subtitle: "A former painter’s studio overlooking the forest edge.",
-    category: "Studio"
-  },
-  {
     slug: "sentier-des-peintres",
     title: "Sentier des Peintres",
     subtitle: "A quiet path tracing the steps of the Barbizon school.",

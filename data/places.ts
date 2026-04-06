@@ -70,20 +70,6 @@ export const places: Place[] = [
     longitude: 2.6055
   },
   {
-    slug: "atelier-rouge",
-    name: "Atelier Rouge",
-    location: "Forest edge, Barbizon",
-    shortDescription: "A former painter’s north-light studio on the forest edge.",
-    description:
-      "Once a working studio for a Barbizon painter, Atelier Rouge still carries the geometry of north light: tall windows, pale walls, and a quiet view toward the forest. It is less a monument than a working room, where canvases and weather studies once leaned against the wall.",
-    history:
-      "In the later 19th century, studios like this were improvised from existing houses and barns, adapted to catch a steady north light. While the names of some of these painters have faded, the rooms they worked in still structure how the village meets the forest.",
-    heroImage: "/images/places/atelier-rouge.jpg",
-    category: "Studio",
-    latitude: 48.443,
-    longitude: 2.605
-  },
-  {
     slug: "sentier-des-peintres",
     name: "Sentier des Peintres",
     location: "Path from village to forest",

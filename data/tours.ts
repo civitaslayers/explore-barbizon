@@ -16,7 +16,7 @@ export const tours: Tour[] = [
     summary:
       "A half‑day walk from village streets to the first clearings of the Fontainebleau forest.",
     durationHours: 3,
-    stops: ["atelier-rouge", "sentier-des-peintres", "musee-de-barbizon"]
+    stops: ["sentier-des-peintres", "musee-de-barbizon"]
   }
 ];
 
