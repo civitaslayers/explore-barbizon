@@ -6,34 +6,27 @@ Last updated: 2026-04-03
 
 ## Status
 
-Single-table spatial architecture complete — places/place_functions dropped, all 8 entries migrated to locations/location_functions, 106 published locations, codebase updated and building cleanly.
+Session complete — coordinate corrections, new Lunetier category, Dormoir de Lantara fully enriched with historical media, R2 bucket restructured to locations/ prefix, map popup link bug fixed.
 
 ---
 
 ## Last Completed
 
-- [map] Added GeolocateControl to MapGL.tsx — real-time GPS dot with heading cone and accuracy circle
-- [schema] places + place_functions tables dropped — all data migrated to locations + location_functions
-- [schema] location_functions table created — multi-service venues now use FK to locations.id
-- [schema] Galerie Atelier Drochon inserted — 79 Grande Rue, category Galerie d'Art
-- [schema] Artist House category rule documented — historical Barbizon School only
-- [schema] booking_url and internal_notes added to schema-reference.md
-- [data] Duplicate pins resolved across places/locations tables — one address one pin rule enforced
-- [data] booking_url column added to locations — 10 properties populated with Booking.com URLs, Villa Albertine and Le Chic with Airbnb
-- [data] Les Pléiades reinserted (was lost in duplicate cleanup) — full content, Daubigny narrative, proximity override set
-- [schema] New categories added: Nightclub, Chambre d'hôtes, Chambre d'hôtes split from Hotel — accommodation layer now clean
-- [schema] booking_url migration applied and documented
-- [data] internal_notes column added — Ô Bout, Bobo Club, Le Relais, Besharat, all B&Bs populated with owner/host info
+- [fix] Map popup "View place" link restored — getMapPins() locationPins were setting placeSlug: null; changed to placeSlug: row.slug in lib/supabase.ts
+- [data] Le Dormoir de Lantara fully enriched — coordinates corrected (slug was dormoir-de-lantara not dormoir-lantara), two historical images added to media table (Le Gray 1852, Lepère 1890), full descriptions and narrative rewritten with sourced Lantara biography
+- [media] R2 bucket restructured — all media now under locations/{slug}/ prefix; places/ folder retired; elephant-de-barbizon.jpg and dormoir images migrated; media table URLs updated
+- [data] Futaie du Bas-Bréau deleted — location and media record removed; was an open coordinate verification item
+- [data] Lunetier category created — Mon Oeil and L'Atelier de Bérangère both moved from Boutique
+- [data] Four location coordinate corrections — Epicerie de Barbizon (68 GR), La Galerie des Pains (70 GR), Muse Galerie (82 GR), Mon Oeil (96B GR); hours and internal_notes enriched
+- [data] Muse Galerie address corrected — was "88 bis", confirmed 82 GR by GPS; address discrepancy with Peintres de la Marine source flagged in internal_notes
+- [data] Mon Oeil recategorised to Lunetier — address updated to 96B, internal_notes added (Maison Moulin Lunetier, Essilor partner)
+- [data] proximity_override enabled for Epicerie de Barbizon and Maison Morin — genuinely distinct establishments within 15m on Grande Rue
+- [schema] booking_url column added to locations — 10 properties populated with Booking.com URLs
+- [data] Les Pléiades reinserted — full content, Daubigny narrative, proximity override set
+- [schema] New categories added: Nightclub, Chambre d'hôtes, Lunetier
+- [data] internal_notes column added — owner/host info populated for key ESS locations
 - [data] Hotel category corrected — L'Esquisse, Besharat, Petit Château moved from wrong categories
-- [data] 6 new B&Bs/chambres d'hôtes inserted: P'tit Angélus, Cottage Barbizonnais, Petit Château, Le Chic à Barbizon, Villa Albertine recategorised
-- [data] Bobo Club inserted with new Nightclub category
-- [data] Galerie Alfart-LBK merged with Métranve Sculptures — single pin, address corrected to no.6
-- [data] Galaxie des Arts updated — single location (83 GR), old 84bis location noted as new tourist office
-- [data] Tourist office pin confirmed at 84bis, website updated to fontainebleau-tourisme.com
-- [data] Apremont cluster completed — 5 climbing sectors, 2 viewpoints, Chêne Sully, Caverne des Brigands all correctly pinned
-- [data] Chalet de la Caverne des Brigands fully enriched with Denecourt origin narrative
-- [data] Coordinate corrections: Ô Bout, Galaxie des Arts, point-de-vue-apremont, escalade-apremont-bizons, bus stops
-- [data] Three coordinate confirmations resolved: L'Ombrage, Maison Charles Jacque, Villa Albertine
+- [data] Bobo Club inserted with Nightclub category
 
 ---
 
@@ -45,14 +38,14 @@ Single-table spatial architecture complete — places/place_functions dropped, a
 
 ## Next Tasks
 
-1. Continue location data entry — nos. 41–63 Grande Rue still unreviewed
-2. Confirm Sentier des Peintres starting pin — Place Marc Jacquet or distinct point?
-3. Wire artists grid to Supabase — artists + artist_locations schema
-4. Source historical postcard images for /history page
-5. Update supabase.types.ts to reflect location_functions FK
+1. Deploy to Vercel and verify map popup links work on live site
+2. Update docs/schema-reference.md — add booking_url and internal_notes columns (Cursor)
+3. Continue location data entry — nos. 41–63 Grande Rue still unreviewed
+4. Confirm Sentier des Peintres starting pin — shares Place Marc Jacquet parking or distinct point?
+5. Wire artists grid to Supabase — artists + artist_locations schema
 
 ---
 
 ## Next Session Starting Point
 
-Continue Grande Rue data entry from no. 41. Check supabase.types.ts for location_functions.
+Deploy fix first. Then update schema-reference.md, then continue Grande Rue data entry from no. 41.

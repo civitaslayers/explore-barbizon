@@ -1,3 +1,27 @@
+## 2026-04-06
+**Decision:** R2 media bucket uses locations/{slug}/ prefix, not places/.
+**Reason:** The app queries the locations table exclusively. The old places/ folder was a legacy artefact from the dual-table migration period. Bucket structure should mirror the live DB schema.
+**Consequence:** All media URLs now follow https://media.explorebarbizon.com/locations/{location-slug}/{filename}. The places/ folder has been retired and deleted. media table records updated accordingly.
+**Migration risk:** none
+
+---
+
+## 2026-04-06
+**Decision:** Historical public-domain images from institutional sources (Gallica/BnF, Cleveland Museum of Art, etc.) must be downloaded and hosted on R2, not linked externally.
+**Reason:** Institutional URLs are unstable over time and can break without notice.
+**Consequence:** Download → upload to locations/{slug}/ on R2 → insert media record pointing to media.explorebarbizon.com. Never insert raw Gallica/CMA/museum URLs into the media table.
+**Migration risk:** none
+
+---
+
+## 2026-04-06
+**Decision:** Lunetier is a distinct ESS category covering both artisan eyewear designers and luxury opticiens.
+**Reason:** Mon Oeil (opticien) and L'Atelier de Bérangère (lunetière artisane) are both eyewear specialists — grouping them under Boutique was too generic.
+**Consequence:** Category slug: lunetier, layer: Eat Stay & Shop, display_order: 19. Mon Oeil and L'Atelier de Bérangère both assigned to this category.
+**Migration risk:** none
+
+---
+
 ## 2026-04-03
 **Decision:** Migrate `places` + `place_functions` tables to `locations` + `location_functions`. Drop `places` and `place_functions`.
 **Reason:** `places` was a parallel spatial table causing silent duplicate pins, stale coordinates, and split query paths. A single `locations` table with `location_functions` for multi-service venues is simpler, safer, and scales correctly to future towns.
