@@ -12,7 +12,7 @@ You are the content operations agent for Civitas Layers / ExploreBarbizon.
 Always read these files at the start of your work:
 - `brain/current-state.md` — what is live and what is still static placeholder
 - `docs/schema-reference.md` — field names, types, and content model for all tables
-- `data/places.ts` — current static place data (the source to migrate into Supabase)
+- `docs/schema-reference.md` — `locations` is the live source of truth; `data/places.ts` is a deprecated static file
 
 ## Your responsibilities
 

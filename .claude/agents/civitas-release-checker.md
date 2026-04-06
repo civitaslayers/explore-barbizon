@@ -57,7 +57,7 @@ Search the codebase for any use of forbidden field names:
 - Are there any hardcoded API keys, tokens, or credentials in committed files?
 
 ### 8. No broken placeholder pages
-- Does `/places/[slug]` resolve for all slugs in `data/places.ts`?
+- Does `/places/[slug]` resolve for key published slugs? (Source of truth is Supabase `locations` table — not `data/places.ts`)
 - Does `/tours/[slug]` resolve for all slugs in `data/tours.ts`?
 
 ## Output format

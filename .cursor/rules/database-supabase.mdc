@@ -15,3 +15,12 @@ Database rules:
 - Avoid polymorphic complexity unless clearly justified.
 - When suggesting SQL, make it clean and runnable in Supabase.
 - When changing schema, always explain migration impact on existing CCC features.
+
+Table naming rules (enforced — do not deviate):
+- Spatial data table: `locations` (NOT `places`)
+- Multi-service venue table: `location_functions` (NOT `place_functions`)
+- Field: `layer` (NOT `map_layer`)
+- Field: `distance_meters` (NOT `distance_km`)
+- Field: `stop_narrative` (NOT `notes`)
+- Always resolve `town_id` and `category_id` by slug subquery — never hardcode UUIDs
+- Category slug lookups must always be scoped by `town_id` (slugs are not globally unique across towns)
