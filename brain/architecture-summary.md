@@ -1,7 +1,7 @@
 # Architecture Summary
 
 Source: extracted from MAIN_BRAIN.md
-Last updated: March 2026
+Last updated: April 2026
 
 ---
 
@@ -25,7 +25,8 @@ Civitas Layers is not a normal tourism website. It is a civic geo-narrative plat
 | Mapbox | Spatial engine |
 | Next.js | Real product layer |
 | Tailwind | Styling |
-| Webflow | Retired — all surfaces now on Next.js / Vercel |
+| Webflow | Retired — all surfaces on Next.js / Vercel |
+| CCC (Command Center) | Internal operating system — tasks, decisions, memory, agent briefs — built into the Next.js app at /command-center |
 
 ### Supabase project details
 
@@ -50,14 +51,8 @@ The Management API SQL query endpoint (`POST /v1/projects/{ref}/database/query`)
 
 ## Current Development Direction
 
-The long-term public experience should move toward Next.js for:
-- Homepage shell
-- Map
-- Place pages
-- Tour pages
-- Dashboard
-
-Webflow may still be used for selected editorial pages or temporary shell work, but should not remain the core product surface.
+All surfaces are on Next.js / Vercel. Webflow is retired.
+SQL and schema work is executed directly by Claude via Supabase MCP — no local CLI or Supabase dashboard required.
 
 ---
 
@@ -115,3 +110,15 @@ Before onboarding town #2, the system should evolve toward:
 - Town-aware dashboard logic
 
 Do not perform a giant refactor now. Finish Barbizon MVP first.
+
+---
+
+## Field Naming Rules (enforced)
+
+| Use | Not |
+|---|---|
+| `layer` | `map_layer` |
+| `distance_meters` | `distance_km` |
+| `stop_narrative` | `notes` |
+| `locations` | `places` |
+| `location_functions` | `place_functions` |

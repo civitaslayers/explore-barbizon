@@ -1,6 +1,6 @@
 # Civitas Layers — Main Brain
 
-Last updated: 2026-03-27
+Last updated: 2026-04-06
 
 ## Purpose
 
@@ -135,12 +135,7 @@ Not recommendations. Not editorial picks.
 Keep:
 - Supabase as source of truth
 - Mapbox as spatial engine
-- Next.js as product layer
-- Webflow only as editorial or temporary shell
-
-Long-term direction:
-- Next.js should carry the real product experience
-- Webflow should not remain the core application surface
+- Next.js as product layer (all surfaces — Webflow retired)
 
 ---
 
@@ -159,6 +154,8 @@ Field rules:
 - use `layer`, not `map_layer`
 - use `distance_meters`, not `distance_km`
 - use `stop_narrative`, not `notes`
+- use `locations`, not `places`
+- use `location_functions`, not `place_functions`
 
 The schema reference remains the authority for exact field names and constraints.
 
@@ -181,9 +178,9 @@ Icon clarity over decoration — one visual idea per icon, legible at 32px.
 
 ## Content state
 
-- ~79 published locations: Art & History (24), Practical (17), ESS (38)
-- Forest & Nature layer: not yet started
-- Narratives: mostly missing — writing phase has not begun
+- ~106 published locations across all four layers (Art & History, Practical, ESS, Forest & Nature)
+- Forest & Nature layer: seeded — Apremont cluster complete (climbing sectors, viewpoints, Chêne Sully, Caverne des Brigands)
+- Narratives: present on all Art & History locations; ESS and Forest & Nature mostly missing
 - Stories: zero published — this is the most visible content gap
 - First stories targets: Maison de Millet, Ferme du Couvent (historical); "Where to sleep", "Where to eat" (guides)
 
@@ -191,14 +188,15 @@ Icon clarity over decoration — one visual idea per icon, legible at 32px.
 
 ## Near-term product priorities
 
-1. Branding: swap all UI references to "Visit Barbizon"
-2. Places page: exclude Practical category
-3. Map: coordinate audit — many pins are incorrectly placed
-4. Map: sidebar UX redesign (hidden by default, drawer/bottom-sheet pattern)
-5. Map: icon redesign — subcategory-level icons, all categories
-6. Design: aesthetic review — more immersive, full-bleed, map-first
-7. Content: write first stories (historical + guide register)
-8. Stories: add `type` field to schema (`history` / `guide`)
+1. ✅ Branding: "Visit Barbizon" adopted in decisions
+2. ✅ Places page: Practical category excluded
+3. ✅ Map: coordinate audit complete (major corrections applied)
+4. Map: sidebar UX redesign still pending
+5. Map: icon redesign still pending
+6. ✅ Design: Stitch aesthetic review complete — design-direction.md updated
+7. Content: write first stories (historical + guide register) — still pending
+8. Stories: add `type` field to schema — still pending
+9. Data: continue location data entry — nos. 41–63 Grande Rue unreviewed
 
 ---
 

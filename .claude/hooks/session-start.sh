@@ -8,7 +8,7 @@ echo "╚═══════════════════════�
 echo ""
 
 echo "Read this first:"
-echo " 1. brain/session-start.md"
+echo " 1. CLAUDE.md (session start protocol)"
 echo ""
 
 echo "If the task touches SQL, Supabase, or schema fields, also read:"

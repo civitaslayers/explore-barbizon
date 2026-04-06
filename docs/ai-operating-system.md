@@ -1,6 +1,6 @@
 # Civitas Layers — AI Operating System
 
-Last updated: 2026-03-31
+Last updated: 2026-04-06
 
 This repository uses a structured AI-assisted development workflow.
 The goal is to run AI tools as a coordinated team, each doing only what it does best.
@@ -27,18 +27,17 @@ Claude does not implement code directly.
 
 ---
 
-## Claude Code (Cursor terminal) — Executor
+## Claude via Supabase MCP — SQL Executor
 
-Runs inside Cursor's terminal. Shares the same working directory.
+Claude (claude.ai) executes SQL directly against Supabase via the MCP connection.
+No Claude Code CLI or worktree is required.
 
 Responsibilities:
-- brain file updates (`/update-brain`)
-- commit and push sequences (`/ship-feature`)
-- typecheck and lint validation
-- shell commands and repo maintenance
+- SQL queries, inserts, updates, migrations
+- schema inspection and verification
+- live database state checks during sessions
 
-Claude Code operates on explicit prompts from Claude (claude.ai).
-It does not plan — it executes.
+All SQL is authored and executed by Claude directly. Luigi reviews results in the conversation.
 
 ---
 
@@ -142,11 +141,11 @@ For all historical and cultural content, sources must be evaluated in order of a
 5. Return to claude.ai to verify output and plan next step
 
 ## Code tasks
-claude.ai → Cursor prompt → Cursor implements → Claude Code validates + commits
+claude.ai → Cursor prompt → Cursor implements → Cursor commits
 
 ## Content tasks
 claude.ai → research direction → Perplexity/Grok research → claude.ai review
-→ fact-check against Tier 1 sources → SQL generation → Supabase SQL editor
+→ fact-check against Tier 1 sources → SQL generation → Claude executes via Supabase MCP
 
 ## Design tasks
 Stitch mockup → claude.ai design review against token system → Cursor prompt → implementation

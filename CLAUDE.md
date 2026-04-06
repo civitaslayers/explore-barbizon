@@ -1,6 +1,6 @@
 # Claude Code — Civitas Layers / ExploreBarbizon
 
-Last updated: 2026-03-28
+Last updated: 2026-04-06
 
 This repository uses a structured AI-assisted development workflow.
 
@@ -53,6 +53,10 @@ Read `docs/agent-tooling.md` if the task involves:
 - decomposing a large multi-step initiative (pilot Task Master)
 
 Avoid loading unnecessary documents.
+
+Read `docs/repo-map.md` for a structural overview of the codebase.
+
+Read `docs/design-direction.md` for visual principles, typography, and palette rules.
 
 ---
 
@@ -108,7 +112,7 @@ Claude handles:
 - architecture decisions and schema planning
 - smallest-safe-step implementation plans for Cursor
 - post-implementation review
-- SQL queries and migrations (run by Luigi in Supabase SQL editor)
+- SQL queries and migrations — executed directly via Supabase MCP connection
 - content narrative writing
 - brain file updates at end of session
 
@@ -152,6 +156,8 @@ These fields are locked conventions.
 | `layer` | `map_layer` |
 | `distance_meters` | `distance_km` |
 | `stop_narrative` | `notes` |
+| `locations` | `places` |
+| `location_functions` | `place_functions` |
 | `location_functions` | Multi-service venues only — one business, multiple services. Never for independent businesses sharing an address |
 | `Artist House` category | Historical Barbizon School painters' homes only (19th century) — use `Galerie d'Art` for living/contemporary artist studios |
 

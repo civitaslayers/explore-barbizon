@@ -34,6 +34,8 @@ Task tags:
 *Valid work, not yet prioritised.*
 
 *(no tasks)*
+- [frontend] Tighten getStaticProps select on /places and /plan-your-visit — 136 kB page data warning
+- [infra] Update middleware → proxy convention ahead of Next.js major upgrade
 
 ---
 
