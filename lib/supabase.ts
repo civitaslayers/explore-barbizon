@@ -135,7 +135,7 @@ export async function getMapPins(): Promise<MapPin[]> {
     longitude: row.longitude,
     category: (row.categories as any)?.name ?? "Point of Interest",
     allCategories: [(row.categories as any)?.name ?? "Point of Interest"],
-    placeSlug: null,
+    placeSlug: row.slug,
     routeSlug: row.route_slug ?? null,
   }));
 }
