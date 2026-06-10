@@ -3,7 +3,7 @@ import type { GetStaticProps, NextPage } from "next";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useEffect, useState, useMemo } from "react";
-import { getAllPlaces, type Place, type PlaceCategory } from "@/data/places";
+import type { Place, PlaceCategory } from "@/lib/types";
 import { getMapPins, getPublishedRoutes, type MapPin, type Route } from "@/lib/supabase";
 import {
   GROUP_NAMES,
@@ -58,6 +58,7 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
     "Art & History",
     "Eat & Stay",
     "Forest & Nature",
+    "Practical",
   ]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -76,7 +77,7 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
     const target = locations.find((l) => l.slug === focusSlug);
     if (!target) return;
     const groups = (target.allCategories ?? [target.category])
-      .map(getCategoryGroup)
+      .map((cat) => getCategoryGroup(cat))
       .filter((g, i, arr) => arr.indexOf(g) === i);
     setActiveGroups((prev) => {
       const missing = groups.filter((g) => !prev.includes(g));
@@ -93,7 +94,7 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
     const q = searchQuery.trim().toLowerCase();
     return locations.filter((l) => {
       const inGroup = (l.allCategories ?? [l.category]).some((cat) =>
-        activeGroups.includes(getCategoryGroup(cat))
+        activeGroups.includes(getCategoryGroup(cat as string))
       );
       if (!inGroup) return false;
       if (!q) return true;
@@ -235,23 +236,8 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
 };
 
 export const getStaticProps: GetStaticProps<MapPageProps> = async () => {
-  try {
-    const [pins, routes] = await Promise.all([getMapPins(), getPublishedRoutes()]);
-    return { props: { pins, routes }, revalidate: 60 };
-  } catch {
-    const fallbackPins: MapPin[] = getAllPlaces().map((p) => ({
-      slug: p.slug,
-      name: p.name,
-      shortDescription: p.shortDescription,
-      latitude: p.latitude,
-      longitude: p.longitude,
-      category: p.category,
-      allCategories: [p.category],
-      placeSlug: p.slug,
-      routeSlug: p.route_slug ?? null,
-    }));
-    return { props: { pins: fallbackPins, routes: [] }, revalidate: 60 };
-  }
+  const [pins, routes] = await Promise.all([getMapPins(), getPublishedRoutes()]);
+  return { props: { pins, routes }, revalidate: 60 };
 };
 
 export default MapPage;

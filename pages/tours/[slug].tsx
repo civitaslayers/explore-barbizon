@@ -8,39 +8,11 @@ import {
   type TourWithStops,
 } from "@/lib/supabase";
 import { hasMapbox } from "@/lib/mapbox";
-import { getAllTours, getTourBySlug, getPlacesForTour } from "@/data/tours";
 
-// Static fallback shape — matches what the page needs
-type StaticStop = {
-  stop_order: number;
-  stop_narrative: string | null;
-  locations: {
-    name: string;
-    slug: string;
-    short_description: string | null;
-    latitude?: number;
-    longitude?: number;
-  } | null;
+type TourPageProps = {
+  tour: TourWithStops;
+  routeCoords: [number, number][] | null;
 };
-
-type TourPageProps =
-  | {
-      source: "supabase";
-      tour: TourWithStops;
-      routeCoords: [number, number][] | null;
-    }
-  | {
-      source: "static";
-      tour: {
-        name: string;
-        slug: string;
-        description: string;
-        duration_minutes: number;
-        distance_meters: number | null;
-      };
-      stops: StaticStop[];
-      routeCoords: null;
-    };
 
 function formatDuration(minutes: number | null): string {
   if (!minutes) return "";
@@ -58,9 +30,8 @@ function formatDistance(meters: number | null): string {
     : `${meters} m`;
 }
 
-const TourPage: NextPage<TourPageProps> = (props) => {
-  const tour = props.tour;
-  const stops = props.source === "supabase" ? props.tour.stops : props.stops;
+const TourPage: NextPage<TourPageProps> = ({ tour, routeCoords }) => {
+  const stops = tour.stops;
 
   return (
     <>
@@ -115,9 +86,6 @@ const TourPage: NextPage<TourPageProps> = (props) => {
               (() => {
                 const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
                 if (!token) return null;
-
-                const routeCoords =
-                  props.source === "supabase" ? props.routeCoords : null;
 
                 if (routeCoords && routeCoords.length >= 2) {
                   const geojson = JSON.stringify({
@@ -289,19 +257,11 @@ const TourPage: NextPage<TourPageProps> = (props) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  try {
-    const slugs = await getPublishedTourSlugs();
-    return {
-      paths: slugs.map((slug) => ({ params: { slug } })),
-      fallback: "blocking",
-    };
-  } catch {
-    const tours = getAllTours();
-    return {
-      paths: tours.map((t) => ({ params: { slug: t.slug } })),
-      fallback: false,
-    };
-  }
+  const slugs = await getPublishedTourSlugs();
+  return {
+    paths: slugs.map((slug) => ({ params: { slug } })),
+    fallback: "blocking",
+  };
 };
 
 export const getStaticProps: GetStaticProps<TourPageProps> = async ({
@@ -310,47 +270,16 @@ export const getStaticProps: GetStaticProps<TourPageProps> = async ({
   const slug = params?.slug;
   if (typeof slug !== "string") return { notFound: true };
 
-  try {
-    const tour = await getTourBySlugFromSupabase(slug);
-    if (!tour) return { notFound: true };
-    const routeCoords = await getRouteByTourSlug(slug).catch(() => null);
-    return {
-      props: {
-        source: "supabase",
-        tour,
-        routeCoords: routeCoords ?? null,
-      },
-      revalidate: 60,
-    };
-  } catch {
-    const staticTour = getTourBySlug(slug);
-    if (!staticTour) return { notFound: true };
-    const places = getPlacesForTour(staticTour);
-    const stops: StaticStop[] = places.map((p, i) => ({
-      stop_order: i + 1,
-      stop_narrative: null,
-      locations: {
-        name: p.name,
-        slug: p.slug,
-        short_description: p.shortDescription ?? null,
-      },
-    }));
-    return {
-      props: {
-        source: "static",
-        tour: {
-          name: staticTour.title,
-          slug: staticTour.slug,
-          description: staticTour.summary,
-          duration_minutes: staticTour.durationHours * 60,
-          distance_meters: null,
-        },
-        stops,
-        routeCoords: null,
-      },
-      revalidate: 60,
-    };
-  }
+  const tour = await getTourBySlugFromSupabase(slug);
+  if (!tour) return { notFound: true };
+  const routeCoords = await getRouteByTourSlug(slug).catch(() => null);
+  return {
+    props: {
+      tour,
+      routeCoords: routeCoords ?? null,
+    },
+    revalidate: 60,
+  };
 };
 
 export default TourPage;

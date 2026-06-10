@@ -1,8 +1,8 @@
 import Head from "next/head";
 import Link from "next/link";
 import type { GetStaticProps, NextPage } from "next";
-import { getAllPlaces, type Place } from "@/data/places";
-import { getPublishedLocations } from "@/lib/supabase";
+import ImagePlaceholder from "@/components/ImagePlaceholder";
+import { getLocationCards, type LocationCard } from "@/lib/supabase";
 
 /** Prefer these slugs when present in published data (matches legacy static atlas). */
 const PREFERRED_FEATURED_SLUGS = [
@@ -16,18 +16,13 @@ type FeaturedPlaceCard = {
   slug: string;
   name: string;
   description: string;
-  image: string;
+  image: string | null;
   category: string;
 };
 
-function heroImageForSlug(slug: string): string {
-  const p = getAllPlaces().find((x) => x.slug === slug);
-  return p?.heroImage ?? "/images/places/place-default.jpg";
-}
-
-function buildFeaturedPlaces(places: Place[]): FeaturedPlaceCard[] {
+function buildFeaturedPlaces(places: LocationCard[]): FeaturedPlaceCard[] {
   const bySlug = new Map(places.map((p) => [p.slug, p]));
-  const picked: Place[] = [];
+  const picked: LocationCard[] = [];
   for (const slug of PREFERRED_FEATURED_SLUGS) {
     const p = bySlug.get(slug);
     if (p) picked.push(p);
@@ -40,8 +35,8 @@ function buildFeaturedPlaces(places: Place[]): FeaturedPlaceCard[] {
     slug: p.slug,
     name: p.name,
     description: p.shortDescription,
-    image: heroImageForSlug(p.slug),
-    category: p.category
+    image: p.heroImage,
+    category: p.category,
   }));
 }
 
@@ -215,10 +210,17 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
                 href={`/places/${place.slug}`}
                 className="group relative block aspect-[3/4] overflow-hidden rounded-2xl"
               >
-                <div
-                  className="absolute inset-0 bg-ink/40 bg-cover bg-center transition-transform duration-700 ease-soft group-hover:scale-105"
-                  style={{ backgroundImage: `url(${place.image})` }}
-                />
+                {place.image ? (
+                  <div
+                    className="absolute inset-0 bg-ink/40 bg-cover bg-center transition-transform duration-700 ease-soft group-hover:scale-105"
+                    style={{ backgroundImage: `url(${place.image})` }}
+                  />
+                ) : (
+                  <ImagePlaceholder
+                    name={place.name}
+                    className="absolute inset-0 transition-transform duration-700 ease-soft group-hover:scale-105"
+                  />
+                )}
 
                 <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/20 to-transparent" />
 
@@ -320,19 +322,11 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
 };
 
 export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
-  try {
-    const places = await getPublishedLocations();
-    return {
-      props: { featuredPlaces: buildFeaturedPlaces(places) },
-      revalidate: 60
-    };
-  } catch {
-    const places = getAllPlaces();
-    return {
-      props: { featuredPlaces: buildFeaturedPlaces(places) },
-      revalidate: 60
-    };
-  }
+  const places = await getLocationCards();
+  return {
+    props: { featuredPlaces: buildFeaturedPlaces(places) },
+    revalidate: 60,
+  };
 };
 
 export default HomePage;

@@ -1,13 +1,13 @@
 import Head from "next/head";
 import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
-import { getPublishedTours, getPublishedLocations } from "@/lib/supabase";
-import { getAllPlaces, type Place } from "@/data/places";
-import { getAllTours, type Tour } from "@/data/tours";
+import { getLocationCards, getPublishedTours } from "@/lib/supabase";
+import type { LocationCard } from "@/lib/supabase";
+import type { TourListItem } from "@/lib/types";
 
 type PlanPageProps = {
-  places: Place[];
-  tours: Tour[];
+  places: LocationCard[];
+  tours: TourListItem[];
 };
 
 const PlanYourVisitPage: NextPage<PlanPageProps> = ({ places, tours }) => {
@@ -97,23 +97,18 @@ const PlanYourVisitPage: NextPage<PlanPageProps> = ({ places, tours }) => {
 };
 
 export const getStaticProps: GetStaticProps<PlanPageProps> = async () => {
-  try {
-    const toursData = await getPublishedTours();
-    const tours = toursData.map((t) => ({
-      slug: t.slug,
-      title: t.name,
-      summary: t.description ?? "",
-      durationHours: Math.round((t.duration_minutes ?? 120) / 60),
-      stops: t.stops.map((s) => s.location_id),
-    }));
-    const places = await getPublishedLocations();
-    return { props: { places, tours }, revalidate: 60 };
-  } catch {
-    return {
-      props: { places: getAllPlaces(), tours: getAllTours() },
-      revalidate: 60,
-    };
-  }
+  const [toursData, places] = await Promise.all([
+    getPublishedTours(),
+    getLocationCards(),
+  ]);
+  const tours = toursData.map((t) => ({
+    slug: t.slug,
+    title: t.name,
+    summary: t.description ?? "",
+    durationHours: Math.round((t.duration_minutes ?? 120) / 60),
+    stops: t.stops.map((s) => s.location_id),
+  }));
+  return { props: { places, tours }, revalidate: 60 };
 };
 
 export default PlanYourVisitPage;

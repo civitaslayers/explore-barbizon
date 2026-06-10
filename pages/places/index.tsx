@@ -2,8 +2,9 @@ import Head from "next/head";
 import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 import { useState, useMemo } from "react";
-import { getAllPlaces, type Place } from "@/data/places";
+import ImagePlaceholder from "@/components/ImagePlaceholder";
 import { getPublishedLocations, supabase } from "@/lib/supabase";
+import type { Place } from "@/lib/types";
 import { staticMapUrl, hasMapbox } from "@/lib/mapbox";
 
 type CuratedRow = {
@@ -145,7 +146,7 @@ function CuratedSection({
             href={`/places/${place.slug}`}
             className="flex w-[72vw] max-w-[20rem] flex-shrink-0 snap-start flex-col overflow-hidden rounded-xl border border-outline-variant/40 bg-surface transition-colors hover:border-ink/25 md:w-auto md:max-w-none"
           >
-            <div className="relative aspect-[16/10] bg-ink/8">
+            <div className="relative aspect-[16/10]">
               {place.heroImage ? (
                 <img
                   src={place.heroImage}
@@ -153,7 +154,9 @@ function CuratedSection({
                   className="h-full w-full object-cover"
                   loading="lazy"
                 />
-              ) : null}
+              ) : (
+                <ImagePlaceholder name={place.name} className="h-full w-full" />
+              )}
             </div>
             <div className="flex flex-1 flex-col p-4">
               <div className="flex items-start justify-between gap-2">
@@ -285,33 +288,22 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({
 };
 
 export const getStaticProps: GetStaticProps<PlacesIndexProps> = async () => {
-  try {
-    const places = await getPublishedLocations();
-    let whereToEat: CuratedPlace[] = [];
-    let whereToStay: CuratedPlace[] = [];
-    if (supabase) {
-      try {
-        const curated = await getFeaturedEatStayCurated();
-        whereToEat = curated.whereToEat;
-        whereToStay = curated.whereToStay;
-      } catch {
-        // Curated sections stay empty if query fails (e.g. column not deployed yet).
-      }
+  const places = await getPublishedLocations();
+  let whereToEat: CuratedPlace[] = [];
+  let whereToStay: CuratedPlace[] = [];
+  if (supabase) {
+    try {
+      const curated = await getFeaturedEatStayCurated();
+      whereToEat = curated.whereToEat;
+      whereToStay = curated.whereToStay;
+    } catch {
+      // Curated sections stay empty if query fails (e.g. column not deployed yet).
     }
-    return {
-      props: { places, whereToEat, whereToStay },
-      revalidate: 60,
-    };
-  } catch {
-    return {
-      props: {
-        places: getAllPlaces(),
-        whereToEat: [],
-        whereToStay: [],
-      },
-      revalidate: 60,
-    };
   }
+  return {
+    props: { places, whereToEat, whereToStay },
+    revalidate: 60,
+  };
 };
 
 export default PlacesIndexPage;

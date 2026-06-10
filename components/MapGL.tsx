@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import type { Place } from "@/data/places";
+import type { Place } from "@/lib/types";
 import type { Route } from "@/lib/supabase";
 import { getCategoryGroup, GROUP_COLORS } from "@/lib/categoryGroups";
 

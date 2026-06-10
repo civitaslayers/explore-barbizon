@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./supabase.types";
-import type { Place, PlaceCategory } from "@/data/places";
+import type { Place, PlaceCategory } from "@/lib/types";
 
 // ---------------------------------------------------------------------------
 // Client
@@ -11,8 +11,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 /**
  * Supabase client. Null when env vars are not configured.
- * All helper functions below check for null and throw — callers are expected
- * to catch and fall back to static data from data/places.ts.
+ * All helper functions below check for null and throw on failure.
  */
 export const supabase =
   supabaseUrl && supabaseAnonKey
@@ -51,7 +50,22 @@ export type DbLocation = {
   media?: { url: string; display_order: number }[] | null;
 };
 
-/** Shape returned by the joined query (locations + categories.name). */
+/** Shape returned by getPublishedLocations (explicit public fields + joins). */
+type PublishedLocationRow = {
+  slug: string;
+  name: string;
+  short_description: string | null;
+  full_description: string | null;
+  narrative: string | null;
+  latitude: number;
+  longitude: number;
+  address: string | null;
+  route_slug?: string | null;
+  categories: { name: string } | null;
+  media?: { url: string; display_order: number }[] | null;
+};
+
+/** Shape returned by getLocationBySlug. */
 type LocationRow = DbLocation & {
   categories: { name: string } | null;
 };
@@ -61,7 +75,7 @@ type LocationRow = DbLocation & {
 // Maps DB snake_case fields to the app-level Place type.
 // ---------------------------------------------------------------------------
 
-function toPlace(row: LocationRow): Place {
+function toPlace(row: PublishedLocationRow | LocationRow): Place {
   return {
     slug: row.slug,
     name: row.name,
@@ -89,19 +103,69 @@ function toPlace(row: LocationRow): Place {
  * Fetch all published locations (all categories). Used for the map.
  * Throws if Supabase is not configured or the query fails.
  */
-export async function getPublishedLocations(): Promise<Place[]> {
+type LocationCardRow = {
+  slug: string;
+  name: string;
+  short_description: string | null;
+  categories: { name: string; layer: string } | null;
+  media: { url: string; display_order: number }[] | null;
+};
+
+export type LocationCard = {
+  slug: string;
+  name: string;
+  shortDescription: string;
+  category: string;
+  heroImage: string | null;
+};
+
+function toLocationCard(row: LocationCardRow): LocationCard {
+  return {
+    slug: row.slug,
+    name: row.name,
+    shortDescription: row.short_description ?? "",
+    category: row.categories?.name ?? "Point of Interest",
+    heroImage:
+      (row.media ?? []).sort((a, b) => a.display_order - b.display_order)[0]
+        ?.url ?? null,
+  };
+}
+
+/**
+ * Lightweight location list for card grids and link lists (no internal fields).
+ */
+export async function getLocationCards(): Promise<LocationCard[]> {
   if (!supabase) throw new Error("Supabase not configured");
 
   const { data, error } = await supabase
     .from("locations")
-    .select("*, categories!inner(name, layer), media(url, display_order)")
+    .select(
+      "slug, name, short_description, categories!inner(name, layer), media(url, display_order)"
+    )
     .eq("is_published", true)
     .neq("categories.layer", "Practical")
     .order("name");
 
   if (error) throw new Error(error.message);
   if (!data || data.length === 0) throw new Error("No published locations");
-  return (data as LocationRow[]).map(toPlace);
+  return (data as LocationCardRow[]).map(toLocationCard);
+}
+
+export async function getPublishedLocations(): Promise<Place[]> {
+  if (!supabase) throw new Error("Supabase not configured");
+
+  const { data, error } = await supabase
+    .from("locations")
+    .select(
+      "id, name, slug, short_description, full_description, narrative, latitude, longitude, address, phone, website, opening_hours, route_slug, is_premium, is_featured, curation_order, categories!inner(name, layer), media(url, display_order)"
+    )
+    .eq("is_published", true)
+    .neq("categories.layer", "Practical")
+    .order("name");
+
+  if (error) throw new Error(error.message);
+  if (!data || data.length === 0) throw new Error("No published locations");
+  return (data as PublishedLocationRow[]).map(toPlace);
 }
 
 export type MapPin = {
@@ -122,8 +186,7 @@ export async function getMapPins(): Promise<MapPin[]> {
   const { data: locsData, error: locsError } = await supabase
     .from("locations")
     .select("slug, name, short_description, latitude, longitude, route_slug, categories!inner(name, layer)")
-    .eq("is_published", true)
-    .neq("categories.layer", "Practical");
+    .eq("is_published", true);
 
   if (locsError) throw new Error(locsError.message);
 

@@ -3,7 +3,8 @@ import Image from "next/image";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { getAllPlaces, type Place } from "@/data/places";
+import ImagePlaceholder from "@/components/ImagePlaceholder";
+import type { Place } from "@/lib/types";
 import {
   getLocationFull,
   getPublishedLocationSlugs,
@@ -84,10 +85,7 @@ function UnifiedPlaceArticle({ place }: { place: LocationFull }) {
               className="object-cover object-center opacity-[0.78]"
             />
           ) : (
-            <div
-              className="absolute inset-0 bg-gradient-to-br from-ink via-ink/90 to-ink/70"
-              aria-hidden
-            />
+            <ImagePlaceholder name={place.name} className="absolute inset-0" />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-ink/75 to-ink/25">
             <div className="fade-in-hero relative z-10 flex h-full flex-col justify-end p-6 md:p-9 lg:p-11 xl:p-14">
@@ -236,9 +234,6 @@ function LegacyLocationPlaceArticle({
   relatedPlaces,
   nearbyPlaces,
 }: LegacyProps) {
-  const heroImage =
-    place.heroImage ?? "/images/places/place-default.jpg";
-
   return (
     <article className="space-y-14 md:space-y-20 lg:space-y-24 xl:space-y-28">
       <p className="font-sans text-[10px] uppercase tracking-[0.25em] text-ink/40">
@@ -253,14 +248,18 @@ function LegacyLocationPlaceArticle({
       {/* Hero: atlas plate, calm framing */}
       <header className="overflow-hidden rounded-2xl border border-ink/10 bg-ink shadow-card md:rounded-[1.75rem]">
         <div className="relative h-[17rem] sm:h-72 md:h-[22rem] lg:h-[26rem] xl:h-[30rem]">
-          <Image
-            src={heroImage}
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-center opacity-[0.78]"
-          />
+          {place.heroImage ? (
+            <Image
+              src={place.heroImage}
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover object-center opacity-[0.78]"
+            />
+          ) : (
+            <ImagePlaceholder name={place.name} className="absolute inset-0" />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/60 to-ink/30">
             <div className="fade-in-hero relative z-10 flex h-full flex-col justify-end p-6 md:p-9 lg:p-11 xl:p-14">
               <div className="max-w-3xl space-y-4 text-cream xl:max-w-[40rem]">
@@ -504,13 +503,15 @@ const PlacePage: NextPage<PlacePageProps> = (props) => {
   }
 
   const { location: place, relatedPlaces, nearbyPlaces } = props;
-  const heroImage =
-    place.heroImage ?? "/images/places/place-default.jpg";
 
   const siteBase = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "";
   const pageTitle = `${place.name} — Visit Barbizon`;
   const metaDescription = place.shortDescription;
-  const ogImageUrl = openGraphImageUrl(place, heroImage, hasMapbox, siteBase);
+  const ogImageUrl = place.heroImage
+    ? openGraphImageUrl(place, place.heroImage, hasMapbox, siteBase)
+    : hasMapbox
+      ? staticMapUrl(place.longitude, place.latitude, 1200, 630, 15)
+      : "";
   const ogUrl = siteBase ? `${siteBase}/places/${place.slug}` : "";
 
   return (
@@ -534,14 +535,9 @@ const PlacePage: NextPage<PlacePageProps> = (props) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  try {
-    const slugs = await getPublishedLocationSlugs();
-    const paths = slugs.map((slug) => ({ params: { slug } }));
-    return { paths, fallback: "blocking" };
-  } catch {
-    const paths = getAllPlaces().map((p) => ({ params: { slug: p.slug } }));
-    return { paths, fallback: false };
-  }
+  const slugs = await getPublishedLocationSlugs();
+  const paths = slugs.map((slug) => ({ params: { slug } }));
+  return { paths, fallback: "blocking" };
 };
 
 export const getStaticProps: GetStaticProps<PlacePageProps> = async ({
@@ -552,40 +548,15 @@ export const getStaticProps: GetStaticProps<PlacePageProps> = async ({
     return { notFound: true };
   }
 
-  try {
-    const placeRecord = await getLocationFull(slug);
-    if (placeRecord) {
-      return {
-        props: { source: "place" as const, place: placeRecord },
-        revalidate: 60,
-      };
-    }
+  const placeRecord = await getLocationFull(slug);
+  if (!placeRecord) {
     return { notFound: true };
-  } catch {
-    const allPlaces = getAllPlaces();
-    const place = allPlaces.find((p) => p.slug === slug);
-
-    if (!place) return { notFound: true };
-
-    const relatedPlaces = allPlaces
-      .filter((p) => p.slug !== slug && p.category === place.category)
-      .slice(0, 3);
-
-    const nearbyPlaces = allPlaces
-      .filter((p) => p.slug !== slug && p.category !== place.category)
-      .sort((a, b) => haversineKm(place, a) - haversineKm(place, b))
-      .slice(0, 3);
-
-    return {
-      props: {
-        source: "location" as const,
-        location: place,
-        relatedPlaces,
-        nearbyPlaces,
-      },
-      revalidate: 60,
-    };
   }
+
+  return {
+    props: { source: "place" as const, place: placeRecord },
+    revalidate: 60,
+  };
 };
 
 export default PlacePage;
