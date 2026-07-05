@@ -36,4 +36,15 @@ if printf '%s' "$blob" | grep -Eiq '(INSERT|UPDATE)' \
   exit 2
 fi
 
+# 3. Destructive SQL — human only. DROP TABLE, TRUNCATE, or DELETE FROM without a WHERE clause.
+if printf '%s' "$blob" | grep -Eiq '\bDROP[[:space:]]+TABLE\b|\bTRUNCATE\b'; then
+  echo "BLOCKED: destructive statement on production requires human execution." >&2
+  exit 2
+fi
+if printf '%s' "$blob" | grep -Eiq '\bDELETE[[:space:]]+FROM\b' \
+   && ! printf '%s' "$blob" | grep -Eiq '\bDELETE[[:space:]]+FROM\b[^;]*\bWHERE\b'; then
+  echo "BLOCKED: destructive statement on production requires human execution." >&2
+  exit 2
+fi
+
 exit 0

@@ -48,7 +48,7 @@
         ]
       },
       {
-        "matcher": "mcp__supabase__merge_branch|mcp__supabase__execute_sql|mcp__supabase__apply_migration",
+        "matcher": "mcp__.*__(merge_branch|execute_sql|apply_migration)",
         "hooks": [
           {
             "type": "command",
