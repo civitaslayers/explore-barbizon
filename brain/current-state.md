@@ -29,6 +29,7 @@ Agent loop operational; first /run-loop completed (lint clean); gates verified o
 - [frontend] 8 lint errors fixed via first loop run
 - [infra] eslint ignores for .next and worktrees
 - [infra] free-tier gate adaptation in content-ops
+- [data] DB hygiene migration executed in production via Supabase MCP — pin_function_search_paths, add_covering_indexes_for_fks, drop_media_purged_backup_table; advisors verified clean
 
 ---
 
@@ -41,12 +42,11 @@ Agent loop operational; first /run-loop completed (lint clean); gates verified o
 
 ## Next Tasks
 
-1. DB hygiene migration (search_path pins, FK indexes, drop media_purged_20260610 after export)
-2. Photo sprint batch 1 with hours/website/address collection
-3. Field-verify Barjole/Roz duplicate coordinates
+1. Photo sprint batch 1 with hours/website/address collection
+2. Field-verify Barjole/Roz duplicate coordinates
 
 ---
 
 ## Next Session Starting Point
 
-Run the DB hygiene migration through /run-loop: pin search_path on set_updated_at and check_location_proximity, add covering indexes for the 8 unindexed FKs, export media_purged_20260610 to a JSON file in scripts/exports/ then stop for human approval of the DROP.
+Photo sprint batch 1 prep — regenerate the field checklist from live data and confirm the walking batches.
