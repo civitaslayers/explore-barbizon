@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, type ReactNode } from "react";
+import Link from "next/link";
 
 type TimelineTag = "art" | "forest" | "village" | "legacy";
 
@@ -29,12 +30,12 @@ const events: TimelineEvent[] = [
         Fontainebleau region. The village of Barbizon, with its simple inn and
         proximity to the forest edge, proved a practical base. The practice of
         painting directly outdoors — en plein air — began in earnest.{" "}
-        <a
+        <Link
           href="/stories/how-the-forest-became-a-picture"
           className="underline underline-offset-4 hover:text-ink transition-colors"
         >
           Read the essay →
-        </a>
+        </Link>
       </>
     )
   },
@@ -47,13 +48,13 @@ const events: TimelineEvent[] = [
         François Ganne, a Barbizon grocer, began accepting paintings as payment
         for room and board. The Auberge Ganne became the social centre of what
         would become the Barbizon School — a loose community of artists sharing
-        meals, arguments, and sketches on the inn's walls.{" "}
-        <a
+        meals, arguments, and sketches on the inn&apos;s walls.{" "}
+        <Link
           href="/stories/inn-paintings-dinner"
           className="underline underline-offset-4 hover:text-ink transition-colors"
         >
           Read the essay →
-        </a>
+        </Link>
       </>
     )
   },
@@ -79,19 +80,19 @@ const events: TimelineEvent[] = [
         Millet arrived after the cholera epidemic in Paris. His house on the
         Grande Rue became his studio for the rest of his life. Here he produced
         The Gleaners, The Angelus, and The Sower.{" "}
-        <a
+        <Link
           href="/stories/rooms-of-light"
           className="underline underline-offset-4 hover:text-ink transition-colors"
         >
           Read the essay →
-        </a>
+        </Link>
         {" "}
-        <a
+        <Link
           href="/stories/the-gleaners"
           className="underline underline-offset-4 hover:text-ink transition-colors"
         >
           And the fields he painted →
-        </a>
+        </Link>
       </>
     )
   },
@@ -105,12 +106,12 @@ const events: TimelineEvent[] = [
         hand-carved hundreds of kilometres of marked trails. His guidebooks
         mapped the forest for visitors and artists alike. Many of today&apos;s
         walking routes still follow his original paths.{" "}
-        <a
+        <Link
           href="/stories/paths-to-the-forest"
           className="underline underline-offset-4 hover:text-ink transition-colors"
         >
           Read the essay →
-        </a>
+        </Link>
       </>
     )
   },
@@ -125,12 +126,12 @@ const events: TimelineEvent[] = [
         13 August 1861 — the first land anywhere to be protected by law. The
         argument was made in aesthetic terms: the landscape had value because
         artists had taught people to see it.{" "}
-        <a
+        <Link
           href="/stories/paths-to-the-forest"
           className="underline underline-offset-4 hover:text-ink transition-colors"
         >
           Read the essay →
-        </a>
+        </Link>
       </>
     )
   },

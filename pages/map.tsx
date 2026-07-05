@@ -62,6 +62,9 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
   ]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [prevFocusSlug, setPrevFocusSlug] = useState<string | undefined>(
+    undefined
+  );
 
   useEffect(() => {
     if (!sidebarOpen) return;
@@ -72,18 +75,21 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [sidebarOpen]);
 
-  useEffect(() => {
-    if (!focusSlug || !router.isReady) return;
-    const target = locations.find((l) => l.slug === focusSlug);
-    if (!target) return;
-    const groups = (target.allCategories ?? [target.category])
-      .map((cat) => getCategoryGroup(cat))
-      .filter((g, i, arr) => arr.indexOf(g) === i);
-    setActiveGroups((prev) => {
-      const missing = groups.filter((g) => !prev.includes(g));
-      return missing.length ? [...prev, ...missing] : prev;
-    });
-  }, [focusSlug, router.isReady, locations]);
+  if (router.isReady && focusSlug !== prevFocusSlug) {
+    setPrevFocusSlug(focusSlug);
+    if (focusSlug) {
+      const target = locations.find((l) => l.slug === focusSlug);
+      if (target) {
+        const groups = (target.allCategories ?? [target.category])
+          .map((cat) => getCategoryGroup(cat))
+          .filter((g, i, arr) => arr.indexOf(g) === i);
+        setActiveGroups((prev) => {
+          const missing = groups.filter((g) => !prev.includes(g));
+          return missing.length ? [...prev, ...missing] : prev;
+        });
+      }
+    }
+  }
 
   const toggleGroup = (group: GroupName) =>
     setActiveGroups((prev) =>
