@@ -1,10 +1,10 @@
 # Current State
 
-Last updated: 2026-04-06
+Last updated: 2026-07-05
 
 ## Status
 
-Full project file audit complete — docs, brain files, Cursor rules, and agent files updated; atelier-rouge placeholder removed; Supabase memory rows corrected.
+Agent loop operational; first /run-loop completed (lint clean); gates verified on free-tier Supabase (no branching — guard-hook mode).
 
 ---
 
@@ -25,22 +25,25 @@ Full project file audit complete — docs, brain files, Cursor rules, and agent 
 - [ai-ops] .claude/hooks/session-start.sh — stale session-start.md reference fixed
 - [map] GeolocateControl added to MapGL.tsx — real-time GPS dot with heading cone
 - [schema] places + place_functions tables dropped — all data migrated to locations + location_functions
+- [ai-ops] agent loop installed with tools: allowlists, /run-loop, prod-write-guard (hardened matcher), project-scoped Supabase MCP
+- [frontend] 8 lint errors fixed via first loop run
+- [infra] eslint ignores for .next and worktrees
+- [infra] free-tier gate adaptation in content-ops
 
 ---
 
 ## Blockers
 
 - Hero video full edit pending — current clip is placeholder; migrate to Cloudflare Stream when ready
+- Supabase branching unavailable on free tier
 
 ---
 
 ## Next Tasks
 
-1. Continue location data entry — nos. 41–63 Grande Rue still unreviewed
-2. Verify coordinates for four trail pins (Futaie du Bas-Breau, Parcours FB, Sentier bleu no.6, Sentier des Peintres)
-3. Wire artists grid — design artists + artist_locations tables, seed initial artist records
-4. Expand /about to absorb practical visitor content (getting here, seasons, accessibility)
-5. Tighten getStaticProps select on /places and /plan-your-visit (136 kB page data warning)
+1. DB hygiene migration (search_path pins, FK indexes, drop media_purged_20260610 after export)
+2. Photo sprint batch 1 with hours/website/address collection
+3. Field-verify Barjole/Roz duplicate coordinates
 
 ---
 
