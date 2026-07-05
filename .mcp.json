@@ -1,5 +1,9 @@
 {
   "mcpServers": {
+    "supabase": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=afqyrxtfbspghpfulvmy&features=database%2Cdocs%2Cdebugging%2Cbranching"
+    },
     "context7": {
       "command": "npx",
       "args": ["-y", "@upstash/context7"]

@@ -46,7 +46,17 @@
             "command": "bash .claude/hooks/pre-commit-check.sh"
           }
         ]
+      },
+      {
+        "matcher": "mcp__supabase__merge_branch|mcp__supabase__execute_sql|mcp__supabase__apply_migration",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/prod-write-guard.sh"
+          }
+        ]
       }
     ]
-  }
+  },
+  "enableAllProjectMcpServers": true
 }

@@ -1,6 +1,8 @@
 ---
 name: civitas-release-checker
-description: Pre-release validation for Civitas Layers / ExploreBarbizon. Use this agent before any deploy, merge, or handoff to verify the codebase is consistent, the brain files are current, and the implementation matches the documented design direction.
+description: Pre-release validation for Civitas Layers / ExploreBarbizon. Use this agent before any deploy, merge, or handoff to verify the codebase is consistent, the brain files are current, and the implementation matches the documented design direction. In the autonomous loop, runs LAST — its verdict gates the human review.
+tools: Read, Glob, Grep, Bash
+model: sonnet
 ---
 
 # Civitas Release Checker
@@ -51,6 +53,11 @@ Search the codebase for any use of forbidden field names:
 - `distance_km` (should be `distance_meters`)
 - `notes` used in place of `stop_narrative`
 
+Also flag the silent-failure class:
+- any `select("*")` (explicit field selects required)
+- any single-record `UPDATE ... WHERE slug =` in scripts without a follow-up verification SELECT
+- any `try/catch` that serves stale or placeholder data instead of failing loudly
+
 ### 7. Secret hygiene
 - Is `.env.local` gitignored?
 - Is `.claude/settings.local.json` gitignored?
@@ -81,6 +88,6 @@ Then list all failures and warnings with file paths and line numbers where appli
 
 ## Do not
 
-- Do not make code changes — report only
-- Do not commit anything
-- Do not update brain files — the implementer does that
+- Do not make code changes — report only. (You retain Bash solely to run tsc / lint / build; do not use it to edit, commit, or push.)
+- Do not commit or push anything.
+- Do not update brain files — the architect/lead owns brain maintenance.

@@ -26,6 +26,10 @@ When you receive a task brief from Claude:
 - Do not expand scope without checking
 - Stop after your assigned step — do not proceed to the next step autonomously
 
+> Scope: this step-wise rule governs **Cursor** sessions for hands-on UI work.
+> Autonomous multi-step execution now runs in Claude Code via `/run-loop`
+> (see CLAUDE.md → Autonomous Loop), not here.
+
 Protected files — never touch unless the task explicitly names them:
 - `pages/_document.tsx` — global HTML shell; removing <Head /> breaks CSS for the entire app
 - `pages/_app.tsx` — global app wrapper; changes affect every route, not just the page in scope

@@ -1,6 +1,8 @@
 ---
 name: civitas-architect
-description: Architecture, schema evolution, system design, and map model decisions for Civitas Layers / ExploreBarbizon. Use this agent when making decisions about data structure, schema migrations, product model, layer design, or any choice that affects multiple parts of the system.
+description: Architecture, schema evolution, system design, and map model decisions for Civitas Layers / ExploreBarbizon. Use this agent when making decisions about data structure, schema migrations, product model, layer design, or any choice that affects multiple parts of the system. In the autonomous loop, runs FIRST — produces the plan the other agents execute.
+tools: Read, Glob, Grep, Write, Edit
+model: opus
 ---
 
 # Civitas Architect

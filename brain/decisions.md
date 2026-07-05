@@ -1,3 +1,19 @@
+## 2026-07-05
+**Decision:** Register the Supabase MCP server project-scoped in `.mcp.json` (hosted remote `mcp.supabase.com`, `project_ref=afqyrxtfbspghpfulvmy`, features: database, docs, debugging, branching; OAuth auth — no token committed). Server name `supabase` → tools resolve as `mcp__supabase__*`, matching the agent allowlists and prod-write-guard matcher.
+**Reason:** The agent loop's data track depends on agents having Supabase tools at project scope; user-level registration doesn't travel with the repo. The legacy npx stdio setup silently discovers zero tools and is banned. Feature scoping excludes account/functions/storage (least privilege). merge_branch stays withheld at the agent-allowlist level + blocked by the guard hook.
+**Consequence:** `.mcp.json` gains the `supabase` server. `settings.json` gains `enableAllProjectMcpServers: true`. First session must validate via `/mcp` + a `list_tables` smoke test. Branching requires a paid Supabase plan — confirm before relying on the dev-branch sandbox.
+**Migration risk:** none
+
+---
+
+## 2026-06-24
+**Decision:** Move the implementation loop into Claude Code autonomous subagents. The lead session runs civitas-architect (plan) → civitas-implementer (code) or civitas-content-ops (dev-branch SQL) → civitas-release-checker (review) → STOP at a human gate, via /run-loop. This supersedes the Cursor-led, stop-after-each-step model for Claude Code tasks.
+**Reason:** Hand-stepping every change through Cursor is slow; the agents can plan, execute, and review autonomously. The risk (hallucinated facts, silent zero-row UPDATEs, premature publishing) is contained by gating only the irreversible surface, enforced structurally rather than by prompt wording.
+**Consequence:** All four agents gained `tools:` allowlists (the gate). civitas-implementer is now Claude-Code-invoked, runs to completion, has no DB tools. civitas-content-ops works on a Supabase dev branch only — no `merge_branch`, never sets `is_published = true`. civitas-release-checker is read-mostly (Bash only for tsc/lint/build). Added `/run-loop` command and `prod-write-guard.sh` PreToolUse hook (blocks prod merge + publish). CLAUDE.md documents the loop; `.cursor/rules/working-style.mdc` scoped to Cursor sessions. Autonomous: code, commits, dev-branch SQL. Human-gated: prod merge, publishing, prod deploy.
+**Migration risk:** none
+
+---
+
 ## 2026-04-06
 **Decision:** R2 media bucket uses locations/{slug}/ prefix, not places/.
 **Reason:** The app queries the locations table exclusively. The old places/ folder was a legacy artefact from the dual-table migration period. Bucket structure should mirror the live DB schema.
