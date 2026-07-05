@@ -12,6 +12,24 @@ GPT and Grok are available as supplementary reviewers and researchers.
 
 ---
 
+# Autonomous Loop (Claude Code)
+
+For tasks run in Claude Code, implementation is no longer hand-stepped through Cursor.
+The lead session runs an autonomous loop via `/run-loop`:
+
+**civitas-architect** (plan) → **civitas-implementer** (code) or **civitas-content-ops**
+(SQL on a dev branch) → **civitas-release-checker** (review) → **STOP at the human gate**.
+
+Autonomous: code, commits, and dev-branch SQL.
+Gated (human only): merging a Supabase branch to production, publishing content
+(`is_published = true`), and production deploys.
+
+The gate is structural — enforced by each agent's `tools:` allowlist and the
+`prod-write-guard.sh` hook, not by prompt wording. Cursor remains available for
+hands-on, step-wise UI work; its `.cursor/rules` govern that mode, not the loop.
+
+---
+
 # Session Start Protocol
 
 At the beginning of each session, follow the session start hook.
