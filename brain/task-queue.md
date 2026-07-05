@@ -1,6 +1,6 @@
 # Task Queue
 
-Last updated: 2026-04-06
+Last updated: 2026-07-05
 
 Tasks are ordered by priority within each section.
 Move tasks between sections as status changes.
@@ -20,6 +20,7 @@ Task tags:
 *Unblocked tasks that can be started immediately.*
 
 *(no tasks)*
+- [schema] Update docs/schema-reference.md from live introspection (routes, outputs, tasks, stories, memory tables missing)
 
 ---
 
