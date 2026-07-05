@@ -49,4 +49,4 @@ Agent loop operational; first /run-loop completed (lint clean); gates verified o
 
 ## Next Session Starting Point
 
-Continue location data entry from no. 41 Grande Rue; coordinate verification for four trail pins is also unblocked.
+Run the DB hygiene migration through /run-loop: pin search_path on set_updated_at and check_location_proximity, add covering indexes for the 8 unindexed FKs, export media_purged_20260610 to a JSON file in scripts/exports/ then stop for human approval of the DROP.
