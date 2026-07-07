@@ -1,10 +1,10 @@
 # Current State
 
-Last updated: 2026-07-05
+Last updated: 2026-07-07
 
 ## Status
 
-Agent loop operational; first /run-loop completed (lint clean); gates verified on free-tier Supabase (no branching — guard-hook mode).
+Agent loop operational, proven across multiple /run-loop cycles including a HOLD → fix → SHIP iteration. Map Immersion Pass 1 shipped and pushed to main (Mapbox Standard style, fixed-dawn light, terrain, camera choreography). Gates verified on free-tier Supabase (no branching — guard-hook mode).
 
 ---
 
@@ -30,6 +30,8 @@ Agent loop operational; first /run-loop completed (lint clean); gates verified o
 - [infra] eslint ignores for .next and worktrees
 - [infra] free-tier gate adaptation in content-ops
 - [data] DB hygiene migration executed in production via Supabase MCP — pin_function_search_paths, add_covering_indexes_for_fks, drop_media_purged_backup_table; advisors verified clean
+- [map] Map Immersion Pass 1 shipped — Mapbox Standard style migration (custom layers preserved via slots), 3D terrain (exaggeration 1.2), documentary camera choreography (load glide + pitch-55 pin select), all pins/routes/geolocate intact; commit 0ca295f
+- [map] Pass 1.5 revision — time-synced light replaced with a permanent dawn preset; light override control removed; POI/transit labels suppressed via Standard config (road labels/house numbers kept on)
 
 ---
 
