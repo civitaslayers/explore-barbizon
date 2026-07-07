@@ -10,7 +10,11 @@ export function middleware(req: NextRequest) {
   if (process.env.NODE_ENV !== "production") return NextResponse.next();
 
   const password = process.env.COMMAND_CENTER_PASSWORD;
-  if (!password) return NextResponse.next(); // no password configured → open
+  if (!password) {
+    return new NextResponse("Command Center locked: no password configured", {
+      status: 503,
+    });
+  }
 
   const auth = req.headers.get("authorization");
   if (auth?.startsWith("Basic ")) {
@@ -27,5 +31,12 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/command-center/:path*", "/dashboard/:path*"],
+  matcher: [
+    "/command-center/:path*",
+    "/dashboard/:path*",
+    "/api/locations/:path*",
+    "/api/places/:path*",
+    "/api/tasks/:path*",
+    "/api/brain/:path*",
+  ],
 };

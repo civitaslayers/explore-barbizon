@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import type { Database } from "@/lib/supabase.types";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 const ALLOWED_FIELDS = [
   "name",
@@ -18,7 +17,31 @@ const ALLOWED_FIELDS = [
   "is_featured",
   "is_premium",
   "curation_order",
+  "allow_proximity_override",
 ] as const;
+
+// NOTE: `allow_proximity_override` is a live column (see docs/schema-reference.md)
+// but is missing from the generated lib/supabase.types.ts — that types file is
+// stale relative to the DB. Selects/updates touching this field are typed via
+// local row shapes below rather than the generated Database["locations"] types.
+type ExistingRow = {
+  id: string;
+  latitude: number;
+  longitude: number;
+  allow_proximity_override: boolean | null;
+};
+
+type UpdatedRow = {
+  id: string;
+  latitude: number;
+  longitude: number;
+  allow_proximity_override: boolean | null;
+};
+
+type VerifiedRow = {
+  latitude: number;
+  longitude: number;
+};
 
 export default async function handler(
   req: NextApiRequest,
@@ -28,18 +51,9 @@ export default async function handler(
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const referer = req.headers.referer ?? "";
-  if (!referer.includes("/dashboard")) {
-    return res.status(403).json({ error: "Forbidden" });
-  }
-
   const { id } = req.query;
   if (!id || Array.isArray(id)) {
     return res.status(400).json({ error: "Invalid id" });
-  }
-
-  if (!supabase) {
-    return res.status(503).json({ error: "Database not configured" });
   }
 
   const body =
@@ -70,36 +84,61 @@ export default async function handler(
     return res.status(400).json({ error: "No updatable fields in body" });
   }
 
-  const { data: existing, error: fetchError } = await supabase
+  const { data: existing, error: fetchError } = await supabaseAdmin
     .from("locations")
-    .select("id")
+    .select("id, latitude, longitude, allow_proximity_override")
     .eq("id", id)
-    .maybeSingle();
+    .maybeSingle<ExistingRow>();
 
   if (fetchError || !existing) {
     return res.status(404).json({ error: "Location not found" });
   }
 
-  const { error: updateError } = await supabase
+  const { data: updatedRows, error: updateError } = await supabaseAdmin
     .from("locations")
-    .update(payload as Database["public"]["Tables"]["locations"]["Update"])
-    .eq("id", id);
+    // `allow_proximity_override` is not in the stale generated types; see note above
+    .update(payload as any)
+    .eq("id", id)
+    .select("id, latitude, longitude, allow_proximity_override")
+    .overrideTypes<UpdatedRow[]>();
 
   if (updateError) {
+    if (updateError.message.includes("PROXIMITY GUARD:")) {
+      return res
+        .status(409)
+        .json({ error: updateError.message, proximity: true });
+    }
     return res.status(500).json({ error: updateError.message });
   }
 
-  const { data: updated, error: refetchError } = await supabase
-    .from("locations")
-    .select("*")
-    .eq("id", id)
-    .maybeSingle();
-
-  if (refetchError || !updated) {
-    return res
-      .status(500)
-      .json({ error: "Update succeeded but refetch failed" });
+  if (!updatedRows || updatedRows.length === 0) {
+    return res.status(500).json({ error: "Update affected zero rows" });
   }
 
-  return res.status(200).json(updated);
+  const { data: verified, error: verifyError } = await supabaseAdmin
+    .from("locations")
+    .select("latitude, longitude")
+    .eq("id", id)
+    .maybeSingle<VerifiedRow>();
+
+  if (verifyError || !verified) {
+    return res.status(500).json({
+      error: "Write verification failed: could not re-fetch location",
+    });
+  }
+
+  if (
+    ("latitude" in payload && verified.latitude !== payload.latitude) ||
+    ("longitude" in payload && verified.longitude !== payload.longitude)
+  ) {
+    return res.status(500).json({
+      error:
+        "Write verification failed: persisted values do not match intended update",
+    });
+  }
+
+  return res.status(200).json({
+    before: { lat: existing.latitude, lng: existing.longitude },
+    after: { lat: verified.latitude, lng: verified.longitude },
+  });
 }
