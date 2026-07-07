@@ -1,6 +1,6 @@
 # Design Direction
 
-Last updated: 2026-03-30
+Last updated: 2026-07-05
 Source: Stitch 2.0 design system (DESIGN.md) + implementation 
 sessions March 2026
 
@@ -219,3 +219,128 @@ places, tour stops.
 - **Dashboard:** Internal admin — restrained, utilitarian but
   on-brand
 - **Visual works layer:** Historical postcard overlay on map
+- **Map Immersion Pass 1** — Barbizon light (brief ready)
+- **Pass 2** — stylized landmark models (blocked on field photos)
+
+---
+
+## Motion & Immersion (2026-07)
+
+### The signature
+
+**The atlas lives on Barbizon light.**
+
+The painters came to Barbizon for the light. The map renders the village under
+its actual current light — dawn, day, dusk, night, computed from Europe/Paris
+time. A visitor planning at 22h sees the village at night; a visitor standing
+on the Grande Rue at golden hour sees the map glowing the same way the street
+does. This is the one bold move. Everything else stays quiet and disciplined
+around it.
+
+One aesthetic-risk note, stated honestly: cream-plus-serif has become a common
+AI-era default look. Our system predates the trend and is locked — but it means
+distinctiveness cannot come from palette alone. It comes from subject-grounded
+signatures: village light, stylized landmark architecture, paper grain,
+cartographic motion. Execution specific to Barbizon is the differentiator.
+
+---
+
+### Map immersion principles
+
+**Symbolic realism, never photorealism.** The map is a graphic representation
+in the atlas's own language — the 3D extension of our icon philosophy (one
+visual idea, legible, palette-bound). Google photorealistic tiles are ruled out
+(EEA-unavailable, off-brand, coverage-poor for a village). Decision logged.
+
+**Light.** Mapbox `lightPreset` (dawn / day / dusk / night) driven by real
+Europe/Paris time. Phase 1: hour-band mapping re-evaluated every 10 minutes.
+Phase 2 (later): true sunrise/sunset via a sun-position calculation so dawn in
+December ≠ dawn in June. A small floating control (design-tokened, bottom
+cluster) lets users override the preset — playing with the village light is a
+feature, not a leak.
+
+**Ground and air.** 3D terrain on (the forest edge and Gorges d'Apremont read
+as relief, not flatness), atmospheric fog/haze at low pitch, subtle sky.
+Terrain exaggeration restrained (≤1.3) — Barbizon is a plain meeting a forest,
+not the Alps.
+
+**Camera as narration.** The camera moves like a documentary drone, slow and
+deliberate, never like a game.
+- Load: begin high and tilted over the forest, one slow glide (~2.5s,
+  ease-soft) settling on the village. With `prefers-reduced-motion`: cut
+  directly to the settled frame.
+- Pin select: `flyTo` with pitch 55–60°, ~1200ms, ease-soft — a glide down the
+  street, not a teleport.
+- Idle (map page hero moments only): drift ≤ 0.5°/s bearing rotation,
+  suspended on any interaction, never on mobile.
+
+**Stylized landmark program (Pass 2).** 3–5 hand-modeled buildings as the map's
+jewelry — graphic architecture in the app palette:
+- Candidates (all existing pins, Tier-1 verifiable): Auberge Ganne,
+  Maison-atelier Millet, Maison-atelier Théodore Rousseau; optionally the
+  Mairie and the Chapelle.
+- Style: low-poly, flat-shaded, **no textures**. Walls `cream`, roofs `umber`,
+  vegetation touches `moss`, openings `ink` at low opacity. One recognizable
+  architectural gesture per model (Ganne's long inn façade, Millet's studio
+  window) — the icon rule, in 3D.
+- Geometry sources: building footprints from the French cadastre
+  (cadastre.gouv.fr, Etalab open licence) or OSM; heights and gestures from
+  Luigi's field photos. **No invented architecture** — the same integrity rule
+  as content.
+- Format: glTF (.glb), ≤100KB per model, anchored at the pin's verified GPS,
+  served from `public/models/` (versioned in git; these are app assets, not
+  content media — R2 convention does not apply).
+- Rendered via the Mapbox GL v3 model layer; landmark models replace the
+  generic extrusion on their footprint, never float beside it.
+
+**Everything else stays symbolic:** generic OSM extrusions ghosted at low
+opacity under the Standard style; our pins, colors, and icon system remain the
+loudest layer on the map. The data is the figure; the basemap is the ground.
+
+---
+
+### Motion tokens (app-wide)
+
+| Token | Value | Use |
+|---|---|---|
+| `duration-quick` | 200ms | hovers, chips, toggles |
+| `duration-base` | 400ms | reveals, drawer, sheet |
+| `duration-slow` | 700ms | image scale, page fade |
+| `duration-cinematic` | 1200–2500ms | map camera only |
+| easing | existing `ease-soft` cubic-bezier(0.2, 0.8, 0.2, 1) | everything |
+
+Rules:
+- **Reveal pattern:** fade-up 12px + opacity, stagger 60ms between siblings,
+  triggered at 20% viewport entry, once per element. Editorial pages only.
+- **Atlas Card parallax:** background image translates ≤6% on scroll; text
+  overlay static. Desktop only.
+- **Kinetic serif:** page titles (Newsreader italic) may enter with a single
+  clip-path or fade-up reveal. Never letter-by-letter animation — that is the
+  trendy default we avoid.
+- **Grain:** a 2%-opacity monochrome noise texture on `cream` surfaces
+  (single tiled PNG or CSS), evoking paper/canvas. Imperceptible as an effect,
+  perceptible as warmth. Never on the map.
+- **Page transitions:** cross-fade + 8px rise via framer-motion
+  `AnimatePresence` in `pages/_app.tsx` (protected file — any task touching it
+  must name it explicitly per .cursor/rules). Card → place page should feel
+  continuous, not like a reload.
+- **`prefers-reduced-motion`: reduce** disables reveals, parallax, idle drift,
+  and camera choreography globally. Non-negotiable quality floor.
+- **Restraint rule:** one orchestrated moment per view. If a screen has the
+  map light signature, nothing else on it animates ambiently. Before shipping
+  any motion pass: remove one accessory.
+
+Dependency note: framer-motion is the single new dependency this addendum
+justifies. Everything else is CSS and Mapbox config.
+
+---
+
+### What to avoid (extends parent list)
+
+- Photorealistic anything
+- Letter-by-letter or bouncing text
+- Scroll-jacking; horizontal scroll sections
+- Parallax deeper than 6%; multiple ambient animations per view
+- Camera moves faster than the documentary register
+- Motion that fires on every visit identically forever — the light signature
+  exists precisely so the atlas never looks the same twice
