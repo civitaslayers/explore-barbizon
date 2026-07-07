@@ -4,6 +4,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import type { Place } from "@/lib/types";
 import type { Route } from "@/lib/supabase";
 import { getCategoryGroup, GROUP_COLORS } from "@/lib/categoryGroups";
+import { DEFAULT_LIGHT_PRESET } from "@/lib/mapLight";
 
 // ---------------------------------------------------------------------------
 // SVG icons — teardrop pin, 28×36 display; viewBox 0 0 40 46
@@ -296,6 +297,76 @@ function hideAllRoutes(map: mapboxgl.Map) {
   });
 }
 
+// ---------------------------------------------------------------------------
+// Motion, terrain, and easing helpers
+// ---------------------------------------------------------------------------
+
+const prefersReducedMotion = () =>
+  typeof window !== "undefined" &&
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// The mount effect (empty dep array) runs on first render, which on a hard
+// load of /map?location=<slug> happens BEFORE Next.js router hydration sets
+// router.isReady — so the `focusSlug` prop can still be undefined even though
+// the URL carries a deep link. Reading the query string directly from
+// window.location sidesteps that race entirely, since it's available
+// synchronously regardless of router hydration state.
+const hasFocusParam = () =>
+  typeof window !== "undefined" &&
+  new URLSearchParams(window.location.search).has("location");
+
+// Heuristic, NOT a device-performance measurement: enable 3D terrain only on
+// desktop-class input (mouse/trackpad). Mid-range touch devices are the terrain
+// perf risk; (hover: hover) + (pointer: fine) is a reasonable proxy for "not a
+// phone." Human must confirm mobile frame rate is acceptable at the review gate
+// and revisit this condition if terrain measurably degrades performance.
+function terrainAllowed(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+}
+
+// Evaluates cubic-bezier(0.2, 0.8, 0.2, 1) — the design-doc "ease-soft" easing
+// curve (note: differs from the Tailwind `ease-soft` CSS class, which uses a
+// different curve — see commit message). Mapbox flyTo's `easing` option takes a
+// (t: number) => number function, not a CSS string, hence this small evaluator.
+function easeSoft(t: number): number {
+  const x1 = 0.2, y1 = 0.8, x2 = 0.2, y2 = 1;
+
+  const cx = 3 * x1;
+  const bx = 3 * (x2 - x1) - cx;
+  const ax = 1 - cx - bx;
+
+  const cy = 3 * y1;
+  const by = 3 * (y2 - y1) - cy;
+  const ay = 1 - cy - by;
+
+  const sampleCurveX = (u: number) => ((ax * u + bx) * u + cx) * u;
+  const sampleCurveY = (u: number) => ((ay * u + by) * u + cy) * u;
+  const sampleCurveDerivativeX = (u: number) => (3 * ax * u + 2 * bx) * u + cx;
+
+  const solveCurveX = (x: number): number => {
+    let u = x;
+    for (let i = 0; i < 8; i++) {
+      const dx = sampleCurveX(u) - x;
+      if (Math.abs(dx) < 1e-6) return u;
+      const d = sampleCurveDerivativeX(u);
+      if (Math.abs(d) < 1e-6) break;
+      u -= dx / d;
+    }
+    let lo = 0, hi = 1;
+    u = x;
+    while (lo < hi) {
+      const cur = sampleCurveX(u);
+      if (Math.abs(cur - x) < 1e-6) return u;
+      if (x > cur) lo = u; else hi = u;
+      u = (lo + hi) / 2;
+    }
+    return u;
+  };
+
+  return sampleCurveY(solveCurveX(t));
+}
+
 type Props = {
   locations: Place[];
   allLocations?: Place[];
@@ -308,6 +379,7 @@ export default function MapGL({ locations, allLocations, routes, focusSlug }: Pr
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const routesRef = useRef<Route[]>([]);
   const focusPopupRef = useRef<mapboxgl.Popup | null>(null);
+  const hasIntroPlayed = useRef(false);
 
   // Initialise map — runs once on mount
   useEffect(() => {
@@ -315,11 +387,39 @@ export default function MapGL({ locations, allLocations, routes, focusSlug }: Pr
 
     mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "";
 
+    // Settled/resting frame — final camera position once the intro (if any) resolves.
+    const SETTLED_CAMERA = {
+      center: [2.6065, 48.4455] as [number, number],
+      zoom: 15,
+      pitch: 40,
+      bearing: 0,
+    };
+    // Intro start frame — southeast of the village, over the forest edge.
+    const INTRO_CAMERA = {
+      center: [2.6135, 48.4395] as [number, number],
+      zoom: 13.8,
+      pitch: 72,
+      bearing: -32,
+    };
+
+    const useIntro = !prefersReducedMotion() && !hasFocusParam();
+    const initialCamera = useIntro ? INTRO_CAMERA : SETTLED_CAMERA;
+
     const map = new mapboxgl.Map({
       container: containerRef.current,
-      style: "mapbox://styles/mapbox/light-v11",
-      center: [2.6065, 48.4455],
-      zoom: 15,
+      style: "mapbox://styles/mapbox/standard",
+      config: {
+        basemap: {
+          lightPreset: DEFAULT_LIGHT_PRESET,
+          show3dObjects: true,
+          showPointOfInterestLabels: false,
+          showTransitLabels: false,
+        },
+      },
+      center: initialCamera.center,
+      zoom: initialCamera.zoom,
+      pitch: initialCamera.pitch,
+      bearing: initialCamera.bearing,
       minZoom: 10,
       maxZoom: 20,
     });
@@ -346,6 +446,17 @@ export default function MapGL({ locations, allLocations, routes, focusSlug }: Pr
         )
       );
 
+      // Terrain — desktop-class input only (see terrainAllowed comment above)
+      if (terrainAllowed()) {
+        map.addSource("mapbox-dem", {
+          type: "raster-dem",
+          url: "mapbox://mapbox.mapbox-terrain-dem-v1",
+          tileSize: 512,
+          maxzoom: 14,
+        });
+        map.setTerrain({ source: "mapbox-dem", exaggeration: 1.2 });
+      }
+
       // GeoJSON source with clustering
       map.addSource("locations", {
         type: "geojson",
@@ -366,6 +477,7 @@ export default function MapGL({ locations, allLocations, routes, focusSlug }: Pr
         id: "clusters",
         type: "circle",
         source: "locations",
+        slot: "top",
         filter: ["has", "point_count"],
         paint: {
           "circle-color": [
@@ -398,6 +510,7 @@ export default function MapGL({ locations, allLocations, routes, focusSlug }: Pr
         id: "cluster-count",
         type: "symbol",
         source: "locations",
+        slot: "top",
         filter: ["has", "point_count"],
         layout: {
           "text-field": "{point_count_abbreviated}",
@@ -412,6 +525,7 @@ export default function MapGL({ locations, allLocations, routes, focusSlug }: Pr
         id: "unclustered-point",
         type: "symbol",
         source: "locations",
+        slot: "top",
         filter: ["!", ["has", "point_count"]],
         layout: {
           "icon-image": ["get", "iconId"],
@@ -446,6 +560,7 @@ export default function MapGL({ locations, allLocations, routes, focusSlug }: Pr
         id: "route-outline",
         type: "line",
         source: "routes",
+        slot: "middle",
         layout: {
           "line-join": "round",
           "line-cap": "round",
@@ -463,6 +578,7 @@ export default function MapGL({ locations, allLocations, routes, focusSlug }: Pr
         id: "route-line",
         type: "line",
         source: "routes",
+        slot: "middle",
         layout: {
           "line-join": "round",
           "line-cap": "round",
@@ -481,6 +597,7 @@ export default function MapGL({ locations, allLocations, routes, focusSlug }: Pr
         id: "route-hover",
         type: "line",
         source: "routes",
+        slot: "middle",
         layout: {
           "line-join": "round",
           "line-cap": "round",
@@ -492,6 +609,22 @@ export default function MapGL({ locations, allLocations, routes, focusSlug }: Pr
           "line-opacity": 0,
         },
       });
+
+      // Intro camera glide — settles from the forest-edge start frame into the
+      // resting village frame, once (guarded by hasIntroPlayed so a style
+      // reload never re-triggers it).
+      if (useIntro && !hasIntroPlayed.current) {
+        hasIntroPlayed.current = true;
+        map.flyTo({
+          center: SETTLED_CAMERA.center,
+          zoom: SETTLED_CAMERA.zoom,
+          pitch: SETTLED_CAMERA.pitch,
+          bearing: SETTLED_CAMERA.bearing,
+          duration: 2500,
+          easing: easeSoft,
+          essential: true,
+        });
+      }
 
       // Trail click → popup with navigate button
       map.on("click", "route-line", (e) => {
@@ -692,6 +825,7 @@ export default function MapGL({ locations, allLocations, routes, focusSlug }: Pr
       map.flyTo({
         center: [target.longitude, target.latitude],
         zoom: 16,
+        pitch: 55,
         duration: 1200,
       });
 

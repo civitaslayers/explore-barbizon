@@ -230,12 +230,14 @@ places, tour stops.
 
 **The atlas lives on Barbizon light.**
 
-The painters came to Barbizon for the light. The map renders the village under
-its actual current light — dawn, day, dusk, night, computed from Europe/Paris
-time. A visitor planning at 22h sees the village at night; a visitor standing
-on the Grande Rue at golden hour sees the map glowing the same way the street
-does. This is the one bold move. Everything else stays quiet and disciplined
-around it.
+The painters came to Barbizon for the light. Pass 1 renders the village in a
+fixed dawn light — the quiet, silvered hour before the village wakes, the
+light Millet and Rousseau painted most. Time-synced light (dawn, day, dusk,
+night matched to the real Europe/Paris clock) remains the eventual signature
+and the design intent stated below; it's deferred past Pass 1.5 in favor of a
+single, dependable atmosphere while the map's other systems — terrain, camera,
+stylized landmarks — mature. This is still the bold move in waiting.
+Everything else stays quiet and disciplined around it.
 
 One aesthetic-risk note, stated honestly: cream-plus-serif has become a common
 AI-era default look. Our system predates the trend and is locked — but it means
@@ -252,12 +254,17 @@ in the atlas's own language — the 3D extension of our icon philosophy (one
 visual idea, legible, palette-bound). Google photorealistic tiles are ruled out
 (EEA-unavailable, off-brand, coverage-poor for a village). Decision logged.
 
-**Light.** Mapbox `lightPreset` (dawn / day / dusk / night) driven by real
-Europe/Paris time. Phase 1: hour-band mapping re-evaluated every 10 minutes.
-Phase 2 (later): true sunrise/sunset via a sun-position calculation so dawn in
-December ≠ dawn in June. A small floating control (design-tokened, bottom
-cluster) lets users override the preset — playing with the village light is a
-feature, not a leak.
+**Light.** Pass 1.5 ships a fixed `lightPreset: 'dawn'` — no time sync, no
+override control. The time-synced version described above (hour-band mapping
+re-evaluated every 10 minutes, later a true sun-position calculation, plus a
+user override control) is the deferred design intent, not yet built. Revisit
+once the map's other systems settle.
+
+**Label restraint (Standard-style rule).** `showPointOfInterestLabels` and
+`showTransitLabels` are set to `false` via Mapbox Standard's config API —
+third-party POI icons and transit labels compete with our own pin system and
+add visual noise foreign to the atlas. Road labels and house numbers stay on;
+wayfinding legibility matters more than restraint here.
 
 **Ground and air.** 3D terrain on (the forest edge and Gorges d'Apremont read
 as relief, not flatness), atmospheric fog/haze at low pitch, subtle sky.
