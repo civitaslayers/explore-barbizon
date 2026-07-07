@@ -349,5 +349,8 @@ justifies. Everything else is CSS and Mapbox config.
 - Scroll-jacking; horizontal scroll sections
 - Parallax deeper than 6%; multiple ambient animations per view
 - Camera moves faster than the documentary register
-- Motion that fires on every visit identically forever — the light signature
-  exists precisely so the atlas never looks the same twice
+- Motion that fires identically on every visit forever with no variation at
+  all (the load glide, camera moves) — documentary pacing, not a stock loop.
+  (Note: as of Pass 1.5 the light itself is a fixed dawn preset, not
+  time-synced — see "Light" above. Time-synced light was the original reason
+  this rule existed; it remains the deferred design intent, not yet shipped.)
