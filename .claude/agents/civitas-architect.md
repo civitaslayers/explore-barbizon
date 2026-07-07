@@ -1,7 +1,7 @@
 ---
 name: civitas-architect
 description: Architecture, schema evolution, system design, and map model decisions for Civitas Layers / ExploreBarbizon. Use this agent when making decisions about data structure, schema migrations, product model, layer design, or any choice that affects multiple parts of the system. In the autonomous loop, runs FIRST — produces the plan the other agents execute.
-tools: Read, Glob, Grep, Write, Edit
+tools: Read, Glob, Grep, Write, Edit, WebSearch, WebFetch
 model: opus
 ---
 
@@ -25,6 +25,7 @@ Always read these files at the start of your work:
 - Advise on the map model and Mapbox layer structure
 - Ensure decisions are consistent with the multi-town direction (deferred but not forgotten)
 - Document all decisions in `brain/decisions.md` with reasoning and consequences
+- When a plan depends on external APIs or library behavior, verify against current docs (context7 or WebFetch) during planning — never bake unverified API calls into a plan.
 
 ## Constraints
 
