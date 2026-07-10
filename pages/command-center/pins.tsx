@@ -157,7 +157,29 @@ async function patchLocation(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
-  const data = await res.json();
+  // Never assume the body is JSON. A framework-level 404/500 (e.g. a route that
+  // failed to compile, or an unhandled handler exception) returns an HTML error
+  // page; calling res.json() on it throws, and that throw was previously
+  // swallowed upstream — the exact silent-failure this editor suffered from.
+  // Read as text and parse defensively so a non-JSON reply still surfaces a
+  // readable error. (fail-loudly rule)
+  const raw = await res.text();
+  let data: {
+    before?: { lat: number; lng: number };
+    after?: { lat: number; lng: number };
+    error?: string;
+    proximity?: boolean;
+  };
+  try {
+    data = raw ? JSON.parse(raw) : {};
+  } catch {
+    data = {
+      error: `Non-JSON response from server (HTTP ${res.status}): ${raw
+        .slice(0, 200)
+        .replace(/\s+/g, " ")
+        .trim()}`,
+    };
+  }
   return { ok: res.ok, status: res.status, data };
 }
 
@@ -342,11 +364,26 @@ const PinsPage: NextPageWithLayout<PinsPageProps> = ({ pins: initialPins }) => {
       }
       if (!res.ok || !res.data.before || !res.data.after) {
         snapMarkerBack(pinId);
-        setToast({ kind: "error", message: res.data.error ?? "Update failed" });
+        setToast({
+          kind: "error",
+          message: `Save failed (HTTP ${res.status}): ${
+            res.data.error ?? "Update failed"
+          }`,
+        });
         setDragState(null);
         return;
       }
       applySuccessfulPatch(pinId, res.data.before, res.data.after);
+      setDragState(null);
+    } catch (err) {
+      // fail-loudly: a thrown fetch/parse error must never be silent.
+      snapMarkerBack(pinId);
+      setToast({
+        kind: "error",
+        message: `Save failed: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      });
       setDragState(null);
     } finally {
       setDragBusy(false);
@@ -384,7 +421,9 @@ const PinsPage: NextPageWithLayout<PinsPageProps> = ({ pins: initialPins }) => {
       if (!neighborRes.ok) {
         setToast({
           kind: "error",
-          message: `Failed to flag neighbor pin: ${neighborRes.data.error ?? "unknown error"}`,
+          message: `Failed to flag neighbor pin (HTTP ${neighborRes.status}): ${
+            neighborRes.data.error ?? "unknown error"
+          }`,
         });
         setProximityState(null);
         return;
@@ -417,7 +456,9 @@ const PinsPage: NextPageWithLayout<PinsPageProps> = ({ pins: initialPins }) => {
         snapMarkerBack(pinId);
         setToast({
           kind: "error",
-          message: draggedRes.data.error ?? "Update failed",
+          message: `Override save failed (HTTP ${draggedRes.status}): ${
+            draggedRes.data.error ?? "Update failed"
+          }`,
         });
         setProximityState(null);
         return;
@@ -425,6 +466,16 @@ const PinsPage: NextPageWithLayout<PinsPageProps> = ({ pins: initialPins }) => {
 
       applySuccessfulPatch(pinId, draggedRes.data.before, draggedRes.data.after, {
         allowOverride: true,
+      });
+      setProximityState(null);
+    } catch (err) {
+      // fail-loudly: a thrown fetch/parse error must never be silent.
+      snapMarkerBack(pinId);
+      setToast({
+        kind: "error",
+        message: `Override failed: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
       });
       setProximityState(null);
     } finally {
@@ -455,10 +506,23 @@ const PinsPage: NextPageWithLayout<PinsPageProps> = ({ pins: initialPins }) => {
         return;
       }
       if (!res.ok || !res.data.before || !res.data.after) {
-        setToast({ kind: "error", message: res.data.error ?? "Revert failed" });
+        setToast({
+          kind: "error",
+          message: `Revert failed (HTTP ${res.status}): ${
+            res.data.error ?? "Revert failed"
+          }`,
+        });
         return;
       }
       applySuccessfulPatch(pinId, res.data.before, res.data.after);
+    } catch (err) {
+      // fail-loudly: a thrown fetch/parse error must never be silent.
+      setToast({
+        kind: "error",
+        message: `Revert failed: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      });
     } finally {
       setRevertBusy(false);
     }
