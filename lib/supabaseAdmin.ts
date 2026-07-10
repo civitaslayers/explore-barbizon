@@ -19,11 +19,16 @@ function getClient(): SupabaseClient<Database> {
   if (cached) return cached;
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const secretKey = process.env.SUPABASE_SECRET_KEY;
+  // Accept either the CCC v2 name (SUPABASE_SECRET_KEY) or Supabase's
+  // conventional service-role name (SUPABASE_SERVICE_ROLE_KEY). Different
+  // environments were provisioned under different names; supporting both
+  // avoids a rename across every deployment target.
+  const secretKey =
+    process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!url || !secretKey) {
     throw new Error(
-      "Supabase admin client missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SECRET_KEY"
+      "Supabase admin client missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SECRET_KEY/SUPABASE_SERVICE_ROLE_KEY"
     );
   }
 
