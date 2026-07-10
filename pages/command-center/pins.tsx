@@ -129,6 +129,47 @@ function haversineMeters(
   return R * c;
 }
 
+// Pins closer than this to each other are treated as a visual "stack" and
+// fanned apart so both are clickable (real coordinates are never touched).
+const STACK_THRESHOLD_M = 2.5;
+const FAN_RADIUS_PX = 18;
+
+type StackInfo = { size: number; offset: [number, number] };
+
+// Cluster pins by physical proximity, then assign each member of a 2+ cluster a
+// pixel offset on a small upward fan. Pure geometry, computed once at load.
+function computeStacks(pins: AdminPin[]): Map<string, StackInfo> {
+  const clusters: AdminPin[][] = [];
+  for (const pin of pins) {
+    const cluster = clusters.find(
+      (c) =>
+        haversineMeters(
+          c[0].latitude,
+          c[0].longitude,
+          pin.latitude,
+          pin.longitude
+        ) <= STACK_THRESHOLD_M
+    );
+    if (cluster) cluster.push(pin);
+    else clusters.push([pin]);
+  }
+
+  const info = new Map<string, StackInfo>();
+  for (const cluster of clusters) {
+    if (cluster.length < 2) continue;
+    const n = cluster.length;
+    cluster.forEach((pin, i) => {
+      const angle = -Math.PI / 2 + (i - (n - 1) / 2) * (Math.PI / 5);
+      const offset: [number, number] = [
+        FAN_RADIUS_PX * Math.cos(angle),
+        FAN_RADIUS_PX * Math.sin(angle),
+      ];
+      info.set(pin.id, { size: n, offset });
+    });
+  }
+  return info;
+}
+
 const NEIGHBOR_PATTERN = /existing pin "([^"]+)" \(slug: ([^)]+)\)/;
 
 function parseProximityError(message: string): {
@@ -206,6 +247,8 @@ const PinsPage: NextPageWithLayout<PinsPageProps> = ({ pins: initialPins }) => {
   const [proximityBusy, setProximityBusy] = useState(false);
   const [toast, setToast] = useState<ToastState | null>(null);
   const [revertBusy, setRevertBusy] = useState(false);
+  const [inspectPinId, setInspectPinId] = useState<string | null>(null);
+  const pulseTimeoutRef = useRef<number | null>(null);
 
   // Keep an always-current lookup map for imperative handlers (map event
   // callbacks close over refs, never over render-scoped state directly).
@@ -217,6 +260,23 @@ const PinsPage: NextPageWithLayout<PinsPageProps> = ({ pins: initialPins }) => {
     const pin = pinsRef.current.get(pinId);
     const marker = markersRef.current.get(pinId);
     if (pin && marker) marker.setLngLat([pin.longitude, pin.latitude]);
+  }, []);
+
+  // Briefly pulse a marker's dot (used to highlight a search match).
+  const pulseMarker = useCallback((pinId: string) => {
+    const dot = markersRef.current
+      .get(pinId)
+      ?.getElement()
+      .querySelector<HTMLElement>(".pin-dot");
+    if (!dot) return;
+    dot.classList.remove("pin-pulse");
+    void dot.offsetWidth; // restart the animation if already pulsing
+    dot.classList.add("pin-pulse");
+    if (pulseTimeoutRef.current) window.clearTimeout(pulseTimeoutRef.current);
+    pulseTimeoutRef.current = window.setTimeout(
+      () => dot.classList.remove("pin-pulse"),
+      3000
+    );
   }, []);
 
   const handleDragEnd = useCallback((pinId: string) => {
@@ -250,28 +310,85 @@ const PinsPage: NextPageWithLayout<PinsPageProps> = ({ pins: initialPins }) => {
     });
     mapRef.current = map;
 
+    // Bottom-right so it clears the production banner pinned to the top.
     map.addControl(
       new mapboxgl.NavigationControl({ showCompass: false }),
-      "top-right"
+      "bottom-right"
     );
 
     map.on("load", () => {
-      initialPins.forEach((pin) => {
-        const el = document.createElement("div");
-        el.style.width = "16px";
-        el.style.height = "16px";
-        el.style.borderRadius = "50%";
-        el.style.background = pin.color;
-        el.style.border = "2px solid #F5F1E8";
-        el.style.boxShadow = "0 2px 6px rgba(0,0,0,0.28)";
-        el.style.cursor = "grab";
-        if (!pin.isPublished) el.style.opacity = "0.5";
+      const stacks = computeStacks(initialPins);
 
-        const marker = new mapboxgl.Marker({ element: el, draggable: true })
+      initialPins.forEach((pin) => {
+        const stack = stacks.get(pin.id);
+
+        const el = document.createElement("div");
+        el.className = "pin-marker";
+
+        // Leader line back to the true point (fanned-out stacked pins only).
+        if (stack) {
+          const [dx, dy] = stack.offset;
+          const leader = document.createElement("div");
+          leader.className = "pin-leader";
+          leader.style.width = `${Math.hypot(dx, dy)}px`;
+          leader.style.transform = `rotate(${Math.atan2(-dy, -dx)}rad)`;
+          el.appendChild(leader);
+        }
+
+        const dot = document.createElement("div");
+        dot.className = pin.isPublished ? "pin-dot" : "pin-dot pin-dot--draft";
+        dot.style.background = pin.color;
+        el.appendChild(dot);
+
+        // Hover name tooltip.
+        const tip = document.createElement("div");
+        tip.className = "pin-tooltip";
+        tip.textContent = pin.name;
+        el.appendChild(tip);
+
+        // Draft badge (hover only).
+        if (!pin.isPublished) {
+          const brouillon = document.createElement("div");
+          brouillon.className = "pin-brouillon";
+          brouillon.textContent = "brouillon";
+          el.appendChild(brouillon);
+        }
+
+        // Stack count badge.
+        if (stack) {
+          const badge = document.createElement("div");
+          badge.className = "pin-stack-badge";
+          badge.textContent = String(stack.size);
+          el.appendChild(badge);
+        }
+
+        const marker = new mapboxgl.Marker({
+          element: el,
+          draggable: true,
+          offset: stack ? stack.offset : [0, 0],
+        })
           .setLngLat([pin.longitude, pin.latitude])
           .addTo(map);
 
+        // Distinguish a plain click (inspect) from a drag. A drag fires
+        // dragstart; a bare click does not. The click event that follows a
+        // drag's mouseup is suppressed via the `dragged` flag.
+        let dragged = false;
+        el.addEventListener("mousedown", () => {
+          dragged = false;
+        });
+        marker.on("dragstart", () => {
+          dragged = true;
+        });
         marker.on("dragend", () => handleDragEnd(pin.id));
+        el.addEventListener("click", () => {
+          if (dragged) {
+            dragged = false;
+            return;
+          }
+          setInspectPinId(pin.id);
+        });
+
         markersRef.current.set(pin.id, marker);
       });
 
@@ -284,6 +401,7 @@ const PinsPage: NextPageWithLayout<PinsPageProps> = ({ pins: initialPins }) => {
 
     const markers = markersRef.current;
     return () => {
+      if (pulseTimeoutRef.current) window.clearTimeout(pulseTimeoutRef.current);
       markers.forEach((m) => m.remove());
       markers.clear();
       map.remove();
@@ -306,6 +424,27 @@ const PinsPage: NextPageWithLayout<PinsPageProps> = ({ pins: initialPins }) => {
       marker.getElement().style.display = matchesSearch && matchesGroup ? "" : "none";
     });
   }, [pins, searchQuery, activeGroups]);
+
+  // Search → pan/zoom to the best match and pulse it (debounced per keystroke).
+  useEffect(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return;
+    const handle = window.setTimeout(() => {
+      const match = pins.find(
+        (p) => activeGroups.has(p.group) && p.name.toLowerCase().includes(query)
+      );
+      const map = mapRef.current;
+      if (!match || !map) return;
+      map.flyTo({
+        center: [match.longitude, match.latitude],
+        zoom: Math.max(map.getZoom(), 17),
+        duration: 900,
+        essential: true,
+      });
+      pulseMarker(match.id);
+    }, 300);
+    return () => window.clearTimeout(handle);
+  }, [searchQuery, pins, activeGroups, pulseMarker]);
 
   const toggleGroup = (group: GroupName) => {
     setActiveGroups((prev) => {
@@ -531,13 +670,27 @@ const PinsPage: NextPageWithLayout<PinsPageProps> = ({ pins: initialPins }) => {
   const dragPinName = dragState ? pinsRef.current.get(dragState.pinId)?.name : null;
   const toastPinName =
     toast?.kind === "success" ? pinsRef.current.get(toast.pinId)?.name : null;
+  const inspectPin = inspectPinId
+    ? pins.find((p) => p.id === inspectPinId) ?? null
+    : null;
 
   return (
     <div className="relative h-screen w-full">
       <div ref={containerRef} className="h-full w-full" />
 
+      {/* Persistent live-write banner — this editor has no sandbox. */}
+      <div className="absolute inset-x-0 top-0 z-30 flex items-center justify-center gap-2 bg-umber px-4 py-2 text-cream shadow-sm">
+        <span aria-hidden className="inline-block h-1.5 w-1.5 rounded-full bg-cream" />
+        <p className="text-[11px] font-medium uppercase tracking-[0.22em]">
+          Écriture directe en production
+          <span className="ml-2 font-normal normal-case tracking-normal text-cream/70">
+            · writes live data — no sandbox
+          </span>
+        </p>
+      </div>
+
       {/* Search + layer filters */}
-      <div className="card absolute left-4 top-4 z-10 w-72 space-y-3 p-4">
+      <div className="card absolute left-4 top-14 z-10 w-72 space-y-3 p-4">
         <p className="eyebrow">Pin Editor</p>
         <input
           type="text"
@@ -561,9 +714,46 @@ const PinsPage: NextPageWithLayout<PinsPageProps> = ({ pins: initialPins }) => {
           ))}
         </div>
         <p className="text-[10px] uppercase tracking-[0.15em] text-ink/35">
-          {pins.length} pins loaded — drafts shown at 50% opacity
+          {pins.length} pins loaded — drafts show a dashed ring
         </p>
       </div>
+
+      {/* Pin inspector — opened by a plain click (not a drag) on a marker. */}
+      {inspectPin && (
+        <div className="card shadow-card fixed bottom-8 left-4 z-20 w-72 p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="eyebrow mb-1">Pin details</p>
+              <p className="heading-lg mb-1 truncate">{inspectPin.name}</p>
+              <p className="truncate font-mono text-xs text-ink/50">
+                {inspectPin.slug}
+              </p>
+            </div>
+            <button
+              type="button"
+              className="shrink-0 text-lg leading-none text-ink/35 transition-colors hover:text-ink"
+              onClick={() => setInspectPinId(null)}
+              aria-label="Close"
+            >
+              ×
+            </button>
+          </div>
+          <div className="mt-3">
+            {inspectPin.isPublished ? (
+              <span className="inline-block rounded-full bg-primary-container px-3 py-1 text-[10px] uppercase tracking-[0.12em] text-cream">
+                Published
+              </span>
+            ) : (
+              <span className="inline-block rounded-full bg-secondary-container px-3 py-1 text-[10px] uppercase tracking-[0.12em] text-on-secondary-container">
+                Brouillon · Draft
+              </span>
+            )}
+          </div>
+          <p className="mt-3 font-mono text-[10px] text-ink/40">
+            {inspectPin.latitude.toFixed(6)}, {inspectPin.longitude.toFixed(6)}
+          </p>
+        </div>
+      )}
 
       {/* Drag confirmation popover */}
       {dragState && (
