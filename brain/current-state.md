@@ -1,15 +1,19 @@
 # Current State
 
-Last updated: 2026-07-07
+Last updated: 2026-07-10
 
 ## Status
 
-Agent loop operational, proven across multiple /run-loop cycles including a HOLD → fix → SHIP iteration. Map Immersion Pass 1 shipped and pushed to main (Mapbox Standard style, fixed-dawn light, terrain, camera choreography). Gates verified on free-tier Supabase (no branching — guard-hook mode).
+Agent loop operational, proven across multiple /run-loop cycles including a HOLD → fix → SHIP iteration. Map Immersion Pass 1 shipped and pushed to main (Mapbox Standard style, fixed-dawn light, terrain, camera choreography). Gates verified on free-tier Supabase (no branching — guard-hook mode). CCC v2 (Command Center) complete and pushed to main — fail-closed auth over the admin API routes, service-role verified writes, and a full pin editor (drag-to-move with proximity guard, stack handling, search, click inspector, address display, sidebar link). Luigi completed a full manual pin-verification pass (~50 pins re-placed via the editor); published count now 106.
 
 ---
 
 ## Last Completed
 
+- [ccc] CCC v2 complete — fail-closed auth over API routes, service-role verified writes, pin editor with stack handling/search/inspector/address display, sidebar link.
+- [data] Root cause of silent saves found and fixed twice: (a) anon-key writes were RLS no-ops, (b) comparator false-500s on float equality — a committed write is never again reported as failed.
+- [data] Full manual pin verification pass by Luigi (~50 pins re-placed via editor); Barjole/Roz separated to true positions; le-royal confirmed correct.
+- [data] Via Claude/Supabase MCP with approval: plaine-angelus-ferme-couvent renamed to ferme-du-couvent (slug + name; painting site already has its own pin), and duplicate rocher-elephant DELETED (unreferenced NE duplicate; snapshot preserved in chat + this entry: 48.4415,2.6195, viewpoint). Published count now 106.
 - [ai-ops] Full repo audit — identified and queued all stale docs, Cursor rules, agent files
 - [ai-ops] Project knowledge re-indexed — all repo files now visible including repo-map.md and ai-operating-system.md
 - [ai-ops] brain/session-start.md deleted (deprecated)
@@ -44,11 +48,11 @@ Agent loop operational, proven across multiple /run-loop cycles including a HOLD
 
 ## Next Tasks
 
-1. Photo sprint batch 1 with hours/website/address collection
-2. Field-verify Barjole/Roz duplicate coordinates
+1. Content pass on ferme-du-couvent description (currently describes the plain, not the farm; verify the "à l'ouest" direction claim against a Tier-1 source before publishing the rewrite)
+2. Photo sprint batch 1 with hours/website/address collection
 
 ---
 
 ## Next Session Starting Point
 
-Photo sprint batch 1 prep — regenerate the field checklist from live data and confirm the walking batches.
+Content pass on ferme-du-couvent description (currently describes the plain; verify "à l'ouest" direction claim against Tier-1 before publishing rewrite); then photo sprint batch 1 prep.
