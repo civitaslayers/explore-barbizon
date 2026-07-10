@@ -23,6 +23,7 @@ type AdminPin = {
   slug: string;
   latitude: number;
   longitude: number;
+  address: string | null;
   isPublished: boolean;
   allowOverride: boolean;
   group: GroupName;
@@ -72,6 +73,7 @@ type LocationJoinRow = {
   slug: string;
   latitude: number;
   longitude: number;
+  address: string | null;
   is_published: boolean | null;
   show_on_map: boolean | null;
   allow_proximity_override: boolean | null;
@@ -82,7 +84,7 @@ export const getServerSideProps: GetServerSideProps<PinsPageProps> = async () =>
   const { data, error } = await supabaseAdmin
     .from("locations")
     .select(
-      "id, name, slug, latitude, longitude, is_published, show_on_map, allow_proximity_override, categories(name, layer)"
+      "id, name, slug, latitude, longitude, address, is_published, show_on_map, allow_proximity_override, categories(name, layer)"
     )
     .overrideTypes<LocationJoinRow[]>();
 
@@ -98,6 +100,7 @@ export const getServerSideProps: GetServerSideProps<PinsPageProps> = async () =>
       slug: row.slug,
       latitude: row.latitude,
       longitude: row.longitude,
+      address: row.address ?? null,
       isPublished: row.is_published ?? false,
       allowOverride: row.allow_proximity_override ?? false,
       group,
@@ -368,10 +371,19 @@ const PinsPage: NextPageWithLayout<PinsPageProps> = ({ pins: initialPins }) => {
         dot.style.background = pin.color;
         el.appendChild(dot);
 
-        // Hover name tooltip.
+        // Hover tooltip — name + recorded address (read-only).
         const tip = document.createElement("div");
         tip.className = "pin-tooltip";
-        tip.textContent = pin.name;
+        const tipName = document.createElement("div");
+        tipName.className = "pin-tooltip-name";
+        tipName.textContent = pin.name;
+        tip.appendChild(tipName);
+        const tipAddr = document.createElement("div");
+        tipAddr.className = pin.address
+          ? "pin-tooltip-address"
+          : "pin-tooltip-address pin-tooltip-address--empty";
+        tipAddr.textContent = pin.address ?? "— sans adresse —";
+        tip.appendChild(tipAddr);
         el.appendChild(tip);
 
         // Draft badge (hover only).
@@ -769,6 +781,13 @@ const PinsPage: NextPageWithLayout<PinsPageProps> = ({ pins: initialPins }) => {
               ×
             </button>
           </div>
+          <p className="mt-3 text-xs leading-snug text-ink/70">
+            {inspectPin.address ? (
+              inspectPin.address
+            ) : (
+              <span className="italic text-ink/35">— sans adresse —</span>
+            )}
+          </p>
           <div className="mt-3">
             {inspectPin.isPublished ? (
               <span className="inline-block rounded-full bg-primary-container px-3 py-1 text-[10px] uppercase tracking-[0.12em] text-cream">
