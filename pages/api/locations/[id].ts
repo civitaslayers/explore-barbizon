@@ -1,6 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
+// Coordinates are IEEE-754 doubles; a value that round-trips through Postgres
+// can differ from the submitted number in its least-significant bits. Compare
+// with a tolerance far below any real-world coordinate significance
+// (1e-9 deg ≈ 0.1 mm) instead of strict equality — strict === here previously
+// failed verification AFTER the UPDATE had already committed.
+const COORD_EPSILON = 1e-9;
+
 const ALLOWED_FIELDS = [
   "name",
   "short_description",
@@ -115,30 +122,59 @@ export default async function handler(
     return res.status(500).json({ error: "Update affected zero rows" });
   }
 
-  const { data: verified, error: verifyError } = await supabaseAdmin
+  // The row RETURNING from the UPDATE is the persisted truth — it is exactly
+  // what the committed write stored. The re-select below is only a secondary
+  // cross-check; it is NEVER the source of truth, and its failure must not be
+  // reported as a failed save (the UPDATE has already committed).
+  const persisted = updatedRows[0];
+
+  const { data: verified } = await supabaseAdmin
     .from("locations")
     .select("latitude, longitude")
     .eq("id", id)
     .maybeSingle<VerifiedRow>();
 
-  if (verifyError || !verified) {
-    return res.status(500).json({
-      error: "Write verification failed: could not re-fetch location",
-    });
-  }
+  // Float-safe comparison — never strict === on double-precision coordinates.
+  const approxEqual = (a: number, b: number) => Math.abs(a - b) < COORD_EPSILON;
 
-  if (
-    ("latitude" in payload && verified.latitude !== payload.latitude) ||
-    ("longitude" in payload && verified.longitude !== payload.longitude)
-  ) {
+  const intendedLat =
+    "latitude" in payload ? Number(payload.latitude) : undefined;
+  const intendedLng =
+    "longitude" in payload ? Number(payload.longitude) : undefined;
+
+  const persistedDiffersFromIntent =
+    (intendedLat !== undefined &&
+      !approxEqual(persisted.latitude, intendedLat)) ||
+    (intendedLng !== undefined &&
+      !approxEqual(persisted.longitude, intendedLng));
+
+  // Cross-check the independent re-select against the returning row.
+  const reSelectDiffers =
+    !!verified &&
+    (!approxEqual(persisted.latitude, verified.latitude) ||
+      !approxEqual(persisted.longitude, verified.longitude));
+
+  if (persistedDiffersFromIntent || reSelectDiffers) {
+    // CRITICAL: the UPDATE has already committed. This is NOT a failed save —
+    // the database changed. Report it distinctly (with committed: true) so the
+    // operator knows production data moved and can reconcile it.
     return res.status(500).json({
+      committed: true,
+      after: { lat: persisted.latitude, lng: persisted.longitude },
       error:
-        "Write verification failed: persisted values do not match intended update",
+        `Write COMMITTED — persisted values differ: lat ${persisted.latitude}, ` +
+        `lng ${persisted.longitude}` +
+        (verified
+          ? ` (re-select read lat ${verified.latitude}, lng ${verified.longitude})`
+          : ""),
     });
   }
 
   return res.status(200).json({
     before: { lat: existing.latitude, lng: existing.longitude },
-    after: { lat: verified.latitude, lng: verified.longitude },
+    after: { lat: persisted.latitude, lng: persisted.longitude },
+    ...(verified
+      ? {}
+      : { warning: "Write committed; re-select cross-check unavailable" }),
   });
 }
