@@ -134,7 +134,11 @@ function haversineMeters(
 const STACK_THRESHOLD_M = 2.5;
 const FAN_RADIUS_PX = 18;
 
-type StackInfo = { size: number; offset: [number, number] };
+type StackInfo = {
+  size: number;
+  offset: [number, number];
+  members: string[]; // pin ids in the same cluster (incl. self)
+};
 
 // Cluster pins by physical proximity, then assign each member of a 2+ cluster a
 // pixel offset on a small upward fan. Pure geometry, computed once at load.
@@ -158,13 +162,14 @@ function computeStacks(pins: AdminPin[]): Map<string, StackInfo> {
   for (const cluster of clusters) {
     if (cluster.length < 2) continue;
     const n = cluster.length;
+    const members = cluster.map((p) => p.id);
     cluster.forEach((pin, i) => {
       const angle = -Math.PI / 2 + (i - (n - 1) / 2) * (Math.PI / 5);
       const offset: [number, number] = [
         FAN_RADIUS_PX * Math.cos(angle),
         FAN_RADIUS_PX * Math.sin(angle),
       ];
-      info.set(pin.id, { size: n, offset });
+      info.set(pin.id, { size: n, offset, members });
     });
   }
   return info;
@@ -233,6 +238,8 @@ const PinsPage: NextPageWithLayout<PinsPageProps> = ({ pins: initialPins }) => {
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<Map<string, mapboxgl.Marker>>(new Map());
   const pinsRef = useRef<Map<string, AdminPin>>(new Map());
+  // pinId -> the ids of every marker in its visual stack (incl. self).
+  const stackClustersRef = useRef<Map<string, string[]>>(new Map());
 
   const [pins, setPins] = useState<AdminPin[]>(initialPins);
   const [searchQuery, setSearchQuery] = useState("");
@@ -260,6 +267,24 @@ const PinsPage: NextPageWithLayout<PinsPageProps> = ({ pins: initialPins }) => {
     const pin = pinsRef.current.get(pinId);
     const marker = markersRef.current.get(pinId);
     if (pin && marker) marker.setLngLat([pin.longitude, pin.latitude]);
+  }, []);
+
+  // Dissolve a visual stack: drop the fan offset + leader line + count badge
+  // from every marker in the cluster so they return to their true points and
+  // each drags independently. Called when a stacked marker starts to drag.
+  const dissolveStack = useCallback((pinId: string) => {
+    const members = stackClustersRef.current.get(pinId);
+    if (!members) return;
+    members.forEach((memberId) => {
+      const marker = markersRef.current.get(memberId);
+      if (marker) {
+        marker.setOffset([0, 0]);
+        const el = marker.getElement();
+        el.querySelector(".pin-leader")?.remove();
+        el.querySelector(".pin-stack-badge")?.remove();
+      }
+      stackClustersRef.current.delete(memberId);
+    });
   }, []);
 
   // Briefly pulse a marker's dot (used to highlight a search match).
@@ -318,6 +343,9 @@ const PinsPage: NextPageWithLayout<PinsPageProps> = ({ pins: initialPins }) => {
 
     map.on("load", () => {
       const stacks = computeStacks(initialPins);
+      stacks.forEach((info, pinId) =>
+        stackClustersRef.current.set(pinId, info.members)
+      );
 
       initialPins.forEach((pin) => {
         const stack = stacks.get(pin.id);
@@ -350,7 +378,7 @@ const PinsPage: NextPageWithLayout<PinsPageProps> = ({ pins: initialPins }) => {
         if (!pin.isPublished) {
           const brouillon = document.createElement("div");
           brouillon.className = "pin-brouillon";
-          brouillon.textContent = "brouillon";
+          brouillon.textContent = "Brouillon";
           el.appendChild(brouillon);
         }
 
@@ -379,6 +407,9 @@ const PinsPage: NextPageWithLayout<PinsPageProps> = ({ pins: initialPins }) => {
         });
         marker.on("dragstart", () => {
           dragged = true;
+          // Detach from the stack the moment a drag begins so this marker
+          // separates and moves on its own.
+          dissolveStack(pin.id);
         });
         marker.on("dragend", () => handleDragEnd(pin.id));
         el.addEventListener("click", () => {
@@ -744,8 +775,8 @@ const PinsPage: NextPageWithLayout<PinsPageProps> = ({ pins: initialPins }) => {
                 Published
               </span>
             ) : (
-              <span className="inline-block rounded-full bg-secondary-container px-3 py-1 text-[10px] uppercase tracking-[0.12em] text-on-secondary-container">
-                Brouillon · Draft
+              <span className="inline-block rounded-full bg-secondary-container px-3 py-1 text-[10px] tracking-[0.06em] text-on-secondary-container">
+                Brouillon
               </span>
             )}
           </div>
