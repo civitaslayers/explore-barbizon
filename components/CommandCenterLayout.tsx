@@ -8,6 +8,7 @@ const navItems = [
   { label: "Decisions", href: "/command-center/decisions" },
   { label: "Memory", href: "/command-center/memory" },
   { label: "Prompts", href: "/command-center/prompts" },
+  { label: "Atlas", href: "/command-center/atlas" },
   { label: "Éditeur de pins", href: "/command-center/pins" },
 ];
 
