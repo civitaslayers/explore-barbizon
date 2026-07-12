@@ -1,8 +1,9 @@
 # CCC v3 — "La Fiche" — Architecture & Feature Proposal
 
-Status: Stage 0 planning output. No code. For the Luigi + Claude human gate.
-Author: civitas-architect
-Date: 2026-07-11
+Status: Stage 0 planning output — **human gate PASSED 2026-07-12**. Review corrections
+applied; open questions resolved (see Section 7); Phase 1 authorized to implement.
+Author: civitas-architect · Gate corrections: lead session (live-SQL verified)
+Date: 2026-07-11 · Gate-corrected: 2026-07-12
 
 ---
 
@@ -29,9 +30,9 @@ heritage atlas. It stays strictly inside the 7 locked decisions in
   and is absent from `LocationFull` (`lib/supabase.ts:298–311`) — so
   `locations.opening_hours` currently has **no public renderer**; it is effectively
   unrendered/dead on the public site today. The type-shape claim
-  (`Record<string, string> | null`) holds either way, but the absence of a live
-  renderer makes Open Question 1's live-data key-convention check **more** load-bearing,
-  not less — there is no shipped render precedent to conform the editor to.
+  (`Record<string, string> | null`) holds either way. **Resolved at the gate:** because
+  there is no shipped render precedent, Phase 2 adds a parent-field renderer built to the
+  post-normalization lowercase-English/French-display convention (Section 3.4).
 - `location_functions`, `tour_stops`, `media` shapes — `lib/supabase.ts`
   (`getLocationFull`, lines 313–358), `pages/tours/[slug].tsx`, `docs/schema-reference.md`.
 - Verified-write pattern — `pages/api/locations/[id].ts` (epsilon compare, RETURNING
@@ -53,13 +54,29 @@ heritage atlas. It stays strictly inside the 7 locked decisions in
    from `lib/supabase.types.ts`** — the API route already documents this staleness
    (comment at lines 30–33) and types those fields with local row shapes.
 
-**Could not run live SQL:** the Supabase MCP `execute_sql` / `list_tables` read tools
-were not exposed as callable in this planning session. Consequences, stated honestly:
-(a) completeness gap counts below are **structural** (derived from the schema and the
-known content backlog), not measured; (b) the exact `opening_hours` day-key convention
-(`"Lundi"` vs `"lundi"` vs `"Mon–Fri"` vs mixed) is **to confirm from live data** before
-the hours editor is built — the editor design below is deliberately non-destructive of
-whatever keys already exist. A one-query confirmation is listed in Open Questions.
+**Live SQL — run at the human gate (2026-07-12).** The Supabase MCP read tools were not
+callable during Stage 0 planning, so the original draft's gap counts were structural. At
+the gate they were confirmed against the live DB. Findings folded into this plan:
+- **`stories` is a LIVE table** (9 rows: `slug, title, subtitle, body, cover_image_url,
+  author, published_at, is_published, is_premium, theme, type`), queried in production
+  (`pages/stories/[slug].tsx`, `pages/stories/index.tsx`). The draft's claim that stories
+  are "static / proposed only" was wrong — corrected in Section 3.10. `data/stories.ts` is
+  only a 2-entry static *fallback*, not the source of truth. **However there is still no
+  `story_locations` join table and no code linking a story to a location** — `stories` FKs
+  only to `towns`. So per-location "story mentions" remain non-relational (Section 3.10, OQ3).
+- **`opening_hours` key convention is genuinely MIXED** across the 16 rows that have hours:
+  3-letter lowercase English (`mon…sun`), full lowercase English (`monday…sunday`), plus
+  non-day keys (`check_in` / `check_out` on accommodation, `default`). Gate decision:
+  **canonicalise to lowercase English day-keys with a French display mapping**, via a
+  16-row normalization migration (Section 3.4, Phase 2, OQ1).
+- **`locations.opening_hours` has no public renderer today** (selected in
+  `getPublishedLocations` at `lib/supabase.ts:160`, then discarded by `toPlace()` at
+  `lib/supabase.ts:78–93`; absent from `LocationFull`). The public render at
+  `pages/places/[slug].tsx:149–205` is for `location_functions.opening_hours` — a
+  *different table's* column. Gate decision: **add the parent-field renderer in Phase 2**
+  alongside the editor (Section 3.4, Phase 2).
+- **16 locations** have non-empty `opening_hours`; **3 `media` rows** exist total across
+  107 locations — the completeness gap the worklist is built to close is real and large.
 
 **Live `locations` columns treated as authoritative for this plan:**
 `id, town_id, category_id, name, slug, short_description, full_description, narrative,
@@ -247,29 +264,43 @@ Fields: `address`, `phone`, `website`, `booking_url` (booking_url shown **only**
 accommodation categories, per the schema rule — Hotel / Chambre d'hôtes), and the
 hours editor.
 
-**`opening_hours` jsonb shape being edited** (verified from code, key convention
-to-confirm from live data):
+**`opening_hours` jsonb shape — RESOLVED at the gate (verified against live data).** The
+16 rows with hours use a **mixed** convention today: 3-letter lowercase English
+(`mon…sun`), full lowercase English (`monday…sunday`), and non-day keys (`check_in` /
+`check_out` on accommodation, `default`). **Gate decision: canonicalise to lowercase
+English day-keys** (`mon, tue, wed, thu, fri, sat, sun`) as the stored shape, with a
+**French display mapping** (`mon → "Lundi"`, …) applied in the UI and public renderer:
 
 ```jsonc
-// Flat object: day label → hours string. Keys rendered literally on the public page.
-{ "Lundi": "Fermé", "Mardi": "12:00–14:00, 19:00–22:00", "Mercredi": "12:00–14:00" }
+// STORED shape (canonical): lowercase English day-key → hours string.
+{ "mon": "Fermé", "tue": "12:00–14:00, 19:00–22:00", "wed": "12:00–14:00" }
+// DISPLAYED as: Lundi · Fermé / Mardi · 12:00–14:00, 19:00–22:00 / …
 ```
 
+**16-row normalization migration (Phase 2, human-gated path).** A one-time migration maps
+existing keys to canonical form: `monday→mon … sunday→sun`; 3-letter keys pass through;
+`check_in` / `check_out` / `default` are **preserved as-is** (non-day keys — accommodation
+check-in/out times and a single "default" catch-all are legitimate). Only 16 rows are
+touched. The migration is a proposal here; it runs via the human-gated direct-migration
+path (Section 3.9 / OQ5), same as the DB-hygiene migration.
+
 Editor design (`OpeningHoursEditor.tsx`), **non-destructive**:
-- Presents **7 canonical French day rows** (Lundi…Dimanche) as label + free-text hours
-  input. Free-text (not a time-picker) because the real data holds strings like
-  "Fermé", ranges, and split services — a picker would fight the data.
-- **Preserves unknown keys:** if the stored object contains any key outside the 7
-  canonical days (e.g. `"Mon–Fri"`, or a lowercase variant), those are shown in a
-  clearly-labelled "Autres entrées (existantes)" list, editable but never silently
-  dropped. This is the safety valve for the unconfirmed key convention.
-- Empty inputs are **omitted** from the written object (matching the public renderer,
-  which filters empty values) so we never persist `""` noise.
-- Writes the whole `opening_hours` object as one PATCH field (it's a single jsonb column).
+- Presents **7 day rows labelled in French** (Lundi…Dimanche) bound to the canonical
+  lowercase English keys (`mon…sun`) as label + free-text hours input. Free-text (not a
+  time-picker) because the real data holds strings like "Fermé", ranges, and split
+  services — a picker would fight the data.
+- **Preserves non-day / unknown keys:** `check_in`, `check_out`, `default`, or any key
+  outside `mon…sun` are shown in a clearly-labelled "Autres entrées (existantes)" list,
+  editable but never silently dropped — the safety valve if a row escaped normalization.
+- Empty inputs are **omitted** from the written object (matching the renderer, which
+  filters empty values) so we never persist `""` noise.
+- Writes the whole `opening_hours` object as one PATCH field (single jsonb column).
   **Requires adding `opening_hours` to `ALLOWED_FIELDS`** (3.9).
 
-Before this ships, confirm the live key convention (Open Question 1) and canonicalise or
-consciously keep mixed keys — the editor is built to survive either answer.
+**Parent-field renderer (Phase 2).** Because `locations.opening_hours` is currently
+discarded by `toPlace()` and unrendered on the public site (Section 0), Phase 2 also adds
+the public renderer for the parent field, using the same lowercase-key → French-label
+mapping. Without it, hours edited in the fiche would save but never appear publicly.
 
 ### 3.5 Flags / curation
 Reuse the current dashboard fieldset, minus publishing (which is promoted to its own
@@ -356,14 +387,15 @@ address, website, phone, the flags, and coords are already allowed.)
 
 Three linked-entity blocks. **Recommendation: all three are read-only in v3**, with
 navigation links out. Reasoning: v3's job is to make the ~106 locations *individually
-complete and correct*; editing relationships is a different, higher-risk surface, and two
-of the three aren't even fully backed by tables yet.
+complete and correct*; editing relationships is a different, higher-risk surface. Two of
+the three (`location_functions`, `tour_stops`) have real join structure to locations; the
+third (`stories`) is a live table but has **no relational link to locations at all**.
 
 | Block | Real backing | v3 decision |
 |---|---|---|
 | **`location_functions`** (multi-service venues) | Live table (`location_functions`), has its own `label, description, website, phone, opening_hours, is_primary, category_id`. | **Read-only list** in v3. Show each function's label + category + a "cette fiche a N services". Editing a function means editing a second nested record with its *own* hours jsonb and proximity-irrelevant fields — a real sub-editor. Defer to a v3.1 "function editor" rather than rush it. Do surface it read-only so the operator sees why a venue looks "incomplete" (its content may live on a function). **Completeness must account for this** — see 4.3. |
 | **`tour_stops` appearances** | Live table (`tour_stops`: `tour_id, location_id, stop_order, stop_narrative`). | **Read-only list** of "apparaît dans N parcours" with `stop_order` + a link to the tour. Editing tour composition belongs to a future tour editor, not the location fiche. |
-| **Story mentions** | **No live table.** `stories` / `story_locations` are *proposed only* (schema-reference Part 2); stories currently live as **static data** in `data/stories.ts`, not the DB. | **Deferred / best-effort read-only.** In v3 either omit, or show a static-derived "mentionné dans" list read from `data/stories.ts` if those entries reference location slugs. Do **not** invent a `story_locations` table for v3. Flag as Open Question 3. |
+| **Story mentions** | **`stories` is a LIVE table** (9 rows, verified at the gate: `slug, title, subtitle, body, author, theme, type`), rendered in production at `pages/stories/[slug].tsx`. `data/stories.ts` is only a 2-entry static fallback. **But there is NO `story_locations` join table and no code linking a story to a location** — `stories` FKs only to `towns`. So a per-location "mentions" list cannot be derived relationally. | **Omitted in v3 (resolved, OQ3).** No relational backing exists to populate a reliable "mentionné dans" block, and free-text scanning of `stories.body` for a location name is too fragile to surface as fact on an archival instrument. Do **not** build a `story_locations` table in v3 (editorial-link schema is deferred with multi-town). A proper story↔location link + block is a v3.1+ item once that schema is designed. |
 
 Editable linked entities are explicitly **out of scope for v3** and called out as the
 natural v3.1 follow-on (a `location_functions` sub-editor first, since it's the only one
@@ -497,19 +529,15 @@ offline review / sharing with Luigi outside the app. Cheap, and a useful paper t
 alongside the audit table. Depends on nothing new. Slightly lower rank because the
 in-app worklist (Feature 1) covers most of the same need.
 
-**8. Geocode-assist for the position section — M (with a ToS caveat).** In the fiche
-position block, "coller une adresse → proposer des coordonnées" via the **Mapbox
-Geocoding API** (the map token is already present). **Verified caveat:** Mapbox's default
-geocoding is *temporary* and its terms forbid storing the returned coordinates; storing
-them in our DB requires *permanent* geocoding (`permanent=true`), which needs a card on
-file / enterprise contract and is internal-use-only. Since the fiche *does* persist coords
-to `locations`, a compliant implementation must use permanent geocoding — so this feature
-carries a real billing/ToS dependency, not just engineering. Ranked last for that reason;
-propose it only as an operator-confirmed *suggestion* whose ToS posture is settled with
-Luigi first. Depends on: Mapbox permanent-geocoding entitlement + the proximity guard on
-write.
+*(Dropped at the gate — Feature 8, geocode-assist. The original draft proposed
+address→coords suggestion via the Mapbox Geocoding API, but persisting returned
+coordinates to our DB requires Mapbox **permanent** geocoding (`permanent=true`) — a
+billing/ToS entitlement, not just engineering — because default geocoding is temporary and
+its terms forbid storing results. Gate decision (OQ7): **not wanted.** Manual pin
+placement, the current working model proven in the ~50-pin verification pass, is
+sufficient; the ToS/billing dependency isn't worth it for a single-operator atlas.)*
 
-*(Considered and dropped: bulk field editing — collides with locked decision 3's
+*(Also considered and dropped: bulk field editing — collides with locked decision 3's
 "never part of a bulk op" and the single-operator care ethic; and any "apply default
 hours to all" macro for the same reason.)*
 
@@ -537,15 +565,26 @@ Ship: `/command-center/atlas/[id]` full fiche (all sections 3.1–3.8), the
 `location_edits` table (via the human-gated migration path), the distinct publish block
 with confirm-summary, the unsaved-changes guard (Feature 3), and edit-history read
 (Feature 4). Writes production through the verified-write pattern only.
-Risks: (a) **`opening_hours` key convention unconfirmed** — resolve Open Question 1 with a
-one-query check *before* building the editor; the non-destructive "Autres entrées" design
-is the safety net if the answer is "mixed". (b) publish confirm-summary must be genuinely
-un-bypassable and never wired to any list-level control (locked decision 3). (c) audit
-insert must never fail a committed write (mirror the re-select discipline).
+**Two data-layer items resolved at the gate ship in this phase:**
+- **`opening_hours` 16-row normalization migration** — canonicalise existing keys to
+  lowercase English day-keys (`monday→mon`…; preserve `check_in`/`check_out`/`default`),
+  run via the human-gated migration path. Do it *before* wiring the editor so the editor
+  reads a clean shape.
+- **Parent-field public renderer** — add the `locations.opening_hours` renderer to
+  `pages/places/[slug].tsx` (with the lowercase-key → French-label mapping), so hours
+  edited in the fiche actually appear publicly. Without it, the editor writes into a dead
+  field.
+Risks: (a) the normalization migration touches live production rows (16) — run it on the
+human-gated path with a before/after row dump, and the editor's non-destructive "Autres
+entrées" list is the safety net for any key that escapes normalization. (b) publish
+confirm-summary must be genuinely un-bypassable and never wired to any list-level control
+(locked decision 3). (c) audit insert must never fail a committed write (mirror the
+re-select discipline).
 
 ### Phase 3 — Linked entities (read-only) + absorb-and-delete /dashboard + polish
 Ship: read-only `location_functions` / `tour_stops` blocks on the fiche (Section 3.10);
-story-mentions per the Open Question 3 resolution; near-duplicate detector (Feature 6),
+story-mentions **omitted** (OQ3 resolved — no relational link exists); near-duplicate
+detector (Feature 6),
 export (Feature 7), command-palette (Feature 5) as polish; then **redirect + remove**
 `/command-center/pins`, `/dashboard/locations`, `/dashboard/locations/[id]`, and sweep the
 legacy `/dashboard/places` + `/api/places/[id]` if confirmed dead; swap the sidebar entry
@@ -554,43 +593,43 @@ Risks: dangling links to old routes — grep for `/dashboard/locations` and
 `/command-center/pins` before deleting; keep redirects (not hard 404s) for any bookmarked
 URLs. Confirm `/dashboard/places` really is dead before removal.
 
-*(Geocode-assist, Feature 8, is not scheduled — it's gated on the Mapbox permanent-
-geocoding ToS decision and belongs in a later loop if Luigi wants it at all.)*
+*(Geocode-assist is dropped, not deferred — OQ7 resolved: manual pin placement is
+sufficient and the Mapbox permanent-geocoding ToS/billing dependency isn't worth it.)*
 
 ---
 
-## 7. Open Questions for the human gate
+## 7. Resolutions from the human gate (2026-07-12)
 
-1. **`opening_hours` key convention.** What day-keys does live data actually use —
-   canonical French (`"Lundi"`…), lowercase, English, or mixed / free-form ranges like
-   `"Mon–Fri"`? One read query settles it
-   (`select opening_hours from locations where opening_hours is not null limit 20`).
-   Decision needed: canonicalise to 7 French days, or keep whatever exists and only edit
-   in place? The editor is built non-destructively either way, but the answer changes
-   whether we run a one-time normalisation.
-2. **Completeness weights + Practical bar.** Are the Section 4.3 weights and the
-   category-group applicability right for how Luigi thinks about "done"? Specifically:
-   should Practical locations be scorable at all, or excluded from the worklist? And does
-   a multi-service venue's completeness roll up from its `location_functions` (4.3 caveat)
-   the way proposed?
-3. **Story mentions.** Stories are static (`data/stories.ts`), not a DB table. For v3: (a)
-   omit story mentions entirely, (b) show a best-effort read from `data/stories.ts` if it
-   references location slugs, or (c) is building `stories` + `story_locations` now in
-   scope? (Recommendation: (a) or (b); do not build the tables in v3 — multi-town/editorial
-   schema is deferred.)
-4. **`location_functions` editing.** Confirmed out of scope for v3 (read-only). Is a
-   `location_functions` sub-editor the right first v3.1 follow-on, ahead of tour/story
-   editors?
-5. **`location_edits` migration path.** The DDL is a proposal. On free-tier Supabase there
-   is no dev branch (`brain/current-state.md`) — so this table gets created via the
-   human-gated direct-migration path (as the DB-hygiene migration was). Confirm Luigi runs
-   it, and confirm append-only + no public exposure is acceptable as specified.
-6. **Legacy route sweep.** OK to redirect-then-remove `/dashboard/locations*`,
-   `/command-center/pins`, and (if dead) `/dashboard/places` + `/api/places/[id]` in Phase
-   3? Any bookmarks or external links to preserve?
-7. **Geocode-assist appetite.** Given the Mapbox permanent-geocoding ToS/billing caveat
-   (Section 5, Feature 8), is address→coords suggestion wanted at all, or is manual pin
-   placement (the current, working model) sufficient?
+All seven open questions were answered at the gate. Recorded here as the design authority
+Phase 1+ implements against.
+
+1. **`opening_hours` key convention → RESOLVED.** Live data is mixed (`mon…sun`,
+   `monday…sunday`, plus `check_in`/`check_out`/`default`). **Decision: canonicalise to
+   lowercase English day-keys with a French display mapping**, via a 16-row normalization
+   migration in Phase 2 (preserving the non-day keys), and add the parent-field public
+   renderer (Section 3.4, Phase 2).
+2. **Completeness weights + Practical bar → RESOLVED as proposed.** Section 4.3 weights and
+   category-group applicability accepted. Practical locations **remain scorable** (a
+   parking with category + short description + address reads 100%, correctly). Multi-service
+   venue completeness **rolls up** from `location_functions` per the 4.3 caveat.
+3. **Story mentions → RESOLVED: omitted in v3.** `stories` is confirmed a live table, but
+   there is no `story_locations` join and no code linking stories to locations, so no
+   reliable per-location "mentions" can be derived. Do **not** build the join table in v3
+   (editorial-link schema deferred with multi-town). Revisit in v3.1+ (Section 3.10).
+4. **`location_functions` editing → RESOLVED.** Out of scope for v3 (read-only). A
+   `location_functions` sub-editor is confirmed the **first v3.1 follow-on**, ahead of
+   tour/story editors — it's the only linked entity with a real table and real
+   completeness impact.
+5. **`location_edits` migration path → RESOLVED.** DDL accepted. Created via the
+   human-gated direct-migration path (no dev branch on free-tier Supabase). Append-only +
+   no public exposure accepted as specified; Luigi runs the migration at the Phase 2 gate.
+6. **Legacy route sweep → RESOLVED: approved.** Redirect-then-remove `/dashboard/locations*`,
+   `/command-center/pins`, and (once confirmed dead) `/dashboard/places` + `/api/places/[id]`
+   in Phase 3. Keep redirects (not hard 404s) for any bookmarked URLs; grep for inbound
+   links before deleting.
+7. **Geocode-assist → RESOLVED: dropped.** Not wanted. Manual pin placement (the proven
+   working model) is sufficient; the Mapbox permanent-geocoding ToS/billing dependency
+   isn't worth it for a single-operator atlas. Feature 8 removed from Section 5.
 
 ---
 
