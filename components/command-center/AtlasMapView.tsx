@@ -155,6 +155,7 @@ async function patchLocation(
     after?: { lat: number; lng: number };
     error?: string;
     proximity?: boolean;
+    committed?: boolean;
   };
 }> {
   const res = await fetch(`/api/locations/${id}`, {
@@ -174,6 +175,7 @@ async function patchLocation(
     after?: { lat: number; lng: number };
     error?: string;
     proximity?: boolean;
+    committed?: boolean;
   };
   try {
     data = raw ? JSON.parse(raw) : {};
@@ -553,6 +555,29 @@ export function AtlasMapView({
         setDragState(null);
         return;
       }
+      if (res.data.committed && res.data.after) {
+        // Write COMMITTED but diverged from intent — surface distinctly,
+        // never as a plain failure or a plain success (verified-write
+        // decision, 2026-07-10). The DB did change: move the marker to what
+        // actually persisted, do not revert.
+        const currentPin = pinsRef.current.get(pinId);
+        applySuccessfulPatch(
+          pinId,
+          res.data.before ??
+            (currentPin
+              ? { lat: currentPin.latitude, lng: currentPin.longitude }
+              : { lat, lng }),
+          res.data.after
+        );
+        setToast({
+          kind: "error",
+          message:
+            res.data.error ??
+            "Écriture COMMISE — valeurs persistées différentes.",
+        });
+        setDragState(null);
+        return;
+      }
       if (!res.ok || !res.data.before || !res.data.after) {
         snapMarkerBack(pinId);
         setToast({
@@ -643,6 +668,31 @@ export function AtlasMapView({
         return;
       }
 
+      if (draggedRes.data.committed && draggedRes.data.after) {
+        // Write COMMITTED but diverged from intent — surface distinctly,
+        // never as a plain failure or a plain success (verified-write
+        // decision, 2026-07-10). The DB did change: move the marker to what
+        // actually persisted, do not revert.
+        const currentPin = pinsRef.current.get(pinId);
+        applySuccessfulPatch(
+          pinId,
+          draggedRes.data.before ??
+            (currentPin
+              ? { lat: currentPin.latitude, lng: currentPin.longitude }
+              : { lat, lng }),
+          draggedRes.data.after,
+          { allowOverride: true }
+        );
+        setToast({
+          kind: "error",
+          message:
+            draggedRes.data.error ??
+            "Écriture COMMISE — valeurs persistées différentes.",
+        });
+        setProximityState(null);
+        return;
+      }
+
       if (!draggedRes.ok || !draggedRes.data.before || !draggedRes.data.after) {
         snapMarkerBack(pinId);
         setToast({
@@ -694,6 +744,20 @@ export function AtlasMapView({
           rawError: res.data.error ?? "",
         });
         setToast(null);
+        return;
+      }
+      if (res.data.committed && res.data.after) {
+        // Write COMMITTED but diverged from intent — surface distinctly,
+        // never as a plain failure or a plain success (verified-write
+        // decision, 2026-07-10). The DB did change: move the marker to what
+        // actually persisted, do not revert.
+        applySuccessfulPatch(pinId, res.data.before ?? before, res.data.after);
+        setToast({
+          kind: "error",
+          message:
+            res.data.error ??
+            "Écriture COMMISE — valeurs persistées différentes.",
+        });
         return;
       }
       if (!res.ok || !res.data.before || !res.data.after) {
