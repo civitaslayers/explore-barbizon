@@ -19,11 +19,11 @@ Responsibilities:
 - prompt generation for all other tools
 - content review and editorial quality checks
 - fact-checking direction and source verification
-- design review before Cursor implementation
+- design review before implementation
 - brain file oversight
 
-Claude points you to the right tool with the right prompt.
-Claude does not implement code directly.
+Claude (claude.ai) points to the right agent with the right plan. Code is
+implemented by the Claude Code agent loop, not by claude.ai directly.
 
 ---
 
@@ -41,16 +41,22 @@ All SQL is authored and executed by Claude directly. Luigi reviews results in th
 
 ---
 
-## Cursor — Implementer
+## Agent loop (Claude Code) — Implementer
+
+Implementation runs through the Claude Code agent loop (`/run-loop`), not a
+separate editor. civitas-architect plans → civitas-implementer writes code (or
+civitas-content-ops runs dev-branch SQL) → civitas-release-checker reviews →
+STOP at the human gate.
 
 Responsibilities:
 - writing and editing code
 - UI iteration and component-level changes
-- scoped file edits based on Claude's prompts
-- local build and lint checks
+- scoped file edits from the architect's plan
+- local build and lint checks (`npx tsc --noEmit`, `npm run lint`)
 
-Cursor receives precise prompts with named files and explicit constraints.
-Cursor does not redesign systems or touch unrelated files.
+The implementer works from a scoped plan with named files and explicit
+constraints. It does not redesign systems or touch unrelated files. The gate is
+structural — enforced by each agent's `tools:` allowlist and `prod-write-guard.sh`.
 
 ---
 
@@ -61,7 +67,7 @@ Responsibilities:
 - visual direction proposals
 
 All Stitch output must be reviewed by Claude against the Tailwind token system
-before being briefed to Cursor. Mismatches (off-token colours, spacing) are caught here.
+before being briefed to the agent loop. Mismatches (off-token colours, spacing) are caught here.
 
 ---
 
@@ -141,14 +147,14 @@ For all historical and cultural content, sources must be evaluated in order of a
 5. Return to claude.ai to verify output and plan next step
 
 ## Code tasks
-claude.ai → Cursor prompt → Cursor implements → Cursor commits
+claude.ai plan → Claude Code agent loop (architect → implementer → release-checker) → human gate
 
 ## Content tasks
 claude.ai → research direction → Perplexity/Grok research → claude.ai review
 → fact-check against Tier 1 sources → SQL generation → Claude executes via Supabase MCP
 
 ## Design tasks
-Stitch mockup → claude.ai design review against token system → Cursor prompt → implementation
+Stitch mockup → claude.ai design review against token system → agent-loop implementation
 
 ---
 
@@ -162,7 +168,7 @@ Supabase query, page component. 2–5 files.
 
 ### M — subsystem
 Stories layer, tours integration, dashboard module.
-Claude plans → Cursor implements in slices.
+Claude plans → the agent loop implements in slices.
 
 ### L — architecture change
 Multi-town migration, major schema redesign.
