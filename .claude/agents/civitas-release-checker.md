@@ -86,10 +86,24 @@ this class:
 - Do not mark the SEO audit ✅ on a local run alone — state explicitly that the
   local build/audit passed but the file-tracing/serverless-bundling class of
   failure cannot be verified locally.
-- Require `node scripts/seo-audit.mjs` to be run against the branch's **Vercel
-  Preview deployment URL** (not `localhost`) before this class of change is
-  treated as release-ready. If no preview URL is available to you, report this
-  as a blocking gap — not a pass — and name it explicitly in the output.
+- **Pre-merge (preview):** Vercel Preview deployments are protected by SSO, so
+  `scripts/seo-audit.mjs` (unauthenticated `fetch`) cannot score them — it only
+  reads the "Login – Vercel" wall. Instead, verify pre-merge with **authenticated
+  spot-fetches of the highest-risk routes** on the preview (e.g. the on-demand
+  `/en/...` dynamic routes — `/en/places/[slug]`, `/en/stories/[slug]`,
+  `/en/tours/[slug]`) via `web_fetch_vercel_url` (or a share/bypass link),
+  confirming each returns 200 with a real rendered page (title, hreflang,
+  JSON-LD, hydrated `_nextI18Next`) rather than a 500 or the login page. This is
+  the pre-merge gate for this change class.
+- **Post-merge (production):** run `node scripts/seo-audit.mjs` against the
+  **public production** URL immediately after merge — production is not SSO-gated,
+  so the audit produces a real per-scope score — and **note the prior production
+  deployment ID for instant rollback** if the audit or a manual `/en/` check
+  regresses.
+- Follow-up (queued): integrate a Vercel **Protection Bypass for Automation**
+  token (`x-vercel-protection-bypass` header) into `scripts/seo-audit.mjs` so the
+  full audit can run against protected previews and the pre-merge gate becomes
+  fully automated.
 
 ## Output format
 
