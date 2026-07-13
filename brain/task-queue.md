@@ -19,32 +19,31 @@ Task tags:
 ## Now
 *Unblocked tasks that can be started immediately.*
 
-- [x] [ccc-v3] Both human-gated migrations run + verified in production via Supabase MCP (2026-07-13): `location_edits` table; `opening_hours` key canonicalization (16 rows, 0 full-word remaining, non-day + object values preserved).
-- [user-action] Luigi: production visual pass on the fiche (`/command-center/atlas/[id]`) + card quick-edit once the Phase 2/2.1 deploy is green.
-- [x] [ccc-v3] Phase 1 — Atlas index (map + list, preview cards, completeness, filters) — shipped & deployed (commit 60f0612)
-- [x] [ccc-v3] Phase 2 — la fiche + card quick-edit + hours editor + parent renderer + audit + publish block + pins retirement — SHIP (5c1fd45, 13d7cae, eb61ba7)
-- [x] [ccc-v3] Phase 2.1 — AtlasMapView committed-but-diverged write handling — SHIP (3491d51)
+- [x] [i18n/seo] i18n + SEO foundation shipped to production (merge `54fa35b`, --no-ff): next-i18next routing, `getLocalized` (10/10 tests), `SeoHead`+JSON-LD, `sitemap.xml.tsx`, `seo-audit.mjs` gate, CCC `TranslationHealthPanel`; Cursor retired from CLAUDE.md + ai-operating-system.md; schema-reference documents translations + `v_translation_health`.
+- [x] [ccc-v3] Phase 1 / Phase 2 / Phase 2.1 shipped + both Phase 2 migrations run & verified in production (2026-07-13).
+- [user-action] Luigi: production visual pass on the fiche (`/command-center/atlas/[id]`) + card quick-edit (if not yet done).
 
 ---
 
 ## Next
-*Unblocked after Now tasks or after a specific blocker is resolved.*
+*Unblocked; in priority order.*
 
-- [i18n] French content migration (schema groundwork already applied 2026-07-13): draft French into `translations->'fr'` (status draft) → review in batches → promote (base←fr, en←old base, en hash stamped). Writers stamp `_meta.source_hash` from `v_translation_health` — never re-implement the hash logic. Live English base columns stay untouched until each batch is promoted.
-- [content] Photo sprint batch 1 with hours/website/address collection — Atlas "sans photo/horaires/adresse" filters are the worklist; fiche + card are the tools.
-- [content] ferme-du-couvent description pass (describes the plain, not the farm; verify "à l'ouest" against Tier-1 before publishing).
-- [schema] Update docs/schema-reference.md from live introspection — confirmed stale (curation_order missing; place_id/place_functions still in generated types; internal_notes/allow_proximity_override/booking_url absent; new `translations` columns + `v_translation_health` view not yet documented). Refresh from live DB.
+- **[BUG — do first] [frontend] tour-pages `is_published` content leak** — `/tours/[slug]` + its `getStaticPaths` are not gated on `is_published`, so unpublished tours are publicly reachable. Gate the path + props on `is_published` (mirror locations/stories). Small, high-priority.
+- [content] Content + photo sprint batch 1 — hours/website/address + photos via the Atlas "sans photo/horaires/adresse" worklist + fiche/card as the tools. Includes the ferme-du-couvent description pass (describes the plain, not the farm; verify "à l'ouest" against Tier-1 before publishing).
+- [i18n] French content migration (Option B) — draft French into `translations->'fr'` (status draft) → review in batches → promote (base←fr, en←old base, en hash stamped). Stamp `_meta.source_hash` from `v_translation_health`; never re-implement the hash. Base columns untouched until each batch is promoted.
+- [ccc-v3] Phase 3 loop — read-only linked entities (location_functions, tour_stops) on the fiche + absorb-and-delete `/dashboard/locations*` (and legacy `/dashboard/places` + `/api/places/[id]` if dead) + near-dup detector, export, command palette polish.
+- [chore] Regenerate `lib/supabase.types.ts` — stale post the 2026-07-13 migration (missing `translations`, `tours.is_published`, `v_translation_health`); CCC panel currently uses a local cast.
+- [seo] Tune `seo-audit.mjs` French title-length lower bound — the 50-char floor (English-content heuristic) mis-flags short French/proper-noun titles; adjust so real gaps surface without noise.
 
 ---
 
 ## Later
 *Valid work, not yet prioritised.*
 
-- [ccc-v3] Phase 3 loop — read-only linked entities (location_functions, tour_stops) on the fiche + absorb-and-delete `/dashboard/locations*` (and legacy `/dashboard/places` + `/api/places/[id]` if dead) + near-dup detector, export, command palette polish.
 - [ccc-v3] v3.1 — `location_functions` sub-editor (first editable-linked-entity follow-on).
-- [i18n] Wire/verify the locale routing (prefix-only, `fr` default + `/en/`) and `<SeoHead>` hreflang + x-default across pages, if not already landed in the parallel session.
-- [chore] Prune Cursor routing from CLAUDE.md, `docs/ai-operating-system.md`, `.claude/agents/*`, and brain files (per 2026-07-13 Cursor-retired decision).
+- [chore] Finish the Cursor-routing prune — `.claude/agents/*` + `.cursor/rules` (CLAUDE.md + ai-operating-system.md done 2026-07-13).
 - [content] Reshape object-valued `opening_hours` (epicerie-de-barbizon, galerie-des-pains, muse-galerie) into the string convention — currently preserved + shown read-only in the editor's "Autres entrées".
+- [schema] Finish docs/schema-reference.md refresh — translations + `v_translation_health` now documented; still stale on curation_order, place_id/place_functions in generated types, internal_notes/allow_proximity_override/booking_url.
 - [frontend] Tighten getStaticProps select on /places and /plan-your-visit — 136 kB page data warning
 - [infra] Update middleware → proxy convention ahead of Next.js major upgrade
 
