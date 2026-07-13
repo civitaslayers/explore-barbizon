@@ -13,6 +13,12 @@ import {
 } from "@/lib/supabase";
 import { staticMapUrl, hasMapbox } from "@/lib/mapbox";
 import { buildPlaceSchema } from "@/lib/seo";
+import {
+  DAY_KEYS,
+  DAY_LABELS_FR,
+  NON_DAY_LABELS_FR,
+  splitOpeningHours,
+} from "@/lib/openingHours";
 
 function haversineKm(
   a: { latitude: number; longitude: number },
@@ -124,6 +130,8 @@ function UnifiedPlaceArticle({ place }: { place: LocationFull }) {
       {place.functions.map((fn) => (
         <FunctionSection key={fn.id} fn={fn} />
       ))}
+
+      <LocationHoursSection hours={place.opening_hours} />
     </article>
   );
 }
@@ -218,6 +226,58 @@ function FunctionSection({ fn }: { fn: LocationFunction }) {
           </div>
         ) : null}
         {practicalBlock(fn)}
+      </div>
+    </section>
+  );
+}
+
+// Venue-level hours (locations.opening_hours) — distinct from per-function
+// hours (location_functions.opening_hours, rendered above via
+// practicalBlock). Kept visually distinct so a multi-service venue does not
+// look like its hours are duplicated. Display-normalizes via
+// lib/openingHours so this renders correctly whether or not the 16-row
+// normalization migration has run, and never drops an object-valued or
+// unrecognized key (see lib/openingHours.ts findings 1–2).
+function LocationHoursSection({
+  hours,
+}: {
+  hours: Record<string, unknown> | null;
+}) {
+  if (!hours) return null;
+  const { days, others } = splitOpeningHours(hours);
+  const dayRows = DAY_KEYS.filter((d) => days[d].trim().length > 0);
+  if (dayRows.length === 0 && others.length === 0) return null;
+
+  return (
+    <section className="border-t border-ink/10 pt-12 md:pt-14 lg:pt-16">
+      <div className="editorial-measure">
+        <p className="eyebrow">Horaires</p>
+        <dl className="mt-6 grid gap-2 text-xs leading-relaxed sm:grid-cols-2">
+          {dayRows.map((d) => (
+            <div
+              key={d}
+              className="flex justify-between gap-4 border-b border-ink/5 pb-2 last:border-0"
+            >
+              <dt className="text-ink/70">{DAY_LABELS_FR[d]}</dt>
+              <dd className="text-right text-ink/90 tabular-nums">
+                {days[d]}
+              </dd>
+            </div>
+          ))}
+          {others.map((entry) => (
+            <div
+              key={entry.key}
+              className="flex justify-between gap-4 border-b border-ink/5 pb-2 last:border-0"
+            >
+              <dt className="text-ink/70">
+                {NON_DAY_LABELS_FR[entry.key] ?? entry.key}
+              </dt>
+              <dd className="text-right text-ink/90 tabular-nums">
+                {entry.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
       </div>
     </section>
   );

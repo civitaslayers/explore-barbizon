@@ -306,6 +306,11 @@ export type LocationFull = {
   short_description: string | null;
   narrative: string | null;
   is_published: boolean;
+  // Parent-level venue hours (locations.opening_hours) — distinct from
+  // per-function hours (location_functions.opening_hours, see
+  // LocationFunction below). Previously selected then discarded by toPlace();
+  // this is the first public consumer (Phase 2, ccc-v3-fiche-plan §3.4).
+  opening_hours: Record<string, unknown> | null;
   functions: LocationFunction[];
   heroImage: string | null;
 };
@@ -319,7 +324,7 @@ export async function getLocationFull(
     .select(
       `
       id, name, slug, address, latitude, longitude,
-      short_description, narrative, is_published,
+      short_description, narrative, is_published, opening_hours,
       location_functions (
         id, label, description, website, phone, opening_hours,
         display_order, is_primary,
@@ -366,6 +371,7 @@ export async function getLocationFull(
     short_description: row.short_description,
     narrative: row.narrative,
     is_published: row.is_published,
+    opening_hours: row.opening_hours ?? null,
     functions,
     heroImage,
   };

@@ -31,6 +31,20 @@ const nextConfig = {
       },
     ];
   },
+
+  // CCC v3 Phase 2 — pins retirement (docs/ccc-v3-phase2-implementation-plan.md
+  // item 15). AtlasMapView shipped in Phase 1 with verified behaviour parity,
+  // so pages/command-center/pins.tsx is removed this phase; a permanent
+  // redirect (not a hard 404) keeps any bookmark working.
+  async redirects() {
+    return [
+      {
+        source: "/command-center/pins",
+        destination: "/command-center/atlas?view=map",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -25,18 +25,55 @@ const ALLOWED_FIELDS = [
   "is_premium",
   "curation_order",
   "allow_proximity_override",
+  // Phase 2 (CCC v3 "La Fiche") additions — docs/ccc-v3-phase2-implementation-plan.md §3.5.
+  "opening_hours",
+  "booking_url",
+  "internal_notes",
+  "qr_code_url",
+  "category_id",
 ] as const;
 
-// NOTE: `allow_proximity_override` is a live column (see docs/schema-reference.md)
-// but is missing from the generated lib/supabase.types.ts — that types file is
-// stale relative to the DB. Selects/updates touching this field are typed via
-// local row shapes below rather than the generated Database["locations"] types.
+// NOTE: `allow_proximity_override`, `opening_hours`, `booking_url`,
+// `internal_notes`, `qr_code_url`, `category_id` are all live columns (see
+// docs/schema-reference.md) but several are missing from the generated
+// lib/supabase.types.ts — that types file is stale relative to the DB.
+// Selects/updates touching these fields are typed via local row shapes below
+// rather than the generated Database["locations"] types.
+//
+// `ExistingRow` is intentionally widened to every ALLOWED_FIELDS column (not
+// just the coord/proximity trio) so the audit trail (below) always has a
+// real before-value to compare against — this is the only change to the
+// pre-write fetch. The UPDATE's own `.select()` and the independent
+// re-select (`UpdatedRow` / `VerifiedRow`) are UNCHANGED from the verified-
+// write pattern: they still select only latitude/longitude/allow_proximity_
+// override, and the epsilon coord-compare path below is untouched byte-for-
+// byte.
 type ExistingRow = {
   id: string;
+  name: string;
+  short_description: string | null;
+  full_description: string | null;
+  narrative: string | null;
+  address: string | null;
+  website: string | null;
+  phone: string | null;
   latitude: number;
   longitude: number;
+  is_published: boolean | null;
+  show_in_editorial: boolean | null;
+  show_on_map: boolean | null;
+  is_featured: boolean | null;
+  is_premium: boolean | null;
+  curation_order: number | null;
   allow_proximity_override: boolean | null;
+  opening_hours: Record<string, unknown> | null;
+  booking_url: string | null;
+  internal_notes: string | null;
+  qr_code_url: string | null;
+  category_id: string | null;
 };
+
+const EXISTING_SELECT = ["id", ...ALLOWED_FIELDS].join(", ");
 
 type UpdatedRow = {
   id: string;
@@ -49,6 +86,69 @@ type VerifiedRow = {
   latitude: number;
   longitude: number;
 };
+
+// ---------------------------------------------------------------------------
+// Audit trail (location_edits) — docs/ccc-v3-phase2-implementation-plan.md
+// §3.5 / docs/ccc-v3-fiche-plan.md §3.9. One row per changed field per write.
+//
+// HARD RULE: this must NEVER fail the committed write. The table may not
+// exist yet (migrations/create_location_edits.sql is human-gated, not yet
+// run) — a missing-relation error is caught, logged, and swallowed. The
+// response to the caller is decided ONLY by the coord-verification logic
+// below, exactly as before this change.
+// ---------------------------------------------------------------------------
+
+function stringifyAuditValue(value: unknown): string | null {
+  if (value === null || value === undefined) return null;
+  if (typeof value === "object") {
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return String(value);
+    }
+  }
+  return String(value);
+}
+
+async function recordLocationEdits(
+  locationId: string,
+  existing: Record<string, unknown>,
+  payload: Record<string, unknown>,
+  sourcePage: string | null
+): Promise<void> {
+  const fields = Object.keys(payload);
+  if (fields.length === 0) return;
+
+  const rows = fields.map((field) => ({
+    location_id: locationId,
+    field,
+    before_value: stringifyAuditValue(existing[field]),
+    after_value: stringifyAuditValue(payload[field]),
+    source_page: sourcePage,
+  }));
+
+  try {
+    // `location_edits` is absent from the generated types until the
+    // human-gated migration runs — cast the table name (same discipline the
+    // rest of this file already uses for stale-type columns, e.g.
+    // `.update(payload as any)` below).
+    const { error } = await supabaseAdmin
+      .from("location_edits" as any)
+      .insert(rows as any);
+    if (error) {
+      // Expected pre-migration (relation does not exist) — never fatal.
+      console.error(
+        "[location_edits] audit insert failed (non-fatal, write already committed):",
+        error.message
+      );
+    }
+  } catch (err) {
+    console.error(
+      "[location_edits] audit insert threw (non-fatal, write already committed):",
+      err instanceof Error ? err.message : err
+    );
+  }
+}
 
 export default async function handler(
   req: NextApiRequest,
@@ -67,6 +167,13 @@ export default async function handler(
     typeof req.body === "object" && req.body !== null
       ? (req.body as Record<string, unknown>)
       : {};
+
+  // `source_page` is provenance for the audit trail only (e.g.
+  // '/command-center/atlas/[id]' for the fiche, '/command-center/atlas#card'
+  // for the card quick-edit) — it is never an ALLOWED_FIELDS column and is
+  // never written to `locations`.
+  const sourcePage =
+    typeof body.source_page === "string" ? body.source_page : null;
 
   const payload: Record<string, unknown> = {};
   for (const key of ALLOWED_FIELDS) {
@@ -93,7 +200,7 @@ export default async function handler(
 
   const { data: existing, error: fetchError } = await supabaseAdmin
     .from("locations")
-    .select("id, latitude, longitude, allow_proximity_override")
+    .select(EXISTING_SELECT)
     .eq("id", id)
     .maybeSingle<ExistingRow>();
 
@@ -121,6 +228,14 @@ export default async function handler(
   if (!updatedRows || updatedRows.length === 0) {
     return res.status(500).json({ error: "Update affected zero rows" });
   }
+
+  // The UPDATE has committed at this point — record the audit trail before
+  // any further branching. Both possible responses below (200 success, or
+  // the 500 "committed: true" divergence path) represent a real committed
+  // write, so the audit fires unconditionally here rather than only on the
+  // success path. This call can never fail the request — see
+  // recordLocationEdits' internal try/catch.
+  await recordLocationEdits(existing.id, existing, payload, sourcePage);
 
   // The row RETURNING from the UPDATE is the persisted truth — it is exactly
   // what the committed write stored. The re-select below is only a secondary

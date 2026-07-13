@@ -146,6 +146,12 @@ export const getServerSideProps: GetServerSideProps<AtlasIndexProps> = async () 
       mediaCount,
       updatedAt: row.updated_at,
       completeness,
+      // Phase 2 card quick-edit (§2.1) — the row already selects these three
+      // columns for the completeness rollup above; serialize them to the
+      // client prop so LocationPreviewCard can inline-edit them.
+      phone: row.phone,
+      website: row.website,
+      openingHours: row.opening_hours,
     };
   });
 
@@ -253,7 +259,13 @@ const AtlasIndexPage: NextPageWithLayout<AtlasIndexProps> = ({ locations }) => {
 
       {selectedLocation ? (
         <LocationPreviewCard
+          // Keyed by id so the card's Phase 2 quick-edit field state (address/
+          // phone/website/opening_hours) resets cleanly when the selection
+          // changes to a different location, rather than carrying over stale
+          // local state from the previously-selected card.
+          key={selectedLocation.id}
           location={selectedLocation}
+          view={view}
           onClose={() => handleSelect(null)}
           onCenter={view === "map" ? handleCenter : undefined}
         />
