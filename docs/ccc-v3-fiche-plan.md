@@ -3,7 +3,8 @@
 Status: Stage 0 planning output — **human gate PASSED 2026-07-12**. Review corrections
 applied; open questions resolved (see Section 7); Phase 1 authorized to implement.
 Author: civitas-architect · Gate corrections: lead session (live-SQL verified)
-Date: 2026-07-11 · Gate-corrected: 2026-07-12
+Date: 2026-07-11 · Gate-corrected: 2026-07-12 · Phase-2 scope amendment: 2026-07-13
+(pins retirement pulled forward into Phase 2; inline quick-edit added to the preview card).
 
 ---
 
@@ -103,7 +104,7 @@ Concrete URL structure:
 | `/command-center/atlas?view=list` | Atlas index, **List** view w/ completeness filters | `pages/dashboard/locations/index.tsx` |
 | `/command-center/atlas?view=…&sel=<id>` | Preview card open for a location (shallow-routed, over either view) | — |
 | `/command-center/atlas/[id]` | **La Fiche** — full-record editor | `pages/dashboard/locations/[id].tsx` |
-| `/command-center/pins` | **301/redirect** → `/command-center/atlas?view=map` (Phase 3) | itself |
+| `/command-center/pins` | **redirect** → `/command-center/atlas?view=map`, then remove (**Phase 2** — pulled forward) | itself |
 | `/dashboard/locations`, `/dashboard/locations/[id]` | **redirect** → atlas equivalents (Phase 3) | themselves |
 
 ### 1.2 Why sibling routes, argued
@@ -155,12 +156,13 @@ Created:
 - `lib/completeness.ts` — pure scoring function, shared server + client (Section 4).
 - `migrations/create_location_edits.sql` — audit table DDL (proposal, Section 3.9).
 
-Absorbed then redirected (Phase 3): `pages/command-center/pins.tsx`,
-`pages/dashboard/locations/index.tsx`, `pages/dashboard/locations/[id].tsx`, and the
-sidebar entry in `components/CommandCenterLayout.tsx` ("Éditeur de pins" → "Atlas").
-Note there is also a legacy `pages/dashboard/places/index.tsx` and
-`pages/api/places/[id].ts` — flagged for the Phase 3 sweep, confirm they are dead before
-removal.
+Absorbed then redirected — **`pages/command-center/pins.tsx` retires in Phase 2** (redirect
+`/command-center/pins` → `/command-center/atlas?view=map`, remove the file and its "Éditeur
+de pins" sidebar entry): AtlasMapView shipped in Phase 1 with verified behaviour parity, so
+the fallback has served its purpose and one interactive map editor is enough. The dashboard
+set — `pages/dashboard/locations/index.tsx`, `pages/dashboard/locations/[id].tsx`, and the
+legacy `pages/dashboard/places/index.tsx` + `pages/api/places/[id].ts` (confirm dead first)
+— stays for the **Phase 3** sweep.
 
 Modified: `pages/api/locations/[id].ts` (extend `ALLOWED_FIELDS`, add audit writes —
 Section 3.9); `components/CommandCenterLayout.tsx` (nav label + href).
@@ -170,10 +172,17 @@ Section 3.9); `components/CommandCenterLayout.tsx` (nav label + href).
 ## 2. The Preview Card
 
 `components/command-center/LocationPreviewCard.tsx`. Opens on selecting a pin (map) or a
-row (list); rendered identically from both views. It is a **read-mostly summary that
-answers "what is this and what's missing"** — the launch pad into the fiche, not an
-editor itself. Design language: the existing `.card` token (`rounded-card`,
-`bg-cream/90`, `shadow-ambient`), no 1px dividers (No-Line rule), umber-tinted shadow.
+row (list); rendered identically from both views. It answers **"what is this and what's
+missing"** and, from Phase 2, is also the **fast pass** for practical-field edits — the
+card is the quick pass, the fiche is the deep pass. Design language: the existing `.card`
+token (`rounded-card`, `bg-cream/90`, `shadow-ambient`), no 1px dividers (No-Line rule),
+umber-tinted shadow.
+
+**Phase split:** Phase 1 shipped the card read-only with "Ouvrir la fiche" disabled (the
+fiche route did not exist yet). Phase 2 turns "Ouvrir la fiche" live **and** makes the four
+practical fields — `address`, `phone`, `website`, `opening_hours` — **inline-editable on the
+card** (see "Quick-edit" below). Descriptions, flags, publishing, and edit history stay
+**fiche-only** — the card never publishes and never edits editorial copy.
 
 Exact contents, every field named against real columns:
 
@@ -187,7 +196,7 @@ Exact contents, every field named against real columns:
 | Short description | `locations.short_description` | Truncated 2 lines; if null, an empty-state line. |
 | Published state | `locations.is_published` | Distinct visual: published = `primary-container` solid chip; draft = `secondary-container` chip. The existing pins inspector (`pins.tsx:792–801`) labels these in **English "Published"** with a French draft "Brouillon" (mixed). **Recommendation: standardise the fiche/card to French — "Publié" / "Brouillon" —** since the tool is French-facing (nav "Éditeur de pins", "sans adresse", "Brouillon"); flagged as a small consistency fix, not a match-existing. Read-only on the card — publishing happens only in the fiche with a confirm summary. |
 | Completeness | `lib/completeness.ts` (Section 4) | A small ring / bar + `NN%`, tinted by band (see 4.4). This is the card's most operational element. |
-| Expand affordance | — | Primary action "Ouvrir la fiche →" (`next/link` to `/atlas/[id]`), plus the whole card body is clickable. On the map, a secondary "Centrer" re-centres without leaving. |
+| Expand affordance | — | Primary action "Ouvrir la fiche →" (`next/link` to `/atlas/[id]`) — **disabled in Phase 1, live from Phase 2** — plus the whole card body is clickable. On the map, a secondary "Centrer" re-centres without leaving. |
 
 The card also carries the two flags most relevant to triage as tiny muted markers
 (not editable here): `show_on_map` and `show_in_editorial` — because a location can be
@@ -195,6 +204,33 @@ published yet hidden from a surface, and that is worth seeing at a glance.
 
 Coordinates are shown read-only in monospace (as the pins inspector does) — dragging
 remains the map view's job, not the card's.
+
+### 2.1 Quick-edit on the card (Phase 2)
+
+The card's practical fields become **inline-editable** — the fast pass for the exact gaps
+the completeness worklist surfaces (address, hours, phone, website are the bulk of what the
+content sprint fills). Scope, deliberately narrow:
+
+- **Editable inline:** `address`, `phone`, `website`, `opening_hours`. Text fields are
+  click-to-edit inputs; `opening_hours` reuses the `OpeningHoursEditor` (Section 3.4) in a
+  compact popover over the card, writing the same canonical lowercase-English-key jsonb.
+- **NOT on the card:** `short_description` / `full_description` / `narrative` (editorial —
+  fiche only), all flags, `category_id`, position, and **`is_published`** (publishing is a
+  fiche-only human act with a confirm summary — locked decision 3; the card never
+  publishes and is never part of a bulk control).
+- **Same write path, no exception:** edits go through the same `PATCH /api/locations/[id]`
+  (locked decision 2) — verified-write, **changed-fields-only** (the card diffs just the
+  field touched), no client-direct Supabase write. `opening_hours` and `booking_url` must
+  be in `ALLOWED_FIELDS` (already required by 3.9); `address`/`phone`/`website` already are.
+- **Audit provenance:** card writes record `location_edits` rows with
+  `source_page = '/command-center/atlas#card'`, distinct from the fiche's
+  `'/command-center/atlas/[id]'` — so history shows whether a value was fixed in the fast
+  pass or the deep pass (exactly the provenance locked decision 5 exists for).
+- **Save state:** per-field saved/dirty/error inline (same discipline as the fiche's
+  unsaved-changes guard, Feature 3) — since the card writes production with no sandbox.
+
+The card stays a card: quick-edit is for the four practical gaps, not a second editor.
+Anything structural or editorial routes through "Ouvrir la fiche".
 
 ---
 
@@ -349,7 +385,7 @@ create table if not exists public.location_edits (
   field        text not null,            -- e.g. 'latitude', 'short_description', 'is_published'
   before_value text,                     -- stringified previous value (null-safe)
   after_value  text,                     -- stringified new value
-  source_page  text,                     -- e.g. '/command-center/atlas/[id]'
+  source_page  text,                     -- e.g. '/command-center/atlas/[id]' (fiche) or '/command-center/atlas#card' (quick-edit)
   created_at   timestamptz not null default now()
 );
 
@@ -370,7 +406,8 @@ Design choices, argued:
 - **Values stored as text**, null-safe, stringified — a uniform audit shape across
   booleans, numbers, jsonb, and text without a polymorphic column zoo. Coordinates keep
   full precision as their string form.
-- **`source_page`** distinguishes a fiche edit from a map-drag edit from a future bulk
+- **`source_page`** distinguishes a fiche edit (`/command-center/atlas/[id]`) from a
+  card quick-edit (`/command-center/atlas#card`) from a map-drag edit from a future bulk
   op — the exact provenance the pin-move incident showed we needed.
 - **Append-only, cascade-delete with the location.** No RLS exposure; written only by
   the service-role endpoint. Insert failures are logged but **must never fail the
@@ -557,15 +594,26 @@ parity with today's `pins.tsx`, which stays live and unchanged this phase). **Al
 read/low-risk, immediately useful for the photo sprint.**
 Risks: extracting the 930-line imperative map without regressing drag/stack/proximity —
 mitigate by moving it wholesale into `AtlasMapView` with a behaviour-parity checklist
-before touching anything; `pins.tsx` remains the untouched fallback until Phase 3.
+before touching anything; `pins.tsx` remains the untouched fallback **until Phase 2 retires
+it** (parity was verified at the Phase 1 gate, so the fallback's job is done).
 
-### Phase 2 — La Fiche: full editor + hours editor + audit trail
+### Phase 2 — La Fiche + card quick-edit + pins retirement + hours editor + audit trail
 Ship: `/command-center/atlas/[id]` full fiche (all sections 3.1–3.8), the
 `OpeningHoursEditor`, the extended `PATCH` (`ALLOWED_FIELDS` + audit inserts), the
 `location_edits` table (via the human-gated migration path), the distinct publish block
 with confirm-summary, the unsaved-changes guard (Feature 3), and edit-history read
 (Feature 4). Writes production through the verified-write pattern only.
-**Two data-layer items resolved at the gate ship in this phase:**
+**Two scope items added by the 2026-07-13 amendment ship in this phase:**
+- **Card quick-edit (Section 2.1)** — inline edit of `address`/`phone`/`website`/
+  `opening_hours` on the preview card, same verified changed-fields-only PATCH, audit rows
+  with `source_page = '/command-center/atlas#card'`. "Ouvrir la fiche" goes live. Publishing
+  and editorial copy stay fiche-only.
+- **Pins retirement (pulled forward from Phase 3)** — redirect `/command-center/pins` →
+  `/command-center/atlas?view=map`, remove `pages/command-center/pins.tsx` and its "Éditeur
+  de pins" sidebar entry. AtlasMapView is now the single interactive map editor. Do this
+  *after* the fiche + card work lands and re-runs green, so the fallback is removed only
+  once its replacement is fully exercised in this phase.
+**Two data-layer items resolved at the earlier gate ship in this phase:**
 - **`opening_hours` 16-row normalization migration** — canonicalise existing keys to
   lowercase English day-keys (`monday→mon`…; preserve `check_in`/`check_out`/`default`),
   run via the human-gated migration path. Do it *before* wiring the editor so the editor
@@ -579,19 +627,22 @@ human-gated path with a before/after row dump, and the editor's non-destructive 
 entrées" list is the safety net for any key that escapes normalization. (b) publish
 confirm-summary must be genuinely un-bypassable and never wired to any list-level control
 (locked decision 3). (c) audit insert must never fail a committed write (mirror the
-re-select discipline).
+re-select discipline). (d) **pins retirement** — before deleting `pins.tsx`, grep for
+inbound links to `/command-center/pins` (sidebar, any hrefs) and ship the redirect (not a
+hard 404) so bookmarks survive; retire only after the fiche + card land green so there is
+never a window without an interactive map editor.
 
 ### Phase 3 — Linked entities (read-only) + absorb-and-delete /dashboard + polish
 Ship: read-only `location_functions` / `tour_stops` blocks on the fiche (Section 3.10);
 story-mentions **omitted** (OQ3 resolved — no relational link exists); near-duplicate
 detector (Feature 6),
-export (Feature 7), command-palette (Feature 5) as polish; then **redirect + remove**
-`/command-center/pins`, `/dashboard/locations`, `/dashboard/locations/[id]`, and sweep the
-legacy `/dashboard/places` + `/api/places/[id]` if confirmed dead; swap the sidebar entry
-to "Atlas". One admin surface achieved (locked decision 1).
-Risks: dangling links to old routes — grep for `/dashboard/locations` and
-`/command-center/pins` before deleting; keep redirects (not hard 404s) for any bookmarked
-URLs. Confirm `/dashboard/places` really is dead before removal.
+export (Feature 7), command-palette (Feature 5) as polish; then **redirect + remove** the
+remaining dashboard surface — `/dashboard/locations`, `/dashboard/locations/[id]`, and the
+legacy `/dashboard/places` + `/api/places/[id]` if confirmed dead. (`/command-center/pins`
+already retired in Phase 2.) One admin surface achieved (locked decision 1).
+Risks: dangling links to old routes — grep for `/dashboard/locations` before deleting;
+keep redirects (not hard 404s) for any bookmarked URLs. Confirm `/dashboard/places` really
+is dead before removal.
 
 *(Geocode-assist is dropped, not deferred — OQ7 resolved: manual pin placement is
 sufficient and the Mapbox permanent-geocoding ToS/billing dependency isn't worth it.)*
@@ -623,10 +674,10 @@ Phase 1+ implements against.
 5. **`location_edits` migration path → RESOLVED.** DDL accepted. Created via the
    human-gated direct-migration path (no dev branch on free-tier Supabase). Append-only +
    no public exposure accepted as specified; Luigi runs the migration at the Phase 2 gate.
-6. **Legacy route sweep → RESOLVED: approved.** Redirect-then-remove `/dashboard/locations*`,
-   `/command-center/pins`, and (once confirmed dead) `/dashboard/places` + `/api/places/[id]`
-   in Phase 3. Keep redirects (not hard 404s) for any bookmarked URLs; grep for inbound
-   links before deleting.
+6. **Legacy route sweep → RESOLVED: approved.** Redirect-then-remove `/command-center/pins`
+   **in Phase 2** (2026-07-13 amendment — pulled forward), and `/dashboard/locations*` +
+   (once confirmed dead) `/dashboard/places` + `/api/places/[id]` in Phase 3. Keep redirects
+   (not hard 404s) for any bookmarked URLs; grep for inbound links before deleting.
 7. **Geocode-assist → RESOLVED: dropped.** Not wanted. Manual pin placement (the proven
    working model) is sufficient; the Mapbox permanent-geocoding ToS/billing dependency
    isn't worth it for a single-operator atlas. Feature 8 removed from Section 5.
@@ -635,8 +686,9 @@ Phase 1+ implements against.
 
 ## Compliance restatement (the 7 locked decisions)
 
-1. **One admin surface** — Atlas under `/command-center`; Phase 3 redirects + removes
-   `/dashboard` (and legacy `/command-center/pins`). ✓
+1. **One admin surface** — Atlas under `/command-center`; **Phase 2 retires
+   `/command-center/pins`** (redirect + remove), **Phase 3 redirects + removes `/dashboard`**.
+   One interactive map editor, one fiche. ✓
 2. **All writes via authed API, verified-write, changed-fields-only** — every fiche write
    goes through the extended `PATCH /api/locations/[id]`; no client-direct Supabase
    writes; diff-based payloads. ✓
