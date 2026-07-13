@@ -1,6 +1,11 @@
-import Head from "next/head";
-import type { NextPage } from "next";
+import type { GetStaticProps, NextPage } from "next";
+import { useRouter } from "next/router";
+import type { SSRConfig } from "next-i18next/pages";
+import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
+import { SeoHead } from "@/components/SeoHead";
 import HistoryTimeline from "@/components/HistoryTimeline";
+
+type HistoryPageProps = SSRConfig;
 
 const ARTISTS = [
   {
@@ -25,12 +30,17 @@ const ARTISTS = [
   }
 ] as const;
 
-const HistoryPage: NextPage = () => {
+const HistoryPage: NextPage<HistoryPageProps> = () => {
+  const router = useRouter();
+  const locale = router.locale ?? "fr";
   return (
     <>
-      <Head>
-        <title>History — Visit Barbizon</title>
-      </Head>
+      <SeoHead
+        title="History — Visit Barbizon"
+        description="Historical postcards, a visual timeline, and the archive of sources behind the Visit Barbizon project."
+        path="/history"
+        locale={locale}
+      />
 
       <div className="section-stack">
         <header className="space-y-4 editorial-measure">
@@ -141,6 +151,13 @@ const HistoryPage: NextPage = () => {
       </div>
     </>
   );
+};
+
+export const getStaticProps: GetStaticProps<HistoryPageProps> = async ({
+  locale,
+}) => {
+  const translations = await serverSideTranslations(locale ?? "fr", ["common"]);
+  return { props: { ...translations }, revalidate: 60 };
 };
 
 export default HistoryPage;

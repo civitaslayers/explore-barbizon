@@ -1,12 +1,15 @@
-import Head from "next/head";
 import Link from "next/link";
 import type { GetStaticProps, NextPage } from "next";
+import { useRouter } from "next/router";
+import type { SSRConfig } from "next-i18next/pages";
+import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
+import { SeoHead } from "@/components/SeoHead";
 import { getAllStories, type Story } from "@/data/stories";
 import { supabase } from "@/lib/supabase";
 
 type StoriesIndexProps = {
   stories: Story[];
-};
+} & SSRConfig;
 
 function excerptFromBody(body: string | null, maxLen = 220): string {
   if (!body?.trim()) return "";
@@ -60,14 +63,19 @@ async function getPublishedStoriesFromSupabase(): Promise<Story[]> {
 }
 
 const StoriesIndexPage: NextPage<StoriesIndexProps> = ({ stories }) => {
+  const router = useRouter();
+  const locale = router.locale ?? "fr";
   const essays = stories.filter((s) => (s.type ?? "history") === "history");
   const guides = stories.filter((s) => s.type === "guide");
 
   return (
     <>
-      <Head>
-        <title>Stories — Visit Barbizon</title>
-      </Head>
+      <SeoHead
+        title="Stories — Visit Barbizon"
+        description="Short essays on how Barbizon has been looked at: through studio windows, along forest paths, and in the quiet of small museums."
+        path="/stories"
+        locale={locale}
+      />
 
       <section className="space-y-10">
         <header className="editorial-measure space-y-4">
@@ -151,12 +159,15 @@ const StoriesIndexPage: NextPage<StoriesIndexProps> = ({ stories }) => {
   );
 };
 
-export const getStaticProps: GetStaticProps<StoriesIndexProps> = async () => {
+export const getStaticProps: GetStaticProps<StoriesIndexProps> = async ({
+  locale,
+}) => {
+  const translations = await serverSideTranslations(locale ?? "fr", ["common"]);
   try {
     const stories = await getPublishedStoriesFromSupabase();
-    return { props: { stories }, revalidate: 60 };
+    return { props: { stories, ...translations }, revalidate: 60 };
   } catch {
-    return { props: { stories: getAllStories() }, revalidate: 60 };
+    return { props: { stories: getAllStories(), ...translations }, revalidate: 60 };
   }
 };
 

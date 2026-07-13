@@ -1,8 +1,11 @@
-import Head from "next/head";
 import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import type { SSRConfig } from "next-i18next/pages";
+import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
 import { useState, useMemo } from "react";
 import ImagePlaceholder from "@/components/ImagePlaceholder";
+import { SeoHead } from "@/components/SeoHead";
 import { getPublishedLocations, supabase } from "@/lib/supabase";
 import type { Place } from "@/lib/types";
 import { staticMapUrl, hasMapbox } from "@/lib/mapbox";
@@ -29,7 +32,7 @@ type PlacesIndexProps = {
   places: Place[];
   whereToEat: CuratedPlace[];
   whereToStay: CuratedPlace[];
-};
+} & SSRConfig;
 
 const EAT_STAY_SHOP_LAYER = "Eat, Stay & Shop";
 
@@ -188,6 +191,8 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({
   whereToEat,
   whereToStay,
 }) => {
+  const router = useRouter();
+  const locale = router.locale ?? "fr";
   const [activeCategory, setActiveCategory] = useState("All");
 
   const categories = useMemo(() => {
@@ -205,9 +210,12 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({
 
   return (
     <>
-      <Head>
-        <title>Places — Visit Barbizon</title>
-      </Head>
+      <SeoHead
+        title="Places — Visit Barbizon"
+        description="Discover the historic ateliers, quiet inns, and forest clearings that defined the Pre-Impressionist era."
+        path="/places"
+        locale={locale}
+      />
 
       <section className="space-y-10 xl:space-y-12">
         <header className="space-y-5">
@@ -287,7 +295,9 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({
   );
 };
 
-export const getStaticProps: GetStaticProps<PlacesIndexProps> = async () => {
+export const getStaticProps: GetStaticProps<PlacesIndexProps> = async ({
+  locale,
+}) => {
   const places = await getPublishedLocations();
   let whereToEat: CuratedPlace[] = [];
   let whereToStay: CuratedPlace[] = [];
@@ -300,8 +310,9 @@ export const getStaticProps: GetStaticProps<PlacesIndexProps> = async () => {
       // Curated sections stay empty if query fails (e.g. column not deployed yet).
     }
   }
+  const translations = await serverSideTranslations(locale ?? "fr", ["common"]);
   return {
-    props: { places, whereToEat, whereToStay },
+    props: { places, whereToEat, whereToStay, ...translations },
     revalidate: 60,
   };
 };

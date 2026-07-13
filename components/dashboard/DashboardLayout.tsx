@@ -1,3 +1,4 @@
+import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import type { ReactNode } from "react";
@@ -16,6 +17,11 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-cream text-ink font-sans flex">
+      {/* Admin surface — never indexed, French-only (legacy dashboard, no
+          serverSideTranslations wiring; see i18n-seo-implementation-plan.md). */}
+      <Head>
+        <meta name="robots" content="noindex, nofollow" />
+      </Head>
       <aside className="w-52 shrink-0 bg-surface-container-low flex flex-col py-6 px-4 border-r border-outline-variant">
         <nav className="flex flex-col gap-1">
           {NAV.map(({ href, label }) => {

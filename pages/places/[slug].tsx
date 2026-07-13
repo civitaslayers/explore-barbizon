@@ -2,6 +2,9 @@ import Head from "next/head";
 import Image from "next/image";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import type { SSRConfig } from "next-i18next/pages";
+import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
 import type { ReactNode } from "react";
 import ImagePlaceholder from "@/components/ImagePlaceholder";
 import type { Place } from "@/lib/types";
@@ -13,6 +16,8 @@ import {
 } from "@/lib/supabase";
 import { staticMapUrl, hasMapbox } from "@/lib/mapbox";
 import { buildPlaceSchema } from "@/lib/seo";
+import { getLocalized } from "@/lib/getLocalized";
+import { SeoHead } from "@/components/SeoHead";
 import {
   DAY_KEYS,
   DAY_LABELS_FR,
@@ -60,11 +65,19 @@ function functionChipClasses(layer: string | null | undefined): string {
   return "bg-ink/8 text-ink/50";
 }
 
-function UnifiedPlaceArticle({ place }: { place: LocationFull }) {
+function UnifiedPlaceArticle({
+  place,
+  locale,
+}: {
+  place: LocationFull;
+  locale: string;
+}) {
   const heroImage = place.heroImage;
+  const name = getLocalized(place, locale, "name") || place.name;
+  const localizedNarrative = getLocalized(place, locale, "narrative");
   const narrativeParagraphs =
-    place.narrative
-      ?.split(/\n\n/)
+    (localizedNarrative || place.narrative || "")
+      .split(/\n\n/)
       .map((p) => p.trim())
       .filter(Boolean) ?? [];
 
@@ -91,13 +104,13 @@ function UnifiedPlaceArticle({ place }: { place: LocationFull }) {
               className="object-cover object-center opacity-[0.78]"
             />
           ) : (
-            <ImagePlaceholder name={place.name} className="absolute inset-0" />
+            <ImagePlaceholder name={name} className="absolute inset-0" />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-ink/75 to-ink/25">
             <div className="fade-in-hero relative z-10 flex h-full flex-col justify-end p-6 md:p-9 lg:p-11 xl:p-14">
               <div className="max-w-3xl space-y-4 text-cream xl:max-w-[40rem]">
                 <h1 className="font-serif text-[2.2rem] italic leading-[1.0] tracking-tight text-cream md:text-[3rem] lg:text-[3.5rem]">
-                  {place.name}
+                  {name}
                 </h1>
                 {place.address ? (
                   <p className="font-sans text-[11px] uppercase tracking-[0.22em] text-cream/65">
@@ -523,41 +536,44 @@ function LegacyLocationPlaceArticle({
   );
 }
 
-type PlacePageProps =
+type PlacePageProps = (
   | { source: "place"; place: LocationFull }
   | {
       source: "location";
       location: Place;
       relatedPlaces: Place[];
       nearbyPlaces: Place[];
-    };
+    }
+) &
+  SSRConfig;
 
 const PlacePage: NextPage<PlacePageProps> = (props) => {
+  const router = useRouter();
+  const locale = router.locale ?? "fr";
+
   if (props.source === "place") {
     const { place } = props;
-    const metaDescription = place.short_description ?? "";
-    const ogImage = place.heroImage ?? "";
+    const name = getLocalized(place, locale, "name") || place.name;
+    const title =
+      getLocalized(place, locale, "meta_title") || `${name} — Barbizon`;
+    const metaDescription =
+      getLocalized(place, locale, "meta_description") ||
+      getLocalized(place, locale, "short_description") ||
+      place.short_description ||
+      "";
+    const ogImage = place.heroImage ?? undefined;
     return (
       <>
-        <Head>
-          <title>{`${place.name} — Barbizon`}</title>
-          <meta name="description" content={metaDescription} />
-          <meta property="og:title" content={place.name} />
-          <meta property="og:description" content={metaDescription} />
-          <meta property="og:image" content={ogImage} />
-          <meta property="og:type" content="place" />
-          <link
-            rel="canonical"
-            href={`https://explorebarbizon.com/places/${place.slug}`}
-          />
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify(buildPlaceSchema(place)),
-            }}
-          />
-        </Head>
-        <UnifiedPlaceArticle place={place} />
+        <SeoHead
+          title={title}
+          description={metaDescription}
+          path={`/places/${place.slug}`}
+          locale={locale}
+          image={ogImage}
+          type="article"
+          jsonLd={buildPlaceSchema(place, locale)}
+        />
+        <UnifiedPlaceArticle place={place} locale={locale} />
       </>
     );
   }
@@ -602,6 +618,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps<PlacePageProps> = async ({
   params,
+  locale,
 }) => {
   const slug = params?.slug;
   if (typeof slug !== "string") {
@@ -613,8 +630,10 @@ export const getStaticProps: GetStaticProps<PlacePageProps> = async ({
     return { notFound: true };
   }
 
+  const translations = await serverSideTranslations(locale ?? "fr", ["common"]);
+
   return {
-    props: { source: "place" as const, place: placeRecord },
+    props: { source: "place" as const, place: placeRecord, ...translations },
     revalidate: 60,
   };
 };

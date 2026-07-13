@@ -1,3 +1,4 @@
+import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import type { ReactNode } from "react";
@@ -16,6 +17,11 @@ export function CommandCenterLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-cream text-ink flex">
+      {/* Admin surface — never indexed, French-only (no serverSideTranslations
+          wiring here; see docs/i18n-seo-implementation-plan.md CCC exclusion). */}
+      <Head>
+        <meta name="robots" content="noindex, nofollow" />
+      </Head>
       {/* Sidebar */}
       <aside className="w-52 shrink-0 border-r border-ink/10 flex flex-col">
         <div className="px-5 py-5 border-b border-ink/10">
