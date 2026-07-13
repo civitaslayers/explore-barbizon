@@ -13,6 +13,7 @@ import {
   getCategoryGroup,
   type GroupName,
 } from "@/lib/categoryGroups";
+import nextI18NextConfig from "@/next-i18next.config";
 
 // Display-only i18n keys for the four fixed layer groups (lib/categoryGroups.ts
 // group names stay as data identifiers used for filtering — untouched — this
@@ -272,7 +273,7 @@ export const getStaticProps: GetStaticProps<MapPageProps> = async ({
   const [pins, routes, translations] = await Promise.all([
     getMapPins(),
     getPublishedRoutes(),
-    serverSideTranslations(locale ?? "fr", ["common"]),
+    serverSideTranslations(locale ?? "fr", ["common"], nextI18NextConfig),
   ]);
   return { props: { pins, routes, ...translations }, revalidate: 60 };
 };

@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import type { SSRConfig } from "next-i18next/pages";
 import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
 import { SeoHead } from "@/components/SeoHead";
+import nextI18NextConfig from "@/next-i18next.config";
 
 // A custom 404 page is needed so this route (rendered inside the shared
 // public Layout, which calls useTranslation for nav/footer) has its own
@@ -52,7 +53,7 @@ const NotFoundPage: NextPage<NotFoundPageProps> = () => {
 export const getStaticProps: GetStaticProps<NotFoundPageProps> = async ({
   locale,
 }) => {
-  const translations = await serverSideTranslations(locale ?? "fr", ["common"]);
+  const translations = await serverSideTranslations(locale ?? "fr", ["common"], nextI18NextConfig);
   return { props: { ...translations } };
 };
 

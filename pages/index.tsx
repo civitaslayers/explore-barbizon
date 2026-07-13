@@ -6,6 +6,7 @@ import { serverSideTranslations } from "next-i18next/pages/serverSideTranslation
 import ImagePlaceholder from "@/components/ImagePlaceholder";
 import { SeoHead } from "@/components/SeoHead";
 import { getLocationCards, type LocationCard } from "@/lib/supabase";
+import nextI18NextConfig from "@/next-i18next.config";
 
 /** Prefer these slugs when present in published data (matches legacy static atlas). */
 const PREFERRED_FEATURED_SLUGS = [
@@ -333,7 +334,7 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async ({
   locale,
 }) => {
   const places = await getLocationCards();
-  const translations = await serverSideTranslations(locale ?? "fr", ["common"]);
+  const translations = await serverSideTranslations(locale ?? "fr", ["common"], nextI18NextConfig);
   return {
     props: { featuredPlaces: buildFeaturedPlaces(places), ...translations },
     revalidate: 60,

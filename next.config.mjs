@@ -14,6 +14,18 @@ const nextConfig = {
   // next-i18next.config.js and is load-bearing (keeps CCC/dashboard French-only).
   i18n,
 
+  // Belt-and-suspenders for the /en/... 500 regression (fix/en-500-i18n-config):
+  // next-i18next's serverSideTranslations() loads next-i18next.config.js and
+  // public/locales/** dynamically from disk at request time. Vercel's file
+  // tracer doesn't reliably follow that dynamic require, so without an
+  // explicit include the config/locale files can be missing from the
+  // serverless bundle in production even though every call site now also
+  // passes the config object directly (the primary fix, in pages/_app.tsx
+  // and every serverSideTranslations() call).
+  outputFileTracingIncludes: {
+    "/**": ["./next-i18next.config.js", "./public/locales/**"],
+  },
+
   images: {
     remotePatterns: [
       {

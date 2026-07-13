@@ -209,6 +209,17 @@ Use the `update-brain` command after any significant state change.
 - Gate instructions must name their executor unambiguously — e.g.
   "Luigi approves, claude.ai executes via MCP". "Claude" alone is ambiguous in a
   two-Claude system (claude.ai lead vs Claude Code loop); always say which one.
+- Any change touching **locale routing, runtime config loading, or page data
+  methods** (`getStaticProps`, `getServerSideProps`, `serverSideTranslations`)
+  must be verified with `scripts/seo-audit.mjs` run against the branch's
+  **Vercel Preview deployment**, not only a local build. A green local build is
+  necessary but not sufficient: file-tracing / serverless-bundling failures
+  (confirmed root cause of the production `/en/...` 500 regression,
+  fix/en-500-i18n-config, 2026-07 — `next-i18next.config.js` was not reliably
+  bundled by Vercel's file tracer, invisible locally because the config sits in
+  the local CWD) only appear in the deployed serverless runtime. This is a
+  mandatory release-checker gate for this change class (see
+  `.claude/agents/civitas-release-checker.md`, SEO audit check).
 
 ---
 

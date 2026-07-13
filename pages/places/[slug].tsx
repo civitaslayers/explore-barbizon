@@ -18,6 +18,7 @@ import { staticMapUrl, hasMapbox } from "@/lib/mapbox";
 import { buildPlaceSchema } from "@/lib/seo";
 import { getLocalized } from "@/lib/getLocalized";
 import { SeoHead } from "@/components/SeoHead";
+import nextI18NextConfig from "@/next-i18next.config";
 import {
   DAY_KEYS,
   DAY_LABELS_FR,
@@ -630,7 +631,7 @@ export const getStaticProps: GetStaticProps<PlacePageProps> = async ({
     return { notFound: true };
   }
 
-  const translations = await serverSideTranslations(locale ?? "fr", ["common"]);
+  const translations = await serverSideTranslations(locale ?? "fr", ["common"], nextI18NextConfig);
 
   return {
     props: { source: "place" as const, place: placeRecord, ...translations },

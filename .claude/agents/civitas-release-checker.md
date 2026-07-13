@@ -73,6 +73,24 @@ Also flag the silent-failure class:
 - Absent `openingHoursSpecification` JSON-LD is a **WARNING**, not a failure (non-parseable / non-day hour shapes legitimately produce no spec).
 - Title/description length failures against French-only content **before the translation content migration** are **EXPECTED** — report the count, but do not treat pre-migration missing-English as a blocker. Only flag a regression where a previously-passing entity now fails.
 
+**Preview-deploy audit — mandatory for locale/runtime-config/data-method changes.**
+A local build/audit is necessary but **not sufficient** for any change touching
+locale routing, runtime config loading, or page data methods (`getStaticProps`,
+`getServerSideProps`, `serverSideTranslations`). This is the confirmed root
+cause of the production `/en/...` 500 regression (fix/en-500-i18n-config,
+2026-07): `next-i18next` loads `next-i18next.config.js` from disk at request
+time; Vercel's serverless file tracer did not reliably bundle it; the failure
+was invisible in every local build because the config file sits in the local
+CWD. It only surfaced against a deployed serverless runtime. For any change in
+this class:
+- Do not mark the SEO audit ✅ on a local run alone — state explicitly that the
+  local build/audit passed but the file-tracing/serverless-bundling class of
+  failure cannot be verified locally.
+- Require `node scripts/seo-audit.mjs` to be run against the branch's **Vercel
+  Preview deployment URL** (not `localhost`) before this class of change is
+  treated as release-ready. If no preview URL is available to you, report this
+  as a blocking gap — not a pass — and name it explicitly in the output.
+
 ## Output format
 
 Report as a checklist:

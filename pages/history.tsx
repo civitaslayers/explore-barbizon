@@ -4,6 +4,7 @@ import type { SSRConfig } from "next-i18next/pages";
 import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
 import { SeoHead } from "@/components/SeoHead";
 import HistoryTimeline from "@/components/HistoryTimeline";
+import nextI18NextConfig from "@/next-i18next.config";
 
 type HistoryPageProps = SSRConfig;
 
@@ -156,7 +157,7 @@ const HistoryPage: NextPage<HistoryPageProps> = () => {
 export const getStaticProps: GetStaticProps<HistoryPageProps> = async ({
   locale,
 }) => {
-  const translations = await serverSideTranslations(locale ?? "fr", ["common"]);
+  const translations = await serverSideTranslations(locale ?? "fr", ["common"], nextI18NextConfig);
   return { props: { ...translations }, revalidate: 60 };
 };
 

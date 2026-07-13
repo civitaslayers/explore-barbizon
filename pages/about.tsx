@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import type { SSRConfig } from "next-i18next/pages";
 import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
 import { SeoHead } from "@/components/SeoHead";
+import nextI18NextConfig from "@/next-i18next.config";
 
 type AboutPageProps = SSRConfig;
 
@@ -53,7 +54,7 @@ const AboutPage: NextPage<AboutPageProps> = () => {
 export const getStaticProps: GetStaticProps<AboutPageProps> = async ({
   locale,
 }) => {
-  const translations = await serverSideTranslations(locale ?? "fr", ["common"]);
+  const translations = await serverSideTranslations(locale ?? "fr", ["common"], nextI18NextConfig);
   return { props: { ...translations }, revalidate: 60 };
 };
 

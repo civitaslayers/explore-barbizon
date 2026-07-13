@@ -6,6 +6,7 @@ import { Inter } from "next/font/google";
 import { appWithTranslation } from "next-i18next/pages";
 import "@/styles/globals.css";
 import { Layout } from "@/components/Layout";
+import nextI18NextConfig from "@/next-i18next.config";
 
 const DEFAULT_SITE_DESCRIPTION =
   "Visit Barbizon — a curated cultural guide to the forest-edge village that inspired generations of artists.";
@@ -45,4 +46,4 @@ function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   );
 }
 
-export default appWithTranslation(MyApp);
+export default appWithTranslation(MyApp, nextI18NextConfig);
