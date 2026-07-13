@@ -298,6 +298,21 @@ export function FichePositionMap({
         return;
       }
 
+      if (draggedRes.data.committed) {
+        // Write committed but diverged from intent — surface distinctly,
+        // never as a plain success or a plain failure (verified-write
+        // decision, 2026-07-10) — mirrors handleConfirmDrag above.
+        setToast({
+          kind: "error",
+          message:
+            draggedRes.data.error ??
+            "Écriture COMMISE — valeurs persistées différentes.",
+        });
+        applyCommitted(draggedRes.data.after.lat, draggedRes.data.after.lng);
+        setProximityState(null);
+        return;
+      }
+
       applyCommitted(draggedRes.data.after.lat, draggedRes.data.after.lng);
       setProximityState(null);
     } catch (err) {
