@@ -1,27 +1,24 @@
 ## 2026-07-13
-**Decision:** French is the **canonical content language** of the atlas. All editorial fields (`short_description`, `full_description`, `narrative`, labels, and location/story copy) are authored in French first; French is the source of truth. Any English or future-locale text is a downstream translation layer, never a parallel source that can diverge from the French.
-**Reason:** Barbizon is a French heritage site; the primary audience and the primary-source material (19th-century Barbizon School history) are French. Authoring French-first keeps the canonical record accurate and prevents translation drift (an English edit silently diverging from the French original). CCC v3's admin surface is already French-facing in its chrome ("Publié"/"Brouillon", "sans photo", "Ouvrir la fiche") — this formalises that the *content*, not just the UI, is French-canonical.
-**Consequence:** The fiche and card edit French content as the source of truth. Any i18n/localization work treats French as the base locale and derives other locales from it. No parallel-authored English content model.
-**Migration risk:** none — editorial/authoring convention, no schema change.
-*(Decided in a parallel claude.ai session on 2026-07-13; recorded here after the fact — Luigi to verify wording.)*
+**Decision:** French is the canonical source language (Option B). Base columns hold French; all other locales live in a `translations` JSONB column keyed by locale (`en`, later `zh`, `ja`), each carrying translated fields + `meta_title`/`meta_description` + `_meta{source_hash, translated_at, status}`.
+**Reason:** Source language should match the default locale and the town's actual language. Cheaper to migrate at 106 locations than at 500. Editorially right for the Office de Tourisme relationship.
+**Consequence:** One-time content migration: French drafted into `translations->'fr'` (status draft), reviewed in batches, then promoted — base←fr, en←old base, en hash stamped. Live English base columns remain untouched until each batch is promoted. `v_translation_health` is the single canonical source of staleness-hash logic; writers stamp `_meta.source_hash` from this view, never re-implement.
+**Migration risk:** low (additive columns applied 2026-07-13; content swap is batched and reve per record)
 
 ---
 
 ## 2026-07-13
-**Decision:** A location's URL **slug is locale-independent** — one canonical slug per location, shared identically across all language versions. Slugs are never translated per locale.
-**Reason:** `locations.slug` is a stable identity used by the DB, deep links, the `location_edits` audit trail, and cross-entity references. Translating slugs per locale would fork that identity, multiply the existing "do not rename slugs without a migration plan" hard constraint across languages, and complicate redirects and analytics. Keeping identity singular while localizing only the rendered content is simpler and safer.
-**Consequence:** i18n routing localizes content, not the slug segment (e.g. a future `/en/places/auberge-ganne` shares the slug with `/places/auberge-ganne`). No per-locale slug column is introduced. Reinforces the existing slug-immutability constraint.
-**Migration risk:** none now — constrains future i18n design.
-*(Decided in a parallel claude.ai session on 2026-07-13; recorded here after the fact — Luigi to verify wording.)*
+**Decision:** URL slugs are identical across all locales. `/en/lieux/maison-atelier-millet`, never `/en/millet-house-studio`.
+**Reason:** Translated slugs require a mapping table, break shareable URLs, and violate the never-rename-slugs rule. Proper nouns dominate our URLs; keyword value is marginal.
+**Consequence:** Locale routing is prefix-only (`fr` default no prefix, `/en/`). `<SeoHead>` emits hreflang alternates + x-default (French) on every page.
+**Migration risk:** none
 
 ---
 
 ## 2026-07-13
-**Decision:** **Cursor is retired** as an implementation path. Claude Code — the autonomous `/run-loop` with the civitas-* agents (architect → implementer/content-ops → release-checker → human gate) — is the sole implementation workflow going forward.
-**Reason:** The agent loop has proven itself across Map Immersion, CCC v2, and CCC v3 Phases 1/2/2.1, including multiple HOLD→fix→SHIP cycles. Maintaining a parallel Cursor mode with its own `.cursor/rules` is redundant surface and a source of drift between two sets of operating instructions; consolidating on one workflow keeps the brain files and the structural gates authoritative.
-**Consequence:** Cursor is no longer used for UI/hands-on work. CLAUDE.md's "hand off to Cursor" guidance is superseded and should be pruned in a follow-up (along with stale `.cursor/rules` references); all implementation now routes through Claude Code.
-**Migration risk:** none — workflow/process decision. Follow-up: remove Cursor routing from CLAUDE.md and docs.
-*(Decided in a parallel claude.ai session on 2026-07-13; recorded here after the fact — Luigi to verify wording.)*
+**Decision:** Cursor is retired from the workflow. Claude Code + agent loop (/run-loop) replaces it for all implementation.
+**Reason:** The agent loop with structural gates (tools allowlists, prod-write-guard) supersedes the Claude→Cursor brief pattern.
+**Consequence:** CLAUDE.md, docs/ai-operating-system.md, .claude/agents/*, and brain files must be purged of Cursor routing. Implementation flows: architect plans → implementer/content-ops execute → release-checker reviews → human gate.
+**Migration risk:** none
 
 ---
 
