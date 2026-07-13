@@ -19,8 +19,8 @@ Task tags:
 ## Now
 *Unblocked tasks that can be started immediately.*
 
-- [ccc-v3] Post-deploy: run the two human-gated migrations from origin via Supabase MCP — `create_location_edits.sql` first, then `normalize_opening_hours_keys.sql`, each with verification (Luigi-authorized 2026-07-13).
-- [user-action] Luigi: production visual pass on the fiche (`/command-center/atlas/[id]`) + card quick-edit after the Phase 2/2.1 deploy.
+- [x] [ccc-v3] Both human-gated migrations run + verified in production via Supabase MCP (2026-07-13): `location_edits` table; `opening_hours` key canonicalization (16 rows, 0 full-word remaining, non-day + object values preserved).
+- [user-action] Luigi: production visual pass on the fiche (`/command-center/atlas/[id]`) + card quick-edit once the Phase 2/2.1 deploy is green.
 - [x] [ccc-v3] Phase 1 — Atlas index (map + list, preview cards, completeness, filters) — shipped & deployed (commit 60f0612)
 - [x] [ccc-v3] Phase 2 — la fiche + card quick-edit + hours editor + parent renderer + audit + publish block + pins retirement — SHIP (5c1fd45, 13d7cae, eb61ba7)
 - [x] [ccc-v3] Phase 2.1 — AtlasMapView committed-but-diverged write handling — SHIP (3491d51)
