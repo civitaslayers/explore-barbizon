@@ -1,13 +1,24 @@
-import type { NextPage } from "next";
+import type { GetServerSideProps, NextPage } from "next";
 import type { ReactElement, ReactNode } from "react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CommandCenterLayout } from "@/components/CommandCenterLayout";
+import {
+  TranslationHealthPanel,
+  type TranslationHealthSummary,
+  type TranslationHealthCounts,
+  type EnStatus,
+} from "@/components/command-center/TranslationHealthPanel";
 import { getOverviewStats } from "@/lib/commandCenter";
 import type { TaskStatus } from "@/lib/commandCenter";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-type NextPageWithLayout = NextPage & {
+type NextPageWithLayout<P> = NextPage<P> & {
   getLayout?: (page: ReactElement) => ReactNode;
+};
+
+type CommandCenterIndexProps = {
+  translationHealth: TranslationHealthSummary[];
 };
 
 const STATUS_LABELS: Record<TaskStatus, string> = {
@@ -28,7 +39,9 @@ const STATUS_STYLE: Record<TaskStatus, string> = {
 
 type Stats = Awaited<ReturnType<typeof getOverviewStats>>;
 
-const CommandCenterIndex: NextPageWithLayout = () => {
+const CommandCenterIndex: NextPageWithLayout<CommandCenterIndexProps> = ({
+  translationHealth,
+}) => {
   const [stats, setStats] = useState<Stats | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,6 +56,10 @@ const CommandCenterIndex: NextPageWithLayout = () => {
       <div className="mb-8">
         <p className="eyebrow mb-1">Internal Dashboard</p>
         <h1 className="font-serif text-2xl tracking-tight">Overview</h1>
+      </div>
+
+      <div className="mb-8">
+        <TranslationHealthPanel summaries={translationHealth} />
       </div>
 
       {error && (
@@ -199,5 +216,69 @@ const CommandCenterIndex: NextPageWithLayout = () => {
 CommandCenterIndex.getLayout = (page: ReactElement) => (
   <CommandCenterLayout>{page}</CommandCenterLayout>
 );
+
+// ---------------------------------------------------------------------------
+// getServerSideProps — supabaseAdmin (service role) reads v_translation_health,
+// published rows only (docs/schema-reference.md, "View — v_translation_health";
+// docs/i18n-seo-implementation-plan.md, Task 5b). Read-only, no writes.
+// ---------------------------------------------------------------------------
+
+type TranslationHealthRow = {
+  entity_type: string;
+  is_published: boolean | null;
+  en_status: EnStatus;
+};
+
+function emptyCounts(): TranslationHealthCounts {
+  return { missing: 0, stale: 0, draft: 0, current: 0 };
+}
+
+export const getServerSideProps: GetServerSideProps<
+  CommandCenterIndexProps
+> = async () => {
+  try {
+    // `v_translation_health` is a live view (added 2026-07-13 with the i18n
+    // groundwork, docs/schema-reference.md) but `lib/supabase.types.ts` was
+    // not regenerated afterward and has no entry for it (nor for several
+    // other post-2026-07-13 columns) — flagged as a follow-up in the
+    // implementer report. Cast the client for this one query rather than
+    // widening the shared `Database` type for a single untyped view.
+    const untypedAdmin = supabaseAdmin as unknown as {
+      from: (table: string) => {
+        select: (columns: string) => {
+          eq: (
+            column: string,
+            value: boolean
+          ) => Promise<{ data: unknown; error: { message: string } | null }>;
+        };
+      };
+    };
+    const { data, error } = await untypedAdmin
+      .from("v_translation_health")
+      .select("entity_type, is_published, en_status")
+      .eq("is_published", true);
+
+    if (error) throw new Error(error.message);
+
+    const byType = new Map<string, TranslationHealthCounts>();
+    for (const row of (data ?? []) as TranslationHealthRow[]) {
+      const counts = byType.get(row.entity_type) ?? emptyCounts();
+      if (row.en_status in counts) {
+        counts[row.en_status] += 1;
+      }
+      byType.set(row.entity_type, counts);
+    }
+
+    const translationHealth: TranslationHealthSummary[] = Array.from(
+      byType.entries()
+    ).map(([entityType, counts]) => ({ entityType, counts }));
+
+    return { props: { translationHealth } };
+  } catch {
+    // Read-only dashboard panel — a query failure (e.g. view not deployed
+    // yet in a given environment) degrades to an empty panel, never a 500.
+    return { props: { translationHealth: [] } };
+  }
+};
 
 export default CommandCenterIndex;
