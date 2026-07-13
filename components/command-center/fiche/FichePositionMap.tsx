@@ -353,6 +353,18 @@ export function FichePositionMap({
         });
         return;
       }
+      if (res.data.committed) {
+        // Write committed but diverged from intent — surface distinctly,
+        // never as a plain success (verified-write decision, 2026-07-10) —
+        // mirrors handleConfirmDrag / handleConfirmOverride above.
+        setToast({
+          kind: "error",
+          message:
+            res.data.error ?? "Écriture COMMISE — valeurs persistées différentes.",
+        });
+        applyCommitted(res.data.after.lat, res.data.after.lng);
+        return;
+      }
       applyCommitted(res.data.after.lat, res.data.after.lng);
       setToast({ kind: "success", message: "Position mise à jour." });
     } catch (err) {
