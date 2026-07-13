@@ -19,16 +19,20 @@ Task tags:
 ## Now
 *Unblocked tasks that can be started immediately.*
 
-- [user-action] Luigi: production smoke-test of `/command-center/atlas` (map + list views, preview cards, completeness filters/sort, map↔list linking). Gates the Phase 2 loop.
+- [ccc-v3] Post-deploy: run the two human-gated migrations from origin via Supabase MCP — `create_location_edits.sql` first, then `normalize_opening_hours_keys.sql`, each with verification (Luigi-authorized 2026-07-13).
+- [user-action] Luigi: production visual pass on the fiche (`/command-center/atlas/[id]`) + card quick-edit after the Phase 2/2.1 deploy.
 - [x] [ccc-v3] Phase 1 — Atlas index (map + list, preview cards, completeness, filters) — shipped & deployed (commit 60f0612)
+- [x] [ccc-v3] Phase 2 — la fiche + card quick-edit + hours editor + parent renderer + audit + publish block + pins retirement — SHIP (5c1fd45, 13d7cae, eb61ba7)
+- [x] [ccc-v3] Phase 2.1 — AtlasMapView committed-but-diverged write handling — SHIP (3491d51)
 
 ---
 
 ## Next
 *Unblocked after Now tasks or after a specific blocker is resolved.*
 
-- [ccc-v3] Phase 2 loop — la fiche editor (`/atlas/[id]`) + card quick-edit + `OpeningHoursEditor` (canonical keys) + parent-field public renderer + `location_edits` audit table + distinct publish block + pins retirement. HELD until Luigi's Atlas smoke-test. Contains human gates: the 16-row hours normalization migration and any `is_published` change stop for approval.
-- [schema] Update docs/schema-reference.md from live introspection — confirmed stale (curation_order missing from Part 1; place_id/place_functions still in generated types; internal_notes/allow_proximity_override/booking_url absent). Refresh from live DB.
+- [content] Photo sprint batch 1 with hours/website/address collection — Atlas "sans photo/horaires/adresse" filters are the worklist; fiche + card are the tools.
+- [content] ferme-du-couvent description pass (describes the plain, not the farm; verify "à l'ouest" against Tier-1 before publishing).
+- [schema] Update docs/schema-reference.md from live introspection — confirmed stale (curation_order missing; place_id/place_functions still in generated types; internal_notes/allow_proximity_override/booking_url absent). Refresh from live DB.
 
 ---
 
@@ -37,8 +41,7 @@ Task tags:
 
 - [ccc-v3] Phase 3 loop — read-only linked entities (location_functions, tour_stops) on the fiche + absorb-and-delete `/dashboard/locations*` (and legacy `/dashboard/places` + `/api/places/[id]` if dead) + near-dup detector, export, command palette polish.
 - [ccc-v3] v3.1 — `location_functions` sub-editor (first editable-linked-entity follow-on).
-- [content] ferme-du-couvent description pass (describes the plain, not the farm; verify "à l'ouest" against Tier-1 before publishing).
-- [content] Photo sprint batch 1 with hours/website/address collection — driven by the Atlas completeness worklist.
+- [chore] Prune Cursor routing from CLAUDE.md + stale `.cursor/rules` (per 2026-07-13 Cursor-retired decision).
 - [frontend] Tighten getStaticProps select on /places and /plan-your-visit — 136 kB page data warning
 - [infra] Update middleware → proxy convention ahead of Next.js major upgrade
 

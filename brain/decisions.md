@@ -1,4 +1,31 @@
 ## 2026-07-13
+**Decision:** French is the **canonical content language** of the atlas. All editorial fields (`short_description`, `full_description`, `narrative`, labels, and location/story copy) are authored in French first; French is the source of truth. Any English or future-locale text is a downstream translation layer, never a parallel source that can diverge from the French.
+**Reason:** Barbizon is a French heritage site; the primary audience and the primary-source material (19th-century Barbizon School history) are French. Authoring French-first keeps the canonical record accurate and prevents translation drift (an English edit silently diverging from the French original). CCC v3's admin surface is already French-facing in its chrome ("Publié"/"Brouillon", "sans photo", "Ouvrir la fiche") — this formalises that the *content*, not just the UI, is French-canonical.
+**Consequence:** The fiche and card edit French content as the source of truth. Any i18n/localization work treats French as the base locale and derives other locales from it. No parallel-authored English content model.
+**Migration risk:** none — editorial/authoring convention, no schema change.
+*(Decided in a parallel claude.ai session on 2026-07-13; recorded here after the fact — Luigi to verify wording.)*
+
+---
+
+## 2026-07-13
+**Decision:** A location's URL **slug is locale-independent** — one canonical slug per location, shared identically across all language versions. Slugs are never translated per locale.
+**Reason:** `locations.slug` is a stable identity used by the DB, deep links, the `location_edits` audit trail, and cross-entity references. Translating slugs per locale would fork that identity, multiply the existing "do not rename slugs without a migration plan" hard constraint across languages, and complicate redirects and analytics. Keeping identity singular while localizing only the rendered content is simpler and safer.
+**Consequence:** i18n routing localizes content, not the slug segment (e.g. a future `/en/places/auberge-ganne` shares the slug with `/places/auberge-ganne`). No per-locale slug column is introduced. Reinforces the existing slug-immutability constraint.
+**Migration risk:** none now — constrains future i18n design.
+*(Decided in a parallel claude.ai session on 2026-07-13; recorded here after the fact — Luigi to verify wording.)*
+
+---
+
+## 2026-07-13
+**Decision:** **Cursor is retired** as an implementation path. Claude Code — the autonomous `/run-loop` with the civitas-* agents (architect → implementer/content-ops → release-checker → human gate) — is the sole implementation workflow going forward.
+**Reason:** The agent loop has proven itself across Map Immersion, CCC v2, and CCC v3 Phases 1/2/2.1, including multiple HOLD→fix→SHIP cycles. Maintaining a parallel Cursor mode with its own `.cursor/rules` is redundant surface and a source of drift between two sets of operating instructions; consolidating on one workflow keeps the brain files and the structural gates authoritative.
+**Consequence:** Cursor is no longer used for UI/hands-on work. CLAUDE.md's "hand off to Cursor" guidance is superseded and should be pruned in a follow-up (along with stale `.cursor/rules` references); all implementation now routes through Claude Code.
+**Migration risk:** none — workflow/process decision. Follow-up: remove Cursor routing from CLAUDE.md and docs.
+*(Decided in a parallel claude.ai session on 2026-07-13; recorded here after the fact — Luigi to verify wording.)*
+
+---
+
+## 2026-07-13
 **Decision:** Pull the retirement of `pages/command-center/pins.tsx` forward from Phase 3 into Phase 2 of CCC v3. Phase 2 will redirect `/command-center/pins` → `/command-center/atlas?view=map`, then remove `pins.tsx` and its "Éditeur de pins" sidebar entry — leaving one interactive map editor (`AtlasMapView`). Separately, the same amendment adds inline quick-edit of the four practical fields (`address`, `phone`, `website`, `opening_hours`) to the Atlas preview card (same verified changed-fields-only PATCH; audit rows tagged `source_page = '/command-center/atlas#card'`; publishing and editorial copy stay fiche-only).
 **Reason:** `AtlasMapView` shipped in Phase 1 as a wholesale extraction of the 930-line `pins.tsx` and passed a 10/10 behaviour-parity checklist at the review gate (marker render, stack fan-out, drag lifecycle, proximity-409 handling, search/pulse, filters, cleanup). With parity verified, keeping a second interactive map editor alive is maintenance surface and drift risk with no user benefit — two editors can diverge and confuse which one is authoritative. Retiring it in Phase 2 (right after the fiche + card land green) rather than waiting for the Phase 3 dashboard sweep collapses to "one map editor" sooner. The card quick-edit is the fast pass for exactly the gaps the completeness worklist surfaces (address/hours/website), keeping the fiche for deep/structural edits.
 **Consequence:** `docs/ccc-v3-fiche-plan.md` amended (commit `07fe981`, pushed): IA route table, §1.4, Section 2 + new §2.1 (card quick-edit), audit `source_page` (3.9), all three phase ship-lists/risks, OQ6 resolution, and compliance item 1. Phase 2 now also greps for inbound `/command-center/pins` links and ships a **redirect (not a hard 404)** so bookmarks survive; the removal happens only after the fiche + card re-run green, so there is never a window without an interactive map editor. Phase 3 keeps only the `/dashboard` absorb-and-delete.
