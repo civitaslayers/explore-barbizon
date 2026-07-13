@@ -67,6 +67,12 @@ Also flag the silent-failure class:
 - Does `/places/[slug]` resolve for key published slugs? (Source of truth is Supabase `locations` table — not `data/places.ts`)
 - Does `/tours/[slug]` resolve for all slugs in `data/tours.ts`?
 
+### 9. SEO audit (mandatory — i18n/SEO surfaces)
+- Run `node scripts/seo-audit.mjs` (requires a running build/server per the script header).
+- Per published entity and available locale it checks: title present + 50–60 chars, meta description 150–160 chars, hreflang pair completeness, JSON-LD + sitemap inclusion. The script exits non-zero on failures — report its scored summary.
+- Absent `openingHoursSpecification` JSON-LD is a **WARNING**, not a failure (non-parseable / non-day hour shapes legitimately produce no spec).
+- Title/description length failures against French-only content **before the translation content migration** are **EXPECTED** — report the count, but do not treat pre-migration missing-English as a blocker. Only flag a regression where a previously-passing entity now fails.
+
 ## Output format
 
 Report as a checklist:
@@ -82,6 +88,7 @@ RELEASE CHECK — [date]
 ✅ Schema field names: clean
 ✅ Secret hygiene: clean
 ⚠️  Broken pages: /places/grande-rue returns 404
+✅ SEO audit: 64 pass / 40 fail (expected pre-migration French-content length) / 2 warn
 ```
 
 Then list all failures and warnings with file paths and line numbers where applicable.

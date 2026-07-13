@@ -2,21 +2,22 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useTranslation } from "next-i18next/pages";
 import BottomNav from "@/components/BottomNav";
 
 type LayoutProps = {
   children: ReactNode;
 };
 
-const navLinks = [
-  { href: "/map", label: "Map" },
-  { href: "/places", label: "Places" },
-  { href: "/history", label: "History" },
-  { href: "/stories", label: "Stories" },
-  { href: "/about", label: "About" },
-];
-
 export function Layout({ children }: LayoutProps) {
+  const { t } = useTranslation("common");
+  const navLinks = [
+    { href: "/map", label: t("nav.map") },
+    { href: "/places", label: t("nav.places") },
+    { href: "/history", label: t("nav.history") },
+    { href: "/stories", label: t("nav.stories") },
+    { href: "/about", label: t("nav.about") },
+  ];
   const [menuOpen, setMenuOpen] = useState(false);
   const { pathname } = useRouter();
 
@@ -132,24 +133,24 @@ export function Layout({ children }: LayoutProps) {
           <div className="space-y-1">
             <div className="font-serif text-sm text-ink">Visit Barbizon</div>
             <div className="text-[11px] uppercase tracking-[0.22em]">
-              Powered by Civitas Layers
+              {t("footer.poweredBy")}
             </div>
           </div>
           <div className="flex flex-col gap-1 text-xs">
             <Link href="/about" className="footer-link">
-              About
+              {t("footer.about")}
             </Link>
             <Link href="/map" className="footer-link">
-              Map
+              {t("footer.map")}
             </Link>
             <Link href="/stories" className="footer-link">
-              Stories
+              {t("footer.stories")}
             </Link>
             <a
               href="mailto:info@explorebarbizon.com"
               className="footer-link"
             >
-              Contact
+              {t("footer.contact")}
             </a>
           </div>
         </div>

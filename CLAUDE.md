@@ -6,7 +6,7 @@ This repository uses a structured AI-assisted development workflow.
 
 Claude is the **primary thinking partner** — responsible for strategy, architecture, planning, schema design, review, and brain maintenance.
 
-Routine coding is executed through **Cursor** using scoped implementation prompts.
+Implementation is executed through the **agent loop** (`/run-loop`): civitas-implementer for code and civitas-content-ops for dev-branch SQL. There is no separate hand-off tool.
 
 GPT and Grok are available as supplementary reviewers and researchers.
 
@@ -25,8 +25,7 @@ Gated (human only): merging a Supabase branch to production, publishing content
 (`is_published = true`), and production deploys.
 
 The gate is structural — enforced by each agent's `tools:` allowlist and the
-`prod-write-guard.sh` hook, not by prompt wording. Cursor remains available for
-hands-on, step-wise UI work; its `.cursor/rules` govern that mode, not the loop.
+`prod-write-guard.sh` hook, not by prompt wording.
 
 ---
 
@@ -128,7 +127,7 @@ Claude handles:
 
 - strategy and task ordering
 - architecture decisions and schema planning
-- smallest-safe-step implementation plans for Cursor
+- smallest-safe-step implementation plans for the agent loop (civitas-implementer / civitas-content-ops)
 - post-implementation review
 - SQL queries and migrations — executed directly via Supabase MCP connection
 - content narrative writing
@@ -140,12 +139,12 @@ Claude may implement directly (without routing through Cursor) for:
 - Tasks where the change is purely additive and low-risk
 - Schema review and validation
 
-Claude should hand off to Cursor for:
+Claude routes to the agent loop (civitas-implementer) for:
 
 - multi-file UI work
 - component iteration and visual refinement
 - debugging local build or lint issues
-- any task requiring file system access
+- any larger code task best executed and reviewed through plan → implement → release-check
 
 ---
 
@@ -195,6 +194,21 @@ After completing work:
 
 Use the `ship-feature` command after a completed feature.  
 Use the `update-brain` command after any significant state change.
+
+---
+
+## Session discipline
+
+- One working tree, one active loop. A single repo checkout runs one `/run-loop`
+  at a time — do not start a parallel implementation pass in the same tree.
+- Parallel Claude Code sessions require a **git worktree on their own branch**.
+  Never run two concurrent sessions against the same working directory.
+- Strategy decided in any claude.ai chat lands in `brain/decisions.md` **before**
+  another session acts on it. An undocumented decision does not exist for the
+  next session.
+- Gate instructions must name their executor unambiguously — e.g.
+  "Luigi approves, claude.ai executes via MCP". "Claude" alone is ambiguous in a
+  two-Claude system (claude.ai lead vs Claude Code loop); always say which one.
 
 ---
 

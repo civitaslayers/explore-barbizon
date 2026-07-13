@@ -143,7 +143,9 @@ Note: `media` is currently scoped to locations only. No attachment to tours, sto
 
 FK: `town_id` → `towns.id`
 
-Note: no `is_published` column. No tour type or difficulty field. No geographic path (GeoJSON).
+Note: `tours` now HAS an `is_published` boolean column (added alongside the i18n
+groundwork, 2026-07-13). Still no tour type or difficulty field, and no
+geographic path (GeoJSON — that lives on the live `routes` table).
 
 ---
 
@@ -172,6 +174,85 @@ FKs: `tour_id` → `tours.id`, `location_id` → `locations.id`
 | created_at | timestamptz | YES | now() |
 
 Note: `id` has no default — it is expected to mirror `auth.users.id` from Supabase Auth. The FK to `auth.users` is not visible through `information_schema`.
+
+---
+
+### Internationalization — `translations` JSONB (added 2026-07-13)
+
+French is the canonical source language (see `brain/decisions.md`, 2026-07-13,
+Option B). Base columns hold **French**; every other locale lives in an additive
+`translations` JSONB column. These columns were applied to the live DB on
+2026-07-13 (migration `add_translations_jsonb_and_health_view`) — additive,
+nullable, no base content touched.
+
+**Tables carrying `translations jsonb`:** `locations`, `stories`, `routes`,
+`tours`, `tour_stops`, `location_functions`, `categories`.
+
+**Shape** — keyed by locale (`en`, later `zh`, `ja`; `fr` is the base columns,
+not a key). Each locale object carries the translated content fields for that
+row, plus SEO fields and a `_meta` block:
+
+```jsonc
+{
+  "en": {
+    "name": "…",              // translated content fields (per-table)
+    "short_description": "…",
+    "meta_title": "…",        // SEO — <title>
+    "meta_description": "…",  // SEO — <meta name=description>
+    "_meta": {
+      "source_hash": "…",     // hash of the French source at translation time
+      "translated_at": "2026-07-13T…Z",
+      "status": "draft"       // 'draft' | 'published' — only 'published' is shown publicly
+    }
+  }
+}
+```
+
+**`_meta` contract:**
+- `source_hash` — hash of the French base fields taken when the translation was
+  written. Writers stamp this **from `v_translation_health`**, never
+  re-implementing the hash. A later divergence between this and the live French
+  hash is what marks the translation *stale*.
+- `translated_at` — ISO timestamp of the translation write.
+- `status` — editorial lifecycle. `getLocalized` renders a locale value only when
+  `status === 'published'`; otherwise it falls back to the French base column. A
+  `draft` locale value is never shown publicly.
+
+**Read rule:** never read `translations` columns directly in render code. Use the
+`getLocalized(row, locale, field)` helper (fr → base column; en → published
+`translations.en[field]`, else base). Never emit an empty string or a draft.
+
+---
+
+### View — `v_translation_health`
+
+Canonical staleness surface for the i18n workflow — the single source of the
+source-hash logic. Writers and the CCC translation-health panel read this view;
+they never re-derive the staleness hash.
+
+| Column | Type | Notes |
+|---|---|---|
+| `entity_type` | text | Which table the row belongs to (`locations`, `stories`, …) |
+| `entity_id` | uuid | PK of the underlying row |
+| `label` | text | Human label (the row's French name/title) for display |
+| `is_published` | boolean | Publish state of the underlying row |
+| `source_hash` | text | Current hash of the French base fields |
+| `translations` | jsonb | The row's full `translations` object (per-locale) |
+| `en_status` | text | Computed English health: `missing` \| `stale` \| `draft` \| `current` |
+
+`en_status` semantics (derived, not stored):
+- `missing` — no `translations.en` yet.
+- `stale` — `translations.en._meta.source_hash` ≠ the current `source_hash`
+  (French changed since the English was written).
+- `draft` — English exists and is current-hash but `_meta.status = 'draft'`.
+- `current` — English exists, hashes match, and is published.
+
+> **Live verification note:** the column set above reflects the established
+> migration contract (`add_translations_jsonb_and_health_view`) as recorded in
+> the i18n decision thread. This planning session had read-only doc access and no
+> live SQL tool; the implementer/content-ops should confirm the exact column
+> names against `information_schema` on first use and correct this table if the
+> view shipped with any naming variance.
 
 ---
 
@@ -205,13 +286,13 @@ These override any default assumptions in queries, migrations, or AI-assisted se
 
 ### Current Schema Gaps
 
-- No `stories` table
+- `stories` table now EXISTS (live — migration `add-stories-table.sql`; has `is_published`)
 - No `artists` table
 - No `paintings` table
-- No `routes` table (geographic paths)
+- `routes` table now EXISTS (live — migration `create-routes-circuit-des-peintres.sql`; has `geojson`, `difficulty`, `is_published`)
 - No `layers` table — layer identity is encoded as a plain text field on `categories`
 - `media` is location-scoped only — cannot attach images to tours, stories, or artists
-- `tours` has no `is_published` flag
+- `tours` now HAS an `is_published` flag (added 2026-07-13 with the i18n groundwork)
 - No unique constraints visible on slug columns (may exist as indexes, not visible through information_schema)
 
 ---

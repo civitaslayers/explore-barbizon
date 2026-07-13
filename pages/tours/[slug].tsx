@@ -1,6 +1,9 @@
-import Head from "next/head";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import type { SSRConfig } from "next-i18next/pages";
+import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
+import { SeoHead } from "@/components/SeoHead";
 import {
   getTourBySlugFromSupabase,
   getPublishedTourSlugs,
@@ -12,7 +15,7 @@ import { hasMapbox } from "@/lib/mapbox";
 type TourPageProps = {
   tour: TourWithStops;
   routeCoords: [number, number][] | null;
-};
+} & SSRConfig;
 
 function formatDuration(minutes: number | null): string {
   if (!minutes) return "";
@@ -31,13 +34,18 @@ function formatDistance(meters: number | null): string {
 }
 
 const TourPage: NextPage<TourPageProps> = ({ tour, routeCoords }) => {
+  const router = useRouter();
+  const locale = router.locale ?? "fr";
   const stops = tour.stops;
 
   return (
     <>
-      <Head>
-        <title>{tour.name} — Explore Barbizon</title>
-      </Head>
+      <SeoHead
+        title={`${tour.name} — Explore Barbizon`}
+        description={tour.description ?? `${tour.name} — a walking tour of Barbizon.`}
+        path={`/tours/${tour.slug}`}
+        locale={locale}
+      />
       <div className="-mt-12 md:-mt-20">
         <header className="overflow-hidden rounded-2xl border border-ink/10 bg-ink shadow-card md:rounded-[1.75rem]">
           <div className="relative h-[14rem] sm:h-56 md:h-[18rem] lg:h-[22rem]">
@@ -266,6 +274,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps<TourPageProps> = async ({
   params,
+  locale,
 }) => {
   const slug = params?.slug;
   if (typeof slug !== "string") return { notFound: true };
@@ -273,10 +282,12 @@ export const getStaticProps: GetStaticProps<TourPageProps> = async ({
   const tour = await getTourBySlugFromSupabase(slug);
   if (!tour) return { notFound: true };
   const routeCoords = await getRouteByTourSlug(slug).catch(() => null);
+  const translations = await serverSideTranslations(locale ?? "fr", ["common"]);
   return {
     props: {
       tour,
       routeCoords: routeCoords ?? null,
+      ...translations,
     },
     revalidate: 60,
   };

@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useTranslation } from "next-i18next/pages";
 
 const tabs = [
   {
-    label: "Atlas",
+    key: "atlas",
     href: "/map",
     icon: (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none"
@@ -16,7 +17,7 @@ const tabs = [
     ),
   },
   {
-    label: "Trails",
+    key: "trails",
     href: "/map", // trails are shown on map; no /tours index exists
     icon: (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none"
@@ -33,7 +34,7 @@ const tabs = [
     ),
   },
   {
-    label: "Stories",
+    key: "stories",
     href: "/stories",
     icon: (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none"
@@ -46,7 +47,7 @@ const tabs = [
     ),
   },
   {
-    label: "Places",
+    key: "places",
     href: "/places",
     icon: (
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none"
@@ -61,6 +62,7 @@ const tabs = [
 
 export default function BottomNav() {
   const router = useRouter();
+  const { t } = useTranslation("common");
   if (router.pathname.startsWith("/dashboard")) return null;
 
   return (
@@ -71,7 +73,7 @@ export default function BottomNav() {
             (tab.href !== "/" && router.pathname.startsWith(tab.href));
           return (
             <Link
-              key={tab.label}
+              key={tab.key}
               href={tab.href}
               className={`flex flex-col items-center gap-1 pt-2 transition-all duration-300 ${isActive
                 ? "text-ink border-t-2 border-ink -translate-y-0.5"
@@ -80,7 +82,7 @@ export default function BottomNav() {
             >
               {tab.icon}
               <span className="font-sans text-[9px] tracking-widest uppercase">
-                {tab.label}
+                {t(`bottomNav.${tab.key}`)}
               </span>
             </Link>
           );

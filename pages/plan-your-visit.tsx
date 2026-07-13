@@ -1,6 +1,9 @@
-import Head from "next/head";
 import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import type { SSRConfig } from "next-i18next/pages";
+import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
+import { SeoHead } from "@/components/SeoHead";
 import { getLocationCards, getPublishedTours } from "@/lib/supabase";
 import type { LocationCard } from "@/lib/supabase";
 import type { TourListItem } from "@/lib/types";
@@ -8,14 +11,19 @@ import type { TourListItem } from "@/lib/types";
 type PlanPageProps = {
   places: LocationCard[];
   tours: TourListItem[];
-};
+} & SSRConfig;
 
 const PlanYourVisitPage: NextPage<PlanPageProps> = ({ places, tours }) => {
+  const router = useRouter();
+  const locale = router.locale ?? "fr";
   return (
     <>
-      <Head>
-        <title>Plan Your Visit — Visit Barbizon</title>
-      </Head>
+      <SeoHead
+        title="Plan Your Visit — Visit Barbizon"
+        description="A quiet framework for a day in Barbizon: start with a map, choose a few places, and follow a slow walking route."
+        path="/plan-your-visit"
+        locale={locale}
+      />
 
       <section className="space-y-10">
         <header className="editorial-measure space-y-4">
@@ -96,10 +104,13 @@ const PlanYourVisitPage: NextPage<PlanPageProps> = ({ places, tours }) => {
   );
 };
 
-export const getStaticProps: GetStaticProps<PlanPageProps> = async () => {
-  const [toursData, places] = await Promise.all([
+export const getStaticProps: GetStaticProps<PlanPageProps> = async ({
+  locale,
+}) => {
+  const [toursData, places, translations] = await Promise.all([
     getPublishedTours(),
     getLocationCards(),
+    serverSideTranslations(locale ?? "fr", ["common"]),
   ]);
   const tours = toursData.map((t) => ({
     slug: t.slug,
@@ -108,7 +119,7 @@ export const getStaticProps: GetStaticProps<PlanPageProps> = async () => {
     durationHours: Math.round((t.duration_minutes ?? 120) / 60),
     stops: t.stops.map((s) => s.location_id),
   }));
-  return { props: { places, tours }, revalidate: 60 };
+  return { props: { places, tours, ...translations }, revalidate: 60 };
 };
 
 export default PlanYourVisitPage;

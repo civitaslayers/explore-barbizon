@@ -1,12 +1,22 @@
-import Head from "next/head";
-import type { NextPage } from "next";
+import type { GetStaticProps, NextPage } from "next";
+import { useRouter } from "next/router";
+import type { SSRConfig } from "next-i18next/pages";
+import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
+import { SeoHead } from "@/components/SeoHead";
 
-const AboutPage: NextPage = () => {
+type AboutPageProps = SSRConfig;
+
+const AboutPage: NextPage<AboutPageProps> = () => {
+  const router = useRouter();
+  const locale = router.locale ?? "fr";
   return (
     <>
-      <Head>
-        <title>About — Visit Barbizon</title>
-      </Head>
+      <SeoHead
+        title="About — Visit Barbizon"
+        description="Visit Barbizon is a slow, editorial guide to a village on the edge of the Fontainebleau forest."
+        path="/about"
+        locale={locale}
+      />
       <section className="space-y-8">
         <header className="editorial-measure space-y-4">
           <p className="text-xs uppercase tracking-[0.25em] text-ink/60">
@@ -38,6 +48,13 @@ const AboutPage: NextPage = () => {
       </section>
     </>
   );
+};
+
+export const getStaticProps: GetStaticProps<AboutPageProps> = async ({
+  locale,
+}) => {
+  const translations = await serverSideTranslations(locale ?? "fr", ["common"]);
+  return { props: { ...translations }, revalidate: 60 };
 };
 
 export default AboutPage;

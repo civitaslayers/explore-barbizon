@@ -1,0 +1,42 @@
+{
+  "nav": {
+    "map": "Map",
+    "places": "Places",
+    "history": "History",
+    "stories": "Stories",
+    "about": "About"
+  },
+  "footer": {
+    "poweredBy": "Powered by Civitas Layers",
+    "about": "About",
+    "map": "Map",
+    "stories": "Stories",
+    "contact": "Contact"
+  },
+  "bottomNav": {
+    "atlas": "Atlas",
+    "trails": "Trails",
+    "stories": "Stories",
+    "places": "Places"
+  },
+  "map": {
+    "title": "Explore Map — Visit Barbizon",
+    "layersAndSearch": "Layers & Search",
+    "close": "Close",
+    "search": "Search",
+    "searchPlaceholder": "Place, trail, studio…",
+    "layers": "Layers",
+    "locationsCountSingular": "location",
+    "locationsCountPlural": "locations"
+  },
+  "layers": {
+    "artHistory": "Art & History",
+    "artHistoryMeta": "Studios, galleries, heritage sites",
+    "eatStay": "Eat & Stay",
+    "eatStayMeta": "Restaurants, cafés, hotels, shops",
+    "forestNature": "Forest & Nature",
+    "forestNatureMeta": "Trails, viewpoints, climbing areas",
+    "practical": "Practical",
+    "practicalMeta": "Parking, transport, services"
+  }
+}

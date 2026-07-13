@@ -1,17 +1,28 @@
-import Head from "next/head";
 import type { GetStaticProps, NextPage } from "next";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
+import { useTranslation, type SSRConfig } from "next-i18next/pages";
+import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
 import { useEffect, useState, useMemo } from "react";
+import { SeoHead } from "@/components/SeoHead";
 import type { Place, PlaceCategory } from "@/lib/types";
 import { getMapPins, getPublishedRoutes, type MapPin, type Route } from "@/lib/supabase";
 import {
   GROUP_NAMES,
   GROUP_DOT_TAILWIND,
-  GROUP_META,
   getCategoryGroup,
   type GroupName,
 } from "@/lib/categoryGroups";
+
+// Display-only i18n keys for the four fixed layer groups (lib/categoryGroups.ts
+// group names stay as data identifiers used for filtering — untouched — this
+// map is purely for rendering the localized label/description).
+const GROUP_I18N_KEY: Record<GroupName, string> = {
+  "Art & History": "artHistory",
+  "Eat & Stay": "eatStay",
+  "Forest & Nature": "forestNature",
+  Practical: "practical",
+};
 
 const MapGL = dynamic(() => import("@/components/MapGL"), {
   ssr: false,
@@ -24,7 +35,7 @@ const MapGL = dynamic(() => import("@/components/MapGL"), {
   ),
 });
 
-type MapPageProps = { pins: MapPin[]; routes: Route[] };
+type MapPageProps = { pins: MapPin[]; routes: Route[] } & SSRConfig;
 
 function mapPinToMapGLPlace(
   pin: MapPin
@@ -47,8 +58,10 @@ function mapPinToMapGLPlace(
 }
 
 const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
+  const { t } = useTranslation("common");
   const locations = useMemo(() => pins.map(mapPinToMapGLPlace), [pins]);
   const router = useRouter();
+  const locale = router.locale ?? "fr";
   const focusSlug =
     typeof router.query.location === "string"
       ? router.query.location
@@ -114,9 +127,16 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
 
   return (
     <>
-      <Head>
-        <title>Explore Map — Visit Barbizon</title>
-      </Head>
+      <SeoHead
+        title={t("map.title")}
+        description={
+          locale === "fr"
+            ? "Carte interactive de Barbizon — ateliers, sentiers, restaurants et hébergements."
+            : "Interactive map of Barbizon — studios, trails, restaurants, and places to stay."
+        }
+        path="/map"
+        locale={locale}
+      />
 
       {/* Map container — fills the viewport below the nav */}
       <div
@@ -143,13 +163,15 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
               className="flex items-center gap-2 rounded-full border border-ink/15 bg-cream/95 px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] text-ink shadow-sm backdrop-blur-sm transition-all hover:bg-cream"
             >
               <span>{sidebarOpen ? "✕" : "☰"}</span>
-              <span>{sidebarOpen ? "Close" : "Layers & Search"}</span>
+              <span>{sidebarOpen ? t("map.close") : t("map.layersAndSearch")}</span>
             </button>
 
             {/* Location count badge */}
             <div className="rounded-full border border-ink/10 bg-cream/90 px-4 py-2 text-[11px] text-ink/50 shadow-sm backdrop-blur-sm">
               {visibleLocations.length}{" "}
-              {visibleLocations.length === 1 ? "location" : "locations"}
+              {visibleLocations.length === 1
+                ? t("map.locationsCountSingular")
+                : t("map.locationsCountPlural")}
               {searchQuery && ` · "${searchQuery}"`}
             </div>
           </div>
@@ -180,22 +202,23 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
 
                 {/* Search */}
                 <div>
-                  <p className="eyebrow mb-2">SEARCH</p>
+                  <p className="eyebrow mb-2">{t("map.search").toUpperCase()}</p>
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Place, trail, studio…"
+                    placeholder={t("map.searchPlaceholder")}
                     className="w-full rounded-full border border-ink/15 bg-cream/60 px-4 py-2.5 text-xs text-ink placeholder:text-ink/35 focus:border-ink/35 focus:bg-cream focus:outline-none"
                   />
                 </div>
 
                 {/* Layer toggles */}
                 <div>
-                  <p className="eyebrow mb-2">LAYERS</p>
+                  <p className="eyebrow mb-2">{t("map.layers").toUpperCase()}</p>
                   <div className="flex flex-col gap-1.5">
                     {GROUP_NAMES.map((group) => {
                       const active = activeGroups.includes(group);
+                      const i18nKey = GROUP_I18N_KEY[group];
                       return (
                         <button
                           key={group}
@@ -212,10 +235,10 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
                           />
                           <div>
                             <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-ink">
-                              {group}
+                              {t(`layers.${i18nKey}`)}
                             </p>
                             <p className="mt-0.5 text-[11px] text-ink/45">
-                              {GROUP_META[group]}
+                              {t(`layers.${i18nKey}Meta`)}
                             </p>
                           </div>
                         </button>
@@ -226,7 +249,9 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
 
                 <p className="mt-auto text-[11px] text-ink/35">
                   {visibleLocations.length}{" "}
-                  {visibleLocations.length === 1 ? "location" : "locations"}
+                  {visibleLocations.length === 1
+                    ? t("map.locationsCountSingular")
+                    : t("map.locationsCountPlural")}
                   {searchQuery && ` matching "${searchQuery}"`}
                 </p>
               </aside>
@@ -241,9 +266,15 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
   );
 };
 
-export const getStaticProps: GetStaticProps<MapPageProps> = async () => {
-  const [pins, routes] = await Promise.all([getMapPins(), getPublishedRoutes()]);
-  return { props: { pins, routes }, revalidate: 60 };
+export const getStaticProps: GetStaticProps<MapPageProps> = async ({
+  locale,
+}) => {
+  const [pins, routes, translations] = await Promise.all([
+    getMapPins(),
+    getPublishedRoutes(),
+    serverSideTranslations(locale ?? "fr", ["common"]),
+  ]);
+  return { props: { pins, routes, ...translations }, revalidate: 60 };
 };
 
 export default MapPage;

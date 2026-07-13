@@ -188,3 +188,98 @@ export function hasAnyOpeningHoursContent(
   const { days, others } = splitOpeningHours(value);
   return DAY_KEYS.some((d) => days[d].trim().length > 0) || others.length > 0;
 }
+
+// ---------------------------------------------------------------------------
+// JSON-LD support (docs/i18n-seo-implementation-plan.md, Task 4c)
+//
+// Structured data must never be malformed. `parseHoursRange` is the single
+// predicate deciding whether a day's stored string is well-formed enough to
+// become a schema.org OpeningHoursSpecification entry. Anything it rejects
+// (non-day keys like check_in/check_out/default/eve_of_holidays, and
+// object/boolean-valued rows — see findings 1-2 above) is silently omitted,
+// never emitted as malformed JSON-LD.
+// ---------------------------------------------------------------------------
+
+/** schema.org day-of-week URI for each canonical day key. */
+export const DAY_SCHEMA_URI: Record<DayKey, string> = {
+  mon: "https://schema.org/Monday",
+  tue: "https://schema.org/Tuesday",
+  wed: "https://schema.org/Wednesday",
+  thu: "https://schema.org/Thursday",
+  fri: "https://schema.org/Friday",
+  sat: "https://schema.org/Saturday",
+  sun: "https://schema.org/Sunday",
+};
+
+export type HoursRange = { opens: string; closes: string };
+
+// One or more "HH:MM-HH:MM" ranges, optionally comma- or slash-separated
+// (e.g. "09:00-12:00, 14:00-18:00" or "09:00-12:00/14:00-18:00").
+const HOURS_RANGE_RE = /^([01]\d|2[0-3]):([0-5]\d)-([01]\d|2[0-3]):([0-5]\d)$/;
+
+/**
+ * Returns parsed { opens, closes } ranges when `dayValue` is one or more
+ * canonical "HH:MM-HH:MM" ranges; `null` when it doesn't parse (free text,
+ * "fermé", "sur rendez-vous", etc.) — the caller must omit the day rather
+ * than emit malformed structured data.
+ */
+export function parseHoursRange(dayValue: string): HoursRange[] | null {
+  if (typeof dayValue !== "string") return null;
+  const trimmed = dayValue.trim();
+  if (trimmed.length === 0) return null;
+
+  const segments = trimmed
+    .split(/[,/]/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (segments.length === 0) return null;
+
+  const ranges: HoursRange[] = [];
+  for (const segment of segments) {
+    const match = HOURS_RANGE_RE.exec(segment);
+    if (!match) return null; // any unparseable segment invalidates the whole day
+    const [, oh, om, ch, cm] = match;
+    ranges.push({ opens: `${oh}:${om}`, closes: `${ch}:${cm}` });
+  }
+  return ranges;
+}
+
+export type OpeningHoursSpecificationEntry = {
+  "@type": "OpeningHoursSpecification";
+  dayOfWeek: string;
+  opens: string;
+  closes: string;
+};
+
+/**
+ * Builds the `openingHoursSpecification` array for JSON-LD from a stored
+ * opening_hours object. Only `mon…sun` keys whose value is a non-empty
+ * string that `parseHoursRange` accepts are emitted — the "others" bucket
+ * (non-day keys and object/boolean-valued rows) is skipped entirely.
+ * Returns `undefined` (never `[]`) when nothing parses, so the caller omits
+ * the key rather than emitting an empty array.
+ */
+export function toOpeningHoursSpecification(
+  value: OpeningHoursObject | null | undefined
+): OpeningHoursSpecificationEntry[] | undefined {
+  if (!value) return undefined;
+  const { days } = splitOpeningHours(value);
+
+  const entries: OpeningHoursSpecificationEntry[] = [];
+  for (const day of DAY_KEYS) {
+    const raw = days[day];
+    if (!raw || raw.trim().length === 0) continue;
+    const ranges = parseHoursRange(raw);
+    if (!ranges) continue;
+    for (const { opens, closes } of ranges) {
+      entries.push({
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: DAY_SCHEMA_URI[day],
+        opens,
+        closes,
+      });
+    }
+  }
+
+  return entries.length > 0 ? entries : undefined;
+}

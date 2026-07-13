@@ -1,10 +1,15 @@
-import Head from "next/head";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import type { SSRConfig } from "next-i18next/pages";
+import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
 import type { ComponentProps } from "react";
 import { marked } from "marked";
 import RelatedStories from "@/components/RelatedStories";
+import { SeoHead } from "@/components/SeoHead";
 import { getAllStories } from "@/data/stories";
+import { getLocalized, type LocalizableRow } from "@/lib/getLocalized";
+import { buildArticleSchema } from "@/lib/seo";
 import { supabase } from "@/lib/supabase";
 
 type StoryPageStory = {
@@ -13,11 +18,15 @@ type StoryPageStory = {
   theme: string;
   dek: string;
   body: string;
+  author: string | null;
+  published_at: string | null;
+  cover_image_url: string | null;
+  translations?: LocalizableRow["translations"];
 };
 
 type StoryPageProps = {
   story: StoryPageStory;
-};
+} & SSRConfig;
 
 function excerptFromBody(body: string | null, maxLen = 220): string {
   if (!body?.trim()) return "";
@@ -26,21 +35,36 @@ function excerptFromBody(body: string | null, maxLen = 220): string {
   return `${plain.slice(0, maxLen).trimEnd()}…`;
 }
 
-function mapRowToPageStory(row: {
+type StoryDbRow = {
   slug: string;
   title: string;
   subtitle: string | null;
   body: string | null;
   author: string | null;
   theme: string | null;
-}): StoryPageStory {
+  published_at: string | null;
+  cover_image_url: string | null;
+  translations?: LocalizableRow["translations"];
+};
+
+function mapRowToPageStory(row: StoryDbRow): StoryPageStory {
   const dek =
     row.subtitle?.trim() ||
     excerptFromBody(row.body) ||
     "A short essay from the editorial notebook.";
   const theme = row.theme?.trim() || row.author?.trim() || "Editorial";
   const body = row.body?.trim() ?? "";
-  return { slug: row.slug, title: row.title, theme, dek, body };
+  return {
+    slug: row.slug,
+    title: row.title,
+    theme,
+    dek,
+    body,
+    author: row.author,
+    published_at: row.published_at,
+    cover_image_url: row.cover_image_url,
+    translations: row.translations,
+  };
 }
 
 async function getPublishedStorySlugs(): Promise<string[]> {
@@ -62,7 +86,9 @@ async function getPublishedStoryBySlug(
 
   const { data, error } = await supabase
     .from("stories")
-    .select("slug, title, subtitle, body, author, theme")
+    .select(
+      "slug, title, subtitle, body, author, theme, published_at, cover_image_url, translations"
+    )
     .eq("slug", slug)
     .eq("is_published", true)
     .single();
@@ -73,16 +99,7 @@ async function getPublishedStoryBySlug(
   }
 
   if (!data) return null;
-  return mapRowToPageStory(
-    data as unknown as {
-      slug: string;
-      title: string;
-      subtitle: string | null;
-      body: string | null;
-      author: string | null;
-      theme: string | null;
-    }
-  );
+  return mapRowToPageStory(data as unknown as StoryDbRow);
 }
 
 const RELATED: Record<string, ComponentProps<typeof RelatedStories>> = {
@@ -189,17 +206,41 @@ const RELATED: Record<string, ComponentProps<typeof RelatedStories>> = {
 };
 
 const StoryPage: NextPage<StoryPageProps> = ({ story }) => {
+  const router = useRouter();
+  const locale = router.locale ?? "fr";
   const bodyHtml = story.body
     ? marked(story.body, { breaks: true, gfm: true })
     : "";
   const related = RELATED[story.slug];
 
+  const title = getLocalized(story, locale, "title") || story.title;
+  // "subtitle" is the real DB/translations column name (see mapRowToPageStory);
+  // `dek` below is a derived display value (subtitle, or a French excerpt
+  // fallback) computed at fetch time — falling back to it here keeps a
+  // sensible French dek when no published English subtitle exists yet.
+  const dek = getLocalized(story, locale, "subtitle") || story.dek;
+
   return (
     <>
-      <Head>
-        <title>{story.title} — Stories — Visit Barbizon</title>
-        <meta name="description" content={story.dek} />
-      </Head>
+      <SeoHead
+        title={`${title} — Stories — Visit Barbizon`}
+        description={dek}
+        path={`/stories/${story.slug}`}
+        locale={locale}
+        image={story.cover_image_url ?? undefined}
+        type="article"
+        jsonLd={buildArticleSchema(
+          {
+            slug: story.slug,
+            title,
+            description: dek,
+            author: story.author,
+            published_at: story.published_at,
+            image: story.cover_image_url,
+          },
+          locale
+        )}
+      />
 
       <article className="editorial-measure space-y-8">
         <p className="text-xs text-ink/50">
@@ -213,9 +254,9 @@ const StoryPage: NextPage<StoryPageProps> = ({ story }) => {
             {story.theme}
           </p>
           <h1 className="font-serif text-3xl leading-tight text-ink md:text-4xl">
-            {story.title}
+            {title}
           </h1>
-          <p className="text-base leading-relaxed text-ink/80">{story.dek}</p>
+          <p className="text-base leading-relaxed text-ink/80">{dek}</p>
         </header>
 
         {story.body ? (
@@ -242,17 +283,20 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps<StoryPageProps> = async ({
-  params
+  params,
+  locale
 }) => {
   const slug = params?.slug;
   if (typeof slug !== "string") {
     return { notFound: true };
   }
 
+  const translations = await serverSideTranslations(locale ?? "fr", ["common"]);
+
   try {
     const story = await getPublishedStoryBySlug(slug);
     if (!story) return { notFound: true };
-    return { props: { story }, revalidate: 60 };
+    return { props: { story, ...translations }, revalidate: 60 };
   } catch {
     const s = getAllStories().find((x) => x.slug === slug);
     if (!s) return { notFound: true };
@@ -261,9 +305,12 @@ export const getStaticProps: GetStaticProps<StoryPageProps> = async ({
       title: s.title,
       theme: s.theme,
       dek: s.dek,
-      body: ""
+      body: "",
+      author: null,
+      published_at: null,
+      cover_image_url: null,
     };
-    return { props: { story }, revalidate: 60 };
+    return { props: { story, ...translations }, revalidate: 60 };
   }
 };
 

@@ -1,7 +1,10 @@
-import Head from "next/head";
 import Link from "next/link";
 import type { GetStaticProps, NextPage } from "next";
+import { useRouter } from "next/router";
+import type { SSRConfig } from "next-i18next/pages";
+import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
 import ImagePlaceholder from "@/components/ImagePlaceholder";
+import { SeoHead } from "@/components/SeoHead";
 import { getLocationCards, type LocationCard } from "@/lib/supabase";
 
 /** Prefer these slugs when present in published data (matches legacy static atlas). */
@@ -42,14 +45,19 @@ function buildFeaturedPlaces(places: LocationCard[]): FeaturedPlaceCard[] {
 
 type HomePageProps = {
   featuredPlaces: FeaturedPlaceCard[];
-};
+} & SSRConfig;
 
 const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
+  const router = useRouter();
+  const locale = router.locale ?? "fr";
   return (
     <>
-      <Head>
-        <title>Visit Barbizon — Cultural Cartography</title>
-      </Head>
+      <SeoHead
+        title="Visit Barbizon — Cultural Cartography"
+        description="Visit Barbizon — a curated cultural guide to the forest-edge village that inspired generations of artists."
+        path="/"
+        locale={locale}
+      />
 
       <div className="section-stack">
         {/* 1. HERO SECTION */}
@@ -321,10 +329,13 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
   );
 };
 
-export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
+export const getStaticProps: GetStaticProps<HomePageProps> = async ({
+  locale,
+}) => {
   const places = await getLocationCards();
+  const translations = await serverSideTranslations(locale ?? "fr", ["common"]);
   return {
-    props: { featuredPlaces: buildFeaturedPlaces(places) },
+    props: { featuredPlaces: buildFeaturedPlaces(places), ...translations },
     revalidate: 60,
   };
 };

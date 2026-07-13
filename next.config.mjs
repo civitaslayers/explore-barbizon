@@ -1,6 +1,18 @@
+import { createRequire } from "node:module";
+
+// next-i18next.config.js is CJS; next.config.mjs is ESM. createRequire is the
+// standard ESM→CJS interop shim (docs/i18n-seo-implementation-plan.md, Task 2b).
+const require = createRequire(import.meta.url);
+const { i18n } = require("./next-i18next.config.js");
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+
+  // Built-in Pages-Router locale routing — fr served at the root (no prefix),
+  // en served under /en/. No middleware. localeDetection: false is set in
+  // next-i18next.config.js and is load-bearing (keeps CCC/dashboard French-only).
+  i18n,
 
   images: {
     remotePatterns: [

@@ -275,6 +275,42 @@ export async function getPublishedLocationSlugs(): Promise<string[]> {
   return getPublishedSlugs();
 }
 
+/**
+ * Published story slugs — for the sitemap (docs/i18n-seo-implementation-plan.md,
+ * Task 4d). Mirrors getPublishedSlugs; throws if Supabase is not configured or
+ * the query fails (the sitemap wraps the call in try/catch and degrades to
+ * static routes only).
+ */
+export async function getPublishedStorySlugs(): Promise<string[]> {
+  if (!supabase) throw new Error("Supabase not configured");
+
+  const { data, error } = await supabase
+    .from("stories")
+    .select("slug")
+    .eq("is_published", true);
+
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((row: { slug: string }) => row.slug);
+}
+
+/**
+ * Published route slugs. `routes` has no public detail page today (the map
+ * is the only consumer) — kept for callers that may want them, but the
+ * sitemap does not list `/routes/{slug}` URLs since no such page exists
+ * (see Task 4d "never emit a URL that 404s").
+ */
+export async function getPublishedRouteSlugs(): Promise<string[]> {
+  if (!supabase) throw new Error("Supabase not configured");
+
+  const { data, error } = await supabase
+    .from("routes")
+    .select("slug")
+    .eq("is_published", true);
+
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((row: { slug: string }) => row.slug);
+}
+
 // ---------------------------------------------------------------------------
 // Locations (unified building / site pages)
 // ---------------------------------------------------------------------------
@@ -313,6 +349,18 @@ export type LocationFull = {
   opening_hours: Record<string, unknown> | null;
   functions: LocationFunction[];
   heroImage: string | null;
+  // The location's own primary category (locations.category_id) — distinct
+  // from each location_function's category. Needed by lib/seo.ts to derive
+  // the JSON-LD @type via getCategoryGroup for the (majority) case of
+  // locations with no location_functions rows, where the previous JSON-LD
+  // type derivation (functions-only) silently fell through to the default.
+  category: { name: string; slug: string; layer: string; color: string | null } | null;
+  // Read-only i18n contract (docs/schema-reference.md, "translations" JSONB).
+  // fr is always the base columns above; getLocalized() reads this for en.
+  translations?: Record<
+    string,
+    { _meta?: { status?: string }; [field: string]: unknown }
+  > | null;
 };
 
 export async function getLocationFull(
@@ -324,7 +372,8 @@ export async function getLocationFull(
     .select(
       `
       id, name, slug, address, latitude, longitude,
-      short_description, narrative, is_published, opening_hours,
+      short_description, narrative, is_published, opening_hours, translations,
+      categories ( name, slug, layer, color ),
       location_functions (
         id, label, description, website, phone, opening_hours,
         display_order, is_primary,
@@ -374,6 +423,8 @@ export async function getLocationFull(
     opening_hours: row.opening_hours ?? null,
     functions,
     heroImage,
+    category: row.categories ?? null,
+    translations: row.translations ?? null,
   };
 }
 
@@ -493,6 +544,31 @@ export async function getTourBySlugFromSupabase(
       (a, b) => a.stop_order - b.stop_order
     ),
   };
+}
+
+/**
+ * Fetch tour slugs whose `is_published` flag is true — for the sitemap
+ * (docs/i18n-seo-implementation-plan.md, Task 4d: "every published entity").
+ *
+ * NOT the same as `getPublishedTourSlugs` below, despite the similar name:
+ * that function (pre-dating the 2026-07-13 `tours.is_published` column,
+ * added with the i18n groundwork) returns ALL tours for a town regardless
+ * of publish state and is relied on by `pages/tours/[slug].tsx`'s
+ * `getStaticPaths`. Renaming/refiltering it here would silently change
+ * which tour pages pre-render — out of scope for this run. Flagging as a
+ * pre-existing gap: tour detail pages are not currently gated on
+ * `is_published` the way locations/stories are.
+ */
+export async function getPublishedTourSlugsForSitemap(): Promise<string[]> {
+  if (!supabase) throw new Error("Supabase not configured");
+
+  const { data, error } = await supabase
+    .from("tours")
+    .select("slug")
+    .eq("is_published", true);
+
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((t: { slug: string }) => t.slug);
 }
 
 /**
