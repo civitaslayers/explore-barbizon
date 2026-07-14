@@ -21,6 +21,7 @@ Task tags:
 
 - [x] [i18n/seo] i18n + SEO foundation shipped to production (merge `54fa35b`, --no-ff): next-i18next routing, `getLocalized` (10/10 tests), `SeoHead`+JSON-LD, `sitemap.xml.tsx`, `seo-audit.mjs` gate, CCC `TranslationHealthPanel`; Cursor retired from CLAUDE.md + ai-operating-system.md; schema-reference documents translations + `v_translation_health`.
 - [x] [ccc-v3] Phase 1 / Phase 2 / Phase 2.1 shipped + both Phase 2 migrations run & verified in production (2026-07-13).
+- [x] [i18n/hotfix] `/en/` 500 production regression fixed (merge `812b144`, 2026-07-14, own worktree): next-i18next config passed explicitly at all 11 `serverSideTranslations` sites + `_app` + `outputFileTracingIncludes`. Verified live — all `/en/` routes 200; prod seo-audit 64/40/2, every hreflang/JSON-LD/sitemap check passes. Preview-audit process rule made executable (auth spot-fetch pre-merge; full audit post-merge on public prod).
 - [user-action] Luigi: production visual pass on the fiche (`/command-center/atlas/[id]`) + card quick-edit (if not yet done).
 
 ---
@@ -40,6 +41,7 @@ Task tags:
 ## Later
 *Valid work, not yet prioritised.*
 
+- [seo/infra] Thread a Vercel **Protection Bypass for Automation** token (`x-vercel-protection-bypass` header) into `scripts/seo-audit.mjs` so the full audit can run against SSO-protected Preview deployments — makes the pre-merge preview gate fully automated (currently pre-merge uses authenticated spot-fetches; full audit runs post-merge against public production). Follow-up from the 2026-07-14 /en/ 500 hotfix.
 - [ccc-v3] v3.1 — `location_functions` sub-editor (first editable-linked-entity follow-on).
 - [chore] Finish the Cursor-routing prune — `.claude/agents/*` + `.cursor/rules` (CLAUDE.md + ai-operating-system.md done 2026-07-13).
 - [content] Reshape object-valued `opening_hours` (epicerie-de-barbizon, galerie-des-pains, muse-galerie) into the string convention — currently preserved + shown read-only in the editor's "Autres entrées".
