@@ -11,6 +11,7 @@ import { getAllStories } from "@/data/stories";
 import { getLocalized, type LocalizableRow } from "@/lib/getLocalized";
 import { buildArticleSchema } from "@/lib/seo";
 import { supabase } from "@/lib/supabase";
+import nextI18NextConfig from "@/next-i18next.config";
 
 type StoryPageStory = {
   slug: string;
@@ -291,7 +292,7 @@ export const getStaticProps: GetStaticProps<StoryPageProps> = async ({
     return { notFound: true };
   }
 
-  const translations = await serverSideTranslations(locale ?? "fr", ["common"]);
+  const translations = await serverSideTranslations(locale ?? "fr", ["common"], nextI18NextConfig);
 
   try {
     const story = await getPublishedStoryBySlug(slug);

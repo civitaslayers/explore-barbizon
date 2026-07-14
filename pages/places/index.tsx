@@ -9,6 +9,7 @@ import { SeoHead } from "@/components/SeoHead";
 import { getPublishedLocations, supabase } from "@/lib/supabase";
 import type { Place } from "@/lib/types";
 import { staticMapUrl, hasMapbox } from "@/lib/mapbox";
+import nextI18NextConfig from "@/next-i18next.config";
 
 type CuratedRow = {
   slug: string;
@@ -310,7 +311,7 @@ export const getStaticProps: GetStaticProps<PlacesIndexProps> = async ({
       // Curated sections stay empty if query fails (e.g. column not deployed yet).
     }
   }
-  const translations = await serverSideTranslations(locale ?? "fr", ["common"]);
+  const translations = await serverSideTranslations(locale ?? "fr", ["common"], nextI18NextConfig);
   return {
     props: { places, whereToEat, whereToStay, ...translations },
     revalidate: 60,

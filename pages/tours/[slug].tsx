@@ -11,6 +11,7 @@ import {
   type TourWithStops,
 } from "@/lib/supabase";
 import { hasMapbox } from "@/lib/mapbox";
+import nextI18NextConfig from "@/next-i18next.config";
 
 type TourPageProps = {
   tour: TourWithStops;
@@ -282,7 +283,7 @@ export const getStaticProps: GetStaticProps<TourPageProps> = async ({
   const tour = await getTourBySlugFromSupabase(slug);
   if (!tour) return { notFound: true };
   const routeCoords = await getRouteByTourSlug(slug).catch(() => null);
-  const translations = await serverSideTranslations(locale ?? "fr", ["common"]);
+  const translations = await serverSideTranslations(locale ?? "fr", ["common"], nextI18NextConfig);
   return {
     props: {
       tour,

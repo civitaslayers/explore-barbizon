@@ -7,6 +7,7 @@ import { SeoHead } from "@/components/SeoHead";
 import { getLocationCards, getPublishedTours } from "@/lib/supabase";
 import type { LocationCard } from "@/lib/supabase";
 import type { TourListItem } from "@/lib/types";
+import nextI18NextConfig from "@/next-i18next.config";
 
 type PlanPageProps = {
   places: LocationCard[];
@@ -110,7 +111,7 @@ export const getStaticProps: GetStaticProps<PlanPageProps> = async ({
   const [toursData, places, translations] = await Promise.all([
     getPublishedTours(),
     getLocationCards(),
-    serverSideTranslations(locale ?? "fr", ["common"]),
+    serverSideTranslations(locale ?? "fr", ["common"], nextI18NextConfig),
   ]);
   const tours = toursData.map((t) => ({
     slug: t.slug,

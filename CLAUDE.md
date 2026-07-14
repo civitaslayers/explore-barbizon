@@ -209,6 +209,26 @@ Use the `update-brain` command after any significant state change.
 - Gate instructions must name their executor unambiguously — e.g.
   "Luigi approves, claude.ai executes via MCP". "Claude" alone is ambiguous in a
   two-Claude system (claude.ai lead vs Claude Code loop); always say which one.
+- Any change touching **locale routing, runtime config loading, or page data
+  methods** (`getStaticProps`, `getServerSideProps`, `serverSideTranslations`)
+  must be verified against a **deployed Vercel serverless runtime**, not only a
+  local build. A green local build is necessary but not sufficient: file-tracing
+  / serverless-bundling failures (confirmed root cause of the production
+  `/en/...` 500 regression, fix/en-500-i18n-config, 2026-07 —
+  `next-i18next.config.js` was not reliably bundled by Vercel's file tracer,
+  invisible locally because the config sits in the local CWD) only appear in the
+  deployed serverless runtime. The executable gate:
+  - **Pre-merge:** authenticated spot-fetches of the highest-risk routes on the
+    branch's **Vercel Preview** (previews are SSO-gated, so the raw
+    `seo-audit.mjs` can't score them) — confirm the on-demand `/en/...` routes
+    return 200 with real content, via `web_fetch_vercel_url`.
+  - **Post-merge:** run `scripts/seo-audit.mjs` against **public production**
+    immediately, and note the prior production deployment ID for instant
+    rollback.
+  - Follow-up: thread a Vercel Protection Bypass token into `seo-audit.mjs` to
+    make the preview gate fully automated.
+  Mandatory release-checker gate for this change class (see
+  `.claude/agents/civitas-release-checker.md`, SEO audit check).
 
 ---
 

@@ -73,6 +73,38 @@ Also flag the silent-failure class:
 - Absent `openingHoursSpecification` JSON-LD is a **WARNING**, not a failure (non-parseable / non-day hour shapes legitimately produce no spec).
 - Title/description length failures against French-only content **before the translation content migration** are **EXPECTED** — report the count, but do not treat pre-migration missing-English as a blocker. Only flag a regression where a previously-passing entity now fails.
 
+**Preview-deploy audit — mandatory for locale/runtime-config/data-method changes.**
+A local build/audit is necessary but **not sufficient** for any change touching
+locale routing, runtime config loading, or page data methods (`getStaticProps`,
+`getServerSideProps`, `serverSideTranslations`). This is the confirmed root
+cause of the production `/en/...` 500 regression (fix/en-500-i18n-config,
+2026-07): `next-i18next` loads `next-i18next.config.js` from disk at request
+time; Vercel's serverless file tracer did not reliably bundle it; the failure
+was invisible in every local build because the config file sits in the local
+CWD. It only surfaced against a deployed serverless runtime. For any change in
+this class:
+- Do not mark the SEO audit ✅ on a local run alone — state explicitly that the
+  local build/audit passed but the file-tracing/serverless-bundling class of
+  failure cannot be verified locally.
+- **Pre-merge (preview):** Vercel Preview deployments are protected by SSO, so
+  `scripts/seo-audit.mjs` (unauthenticated `fetch`) cannot score them — it only
+  reads the "Login – Vercel" wall. Instead, verify pre-merge with **authenticated
+  spot-fetches of the highest-risk routes** on the preview (e.g. the on-demand
+  `/en/...` dynamic routes — `/en/places/[slug]`, `/en/stories/[slug]`,
+  `/en/tours/[slug]`) via `web_fetch_vercel_url` (or a share/bypass link),
+  confirming each returns 200 with a real rendered page (title, hreflang,
+  JSON-LD, hydrated `_nextI18Next`) rather than a 500 or the login page. This is
+  the pre-merge gate for this change class.
+- **Post-merge (production):** run `node scripts/seo-audit.mjs` against the
+  **public production** URL immediately after merge — production is not SSO-gated,
+  so the audit produces a real per-scope score — and **note the prior production
+  deployment ID for instant rollback** if the audit or a manual `/en/` check
+  regresses.
+- Follow-up (queued): integrate a Vercel **Protection Bypass for Automation**
+  token (`x-vercel-protection-bypass` header) into `scripts/seo-audit.mjs` so the
+  full audit can run against protected previews and the pre-merge gate becomes
+  fully automated.
+
 ## Output format
 
 Report as a checklist:

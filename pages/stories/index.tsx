@@ -6,6 +6,7 @@ import { serverSideTranslations } from "next-i18next/pages/serverSideTranslation
 import { SeoHead } from "@/components/SeoHead";
 import { getAllStories, type Story } from "@/data/stories";
 import { supabase } from "@/lib/supabase";
+import nextI18NextConfig from "@/next-i18next.config";
 
 type StoriesIndexProps = {
   stories: Story[];
@@ -162,7 +163,7 @@ const StoriesIndexPage: NextPage<StoriesIndexProps> = ({ stories }) => {
 export const getStaticProps: GetStaticProps<StoriesIndexProps> = async ({
   locale,
 }) => {
-  const translations = await serverSideTranslations(locale ?? "fr", ["common"]);
+  const translations = await serverSideTranslations(locale ?? "fr", ["common"], nextI18NextConfig);
   try {
     const stories = await getPublishedStoriesFromSupabase();
     return { props: { stories, ...translations }, revalidate: 60 };
