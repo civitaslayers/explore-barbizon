@@ -14,7 +14,22 @@
       "Bash(git log *)",
       "Bash(git commit *)",
       "Bash(git push)",
-      "Bash(bash .claude/hooks/*)"
+      "Bash(bash .claude/hooks/*)",
+      "Bash(npm run start*)",
+      "Bash(npm start*)",
+      "Bash(node --test*)",
+      "Bash(node scripts/seo-audit.mjs*)",
+      "Bash(git worktree add *)",
+      "Bash(git worktree remove *)",
+      "Bash(git worktree list*)",
+      "Bash(git worktree prune*)",
+      "Bash(curl http://localhost:3000*)",
+      "Bash(curl -s http://localhost:3000*)",
+      "Bash(curl -I http://localhost:3000*)",
+      "Bash(curl -sI http://localhost:3000*)",
+      "Bash(lsof -i:3000*)",
+      "Bash(lsof -ti:3000*)",
+      "Bash(pkill -f \"next dev\"*)"
     ],
     "deny": [
       "Read(./.env)",
