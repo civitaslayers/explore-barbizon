@@ -1,6 +1,11 @@
 # Task Queue
 
-Last updated: 2026-07-13
+Last updated: 2026-07-15
+
+> **Generated display-only mirror.** The Supabase `tasks` table is the canonical
+> work queue (as of 2026-07-15, merge `eb63b7b`). Regenerate from live task state
+> via the CCC tasks page **→ brain** button (`/api/brain/sync-tasks`). Hand-edits
+> here are provisional until the next sync.
 
 Tasks are ordered by priority within each section.
 Move tasks between sections as status changes.
@@ -19,6 +24,7 @@ Task tags:
 ## Now
 *Unblocked tasks that can be started immediately.*
 
+- [x] [ai-ops] Task-queue dispatch + retrospective shipped to main (merge `eb63b7b`, --no-ff): `tasks` table = canonical queue, this file = generated mirror. Migration applied + verified (`tasks.source`, `execution_status` superset CHECK +queued/at_gate, `outputs.commit_hash`). `/run-loop` Step 1 dispatch / Step 5 at_gate+outputs summary / Step 6 done|blocked / new Step 7 retrospective; `settings.json` allowlist pass; CLAUDE.md governance lines.
 - [x] [i18n/seo] i18n + SEO foundation shipped to production (merge `54fa35b`, --no-ff): next-i18next routing, `getLocalized` (10/10 tests), `SeoHead`+JSON-LD, `sitemap.xml.tsx`, `seo-audit.mjs` gate, CCC `TranslationHealthPanel`; Cursor retired from CLAUDE.md + ai-operating-system.md; schema-reference documents translations + `v_translation_health`.
 - [x] [ccc-v3] Phase 1 / Phase 2 / Phase 2.1 shipped + both Phase 2 migrations run & verified in production (2026-07-13).
 - [x] [i18n/hotfix] `/en/` 500 production regression fixed (merge `812b144`, 2026-07-14, own worktree): next-i18next config passed explicitly at all 11 `serverSideTranslations` sites + `_app` + `outputFileTracingIncludes`. Verified live — all `/en/` routes 200; prod seo-audit 64/40/2, every hreflang/JSON-LD/sitemap check passes. Preview-audit process rule made executable (auth spot-fetch pre-merge; full audit post-merge on public prod).
@@ -41,6 +47,7 @@ Task tags:
 ## Later
 *Valid work, not yet prioritised.*
 
+- [ai-ops] [`source='loop'`, task `05bc2e17`, `.claude/**`-gated] run-loop: assign live-schema introspection to the **lead** (or `civitas-content-ops`, which has `execute_sql`), not `civitas-architect` — the architect's tool allowlist has no Supabase MCP, so it cannot read live schema as run-loop Step 2 implies. Doc/flow fix only; do NOT grant the architect DB access. (First retrospective proposal.)
 - [seo/infra] Thread a Vercel **Protection Bypass for Automation** token (`x-vercel-protection-bypass` header) into `scripts/seo-audit.mjs` so the full audit can run against SSO-protected Preview deployments — makes the pre-merge preview gate fully automated (currently pre-merge uses authenticated spot-fetches; full audit runs post-merge against public production). Follow-up from the 2026-07-14 /en/ 500 hotfix.
 - [ccc-v3] v3.1 — `location_functions` sub-editor (first editable-linked-entity follow-on).
 - [chore] Finish the Cursor-routing prune — `.claude/agents/*` + `.cursor/rules` (CLAUDE.md + ai-operating-system.md done 2026-07-13).
