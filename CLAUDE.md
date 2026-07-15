@@ -209,6 +209,20 @@ Use the `update-brain` command after any significant state change.
 - Gate instructions must name their executor unambiguously — e.g.
   "Luigi approves, claude.ai executes via MCP". "Claude" alone is ambiguous in a
   two-Claude system (claude.ai lead vs Claude Code loop); always say which one.
+- **Canonical queue.** The `tasks` table (Supabase) is the canonical work queue;
+  `brain/task-queue.md` is a generated display-only mirror
+  (`pages/api/brain/sync-tasks.ts`). Dispatch and status (`execution_status`:
+  `queued → in_progress → at_gate → done | blocked`) live in `tasks` / `outputs`,
+  never in the mirror — see `.claude/commands/run-loop.md`.
+- **Governance.** claude.ai dispatches and reviews; agents execute; irreversible
+  actions (merge/deploy, prod SQL, publish, spend) are approved by Luigi. The
+  dispatcher never approves its own irreversible actions. The system may *propose*
+  changes to its own guardrails (`.claude/**`); it may never *enact* them — any
+  task touching `.claude/**` is always human-gated, and no agent applies a
+  `.claude/**` change in the same run that proposed it.
+- **Permission fatigue is a bug signal.** A permission prompt the human doesn't
+  understand is an allowlist bug — report it, don't approve it. Mechanical,
+  reviewed-safe patterns belong in `.claude/settings.json` `permissions.allow`.
 - Any change touching **locale routing, runtime config loading, or page data
   methods** (`getStaticProps`, `getServerSideProps`, `serverSideTranslations`)
   must be verified against a **deployed Vercel serverless runtime**, not only a
