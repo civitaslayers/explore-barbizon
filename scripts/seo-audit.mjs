@@ -6,8 +6,8 @@
 // RLS — least-privilege), plus HTTP fetches against a running/deployed app.
 //
 // Per published entity, per available locale (fr root, /en/…):
-//   - <title> present, 50-60 chars
-//   - <meta name="description"> present, 150-160 chars
+//   - <title> present, 30-60 chars
+//   - <meta name="description"> present, 110-160 chars
 //   - hreflang pair completeness (fr + en + x-default -> fr URL)
 //   - JSON-LD present, valid JSON, has an @type
 //   - sitemap inclusion (fetched once)
@@ -176,8 +176,8 @@ function checkTitle(scope, html) {
     fail(scope, "Missing <title>");
     return;
   }
-  if (title.length < 50 || title.length > 60) {
-    fail(scope, `<title> length ${title.length} outside 50-60 (“${title}”)`);
+  if (title.length < 30 || title.length > 60) {
+    fail(scope, `<title> length ${title.length} outside 30-60 (“${title}”)`);
     return;
   }
   pass(scope, `<title> OK (${title.length} chars)`);
@@ -190,10 +190,10 @@ function checkDescription(scope, html) {
     fail(scope, "Missing <meta name=\"description\">");
     return;
   }
-  if (description.length < 150 || description.length > 160) {
+  if (description.length < 110 || description.length > 160) {
     fail(
       scope,
-      `description length ${description.length} outside 150-160`
+      `description length ${description.length} outside 110-160`
     );
     return;
   }

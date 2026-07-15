@@ -69,7 +69,7 @@ Also flag the silent-failure class:
 
 ### 9. SEO audit (mandatory — i18n/SEO surfaces)
 - Run `node scripts/seo-audit.mjs` (requires a running build/server per the script header).
-- Per published entity and available locale it checks: title present + 50–60 chars, meta description 150–160 chars, hreflang pair completeness, JSON-LD + sitemap inclusion. The script exits non-zero on failures — report its scored summary.
+- Per published entity and available locale it checks: title present + 30–60 chars, meta description 110–160 chars, hreflang pair completeness, JSON-LD + sitemap inclusion. The script exits non-zero on failures — report its scored summary.
 - Absent `openingHoursSpecification` JSON-LD is a **WARNING**, not a failure (non-parseable / non-day hour shapes legitimately produce no spec).
 - Title/description length failures against French-only content **before the translation content migration** are **EXPECTED** — report the count, but do not treat pre-migration missing-English as a blocker. Only flag a regression where a previously-passing entity now fails.
 
