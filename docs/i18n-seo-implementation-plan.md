@@ -340,8 +340,8 @@ Purpose: fail a pre-deploy check when SEO output is malformed.
   prod; default `http://localhost:3000`) for a sample per entity, for each
   available locale (`fr` root, `/en/…`).
 - **Checks (per page, per available locale):**
-  - `<title>` present and **50–60 chars** (fail outside range).
-  - `<meta name="description">` present and **150–160 chars** (fail outside range).
+  - `<title>` present and **30–60 chars** (fail outside range).
+  - `<meta name="description">` present and **110–160 chars** (fail outside range).
   - **hreflang pair completeness**: both `fr` and `en` alternates present, plus
     `x-default` → the French URL.
   - **JSON-LD present** and valid JSON with an `@type`.
