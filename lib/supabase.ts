@@ -485,6 +485,7 @@ export async function getPublishedTours(): Promise<TourWithStops[]> {
     `
     )
     .eq("town_id", townRes.data.id)
+    .eq("is_published", true)
     .order("name");
 
   if (error) throw new Error(error.message);
@@ -529,6 +530,7 @@ export async function getTourBySlugFromSupabase(
     )
     .eq("slug", slug)
     .eq("town_id", townRes.data.id)
+    .eq("is_published", true)
     .single();
 
   if (error) {
@@ -551,13 +553,10 @@ export async function getTourBySlugFromSupabase(
  * (docs/i18n-seo-implementation-plan.md, Task 4d: "every published entity").
  *
  * NOT the same as `getPublishedTourSlugs` below, despite the similar name:
- * that function (pre-dating the 2026-07-13 `tours.is_published` column,
- * added with the i18n groundwork) returns ALL tours for a town regardless
- * of publish state and is relied on by `pages/tours/[slug].tsx`'s
- * `getStaticPaths`. Renaming/refiltering it here would silently change
- * which tour pages pre-render — out of scope for this run. Flagging as a
- * pre-existing gap: tour detail pages are not currently gated on
- * `is_published` the way locations/stories are.
+ * that function is used by `pages/tours/[slug].tsx`'s `getStaticPaths` and,
+ * as of the tour `is_published` gate fix, ALSO filters to `is_published =
+ * true` — so the two functions are now aligned in what they return, just
+ * with different call sites (sitemap vs. static paths).
  */
 export async function getPublishedTourSlugsForSitemap(): Promise<string[]> {
   if (!supabase) throw new Error("Supabase not configured");
@@ -587,7 +586,8 @@ export async function getPublishedTourSlugs(): Promise<string[]> {
   const { data, error } = await supabase
     .from("tours")
     .select("slug")
-    .eq("town_id", townRes.data.id);
+    .eq("town_id", townRes.data.id)
+    .eq("is_published", true);
 
   if (error) throw new Error(error.message);
   return (data ?? []).map((t: { slug: string }) => t.slug);
