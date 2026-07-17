@@ -8,8 +8,9 @@
     "start": "next start",
     "lint": "eslint .",
     "task": "node scripts/run-task.js",
-    "test": "node --test lib/getLocalized.test.ts",
-    "seo-audit": "node scripts/seo-audit.mjs"
+    "test": "node --test lib/getLocalized.test.ts scripts/upload-media.test.mjs",
+    "seo-audit": "node scripts/seo-audit.mjs",
+    "upload-media": "node scripts/upload-media.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1021.0",
@@ -23,7 +24,8 @@
     "next-i18next": "^16.0.7",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "react-i18next": "^17.0.9"
+    "react-i18next": "^17.0.9",
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",

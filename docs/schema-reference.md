@@ -124,6 +124,8 @@ FK: `location_id` → `locations.id`
 
 Note: `media` is currently scoped to locations only. No attachment to tours, stories, or artists.
 
+Note: `scripts/upload-media.mjs` uploads two R2 variants per source photo (`{basename}-1600.webp`, `{basename}-800.webp`), but `media.url` carries **only the 1600w URL** — there is no variant column. The 800w object is uploaded for forward-compat (a future `srcset`/card task) and is unreferenced by any code until that lands; derive its URL by string-swapping `-1600` for `-800` on the stored URL, never re-ingest. `display_order` is parsed from the source filename anchored on the location's slug (`{slug}` -> 0, `{slug}-1`/`{slug}-01` -> 1, ...), not a dense 0-based rank.
+
 ---
 
 ### `tours`
