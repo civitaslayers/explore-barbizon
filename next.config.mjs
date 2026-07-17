@@ -40,6 +40,16 @@ const nextConfig = {
         protocol: "https",
         hostname: "api.mapbox.com",
       },
+      {
+        // Cloudflare R2 media host (scripts/upload-media.mjs,
+        // scripts/upload-to-r2.mjs). Hardcoded, not derived from
+        // NEXT_PUBLIC_MEDIA_BASE_URL — this file already caused one
+        // serverless-bundling regression (the /en 500), so the build must
+        // not depend on a runtime env var here.
+        protocol: "https",
+        hostname: "media.explorebarbizon.com",
+        pathname: "/**",
+      },
     ],
   },
 
