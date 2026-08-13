@@ -77,6 +77,14 @@ const nextConfig = {
         destination: "/command-center/atlas?view=map",
         permanent: true,
       },
+      {
+        // Renamed slug: creperie-barjole → barjole. locale: true is applied
+        // automatically because i18n is configured, so /en/places/... is
+        // covered without a second rule.
+        source: "/places/creperie-barjole",
+        destination: "/places/barjole",
+        permanent: true,
+      },
     ];
   },
 };
