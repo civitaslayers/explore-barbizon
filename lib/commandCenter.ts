@@ -59,6 +59,8 @@ export type Task = {
   last_run_at: string | null;
   /** Short note about the latest handoff/run. */
   last_run_note: string | null;
+  /** Which system dispatched this task (claude.ai lead, Luigi directly, or the run-loop). */
+  source: "claude-ai" | "luigi" | "loop" | null;
   created_at: string;
   updated_at: string;
 };
@@ -112,8 +114,12 @@ export type TaskLink = {
   created_at: string;
 };
 
-/** Ensures execution columns exist at runtime (null) if DB predates migration. */
-function taskFromRow(row: Task): Task {
+/**
+ * Ensures execution columns exist at runtime (null) if DB predates migration.
+ * Exported so lib/commandCenter.server.ts (admin reads) can reuse the same
+ * row-normalization logic instead of duplicating it.
+ */
+export function taskFromRow(row: Task): Task {
   return {
     ...row,
     task_type: row.task_type ?? null,
@@ -129,6 +135,7 @@ function taskFromRow(row: Task): Task {
     last_run_target: row.last_run_target ?? null,
     last_run_at: row.last_run_at ?? null,
     last_run_note: row.last_run_note ?? null,
+    source: row.source ?? null,
   };
 }
 

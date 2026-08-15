@@ -1,8 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import fs from "fs";
 import path from "path";
-import { getTasks } from "@/lib/commandCenter";
 import type { Task, TaskType, RelatedArea } from "@/lib/commandCenter";
+import { getTasksAdmin } from "@/lib/commandCenter.server";
 
 // Dev-only — filesystem writes must never reach production.
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -14,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const tasks = await getTasks();
+    const tasks = await getTasksAdmin();
     const markdown = generateBrainMarkdown(tasks);
     const filePath = path.join(process.cwd(), "brain", "task-queue.md");
     fs.writeFileSync(filePath, markdown, "utf-8");

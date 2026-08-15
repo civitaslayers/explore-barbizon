@@ -1,16 +1,12 @@
-import type { NextPage } from "next";
+import type { GetServerSideProps, NextPage } from "next";
 import type { ReactElement, ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { CommandCenterLayout } from "@/components/CommandCenterLayout";
-import {
-  getTasks,
-  createTask,
-  updateTask,
-  deleteTask,
-} from "@/lib/commandCenter";
+import { createTask, updateTask, deleteTask } from "@/lib/commandCenter";
 import type { Task, TaskStatus, RelatedArea } from "@/lib/commandCenter";
+import { getTasksAdmin } from "@/lib/commandCenter.server";
 import {
   TASK_TEMPLATES,
   executionFieldsForCreate,
@@ -22,8 +18,12 @@ import {
 } from "@/lib/taskBriefs";
 import type { TaskSuggestion } from "@/pages/api/tasks/suggest";
 
-type NextPageWithLayout = NextPage & {
+type NextPageWithLayout<P = object> = NextPage<P> & {
   getLayout?: (page: ReactElement) => ReactNode;
+};
+
+type TasksPageProps = {
+  initialTasks: Task[];
 };
 
 const STATUSES: TaskStatus[] = ["backlog", "ready", "in_progress", "review", "done"];
@@ -116,6 +116,7 @@ function TaskRow({ task, isFirst, runningId, copiedId, onRun, onCopyBrief, onSta
           <p className="text-[11px] text-ink/40 mt-0.5 line-clamp-1">{task.description}</p>
         )}
         {(task.execution_status ||
+          task.source ||
           task.assigned_to ||
           (task.next_step && task.next_step.trim()) ||
           (task.last_run_at && (task.last_run_target ?? "").trim())) && (
@@ -123,6 +124,11 @@ function TaskRow({ task, isFirst, runningId, copiedId, onRun, onCopyBrief, onSta
             {task.execution_status && (
               <span className={`text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded ${EXECUTION_STATUS_STYLE[task.execution_status] ?? "bg-ink/6 text-ink/45"}`}>
                 {task.execution_status.replace("_", " ")}
+              </span>
+            )}
+            {task.source && (
+              <span className="text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded border border-ink/8 text-ink/30" title="Dispatch source">
+                {task.source}
               </span>
             )}
             {task.assigned_to && (
@@ -226,10 +232,9 @@ function TaskRow({ task, isFirst, runningId, copiedId, onRun, onCopyBrief, onSta
   );
 }
 
-const TasksPage: NextPageWithLayout = () => {
+const TasksPage: NextPageWithLayout<TasksPageProps> = ({ initialTasks }) => {
   const router = useRouter();
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
@@ -258,20 +263,12 @@ const TasksPage: NextPageWithLayout = () => {
   const [filterAgent, setFilterAgent] = useState("");
   const [filterArea, setFilterArea] = useState("");
 
+  // router.replace() below re-fetches getServerSideProps into this same
+  // mounted component — it does not reset useState's initial value, so keep
+  // local state synced to the SSR-provided prop when it changes.
   useEffect(() => {
-    load();
-  }, []);
-
-  async function load() {
-    setLoading(true);
-    try {
-      setTasks(await getTasks());
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Failed to load tasks");
-    } finally {
-      setLoading(false);
-    }
-  }
+    setTasks(initialTasks);
+  }, [initialTasks]);
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -286,13 +283,14 @@ const TasksPage: NextPageWithLayout = () => {
         status: form.status,
         priority: form.priority,
         related_area: (form.related_area as RelatedArea) || null,
+        source: null,
         ...execFields,
         assigned_to: form.assigned_to.trim() || execFields.assigned_to,
       });
       setForm(emptyForm);
       setCreationTemplateId(null);
       setShowForm(false);
-      await load();
+      await router.replace(router.asPath, undefined, { scroll: false });
     } catch (e: unknown) {
       setFormError(e instanceof Error ? e.message : "Failed to create task");
     } finally {
@@ -308,7 +306,7 @@ const TasksPage: NextPageWithLayout = () => {
         prev.map((t) => (t.id === id ? { ...t, status, ...extra } : t))
       );
     } catch {
-      await load();
+      await router.replace(router.asPath, undefined, { scroll: false });
     }
   }
 
@@ -319,7 +317,7 @@ const TasksPage: NextPageWithLayout = () => {
         prev.map((t) => (t.id === id ? { ...t, assigned_to: assignee || null } : t))
       );
     } catch {
-      await load();
+      await router.replace(router.asPath, undefined, { scroll: false });
     }
   }
 
@@ -414,10 +412,11 @@ const TasksPage: NextPageWithLayout = () => {
           last_run_note: null,
           artifact_links: null,
           review_note: null,
+          source: null,
         });
       }
       setSuggestions(null);
-      await load();
+      await router.replace(router.asPath, undefined, { scroll: false });
     } catch (e: unknown) {
       setSuggestError(e instanceof Error ? e.message : "Failed to add tasks");
     } finally {
@@ -755,14 +754,8 @@ const TasksPage: NextPageWithLayout = () => {
         </p>
       )}
 
-      {/* Loading */}
-      {loading && (
-        <p className="text-sm text-ink/40 py-8 text-center">Loading...</p>
-      )}
-
       {/* Table */}
-      {!loading && (
-        <>
+      <>
           <div className="border border-ink/10 rounded-xl overflow-hidden">
             {activeTasks.length === 0 && doneTasks.length === 0 ? (
               <p className="text-sm text-ink/35 px-6 py-10 text-center">
@@ -839,7 +832,6 @@ const TasksPage: NextPageWithLayout = () => {
             </div>
           )}
         </>
-      )}
     </div>
   );
 };
@@ -847,5 +839,26 @@ const TasksPage: NextPageWithLayout = () => {
 TasksPage.getLayout = (page: ReactElement) => (
   <CommandCenterLayout>{page}</CommandCenterLayout>
 );
+
+// ---------------------------------------------------------------------------
+// getServerSideProps — admin-read task list (task 82295116). The anon
+// `getTasks()` client-side fetch this page used previously is deny-all
+// under RLS and silently returned []; `getTasksAdmin()` reads via
+// supabaseAdmin (service role), server-only. This route already sits behind
+// the Basic Auth in middleware.ts (matcher includes /command-center/:path*),
+// so this getServerSideProps inherits the same protection as the existing
+// pattern in pages/command-center/index.tsx.
+// ---------------------------------------------------------------------------
+
+export const getServerSideProps: GetServerSideProps<TasksPageProps> = async () => {
+  try {
+    const initialTasks = await getTasksAdmin();
+    return { props: { initialTasks } };
+  } catch {
+    // Degrade to an empty list rather than a 500 — the page already has an
+    // error-recovery path for mutation failures.
+    return { props: { initialTasks: [] } };
+  }
+};
 
 export default TasksPage;
