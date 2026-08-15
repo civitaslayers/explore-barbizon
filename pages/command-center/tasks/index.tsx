@@ -24,6 +24,10 @@ type NextPageWithLayout<P = object> = NextPage<P> & {
 
 type TasksPageProps = {
   initialTasks: Task[];
+  /** Set when the admin-read getServerSideProps fetch itself failed — an
+   * empty `initialTasks` in this case means "read failed", not "zero tasks",
+   * and must render distinctly from a genuine empty queue. */
+  tasksError?: string | null;
 };
 
 const STATUSES: TaskStatus[] = ["backlog", "ready", "in_progress", "review", "done"];
@@ -232,10 +236,16 @@ function TaskRow({ task, isFirst, runningId, copiedId, onRun, onCopyBrief, onSta
   );
 }
 
-const TasksPage: NextPageWithLayout<TasksPageProps> = ({ initialTasks }) => {
+const TasksPage: NextPageWithLayout<TasksPageProps> = ({
+  initialTasks,
+  tasksError,
+}) => {
   const router = useRouter();
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
-  const [error, setError] = useState<string | null>(null);
+  // Seeded from tasksError so a failed SSR admin-read renders as a visible
+  // error, not an indistinguishable empty list (also reused by mutation
+  // error paths below, e.g. handleDelete).
+  const [error, setError] = useState<string | null>(tasksError ?? null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [creationTemplateId, setCreationTemplateId] = useState<TaskTemplateId | null>(null);
@@ -265,10 +275,13 @@ const TasksPage: NextPageWithLayout<TasksPageProps> = ({ initialTasks }) => {
 
   // router.replace() below re-fetches getServerSideProps into this same
   // mounted component — it does not reset useState's initial value, so keep
-  // local state synced to the SSR-provided prop when it changes.
+  // local state synced to the SSR-provided props when they change. Syncing
+  // `error` here too means a refresh that fixes (or newly hits) the admin
+  // read surfaces/clears the banner, same as `tasks`.
   useEffect(() => {
     setTasks(initialTasks);
-  }, [initialTasks]);
+    setError(tasksError ?? null);
+  }, [initialTasks, tasksError]);
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -853,11 +866,14 @@ TasksPage.getLayout = (page: ReactElement) => (
 export const getServerSideProps: GetServerSideProps<TasksPageProps> = async () => {
   try {
     const initialTasks = await getTasksAdmin();
-    return { props: { initialTasks } };
-  } catch {
-    // Degrade to an empty list rather than a 500 — the page already has an
-    // error-recovery path for mutation failures.
-    return { props: { initialTasks: [] } };
+    return { props: { initialTasks, tasksError: null } };
+  } catch (e) {
+    // Render (never a 500) — but a failed admin read must be visibly
+    // distinct from a genuine zero-task queue, not silently swallowed into
+    // an empty list (the exact blind-read bug this task exists to fix).
+    const tasksError =
+      e instanceof Error ? e.message : "Failed to load tasks";
+    return { props: { initialTasks: [], tasksError } };
   }
 };
 
