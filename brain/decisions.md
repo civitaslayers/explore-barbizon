@@ -6,6 +6,38 @@
 
 ---
 
+## 2026-08-13
+**Decision:** Slug creperie-barjole renamed to barjole, with a permanent redirect.
+**Reason:** The business reopened in May–June 2026 as a Mediterranean restaurant and is no longer a crêperie. Google had not yet fetched the sitemap, so the URL had no accumulated equity to lose — the cheapest possible moment to rename.
+**Consequence:** /places/creperie-barjole returns 308 to /places/barjole (Next emits 308 for permanent: true, not 301). i18n covers /en automatically via locale: true. Verified in production on both locales. R2 object moved and media.url repointed.
+**Migration risk:** low
+
+---
+
+## 2026-08-13
+**Decision:** hreflang and sitemap alternates are gated per record on translations->'en' being populated, not by a global flag.
+**Reason:** An audit found translations empty across all 107 published locations while SeoHead and the sitemap already declared fr/en/x-default alternates — /X and /en/X were byte-identical. A global off-switch would have suppressed hreflang on records that legitimately have translations as the migration progresses.
+**Consequence:** Per-record gating is self-correcting as batches land. Records without translations get noindex,follow on the non-default locale. No flag to remember to flip.
+**Migration risk:** none
+
+---
+
+## 2026-08-13
+**Decision:** Audience measurement is first-party and Supabase-native (page_views table + record_page_view RPC). GA4 rejected. Google Search Console used for search-demand data only.
+**Reason:** GA4 requires a consent banner for EU visitors, conflicting with the "quiet digital atlas" direction. A cookieless first-party table is consent-exempt under CNIL audience-measurement conditions, keeps traffic data joinable against locations, categories and layer, and produces per-location visit evidence owned by the project — useful for the Office de Tourisme pitch. Search Console carries no consent implication and is complementary.
+**Consequence:** All page views write through record_page_view() with the service-role key. No analytics script, no cookie banner. Retention must be capped at 25 months — purge job outstanding. town_id already present for multi-town.
+**Migration risk:** none
+
+---
+
+## 2026-08-13
+**Decision:** French base content is written natively, not translated from English; existing English is moved into translations->'en' field by field.
+**Reason:** Translated-from-English prose reads foreign to a French audience reading about their own village heritage, and the Barbizon School has settled French art-historical vocabulary. Language mixing was found to be per-field rather than per-record (maison-charles-jacque had a French short_description and an English narrative), so a per-record language flag would have corrupted data.
+**Consequence:** Every factual claim is verified before being carried into French, which surfaced multiple errors in published content. Records that were French-base have no English at all and need English originals composed. Accent-stripped French corrected in passing.
+**Migration risk:** none
+
+---
+
 ## 2026-07-17
 **Decision:** Media ingestion (`scripts/upload-media.mjs`, task `6612dd51`) — **shipped and executed** (merge `c62a058` `--no-ff`; gate passed on `auberge-ganne`, then the full batch: 54 folders / 122 photos / 244 objects / 92 rows / 0 conflicts / 0 failures; verified 97 rows, 0 duplicates, 0 `_general` rows, 3 captions preserved). (1) **Two variants uploaded, one referenced**: every source photo produces `-1600.webp` + `-800.webp` on R2, but the `media` row carries **only the 1600 URL**. `media.url` is one opaque absolute URL consumed by a `next/image` hero (which does its own downscaling from the largest available source) and by two raw-`<img>` renderers; an 800 source would visibly degrade the hero, so the largest variant wins. The 800 is uploaded now as forward-compat for a later frontend `srcset`/card task — a pure string swap off the 1600 URL, no DB migration, no re-ingest. (2) **`display_order` = the number parsed from the filename, anchored on the known slug**: `{slug}.jpg` → 0, `{slug}-1.jpg` → 1, `{slug}-01.jpg` → 1. Not a dense 0-based rank. (3) **No `upsert`** — `media` has no unique index, so idempotency is app-level: SELECT existing rows for the location, match on exact `url`, UPDATE the matched rows whose `display_order` changed, INSERT the rest, never DELETE, never overwrite `caption`. (4) `media.explorebarbizon.com` is added to `next.config.mjs` `images.remotePatterns` — a live production bug fix, in scope.
 **Reason:** `media` has one `url` column, no variant column, and no unique constraint — all three shapes are fixed for this task (DDL is human-gated and out of scope), so the design has to fit them rather than change them. Filename-anchored `display_order` reproduces the existing live convention exactly (single image = 0; the one 2-image set = 1,2), keeps filename↔order legible, and is strictly more idempotent than dense ranking: deleting one photo from a folder renumbers nothing. Slug-anchored parsing is required, not stylistic — `media-staging/maison-45/maison-45.jpg` is a bare single-image file whose slug ends in digits, and a naive trailing-`-(\d+)` parser assigns it `display_order` 45 instead of 0. The remotePatterns gap is verified live: the R2 origin serves the image 200, but `/_next/image?url=<R2 url>` returns 400 ("Any other protocol, hostname, port, or unmatched path will respond with 400 Bad Request" — Next 16 docs), so the hero is broken today on the 2 locations that have media, and ingesting 122 photos would multiply it to 54.
