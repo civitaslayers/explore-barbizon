@@ -1,3 +1,19 @@
+## 2026-08-16
+**Decision:** The `decisions` and `memory` Supabase tables are retired. `brain/decisions.md` is the single decision log. `tasks` and `outputs` remain canonical in Supabase.
+**Reason:** `decisions` received no writes after 2026-04-02 and `memory` none after 2026-03-21, while `brain/decisions.md` continued to be updated — two logs that diverged in April. CCC displayed the dead one, which is worse than displaying nothing: a stale panel asserts something false. The markdown file won because it lives in the repo where the agents already work; the tables lost because writing to them required a UI that broke under RLS.
+**Consequence:** Both tables carry a RETIRED comment. All 20 `decisions` rows merged inline into `brain/decisions.md` in chronological position — deliberately not under an "Archive" heading, because most were still-active constraints (`show_in_editorial` dual filter, `visual_works` geo_confidence, Tier 3 source policy, duplicate-elimination policy) that an agent would skip if labelled history. `memory` triaged: most rows stale or duplicated, five unique items folded into repo docs. CCC's Decisions and Memory panels must be removed.
+**Migration risk:** none — no drops, rows preserved.
+
+---
+
+## 2026-08-16
+**Decision:** Claude, Claude Code and Claude Design are the only AI tools in use. Cursor, ChatGPT, GPT, Grok, Stitch and Perplexity are retired.
+**Reason:** Eight files across docs, agent definitions and application code still described a multi-tool workflow abandoned months earlier — including `.claude/agents/civitas-implementer.md`, which told the agent it was invoked by Cursor when `/run-loop` invokes it. Stale documentation that reads as authoritative caused a correct queue cleanup to be reversed on 2026-08-16.
+**Consequence:** Single reconciliation pass across all eight files rather than piecemeal edits. `assigned_to` remains free text, so historical rows still contain retired values — UI must render unknown assignees gracefully. Claude Design is adopted but not yet implemented — should not have a workflow invented for it.
+**Migration risk:** low — code presets are a typed change with consumers.
+
+---
+
 ## 2026-08-13
 **Decision:** The canonical task queue depends on a service-role read path. The anon key can never serve CCC.
 **Reason:** RLS was enabled across public tables with deny-all on tasks, outputs, memory, decisions and task_links. CCC reads via the anon key, so every query returned zero rows. The dashboard was blind, not broken, and the "tasks table is canonical, task-queue.md is a generated mirror" model was fiction for roughly a month — the table was unreadable through its only interface, so neither artefact was trustworthy.
