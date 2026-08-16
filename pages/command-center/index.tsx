@@ -1,6 +1,5 @@
 import type { GetServerSideProps, NextPage } from "next";
 import type { ReactElement, ReactNode } from "react";
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CommandCenterLayout } from "@/components/CommandCenterLayout";
 import {
@@ -9,16 +8,20 @@ import {
   type TranslationHealthCounts,
   type EnStatus,
 } from "@/components/command-center/TranslationHealthPanel";
-import { getOverviewStats } from "@/lib/commandCenter";
 import type { TaskStatus } from "@/lib/commandCenter";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { getOverviewStatsAdmin } from "@/lib/commandCenter.server";
 
 type NextPageWithLayout<P> = NextPage<P> & {
   getLayout?: (page: ReactElement) => ReactNode;
 };
 
+type Stats = Awaited<ReturnType<typeof getOverviewStatsAdmin>>;
+
 type CommandCenterIndexProps = {
   translationHealth: TranslationHealthSummary[];
+  stats: Stats | null;
+  statsError: string | null;
 };
 
 const STATUS_LABELS: Record<TaskStatus, string> = {
@@ -37,20 +40,11 @@ const STATUS_STYLE: Record<TaskStatus, string> = {
   done: "bg-ink text-cream",
 };
 
-type Stats = Awaited<ReturnType<typeof getOverviewStats>>;
-
 const CommandCenterIndex: NextPageWithLayout<CommandCenterIndexProps> = ({
   translationHealth,
+  stats,
+  statsError,
 }) => {
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    getOverviewStats()
-      .then(setStats)
-      .catch((e) => setError(e.message));
-  }, []);
-
   return (
     <div className="p-8 max-w-5xl">
       <div className="mb-8">
@@ -62,14 +56,14 @@ const CommandCenterIndex: NextPageWithLayout<CommandCenterIndexProps> = ({
         <TranslationHealthPanel summaries={translationHealth} />
       </div>
 
-      {error && (
+      {statsError && (
         <p className="text-sm text-red-600 mb-6 p-3 bg-red-50 rounded border border-red-200">
-          {error}
+          {statsError}
         </p>
       )}
 
-      {!stats && !error && (
-        <p className="text-sm text-ink/40">Loading...</p>
+      {!stats && !statsError && (
+        <p className="text-sm text-ink/40">No data available.</p>
       )}
 
       {stats && (
@@ -236,6 +230,7 @@ function emptyCounts(): TranslationHealthCounts {
 export const getServerSideProps: GetServerSideProps<
   CommandCenterIndexProps
 > = async () => {
+  let translationHealth: TranslationHealthSummary[] = [];
   try {
     // `v_translation_health` is a live view (added 2026-07-13 with the i18n
     // groundwork, docs/schema-reference.md) but `lib/supabase.types.ts` was
@@ -269,16 +264,28 @@ export const getServerSideProps: GetServerSideProps<
       byType.set(row.entity_type, counts);
     }
 
-    const translationHealth: TranslationHealthSummary[] = Array.from(
-      byType.entries()
-    ).map(([entityType, counts]) => ({ entityType, counts }));
-
-    return { props: { translationHealth } };
+    translationHealth = Array.from(byType.entries()).map(
+      ([entityType, counts]) => ({ entityType, counts })
+    );
   } catch {
     // Read-only dashboard panel — a query failure (e.g. view not deployed
     // yet in a given environment) degrades to an empty panel, never a 500.
-    return { props: { translationHealth: [] } };
+    translationHealth = [];
   }
+
+  // Overview stats — admin read (task 82295116). Previously fetched
+  // client-side via the anon `getOverviewStats`, which is deny-all under RLS
+  // and silently returned zeros/[] (the CCC "blind reads" bug).
+  let stats: Stats | null = null;
+  let statsError: string | null = null;
+  try {
+    stats = await getOverviewStatsAdmin();
+  } catch (e) {
+    statsError =
+      e instanceof Error ? e.message : "Failed to load overview stats";
+  }
+
+  return { props: { translationHealth, stats, statsError } };
 };
 
 export default CommandCenterIndex;
