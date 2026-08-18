@@ -1,12 +1,13 @@
 # Civitas Layers — Main Brain
 
-Last updated: 2026-04-06
+Last updated: 2026-08-18
 
 ## Purpose
 
 This document is the long-range strategic orientation for the Civitas Layers / ExploreBarbizon project.
 
 Use it for:
+
 - product positioning
 - design direction
 - roadmap decisions
@@ -15,9 +16,10 @@ Use it for:
 
 Do not use it as the primary operational handoff for routine coding sessions.
 Operational state belongs in:
-- `brain/current-state.md`
-- `brain/task-queue.md`
-- `brain/decisions.md`
+
+- `brain/current-state.md` — session history and current status
+- `brain/decisions.md` — the single decision log
+- the Supabase `tasks` table — the work queue, viewed in CCC at `/command-center/tasks` or queried directly. No file mirror exists.
 
 ---
 
@@ -35,25 +37,32 @@ The strongest positioning remains:
 **A quiet digital atlas of Barbizon**
 
 The product should sit between:
+
 - cultural magazine
 - museum / archive interface
 - cartographic exploration product
 
 Avoid:
+
 - generic tourism website patterns
 - startup SaaS aesthetics
 - cluttered travel-directory design
 
 ---
 
+
+
 ## Branding note
 
 The public-facing brand is **Visit Barbizon**, not "Explore Barbizon".
+
 - All UI wordmarks, nav headers, and page titles use "Visit Barbizon"
 - The domain remains explorebarbizon.com (visitbarbizon.com domain deferred — currently priced at ~5K)
 - "Visit..." translates better across languages and works as a pattern for future cities (Visit Fontainebleau, Visit Giverny, etc.)
 
 ---
+
+
 
 ## Product model
 
@@ -69,6 +78,7 @@ Primary user journey:
 **Visual entry → Spatial exploration → Editorial depth**
 
 This means:
+
 - image and video attract
 - map and trails engage
 - stories and archive content deepen
@@ -76,6 +86,8 @@ This means:
 **The map is the product. All editorial content is a funnel into the map.**
 
 ---
+
+
 
 ## Current design direction
 
@@ -87,6 +99,7 @@ The homepage should be:
 **full-bleed visual → immediate map access → editorial below**
 
 Principles:
+
 - cinematic hero (video when available, atmospheric full-bleed still otherwise)
 - map CTA above the fold
 - minimal copy in the hero
@@ -94,6 +107,7 @@ Principles:
 - editorial depth lives below or deeper in the site
 
 The interface should feel:
+
 - calm
 - eloquent
 - immersive
@@ -101,6 +115,7 @@ The interface should feel:
 - visually courageous — big images, generous negative space
 
 Not:
+
 - brochure-like
 - loud
 - crowded
@@ -109,15 +124,24 @@ Not:
 
 ---
 
+
+
 ## Editorial architecture
 
+
+
 ### Places page (`/places`)
+
 - Shows Art & History + ESS (Eat, Stay & Shop) locations only
 - **Practical category is excluded from Places** — bus stops, toilets, parking are map utilities only
 - Editorial catalogue: inspires discovery, not logistics
 
+
+
 ### Stories page (`/stories`)
+
 Two registers of content, both live here:
+
 - **Historical/cultural** — "How Millet's studio shaped the Barbizon School"
 - **Practical-editorial** — "Where to sleep in Barbizon" / "The best tables in the village"
 
@@ -125,23 +149,30 @@ Stories uses a `type` field to distinguish: `history` vs `guide`.
 Best-of lists, recommendations, and where-to-eat articles are all **Stories**, not Places or Plan Your Visit.
 
 ### Plan Your Visit (`/plan-your-visit`)
+
 Logistics only: getting there, seasons, accessibility, practical orientation.
 Not recommendations. Not editorial picks.
 
 ---
 
+
+
 ## Technical direction
 
 Keep:
+
 - Supabase as source of truth
 - Mapbox as spatial engine
 - Next.js as product layer (all surfaces — Webflow retired)
 
 ---
 
+
+
 ## Database baseline
 
 Current schema family includes:
+
 - towns
 - categories
 - locations
@@ -151,6 +182,7 @@ Current schema family includes:
 - users
 
 Field rules:
+
 - use `layer`, not `map_layer`
 - use `distance_meters`, not `distance_km`
 - use `stop_narrative`, not `notes`
@@ -161,9 +193,12 @@ The schema reference remains the authority for exact field names and constraints
 
 ---
 
+
+
 ## Map design principles
 
 The map page is full-screen. No persistent sidebar.
+
 - Sidebar/panel is hidden by default
 - Opens only when a pin is clicked or a filter is activated
 - On desktop: slide-in drawer (left or right), dismisses on map click
@@ -176,6 +211,8 @@ Icon clarity over decoration — one visual idea per icon, legible at 32px.
 
 ---
 
+
+
 ## Content state
 
 - ~106 published locations across all four layers (Art & History, Practical, ESS, Forest & Nature)
@@ -185,6 +222,8 @@ Icon clarity over decoration — one visual idea per icon, legible at 32px.
 - First stories targets: Maison de Millet, Ferme du Couvent (historical); "Where to sleep", "Where to eat" (guides)
 
 ---
+
+
 
 ## Near-term product priorities
 
@@ -200,11 +239,14 @@ Icon clarity over decoration — one visual idea per icon, legible at 32px.
 
 ---
 
+
+
 ## Dashboard direction
 
 A lightweight internal dashboard remains desirable.
 
 Dashboard v1 priorities:
+
 - login
 - overview
 - locations list
@@ -213,6 +255,8 @@ Dashboard v1 priorities:
 This should live inside the same Next.js codebase.
 
 ---
+
+
 
 ## Multi-town principle
 
