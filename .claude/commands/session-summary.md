@@ -1,6 +1,6 @@
 Read:
 - `brain/current-state.md`
-- `brain/task-queue.md`
+- the `tasks` table (via CCC or the Supabase MCP)
 
 Return:
 1. Completed in this session

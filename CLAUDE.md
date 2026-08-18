@@ -36,8 +36,10 @@ At the beginning of each session, follow the session start hook.
 Read in this order:
 
 1. `brain/current-state.md`
-2. `brain/task-queue.md`
-3. `brain/decisions.md`
+2. `brain/decisions.md`
+
+For the work queue, read the Supabase `tasks` table — via CCC at
+`/command-center/tasks` or queried directly. There is no file mirror.
 
 These files represent the **operational brain** of the project.
 
@@ -97,7 +99,7 @@ Return only:
 2 concise sentences describing the current project state.
 
 **Top 3 Next Tasks**
-Highest-priority unblocked tasks from task-queue.md.
+Highest-priority unblocked tasks from the `tasks` table (CCC / Supabase).
 
 **Blockers**
 Anything preventing implementation.
@@ -189,7 +191,7 @@ Claude updates the brain files after every significant session.
 After completing work:
 
 1. Update `brain/current-state.md` — move completed items to Done, update blockers
-2. Trigger brain sync via `/api/brain/sync-tasks` or update `brain/task-queue.md` directly
+2. Update the `tasks` table (via CCC or Supabase MCP) — mark completed tasks `done`, move unblocked tasks to `ready`
 3. Commit brain updates with a clear message
 
 Use the `ship-feature` command after a completed feature.  
@@ -209,11 +211,11 @@ Use the `update-brain` command after any significant state change.
 - Gate instructions must name their executor unambiguously — e.g.
   "Luigi approves, claude.ai executes via MCP". "Claude" alone is ambiguous in a
   two-Claude system (claude.ai lead vs Claude Code loop); always say which one.
-- **Canonical queue.** The `tasks` table (Supabase) is the canonical work queue;
-  `brain/task-queue.md` is a generated display-only mirror
-  (`pages/api/brain/sync-tasks.ts`). Dispatch and status (`execution_status`:
-  `queued → in_progress → at_gate → done | blocked`) live in `tasks` / `outputs`,
-  never in the mirror — see `.claude/commands/run-loop.md`.
+- **Canonical queue.** The `tasks` table (Supabase) is the sole work queue;
+  CCC's tasks view (`/command-center/tasks`) is the human-readable window onto
+  it — there is no file mirror. Dispatch and status (`execution_status`:
+  `queued → in_progress → at_gate → done | blocked`) live in `tasks` / `outputs`
+  — see `.claude/commands/run-loop.md`.
 - **Governance.** claude.ai dispatches and reviews; agents execute; irreversible
   actions (merge/deploy, prod SQL, publish, spend) are approved by Luigi. The
   dispatcher never approves its own irreversible actions. The system may *propose*
