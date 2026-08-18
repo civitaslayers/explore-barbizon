@@ -251,8 +251,6 @@ const TasksPage: NextPageWithLayout<TasksPageProps> = ({
   const [creationTemplateId, setCreationTemplateId] = useState<TaskTemplateId | null>(null);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const [syncing, setSyncing] = useState(false);
-  const [syncMsg, setSyncMsg] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [runningId, setRunningId] = useState<string | null>(null);
   const [runError, setRunError] = useState<string | null>(null);
@@ -434,21 +432,6 @@ const TasksPage: NextPageWithLayout<TasksPageProps> = ({
       setSuggestError(e instanceof Error ? e.message : "Failed to add tasks");
     } finally {
       setAddingTasks(false);
-    }
-  }
-
-  async function handleSyncBrain() {
-    setSyncing(true);
-    setSyncMsg(null);
-    try {
-      const res = await fetch("/api/brain/sync-tasks", { method: "POST" });
-      const json = await res.json();
-      setSyncMsg(json.success ? `Synced (${json.count} tasks)` : (json.error ?? "Sync failed"));
-    } catch {
-      setSyncMsg("Sync failed");
-    } finally {
-      setSyncing(false);
-      setTimeout(() => setSyncMsg(null), 4000);
     }
   }
 
@@ -671,17 +654,6 @@ const TasksPage: NextPageWithLayout<TasksPageProps> = ({
           >
             {suggesting ? "Analysing…" : "Suggest tasks"}
           </button>
-          <button
-            onClick={handleSyncBrain}
-            disabled={syncing}
-            className="text-[10px] uppercase tracking-[0.12em] px-2.5 py-1 rounded border border-ink/15 text-ink/45 hover:text-ink/70 transition-colors disabled:opacity-40"
-            title="Regenerate brain/task-queue.md from current Supabase task state"
-          >
-            {syncing ? "Syncing…" : "→ brain"}
-          </button>
-          {syncMsg && (
-            <span className="text-[10px] text-moss/70">{syncMsg}</span>
-          )}
           {runError && (
             <span className="text-[10px] text-red-500">{runError}</span>
           )}

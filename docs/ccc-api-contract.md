@@ -8,25 +8,9 @@ All endpoints are Next.js API routes under `pages/api/`. Endpoints marked **dev-
 
 ## Endpoints
 
-### POST /api/brain/sync-tasks
-
-**Dev-only.** Reads all tasks from Supabase and overwrites `brain/task-queue.md` with the current task state, partitioned by status and priority.
-
-**Request:** No body required.
-
-**Response:**
-```json
-{ "success": true, "count": 12 }
-```
-`count` = number of active (non-done) tasks written.
-
-**Side effects:** Writes to `brain/task-queue.md` on disk.
-
----
-
 ### POST /api/tasks/suggest
 
-**Dev-only.** Audits project state and asks Claude to suggest 4–7 new tasks. Reads `brain/current-state.md` and `brain/task-queue.md` alongside live Supabase tasks, then spawns `claude --print` with a structured prompt.
+**Dev-only.** Audits project state and asks Claude to suggest 4–7 new tasks. Reads `brain/current-state.md` and a live summary of the `tasks` table, then spawns `claude --print` with a structured prompt.
 
 **Request:** No body required.
 
@@ -161,7 +145,6 @@ Generic callback for agents to submit task output. **Not dev-only** — designed
 
 | Endpoint | Method | Dev-only | Purpose |
 |----------|--------|----------|---------|
-| `/api/brain/sync-tasks` | POST | Yes | Sync Supabase tasks → brain markdown |
 | `/api/tasks/suggest` | POST | Yes | Generate task suggestions via Claude |
 | `/api/tasks/[id]/dispatch` | POST | No | Dispatch task to agent, return brief |
 | `/api/tasks/[id]/run` | POST | Yes | Auto-run claude task end-to-end |

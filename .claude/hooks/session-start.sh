@@ -31,14 +31,6 @@ else
 fi
 
 echo ""
-echo "[task-queue.md preview]"
-if [ -f "brain/task-queue.md" ]; then
-  sed -n '1,120p' brain/task-queue.md
-else
-  echo "[WARNING] brain/task-queue.md not found"
-fi
-
-echo ""
 echo "[decisions.md preview]"
 if [ -f "brain/decisions.md" ]; then
   sed -n '1,60p' brain/decisions.md
