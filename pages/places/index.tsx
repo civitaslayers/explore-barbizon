@@ -38,6 +38,7 @@ type PlacesIndexProps = {
   places: Place[];
   whereToEat: CuratedPlace[];
   whereToStay: CuratedPlace[];
+  curatedUnavailable: boolean;
 } & SSRConfig;
 
 // Internal sentinel for the "show every category" filter state — distinct
@@ -213,6 +214,7 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({
   places,
   whereToEat,
   whereToStay,
+  curatedUnavailable,
 }) => {
   const router = useRouter();
   const locale = router.locale ?? "fr";
@@ -259,6 +261,9 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({
         <div className="space-y-10">
           <CuratedSection eyebrow={t("places.whereToEat")} items={whereToEat} />
           <CuratedSection eyebrow={t("places.whereToStay")} items={whereToStay} />
+          {curatedUnavailable && whereToEat.length === 0 && whereToStay.length === 0 ? (
+            <p className="text-xs text-ink/50">{t("places.curatedUnavailable")}</p>
+          ) : null}
         </div>
 
         {/* Category filters */}
@@ -325,18 +330,26 @@ export const getStaticProps: GetStaticProps<PlacesIndexProps> = async ({
   const places = await getPublishedLocations();
   let whereToEat: CuratedPlace[] = [];
   let whereToStay: CuratedPlace[] = [];
+  let curatedUnavailable = false;
   if (supabase) {
     try {
       const curated = await getFeaturedEatStayCurated();
       whereToEat = curated.whereToEat;
       whereToStay = curated.whereToStay;
-    } catch {
-      // Curated sections stay empty if query fails (e.g. column not deployed yet).
+    } catch (error) {
+      // Curated sections stay empty if the query fails (e.g. column not
+      // deployed yet) — but flag it so the page can surface a note instead
+      // of silently looking like there's genuinely nothing curated.
+      console.error(
+        "[places/getStaticProps] getFeaturedEatStayCurated failed:",
+        error instanceof Error ? error.message : error
+      );
+      curatedUnavailable = true;
     }
   }
   const translations = await serverSideTranslations(locale ?? "fr", ["common"], nextI18NextConfig);
   return {
-    props: { places, whereToEat, whereToStay, ...translations },
+    props: { places, whereToEat, whereToStay, curatedUnavailable, ...translations },
     revalidate: 60,
   };
 };
