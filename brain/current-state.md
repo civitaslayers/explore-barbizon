@@ -1,15 +1,23 @@
 # Current State
 
-Last updated: 2026-08-18
+Last updated: 2026-10-04
 
 ## Status
-French content migration 60% complete (64 of 107 published locations). Analytics schema live,
-tracking code not yet written. CCC dashboard blind reads FIXED and merged (task 82295116,
-PR #3, merge 790f1a2) — reads now run server-side via supabaseAdmin; the dashboard shows the
-real queue (41 non-done). The `tasks` table is the sole queue; brain/task-queue.md and its
-sync are retired (task 0f9858fc, 2026-08-18).
+French content migration 60% complete as of the last confirmed count (64 of 107 published
+locations) — a parallel French migration batch is in progress on the `locations` table as of
+this session, so that count is not final. Analytics schema live, tracking code not yet written.
+CCC dashboard blind reads FIXED and merged (task 82295116, PR #3, merge 790f1a2) — reads now run
+server-side via supabaseAdmin; the dashboard shows the real queue. PR #4
+(fix/retire-task-queue-mirror, task 0f9858fc) merged to main (292f313 merge commit) and deployed —
+brain/task-queue.md and pages/api/brain/sync-tasks.ts removed; the Supabase `tasks` table is now
+the sole work queue, with CCC's `/command-center/tasks` as the human-readable window onto it.
+
+---
+2026-10-04 audit (claude.ai, live DB): no deploys or DB writes between 2026-08-18 and 2026-10-04. page_views has 0 rows: the schema shipped 2026-08-13 but the client tracker (task 66deb8a9) never shipped, so no first-party analytics exist for that period. Content at audit time: 107 published, 64 French-native with English in translations->en, 52 with media, 16 with opening hours, 0 video. Open: the 1A mobile board "the day is the product" conflict still has no brain/decisions.md entry.
+---
 
 ## Last Completed
+- [ops] Task queue mirror retired (task 0f9858fc, PR #4, merge 292f313) — brain/task-queue.md and pages/api/brain/sync-tasks.ts deleted; the Supabase `tasks` table is the sole canonical queue, CCC's tasks view is the read-only window onto it. Closed and deployed 2026-10-04.
 - [ops] CCC dashboard blind reads fixed (task 82295116, PR #3, merge 790f1a2) — root cause was lib/commandCenter.ts reading via the anon client against deny-all RLS. New server-only lib/commandCenter.server.ts (getTasksAdmin/getOverviewStatsAdmin via supabaseAdmin, explicit columns); index.tsx + tasks/index.tsx reads moved into getServerSideProps; sync-tasks.ts uses the admin read. Service-role key verified absent from the client bundle. Ran through /run-loop: lead-planned → implementer → release-checker SHIP after 1 HOLD (SSR read failures now surface a banner, not a silent empty list). Follow-ups queued: 08309b0b (suggest.ts same-family blind read), 729ede25 (loop retrospective, .claude/**-gated).
 - [content] French migration, 64 of 107 locations — French in base columns, English into translations->'en'
 - [content] Factual corrections found during migration: chapel 1858→1889, bell tower architect corrected to Charles-Louis Millet (second son of J-F Millet), L'Angélus provenance corrected to the 1910 Chauchard bequest, Chêne Bodmer confirmed no longer standing, Laure Henry corrected from "1920s benefactress" to soprano (d. 1906), museum renamed to Musée départemental des peintres de Barbizon
