@@ -6,6 +6,7 @@ import { Inter } from "next/font/google";
 import { appWithTranslation } from "next-i18next/pages";
 import "@/styles/globals.css";
 import { Layout } from "@/components/Layout";
+import { PageViewTracker } from "@/components/PageViewTracker";
 import nextI18NextConfig from "@/next-i18next.config";
 
 const DEFAULT_SITE_DESCRIPTION =
@@ -40,6 +41,7 @@ function MyApp({ Component, pageProps }: AppPropsWithLayout) {
       <div
         className={`${inter.variable} font-sans bg-cream text-ink min-h-screen`}
       >
+        <PageViewTracker />
         {getLayout(<Component {...pageProps} />)}
       </div>
     </>
