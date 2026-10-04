@@ -51,43 +51,14 @@ export type DbLocation = {
   media?: { url: string; display_order: number }[] | null;
 };
 
-/** Shape returned by getLocationBySlug. */
-type LocationRow = DbLocation & {
-  categories: { name: string } | null;
-};
-
-// ---------------------------------------------------------------------------
-// Adapter: LocationRow → Place
-// Maps DB snake_case fields to the app-level Place type.
-// ---------------------------------------------------------------------------
-
-function toPlace(row: LocationRow): Place {
-  return {
-    slug: row.slug,
-    name: row.name,
-    // address is the closest DB field to the display "location" string
-    location: row.address ?? "Barbizon",
-    shortDescription: row.short_description ?? "",
-    description: row.full_description ?? "",
-    // narrative maps to the history/context field on the place page
-    history: row.narrative ?? null,
-    // heroImage comes from the media table (not yet wired); pages handle null
-    heroImage: (row.media ?? []).sort((a, b) => a.display_order - b.display_order)[0]?.url ?? null,
-    // category comes from the joined categories.name — cast to PlaceCategory
-    category: (row.categories?.name ?? "Studio") as PlaceCategory,
-    latitude: row.latitude,
-    longitude: row.longitude,
-    route_slug: row.route_slug ?? null,
-  };
-}
-
 /**
  * Shape returned by getPublishedLocations — trimmed to exactly what
  * pages/places/index.tsx renders, plus the two translations->en JSON paths
  * needed for the EN short_description fallback (see brain/decisions.md,
  * 2026-10-04 _meta stamp decision; lib/getLocalized.ts for the read-path
- * contract). Deliberately NOT part of toPlace()'s row union — this is the
- * only call site, so its row shape stays scoped to this one query.
+ * contract). Deliberately its own row type, not shared with any other
+ * adapter — this is the only call site, so its row shape stays scoped to
+ * this one query.
  */
 type PlacesListRow = {
   slug: string;
@@ -103,9 +74,9 @@ type PlacesListRow = {
 
 /**
  * Adapter: PlacesListRow → Place, for the /places list page only. Populates
- * `short_description` + `translations` (not read by toPlace()) so the page
- * can call lib/getLocalized.ts's getLocalized() instead of unconditionally
- * rendering the French base column on /en/places.
+ * `short_description` + `translations` so the page can call
+ * lib/getLocalized.ts's getLocalized() instead of unconditionally rendering
+ * the French base column on /en/places.
  */
 function toLocalizedPlace(row: PlacesListRow): Place {
   return {
@@ -272,30 +243,6 @@ export async function getPublishedRoutes(): Promise<Route[]> {
 }
 
 /**
- * Fetch a single published location by slug, joined with category name.
- * Returns null if not found.
- * Throws if Supabase is not configured or the query fails.
- */
-export async function getLocationBySlug(slug: string): Promise<Place | null> {
-  if (!supabase) throw new Error("Supabase not configured");
-
-  const { data, error } = await supabase
-    .from("locations")
-    .select("*, categories(name), media(url, display_order)")
-    .eq("slug", slug)
-    .eq("is_published", true)
-    .single();
-
-  if (error) {
-    // PGRST116 = no rows found — not a query error, just no match
-    if (error.code === "PGRST116") return null;
-    throw new Error(error.message);
-  }
-
-  return data ? toPlace(data as LocationRow) : null;
-}
-
-/**
  * Fetch all published location slugs.
  * Used by getStaticPaths to pre-render known slugs at build time.
  * Throws if Supabase is not configured or the query fails.
@@ -418,8 +365,8 @@ export type LocationFull = {
   is_published: boolean;
   // Parent-level venue hours (locations.opening_hours) — distinct from
   // per-function hours (location_functions.opening_hours, see
-  // LocationFunction below). Previously selected then discarded by toPlace();
-  // this is the first public consumer (Phase 2, ccc-v3-fiche-plan §3.4).
+  // LocationFunction below). Previously selected but never surfaced to the
+  // UI; this is the first public consumer (Phase 2, ccc-v3-fiche-plan §3.4).
   opening_hours: Record<string, unknown> | null;
   functions: LocationFunction[];
   heroImage: string | null;
