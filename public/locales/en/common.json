@@ -75,7 +75,7 @@
     "whereToEat": "Where to eat",
     "whereToStay": "Where to stay",
     "metaTitle": "Places of Barbizon — Visit Barbizon",
-    "metaDescription": "Discover the historic ateliers, quiet inns, and forest clearings that shaped Barbizon's Pre-Impressionist era — browse every place on the map."
+    "metaDescription": "The directory of every placen: artists' studios, historic inns, village shops, and the trails and climbing sites of the Fontainebleau forest."
   },
   "tour": {
     "eyebrow": "Walking Tour",
@@ -98,7 +98,7 @@
     "tags": { "art": "art", "forest": "forest", "village": "village", "legacy": "legacy" }
   },
   "days": { "mon": "Mon", "tue": "Tue", "wed": "Wed", "thu": "Thu", "fri": "Fri", "sat": "Sat", "sun": "Sun" },
-  "hoursLabels": { "check_in": "Check-in", "check_out": "Check-out", "default": "Default" },
+  "hoursLabels": { "check_in": "Check-in", "check_out": "Check-out", "default": "Usually" },
   "hoursValue": { "yes": "yes", "no": "no" },
   "notFound": { "heading": "Page not found" },
   "locale": {

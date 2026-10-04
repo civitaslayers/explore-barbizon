@@ -234,6 +234,14 @@ function LocationHoursSection({
   const dayRows = DAY_KEYS.filter((d) => days[d].trim().length > 0);
   if (dayRows.length === 0 && others.length === 0) return null;
 
+  // "default" is a catch-all non-day key (see lib/openingHours.ts). When it's
+  // the ONLY thing to show, a label ("Habituellement"/"Usually") reads as
+  // noise next to a single value — render the hours bare. The label earns
+  // its place only when it needs to distinguish "default" from other rows
+  // (day rows, check_in/check_out, etc).
+  const isDefaultOnly =
+    dayRows.length === 0 && others.length === 1 && others[0].key === "default";
+
   return (
     <section className="border-t border-ink/10 pt-12 md:pt-14 lg:pt-16">
       <div className="editorial-measure">
@@ -253,15 +261,24 @@ function LocationHoursSection({
           {others.map((entry) => {
             const labelKey = NON_DAY_LABEL_KEYS[entry.key];
             const valueKey = formatHoursValueKey(entry.raw);
+            const hideLabel = isDefaultOnly && entry.key === "default";
             return (
               <div
                 key={entry.key}
                 className="flex justify-between gap-4 border-b border-ink/5 pb-2 last:border-0"
               >
-                <dt className="text-ink/70">
-                  {labelKey ? t(labelKey) : entry.key}
-                </dt>
-                <dd className="text-right text-ink/90 tabular-nums">
+                {!hideLabel && (
+                  <dt className="text-ink/70">
+                    {labelKey ? t(labelKey) : entry.key}
+                  </dt>
+                )}
+                <dd
+                  className={
+                    hideLabel
+                      ? "text-ink/90 tabular-nums"
+                      : "text-right text-ink/90 tabular-nums"
+                  }
+                >
                   {valueKey ? t(valueKey) : entry.value}
                 </dd>
               </div>

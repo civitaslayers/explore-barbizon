@@ -3,20 +3,20 @@
     "map": "Carte",
     "places": "Lieux",
     "history": "Histoire",
-    "stories": "Histoires",
+    "stories": "Récits",
     "about": "À propos"
   },
   "footer": {
     "poweredBy": "Propulsé par Civitas Layers",
     "about": "À propos",
     "map": "Carte",
-    "stories": "Histoires",
+    "stories": "Récits",
     "contact": "Contact"
   },
   "bottomNav": {
     "atlas": "Atlas",
     "trails": "Sentiers",
-    "stories": "Histoires",
+    "stories": "Récits",
     "places": "Lieux"
   },
   "map": {
@@ -29,11 +29,11 @@
     "locationsCountSingular": "lieu",
     "locationsCountPlural": "lieux",
     "loading": "Chargement de la carte…",
-    "matching": "correspondant à « {{query}} »",
+    "matching": "correspondant à « {{query}} »",
     "trailEyebrow": "Sentier",
     "loop": "Boucle",
-    "description": "Carte interactive de Barbizon : ateliers d'artistes, sentiers en forêt, restaurants, hébergements et commerces du village réunis sur une seule carte.",
-    "difficulty": { "easy": "facile", "moderate": "modéré", "hard": "difficile" }
+    "description": "Carte interactive de Barbizon : ateliers d'artistes, sentiers en forêt, restaurants, hébergements et commerces du village réunis sur une seule carte.",
+    "difficulty": { "easy": "facile", "moderate": "moyen", "hard": "difficile" }
   },
   "layers": {
     "artHistory": "Art et Histoire",
@@ -55,13 +55,13 @@
   },
   "actions": {
     "backToPlaces": "Retour aux lieux",
-    "backToStories": "Retour aux histoires",
-    "backToPlan": "Retour à la préparation",
+    "backToStories": "Retour aux récits",
+    "backToPlan": "Retour aux infos pratiques",
     "backHome": "Retour à l'accueil",
     "viewOnMap": "Voir sur la carte",
     "viewPlace": "Voir le lieu",
-    "visitWebsite": "Visiter le site",
-    "readEssay": "Lire l'essai"
+    "visitWebsite": "Voir le site web",
+    "readEssay": "Lire le récit"
   },
   "place": {
     "narrativeEyebrow": "Le lieu",
@@ -75,7 +75,7 @@
     "whereToEat": "Où manger",
     "whereToStay": "Où dormir",
     "metaTitle": "Lieux de Barbizon — Visit Barbizon",
-    "metaDescription": "Découvrez les ateliers historiques, auberges tranquilles et clairières de forêt qui ont marqué Barbizon à l'époque pré-impressionniste."
+    "metaDescription": "Le répertoire de tous les lieux de Barbizon : ateliers d'artistes, auberges historiques, commerces du village, sentiers et sites d'escalade de la forêt de Fontainebleau."
   },
   "tour": {
     "eyebrow": "Promenade",
@@ -86,11 +86,11 @@
     "stopsHeading": "Les lieux du parcours"
   },
   "story": {
-    "essays": "Essais",
+    "essays": "Récits",
     "inTheVillage": "Dans le village",
-    "relatedEssays": "Essais liés",
-    "placesInEssay": "Lieux de cet essai",
-    "dekFallback": "Un court essai du carnet éditorial.",
+    "relatedEssays": "Récits liés",
+    "placesInEssay": "Lieux de ce récit",
+    "dekFallback": "Un court récit du carnet éditorial.",
     "themeFallback": "Éditorial"
   },
   "timeline": {
@@ -98,7 +98,7 @@
     "tags": { "art": "art", "forest": "forêt", "village": "village", "legacy": "héritage" }
   },
   "days": { "mon": "Lundi", "tue": "Mardi", "wed": "Mercredi", "thu": "Jeudi", "fri": "Vendredi", "sat": "Samedi", "sun": "Dimanche" },
-  "hoursLabels": { "check_in": "Arrivée", "check_out": "Départ", "default": "Par défaut" },
+  "hoursLabels": { "check_in": "Arrivée", "check_out": "Départ", "default": "Habituellement" },
   "hoursValue": { "yes": "oui", "no": "non" },
   "notFound": { "heading": "Page introuvable" },
   "locale": {
