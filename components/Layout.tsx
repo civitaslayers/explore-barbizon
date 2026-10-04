@@ -4,12 +4,19 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useTranslation } from "next-i18next/pages";
 import BottomNav from "@/components/BottomNav";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 type LayoutProps = {
   children: ReactNode;
+  /** Does the current page have a genuinely published EN translation?
+   *  Default true so the i18n-catalogue-only pages (home, map, places
+   *  index, stories index, history, about, plan-your-visit, stories/[slug],
+   *  tours/[slug]) keep offering both locales with zero changes at their
+   *  call sites — mirrors SeoHead's existing default-true contract. */
+  hasEnglishVersion?: boolean;
 };
 
-export function Layout({ children }: LayoutProps) {
+export function Layout({ children, hasEnglishVersion = true }: LayoutProps) {
   const { t } = useTranslation("common");
   const navLinks = [
     { href: "/map", label: t("nav.map") },
@@ -80,6 +87,9 @@ export function Layout({ children }: LayoutProps) {
                 </li>
               ))}
             </ul>
+            <div className="pt-5">
+              <LanguageSwitcher hasEnglishVersion={hasEnglishVersion} showNote />
+            </div>
           </nav>
         )}
 
@@ -101,18 +111,21 @@ export function Layout({ children }: LayoutProps) {
             ))}
           </nav>
 
-          <button
-            type="button"
-            className="p-1 text-ink/60 transition-colors duration-300 hover:text-ink"
-            aria-label={t("a11y.search")}
-          >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
-              stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
-              strokeLinejoin="round">
-              <circle cx="8.5" cy="8.5" r="5.5" />
-              <line x1="13" y1="13" x2="18" y2="18" />
-            </svg>
-          </button>
+          <div className="flex items-center gap-5">
+            <LanguageSwitcher hasEnglishVersion={hasEnglishVersion} />
+            <button
+              type="button"
+              className="p-1 text-ink/60 transition-colors duration-300 hover:text-ink"
+              aria-label={t("a11y.search")}
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
+                stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
+                strokeLinejoin="round">
+                <circle cx="8.5" cy="8.5" r="5.5" />
+                <line x1="13" y1="13" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div className="h-px w-full bg-surface-container-low" />

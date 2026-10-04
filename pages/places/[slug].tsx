@@ -273,7 +273,10 @@ function LocationHoursSection({
   );
 }
 
-type PlacePageProps = { place: LocationFull } & SSRConfig;
+type PlacePageProps = {
+  place: LocationFull;
+  hasEnglishVersion: boolean;
+} & SSRConfig;
 
 const PlacePage: NextPage<PlacePageProps> = ({ place }) => {
   const router = useRouter();
@@ -328,7 +331,11 @@ export const getStaticProps: GetStaticProps<PlacePageProps> = async ({
   const translations = await serverSideTranslations(locale ?? "fr", ["common"], nextI18NextConfig);
 
   return {
-    props: { place: placeRecord, ...translations },
+    props: {
+      place: placeRecord,
+      hasEnglishVersion: hasPublishedTranslation(placeRecord, "en"),
+      ...translations,
+    },
     revalidate: 60,
   };
 };

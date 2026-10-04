@@ -27,7 +27,16 @@ type AppPropsWithLayout = AppProps & {
 
 function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   const getLayout =
-    Component.getLayout ?? ((page) => <Layout>{page}</Layout>);
+    Component.getLayout ??
+    ((page) => (
+      <Layout
+        hasEnglishVersion={
+          (pageProps as { hasEnglishVersion?: boolean }).hasEnglishVersion
+        }
+      >
+        {page}
+      </Layout>
+    ));
 
   return (
     <>

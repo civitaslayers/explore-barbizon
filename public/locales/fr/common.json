@@ -100,5 +100,13 @@
   "days": { "mon": "Lundi", "tue": "Mardi", "wed": "Mercredi", "thu": "Jeudi", "fri": "Vendredi", "sat": "Samedi", "sun": "Dimanche" },
   "hoursLabels": { "check_in": "Arrivée", "check_out": "Départ", "default": "Par défaut" },
   "hoursValue": { "yes": "oui", "no": "non" },
-  "notFound": { "heading": "Page introuvable" }
+  "notFound": { "heading": "Page introuvable" },
+  "locale": {
+    "label": "Langue",
+    "fr": "FR",
+    "en": "EN",
+    "switchToFr": "Passer en français",
+    "switchToEn": "Passer en anglais",
+    "enUnavailable": "Version anglaise bientôt disponible"
+  }
 }

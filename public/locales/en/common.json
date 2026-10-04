@@ -100,5 +100,13 @@
   "days": { "mon": "Mon", "tue": "Tue", "wed": "Wed", "thu": "Thu", "fri": "Fri", "sat": "Sat", "sun": "Sun" },
   "hoursLabels": { "check_in": "Check-in", "check_out": "Check-out", "default": "Default" },
   "hoursValue": { "yes": "yes", "no": "no" },
-  "notFound": { "heading": "Page not found" }
+  "notFound": { "heading": "Page not found" },
+  "locale": {
+    "label": "Language",
+    "fr": "FR",
+    "en": "EN",
+    "switchToFr": "Switch to French",
+    "switchToEn": "Switch to English",
+    "enUnavailable": "English version coming soon"
+  }
 }
