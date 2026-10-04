@@ -34,6 +34,8 @@ const STATIC_ROUTES: UrlEntry[] = [
   { path: "/places", priority: "0.8", changefreq: "weekly", hasAlternates: true },
   { path: "/about", priority: "0.5", changefreq: "monthly", hasAlternates: true },
   { path: "/plan-your-visit", priority: "0.6", changefreq: "monthly", hasAlternates: true },
+  { path: "/history", priority: "0.6", changefreq: "monthly", hasAlternates: true },
+  { path: "/stories", priority: "0.8", changefreq: "weekly", hasAlternates: true },
 ];
 
 type UrlEntry = {
