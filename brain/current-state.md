@@ -3,6 +3,27 @@
 Last updated: 2026-10-04
 
 ## Status
+UI-chrome i18n strings (task cc6e5703) and the FR/EN language switcher (task ea615bf5) merged to
+main (`5a86b67`, fast-forward from `feat/i18n-strings-switcher`) and deployed to production.
+Nav/footer/bottomNav/microcopy/aria-labels now read from `public/locales/{fr,en}/common.json`
+instead of hardcoded English leaking onto French pages; `pages/_document.tsx`'s `lang="en"`
+hardcoded-on-every-page bug fixed; a `LanguageSwitcher` (`FR · EN`, URL-only state, no
+cookie/localStorage) sits in the header and mobile drawer, disabled on the FR→EN direction only
+when a record has no published translation (same `hasPublishedTranslation` predicate as the
+hreflang gate — verified correct on the escape-hatch case: a visitor already on an EN page with no
+real translation sees EN as active, not disabled). New `scripts/check-i18n-strings.mjs` /
+`npm run check:i18n` enforces French typography (non-breaking space before `: ; ! ?` and inside
+`« »`) in `fr/*.json` — this had been planned alongside the strings work but hadn't actually
+landed until this merge. Scope was deliberately split: long-form editorial prose (homepage, about,
+history, plan-your-visit, the 13 HistoryTimeline events) was carved out to a new queued task,
+since mechanical/agent translation of narrative copy risks flat, non-native French — this branch
+shipped only mechanical UI chrome + the switcher. Two rounds of Luigi copy review landed in two
+follow-up commits before merge (stories "Histoires"→"Récits", several action-label rewordings,
+opening-hours "default"-only-entry rendering with no row label, `places.metaDescription` rewritten
+twice — last round fixed an EN typo and trimmed FR to 152 chars). Verified on public production:
+`/places` and `/en/places` serve the final reviewed meta descriptions; the switcher on
+`/places/auberge-ganne` is live (FR active, EN links to `/en/places/auberge-ganne`).
+
 Cookieless page-view tracking (task 66deb8a9) and per-record hreflang gating (task eb5f1e3e)
 merged to main (`a11360d`, fast-forward from `feat/tracker-hreflang`) and deployed to production.
 `page_views` is now live (verified: a real preview visit inserted a row with correct
@@ -38,6 +59,7 @@ as the human-readable window onto it.
 ---
 
 ## Last Completed
+- [ops+i18n] UI-chrome strings + FR/EN language switcher shipped (tasks cc6e5703, ea615bf5; branch feat/i18n-strings-switcher; three commits — e1543ae strings, e6e6690 switcher, 25d300a+5a86b67 Luigi's copy review; fast-forward merge 5a86b67; deployed 2026-10-04). `components/LanguageSwitcher.tsx` new; `components/Layout.tsx` gained `hasEnglishVersion?: boolean` (default `true`); `pages/places/[slug].tsx` computes it via `hasPublishedTranslation()`. Found and fixed in passing: a duplicate top-level `"map"` key in both `common.json` files that was silently clobbering keys; a `MapGL.tsx` bug where `/en/map` pin popups linked to the French `/places/...` page; dead legacy code in `places/[slug].tsx` (~21 untranslated strings removed with it). Editorial prose (homepage/about/history/plan-your-visit/HistoryTimeline body copy) deliberately split out — new queued task for native French authorship, not a mechanical pass.
 - [ops+seo] Tracker + hreflang gating shipped (tasks 66deb8a9, eb5f1e3e; branch feat/tracker-hreflang; merge a11360d, fast-forward to main; deployed 2026-10-04). `pages/api/track.ts` + `components/PageViewTracker.tsx` write to the existing `page_views` schema via `record_page_view()` RPC (service-role client, bot-filtered, sha256 visitor-day hash, no raw IP/UA stored); mounted in `_app.tsx`, no-ops outside `NODE_ENV=production` (fires on Vercel Preview too). `lib/getLocalized.ts` gained `hasPublishedTranslation()`, consumed by both `SeoHead` (new `hasEnglishVersion` prop, default `true` so the ~9 i18n-catalogue pages are unaffected) and `pages/sitemap.xml.tsx` — one predicate, no duplication. Ran through the full loop (architect → implementer → release-checker SHIP) plus two rounds of live preview verification (before and after claude.ai's 93-row translation-status stamp); release-checker, unit tests (6 new `hasPublishedTranslation` cases), and a full local `seo-audit.mjs` run against production data all green. Stories/tours deliberately out of scope (same `translations` contract, queued as follow-ups).
 - [ops] Task queue mirror retired (task 0f9858fc, PR #4, merge 292f313) — brain/task-queue.md and pages/api/brain/sync-tasks.ts deleted; the Supabase `tasks` table is the sole canonical queue, CCC's tasks view is the read-only window onto it. Closed and deployed 2026-10-04.
 - [ops] CCC dashboard blind reads fixed (task 82295116, PR #3, merge 790f1a2) — root cause was lib/commandCenter.ts reading via the anon client against deny-all RLS. New server-only lib/commandCenter.server.ts (getTasksAdmin/getOverviewStatsAdmin via supabaseAdmin, explicit columns); index.tsx + tasks/index.tsx reads moved into getServerSideProps; sync-tasks.ts uses the admin read. Service-role key verified absent from the client bundle. Ran through /run-loop: lead-planned → implementer → release-checker SHIP after 1 HOLD (SSR read failures now surface a banner, not a silent empty list). Follow-ups queued: 08309b0b (suggest.ts same-family blind read), 729ede25 (loop retrospective, .claude/**-gated).
@@ -53,13 +75,17 @@ as the human-readable window onto it.
 
 ## Next Tasks
 1. Tighten getStaticProps select on /places — 143 kB, over threshold, grows with each translation batch
-2. Remaining French migration records (93 of 107 now have published English; ~14 still need translation + status stamp)
-3. suggest.ts anon blind-read follow-up (task 08309b0b) — swap getTasks() for getTasksAdmin(); small
-4. Stories hreflang gating — same `translations`/`_meta.status` contract as locations, currently unconditional; queued follow-up from the eb5f1e3e branch
-5. page_views retention/purge job (25-month cap per 2026-08-13 decision) — outstanding since the schema shipped
+2. Editorial prose French translation — homepage, about, history, plan-your-visit, HistoryTimeline (split off cc6e5703; needs native authorship, not a mechanical pass)
+3. Remaining French migration records (93 of 107 now have published English; ~14 still need translation + status stamp)
+4. suggest.ts anon blind-read follow-up (task 08309b0b) — swap getTasks() for getTasksAdmin(); small
+5. Stories hreflang gating — same `translations`/`_meta.status` contract as locations, currently unconditional; queued follow-up from the eb5f1e3e branch
+6. page_views retention/purge job (25-month cap per 2026-08-13 decision) — outstanding since the schema shipped
 
 ## Next Session Starting Point
-Tracker + hreflang gating are live in production. Next priority: tighten getStaticProps on /places, then continue the French migration (translations need both the content AND the `_meta.status=published` stamp to actually surface via hreflang/getLocalized).
+Tracker, hreflang gating, UI-chrome i18n strings, and the FR/EN switcher are all live in
+production. Next priority: tighten getStaticProps on /places, then either the editorial-prose
+translation task or continuing the French migration (translations need both the content AND the
+`_meta.status=published` stamp to actually surface via hreflang/getLocalized/the switcher).
 
 ## Operational lessons (salvaged from the retired task-queue.md)
 
