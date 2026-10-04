@@ -3,6 +3,23 @@
 Last updated: 2026-10-04
 
 ## Status
+`/places` payload trim + EN short_description fallback fix (task 8ec7a8fb) merged to main
+(`511c2e2`, fast-forward from `feat/places-payload-trim`) and deployed to production. `/places`
+page-data dropped from ~142-145 kB to ~85-88 kB (both locales) by trimming
+`getPublishedLocations()`'s select to only the fields the list page actually renders. Investigation
+also found a real bug exposed by the language switcher going live: `/en/places` was silently
+showing French short descriptions on every card, even for locations with a published English
+translation, because the query never selected anything from `translations`. Fixed via two
+PostgREST JSON-path-aliased select columns, rendered through the existing shared `getLocalized()`
+helper (same predicate as the hreflang gate — not reimplemented). Same fix folded into the "Where
+to eat"/"Where to stay" curated cards on the same page. Verified on production: `/en/places` shows
+English for `auberge-ganne` (published) and correctly falls back to French for `chene-sully`
+(translation still `draft`). `/map`'s equivalent bug (Mapbox popups) is real but structurally
+different — filed as its own task rather than folded in. Two cleanup items also filed from
+release-check findings: a dead `getLocationBySlug()` using the forbidden `select("*")` pattern, and
+a silent catch around the curated-cards query that should log/surface failures instead of quietly
+rendering empty.
+
 UI-chrome i18n strings (task cc6e5703) and the FR/EN language switcher (task ea615bf5) merged to
 main (`5a86b67`, fast-forward from `feat/i18n-strings-switcher`) and deployed to production.
 Nav/footer/bottomNav/microcopy/aria-labels now read from `public/locales/{fr,en}/common.json`
@@ -59,6 +76,7 @@ as the human-readable window onto it.
 ---
 
 ## Last Completed
+- [perf+i18n] `/places` payload trim + EN fallback fix shipped (task 8ec7a8fb; branch feat/places-payload-trim; merge 511c2e2, fast-forward to main; deployed 2026-10-04). `getPublishedLocations()` in `lib/supabase.ts` now has its own dedicated row type/mapper (`toLocalizedPlace`, not the shared `toPlace()`) selecting only the fields `pages/places/index.tsx` renders, plus two PostgREST JSON-path-aliased columns (`translations->en->>short_description`, `translations->en->_meta->>status`) resolved through the shared `getLocalized()` helper — fr/en page-data dropped from ~142-145 kB to ~85-88 kB. Same treatment applied to `getFeaturedEatStayCurated()` (the curated cards on the same page). Verified on production: `auberge-ganne` (published) shows English, `chene-sully` (draft) correctly falls back to French. `/map`'s equivalent popup bug filed separately (imperative Mapbox rendering, different fix shape). Two cleanup tasks filed from release-check findings: dead `getLocationBySlug()`/`select("*")` removal, silent-catch-to-logged-error on the curated query.
 - [ops+i18n] UI-chrome strings + FR/EN language switcher shipped (tasks cc6e5703, ea615bf5; branch feat/i18n-strings-switcher; three commits — e1543ae strings, e6e6690 switcher, 25d300a+5a86b67 Luigi's copy review; fast-forward merge 5a86b67; deployed 2026-10-04). `components/LanguageSwitcher.tsx` new; `components/Layout.tsx` gained `hasEnglishVersion?: boolean` (default `true`); `pages/places/[slug].tsx` computes it via `hasPublishedTranslation()`. Found and fixed in passing: a duplicate top-level `"map"` key in both `common.json` files that was silently clobbering keys; a `MapGL.tsx` bug where `/en/map` pin popups linked to the French `/places/...` page; dead legacy code in `places/[slug].tsx` (~21 untranslated strings removed with it). Editorial prose (homepage/about/history/plan-your-visit/HistoryTimeline body copy) deliberately split out — new queued task for native French authorship, not a mechanical pass.
 - [ops+seo] Tracker + hreflang gating shipped (tasks 66deb8a9, eb5f1e3e; branch feat/tracker-hreflang; merge a11360d, fast-forward to main; deployed 2026-10-04). `pages/api/track.ts` + `components/PageViewTracker.tsx` write to the existing `page_views` schema via `record_page_view()` RPC (service-role client, bot-filtered, sha256 visitor-day hash, no raw IP/UA stored); mounted in `_app.tsx`, no-ops outside `NODE_ENV=production` (fires on Vercel Preview too). `lib/getLocalized.ts` gained `hasPublishedTranslation()`, consumed by both `SeoHead` (new `hasEnglishVersion` prop, default `true` so the ~9 i18n-catalogue pages are unaffected) and `pages/sitemap.xml.tsx` — one predicate, no duplication. Ran through the full loop (architect → implementer → release-checker SHIP) plus two rounds of live preview verification (before and after claude.ai's 93-row translation-status stamp); release-checker, unit tests (6 new `hasPublishedTranslation` cases), and a full local `seo-audit.mjs` run against production data all green. Stories/tours deliberately out of scope (same `translations` contract, queued as follow-ups).
 - [ops] Task queue mirror retired (task 0f9858fc, PR #4, merge 292f313) — brain/task-queue.md and pages/api/brain/sync-tasks.ts deleted; the Supabase `tasks` table is the sole canonical queue, CCC's tasks view is the read-only window onto it. Closed and deployed 2026-10-04.
@@ -74,18 +92,21 @@ as the human-readable window onto it.
 - Heritage Plaque batch (7 records) blocked pending a dedicated verification session
 
 ## Next Tasks
-1. Tighten getStaticProps select on /places — 143 kB, over threshold, grows with each translation batch
-2. Editorial prose French translation — homepage, about, history, plan-your-visit, HistoryTimeline (split off cc6e5703; needs native authorship, not a mechanical pass)
-3. Remaining French migration records (93 of 107 now have published English; ~14 still need translation + status stamp)
+1. Editorial prose French translation — homepage, about, history, plan-your-visit, HistoryTimeline (split off cc6e5703; needs native authorship, not a mechanical pass)
+2. Remaining French migration records (93 of 107 now have published English; ~14 still need translation + status stamp)
+3. Map popups render French short_description on /en/map — same bug class as 8ec7a8fb, different fix shape (imperative Mapbox rendering)
 4. suggest.ts anon blind-read follow-up (task 08309b0b) — swap getTasks() for getTasksAdmin(); small
 5. Stories hreflang gating — same `translations`/`_meta.status` contract as locations, currently unconditional; queued follow-up from the eb5f1e3e branch
 6. page_views retention/purge job (25-month cap per 2026-08-13 decision) — outstanding since the schema shipped
+7. Replace silent catch around /places curated-cards query with logged error + visible empty state (release-check finding)
+8. Remove dead getLocationBySlug() (uses forbidden select("*")) (release-check finding, P5)
 
 ## Next Session Starting Point
-Tracker, hreflang gating, UI-chrome i18n strings, and the FR/EN switcher are all live in
-production. Next priority: tighten getStaticProps on /places, then either the editorial-prose
-translation task or continuing the French migration (translations need both the content AND the
-`_meta.status=published` stamp to actually surface via hreflang/getLocalized/the switcher).
+Tracker, hreflang gating, UI-chrome i18n strings, the FR/EN switcher, and the /places payload trim
+are all live in production. Next priority: either the editorial-prose translation task or the
+/map popup locale bug (same class as the /places fix just shipped), then continuing the French
+migration (translations need both the content AND the `_meta.status=published` stamp to actually
+surface via hreflang/getLocalized/the switcher/the places list).
 
 ## Operational lessons (salvaged from the retired task-queue.md)
 
