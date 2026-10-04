@@ -16,7 +16,7 @@ import {
 } from "@/lib/supabase";
 import { staticMapUrl, hasMapbox } from "@/lib/mapbox";
 import { buildPlaceSchema } from "@/lib/seo";
-import { getLocalized } from "@/lib/getLocalized";
+import { getLocalized, hasPublishedTranslation } from "@/lib/getLocalized";
 import { SeoHead } from "@/components/SeoHead";
 import nextI18NextConfig from "@/next-i18next.config";
 import {
@@ -573,6 +573,7 @@ const PlacePage: NextPage<PlacePageProps> = (props) => {
           image={ogImage}
           type="article"
           jsonLd={buildPlaceSchema(place, locale)}
+          hasEnglishVersion={hasPublishedTranslation(place, "en")}
         />
         <UnifiedPlaceArticle place={place} locale={locale} />
       </>

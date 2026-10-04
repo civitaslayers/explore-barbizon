@@ -72,6 +72,33 @@ export function getLocalized(
 }
 
 /**
+ * Does this row have a genuinely published, non-empty translation for
+ * `locale`? Used to gate hreflang alternates and sitemap entries — NOT a
+ * looser "key present" check. Must use the exact same predicate as
+ * `getLocalized`'s non-fr branch above (published status + non-empty field),
+ * otherwise hreflang could advertise an alternate for a page that
+ * `getLocalized` still renders in the base language. See brain/decisions.md,
+ * 2026-08-13 and 2026-10-04.
+ */
+export function hasPublishedTranslation(
+  row: LocalizableRow | null | undefined,
+  locale: Locale,
+  fields: string[] = ["name", "short_description"]
+): boolean {
+  // fr is the base language, never an "alternate" of itself.
+  if (locale === "fr") return false;
+  if (!row) return false;
+
+  const entry = row.translations?.[locale];
+  if (!entry || entry._meta?.status !== "published") return false;
+
+  return fields.some((field) => {
+    const value = entry[field];
+    return typeof value === "string" && value.length > 0;
+  });
+}
+
+/**
  * Non-string variant — for the rare case a translated field is not text
  * (kept separate so the default string consumer never has to narrow a
  * union). Same fallback semantics as getLocalized; returns `undefined`

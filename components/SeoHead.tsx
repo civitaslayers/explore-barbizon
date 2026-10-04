@@ -10,6 +10,16 @@ import Head from "next/head";
 // `path` is the locale-agnostic path (no /en prefix), e.g.
 // "/places/maison-millet". Slugs are identical across locales
 // (brain/decisions.md, 2026-07-13) so no slug-mapping is needed here.
+//
+// Per-record hreflang gating (brain/decisions.md, 2026-08-13 and
+// 2026-10-04): `hasEnglishVersion` defaults to `true` so the ~9 i18n-JSON-
+// catalogue pages (home, map, about, history, plan-your-visit, places
+// index, stories index, stories/[slug], tours/[slug], 404) keep their
+// current fr/en/x-default output unchanged. Only DB-record-backed pages
+// (currently pages/places/[slug].tsx) pass the computed boolean — gated on
+// the exact same predicate `getLocalized` uses to render
+// (`lib/getLocalized.ts`'s `hasPublishedTranslation`), never on mere
+// translations-key presence.
 // ---------------------------------------------------------------------------
 
 export const SITE_BASE_URL = "https://explorebarbizon.com";
@@ -26,6 +36,15 @@ export type SeoHeadProps = {
   /** og:type — "article" for stories/place detail pages, "website" for indexes. */
   type?: "website" | "article";
   jsonLd?: JsonLd;
+  /**
+   * Does this record have a genuinely published English translation?
+   * Defaults to `true` — load-bearing for every i18n-JSON-catalogue call
+   * site (not DB-record-backed), which must keep emitting fr/en/x-default
+   * alternates unchanged. Record-backed pages pass this explicitly, computed
+   * via `hasPublishedTranslation` (lib/getLocalized.ts). See
+   * brain/decisions.md, 2026-08-13 and 2026-10-04.
+   */
+  hasEnglishVersion?: boolean;
 };
 
 function localizedUrl(path: string, locale: string): string {
@@ -48,10 +67,18 @@ export function SeoHead({
   image,
   type = "website",
   jsonLd,
+  hasEnglishVersion = true,
 }: SeoHeadProps) {
   const canonical = localizedUrl(path, locale);
   const frUrl = localizedUrl(path, "fr");
   const enUrl = localizedUrl(path, "en");
+
+  // French is the default locale (brain/decisions.md, 2026-07-13 — x-default
+  // → the French URL). noindex,follow applies only on the non-default
+  // locale when there is no published alternate to advertise — the French
+  // page itself always stays indexable.
+  const isNonDefaultLocale = locale !== "fr";
+  const suppressAlternates = isNonDefaultLocale && !hasEnglishVersion;
 
   return (
     <Head>
@@ -59,10 +86,17 @@ export function SeoHead({
       <meta name="description" content={description} />
 
       <link rel="canonical" href={canonical} />
-      <link rel="alternate" hrefLang="fr" href={frUrl} />
-      <link rel="alternate" hrefLang="en" href={enUrl} />
-      {/* x-default → the French URL (brain/decisions.md, 2026-07-13). */}
-      <link rel="alternate" hrefLang="x-default" href={frUrl} />
+      {hasEnglishVersion ? (
+        <>
+          <link rel="alternate" hrefLang="fr" href={frUrl} />
+          <link rel="alternate" hrefLang="en" href={enUrl} />
+          {/* x-default → the French URL (brain/decisions.md, 2026-07-13). */}
+          <link rel="alternate" hrefLang="x-default" href={frUrl} />
+        </>
+      ) : null}
+      {suppressAlternates ? (
+        <meta name="robots" content="noindex,follow" />
+      ) : null}
 
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />

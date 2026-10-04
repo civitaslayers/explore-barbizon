@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./supabase.types";
 import type { Place, PlaceCategory } from "@/lib/types";
+import { hasPublishedTranslation, type LocalizableRow } from "@/lib/getLocalized";
 
 // ---------------------------------------------------------------------------
 // Client
@@ -273,6 +274,37 @@ export async function getPublishedSlugs(): Promise<string[]> {
 /** Published location slugs for place pages and pre-rendering. */
 export async function getPublishedLocationSlugs(): Promise<string[]> {
   return getPublishedSlugs();
+}
+
+export type SitemapLocationEntry = { slug: string; hasEnglish: boolean };
+
+/**
+ * Published location slugs + per-record hreflang-alternate eligibility, for
+ * pages/sitemap.xml.tsx. Gated on the exact same predicate the render path
+ * (getLocalized) and SeoHead use — `hasPublishedTranslation` — never on mere
+ * translations-key presence. See brain/decisions.md, 2026-08-13 and
+ * 2026-10-04. Uses the anon client: published locations are anon-readable,
+ * same as the rest of this file.
+ */
+export async function getPublishedLocationSitemapEntries(): Promise<
+  SitemapLocationEntry[]
+> {
+  if (!supabase) throw new Error("Supabase not configured");
+
+  const { data, error } = await supabase
+    .from("locations")
+    .select("slug, translations")
+    .eq("is_published", true);
+
+  if (error) throw new Error(error.message);
+
+  return (data ?? []).map((row) => {
+    const typedRow = row as unknown as LocalizableRow & { slug: string };
+    return {
+      slug: typedRow.slug,
+      hasEnglish: hasPublishedTranslation(typedRow, "en"),
+    };
+  });
 }
 
 /**

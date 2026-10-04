@@ -10,7 +10,11 @@
 
 import test from "node:test";
 import assert from "node:assert/strict";
-import { getLocalized, type LocalizableRow } from "./getLocalized.ts";
+import {
+  getLocalized,
+  hasPublishedTranslation,
+  type LocalizableRow,
+} from "./getLocalized.ts";
 
 function row(overrides: Partial<LocalizableRow> = {}): LocalizableRow {
   return {
@@ -96,4 +100,59 @@ test("10. unpopulated locale (e.g. zh) returns the base", () => {
     },
   });
   assert.equal(getLocalized(r, "zh", "name"), "Maison Millet");
+});
+
+test("11. hasPublishedTranslation: real published + non-empty en entry returns true", () => {
+  const r = row({
+    translations: {
+      en: { name: "Millet House", _meta: { status: "published" } },
+    },
+  });
+  assert.equal(hasPublishedTranslation(r, "en"), true);
+});
+
+test("12. hasPublishedTranslation: translations.en present but no _meta (the live-data case) returns false", () => {
+  const r = row({
+    translations: {
+      en: { name: "Millet House" },
+    },
+  });
+  assert.equal(hasPublishedTranslation(r, "en"), false);
+});
+
+test("13. hasPublishedTranslation: translations.en present with _meta.status !== 'published' returns false", () => {
+  const r = row({
+    translations: {
+      en: { name: "Millet House", _meta: { status: "draft" } },
+    },
+  });
+  assert.equal(hasPublishedTranslation(r, "en"), false);
+});
+
+test("14. hasPublishedTranslation: no translations.en key at all returns false", () => {
+  const r = row();
+  assert.equal(hasPublishedTranslation(r, "en"), false);
+});
+
+test("15. hasPublishedTranslation: locale === 'fr' always returns false regardless of translations content", () => {
+  const r = row({
+    translations: {
+      en: { name: "Millet House", _meta: { status: "published" } },
+    },
+  });
+  assert.equal(hasPublishedTranslation(r, "fr"), false);
+});
+
+test("16. hasPublishedTranslation: published but all checked fields empty/missing returns false", () => {
+  const r = row({
+    translations: {
+      en: { name: "", short_description: "", _meta: { status: "published" } },
+    },
+  });
+  assert.equal(hasPublishedTranslation(r, "en"), false);
+});
+
+test("17. hasPublishedTranslation: row null/undefined returns false (no throw)", () => {
+  assert.equal(hasPublishedTranslation(null, "en"), false);
+  assert.equal(hasPublishedTranslation(undefined, "en"), false);
 });

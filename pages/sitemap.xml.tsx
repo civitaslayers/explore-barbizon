@@ -1,6 +1,6 @@
 import type { GetServerSideProps } from "next";
 import {
-  getPublishedSlugs,
+  getPublishedLocationSitemapEntries,
   getPublishedStorySlugs,
   getPublishedTourSlugsForSitemap,
 } from "@/lib/supabase";
@@ -15,32 +15,49 @@ import {
 // `routes` is intentionally excluded: it has no public detail page today
 // (the map is the only consumer of routes.geojson) — never list a URL that
 // 404s. CCC/dashboard are admin surfaces, excluded per the plan.
+//
+// Per-record hreflang gating (brain/decisions.md, 2026-08-13 and
+// 2026-10-04): locations only emit xhtml:link alternates when
+// `getPublishedLocationSitemapEntries` (lib/supabase.ts) reports a genuinely
+// published English translation, via the same predicate as
+// getLocalized/SeoHead (`hasPublishedTranslation`). Stories and tours are
+// out of scope for this task (same `translations` contract, queued
+// follow-up for stories; tours have no `translations` column at all) and
+// keep `hasAlternates: true` unconditionally.
 // ---------------------------------------------------------------------------
 
 const BASE_URL = "https://explorebarbizon.com";
 
-const STATIC_ROUTES = [
-  { path: "/", priority: "1.0", changefreq: "weekly" },
-  { path: "/map", priority: "0.9", changefreq: "weekly" },
-  { path: "/places", priority: "0.8", changefreq: "weekly" },
-  { path: "/about", priority: "0.5", changefreq: "monthly" },
-  { path: "/plan-your-visit", priority: "0.6", changefreq: "monthly" },
+const STATIC_ROUTES: UrlEntry[] = [
+  { path: "/", priority: "1.0", changefreq: "weekly", hasAlternates: true },
+  { path: "/map", priority: "0.9", changefreq: "weekly", hasAlternates: true },
+  { path: "/places", priority: "0.8", changefreq: "weekly", hasAlternates: true },
+  { path: "/about", priority: "0.5", changefreq: "monthly", hasAlternates: true },
+  { path: "/plan-your-visit", priority: "0.6", changefreq: "monthly", hasAlternates: true },
 ];
 
-type UrlEntry = { path: string; priority: string; changefreq: string };
+type UrlEntry = {
+  path: string;
+  priority: string;
+  changefreq: string;
+  hasAlternates: boolean;
+};
 
 function localeUrl(path: string, locale: "fr" | "en"): string {
   return locale === "fr" ? `${BASE_URL}${path}` : `${BASE_URL}/en${path}`;
 }
 
-function renderUrl({ path, priority, changefreq }: UrlEntry): string {
+function renderUrl({ path, priority, changefreq, hasAlternates }: UrlEntry): string {
   const frUrl = localeUrl(path, "fr");
   const enUrl = localeUrl(path, "en");
-  return `  <url>
-    <loc>${frUrl}</loc>
+  const alternates = hasAlternates
+    ? `
     <xhtml:link rel="alternate" hreflang="fr" href="${frUrl}"/>
     <xhtml:link rel="alternate" hreflang="en" href="${enUrl}"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="${frUrl}"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="${frUrl}"/>`
+    : "";
+  return `  <url>
+    <loc>${frUrl}</loc>${alternates}
     <changefreq>${changefreq}</changefreq>
     <priority>${priority}</priority>
   </url>`;
@@ -57,12 +74,13 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
   const entries: UrlEntry[] = [...STATIC_ROUTES];
 
   try {
-    const locationSlugs = await getPublishedSlugs();
-    for (const slug of locationSlugs) {
+    const locationEntries = await getPublishedLocationSitemapEntries();
+    for (const { slug, hasEnglish } of locationEntries) {
       entries.push({
         path: `/places/${slug}`,
         priority: "0.7",
         changefreq: "monthly",
+        hasAlternates: hasEnglish,
       });
     }
   } catch {
@@ -76,6 +94,8 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
         path: `/stories/${slug}`,
         priority: "0.6",
         changefreq: "monthly",
+        // Out of scope for this task — see header comment.
+        hasAlternates: true,
       });
     }
   } catch {
@@ -89,6 +109,8 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
         path: `/tours/${slug}`,
         priority: "0.6",
         changefreq: "monthly",
+        // Out of scope for this task — tours have no translations column.
+        hasAlternates: true,
       });
     }
   } catch {

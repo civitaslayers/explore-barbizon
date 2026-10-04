@@ -80,9 +80,24 @@ async function sampleSlugs(table, extraSelect = "") {
   return data ?? [];
 }
 
+// Per-record hreflang gating (brain/decisions.md, 2026-08-13 and
+// 2026-10-04): duplicated here, byte-for-byte equivalent, from
+// lib/getLocalized.ts's `hasPublishedTranslation` — this is a plain .mjs
+// script and cannot import the TS helper. The canonical definition lives in
+// lib/getLocalized.ts; if that predicate ever changes, this must change
+// with it.
+function expectAlternatesForLocation(translations) {
+  const entry = translations?.en;
+  if (!entry || entry._meta?.status !== "published") return false;
+  const fields = ["name", "short_description"];
+  return fields.some(
+    (field) => typeof entry[field] === "string" && entry[field].length > 0
+  );
+}
+
 async function enumerateEntities() {
   const locations = (
-    await sampleSlugs("locations", ", opening_hours")
+    await sampleSlugs("locations", ", opening_hours, translations")
   ).map((row) => ({
     type: "locations",
     slug: row.slug,
@@ -90,6 +105,7 @@ async function enumerateEntities() {
     hasOpeningHours: Boolean(
       row.opening_hours && Object.keys(row.opening_hours).length > 0
     ),
+    expectAlternates: expectAlternatesForLocation(row.translations),
   }));
 
   const stories = (await sampleSlugs("stories")).map((row) => ({
@@ -97,6 +113,9 @@ async function enumerateEntities() {
     slug: row.slug,
     path: `/stories/${row.slug}`,
     hasOpeningHours: false,
+    // Out of scope for this task — stories carry the same `translations`
+    // contract but per-record gating for them is a queued follow-up.
+    expectAlternates: true,
   }));
 
   const tours = (await sampleSlugs("tours")).map((row) => ({
@@ -104,6 +123,8 @@ async function enumerateEntities() {
     slug: row.slug,
     path: `/tours/${row.slug}`,
     hasOpeningHours: false,
+    // Out of scope for this task — tours have no translations column.
+    expectAlternates: true,
   }));
 
   return [...locations, ...stories, ...tours];
@@ -200,9 +221,40 @@ function checkDescription(scope, html) {
   pass(scope, `description OK (${description.length} chars)`);
 }
 
-function checkHreflang(scope, html, path) {
+function checkHreflang(scope, html, path, expectAlternates, locale) {
   checks += 1;
   const links = extractHreflangLinks(html);
+
+  if (!expectAlternates) {
+    // Gated off (brain/decisions.md, 2026-08-13/2026-10-04): no alternates
+    // at all is correct — a lone self-referencing x-default would be noise.
+    // Any hreflang link here means the gate isn't working.
+    if (Object.keys(links).length > 0) {
+      fail(
+        scope,
+        `Expected no hreflang alternates (gated off) but found: ${JSON.stringify(links)}`
+      );
+      return;
+    }
+    pass(scope, "No hreflang alternates (gated off, as expected)");
+
+    if (locale === "en") {
+      checks += 1;
+      const robots = extractMetaContent(html, "robots");
+      const hasNoindex = Boolean(robots?.includes("noindex"));
+      const hasFollow = Boolean(robots?.includes("follow"));
+      if (!hasNoindex || !hasFollow) {
+        fail(
+          scope,
+          `Expected robots meta containing noindex,follow on gated-off en page, got: ${robots ?? "(none)"}`
+        );
+        return;
+      }
+      pass(scope, `robots meta OK (${robots})`);
+    }
+    return;
+  }
+
   const hasFr = Boolean(links.fr);
   const hasEn = Boolean(links.en);
   const hasXDefault = Boolean(links["x-default"]);
@@ -298,7 +350,7 @@ async function main() {
       }
       checkTitle(scope, html);
       checkDescription(scope, html);
-      checkHreflang(scope, html, localePath);
+      checkHreflang(scope, html, localePath, entity.expectAlternates, locale);
       if (JSON_LD_ENTITY_TYPES.has(entity.type)) {
         checkJsonLd(scope, html, entity);
       }
