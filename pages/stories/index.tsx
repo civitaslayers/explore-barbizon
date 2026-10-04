@@ -1,15 +1,24 @@
 import Link from "next/link";
 import type { GetStaticProps, NextPage } from "next";
 import { useRouter } from "next/router";
-import type { SSRConfig } from "next-i18next/pages";
+import { useTranslation, type SSRConfig } from "next-i18next/pages";
 import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
 import { SeoHead } from "@/components/SeoHead";
 import { getAllStories, type Story } from "@/data/stories";
 import { supabase } from "@/lib/supabase";
 import nextI18NextConfig from "@/next-i18next.config";
 
+// dek/theme are nullable here (unlike data/stories.ts's Story type, which
+// always carries literal strings) — the Supabase-sourced rows below have no
+// subtitle/theme fallback at fetch time, so the page renders a translated
+// fallback instead of a hardcoded English string (dek ?? t("story.dekFallback")).
+type StoriesRowStory = Omit<Story, "dek" | "theme"> & {
+  dek: string | null;
+  theme: string | null;
+};
+
 type StoriesIndexProps = {
-  stories: Story[];
+  stories: StoriesRowStory[];
 } & SSRConfig;
 
 function excerptFromBody(body: string | null, maxLen = 220): string {
@@ -27,17 +36,14 @@ function rowToStory(row: {
   author: string | null;
   theme: string | null;
   type: string | null;
-}): Story {
-  const dek =
-    row.subtitle?.trim() ||
-    excerptFromBody(row.body) ||
-    "A short essay from the editorial notebook.";
-  const theme = row.theme?.trim() || row.author?.trim() || "Editorial";
+}): StoriesRowStory {
+  const dek = row.subtitle?.trim() || excerptFromBody(row.body) || null;
+  const theme = row.theme?.trim() || row.author?.trim() || null;
   const type = row.type === "guide" ? "guide" : "history";
   return { slug: row.slug, title: row.title, dek, theme, type };
 }
 
-async function getPublishedStoriesFromSupabase(): Promise<Story[]> {
+async function getPublishedStoriesFromSupabase(): Promise<StoriesRowStory[]> {
   if (!supabase) throw new Error("Supabase not configured");
 
   const { data, error } = await supabase
@@ -66,6 +72,7 @@ async function getPublishedStoriesFromSupabase(): Promise<Story[]> {
 const StoriesIndexPage: NextPage<StoriesIndexProps> = ({ stories }) => {
   const router = useRouter();
   const locale = router.locale ?? "fr";
+  const { t } = useTranslation("common");
   const essays = stories.filter((s) => (s.type ?? "history") === "history");
   const guides = stories.filter((s) => s.type === "guide");
 
@@ -95,7 +102,7 @@ const StoriesIndexPage: NextPage<StoriesIndexProps> = ({ stories }) => {
         {essays.length > 0 && (
           <div className="space-y-4">
             <p className="editorial-measure text-[11px] uppercase tracking-[0.2em] text-ink/50">
-              Essays
+              {t("story.essays")}
             </p>
             <div className="space-y-6 md:space-y-8">
               {essays.map((story) => (
@@ -106,16 +113,16 @@ const StoriesIndexPage: NextPage<StoriesIndexProps> = ({ stories }) => {
                 >
                   <article>
                     <p className="text-[11px] uppercase tracking-[0.18em] text-ink/50">
-                      {story.theme}
+                      {story.theme ?? t("story.themeFallback")}
                     </p>
                     <h2 className="mt-1 font-serif text-lg text-ink">
                       {story.title}
                     </h2>
                     <p className="mt-2 text-sm leading-relaxed text-ink/75">
-                      {story.dek}
+                      {story.dek ?? t("story.dekFallback")}
                     </p>
                     <p className="mt-3 text-[11px] uppercase tracking-[0.16em] text-ink/40">
-                      Read essay →
+                      {t("actions.readEssay")} →
                     </p>
                   </article>
                 </Link>
@@ -127,7 +134,7 @@ const StoriesIndexPage: NextPage<StoriesIndexProps> = ({ stories }) => {
         {guides.length > 0 && (
           <div className="space-y-4">
             <p className="editorial-measure text-[11px] uppercase tracking-[0.2em] text-ink/50">
-              In the village
+              {t("story.inTheVillage")}
             </p>
             <div className="editorial-measure space-y-3">
               {guides.map((story) => (
@@ -141,7 +148,7 @@ const StoriesIndexPage: NextPage<StoriesIndexProps> = ({ stories }) => {
                       {story.title}
                     </h2>
                     <p className="mt-1 line-clamp-2 text-sm leading-snug text-ink/70">
-                      {story.dek}
+                      {story.dek ?? t("story.dekFallback")}
                     </p>
                   </div>
                   <span

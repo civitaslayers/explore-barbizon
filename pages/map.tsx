@@ -25,15 +25,22 @@ const GROUP_I18N_KEY: Record<GroupName, string> = {
   Practical: "practical",
 };
 
-const MapGL = dynamic(() => import("@/components/MapGL"), {
-  ssr: false,
-  loading: () => (
+// A standalone component because `dynamic({ loading })` runs at module scope,
+// outside any component render — it cannot call useTranslation directly.
+function MapLoading() {
+  const { t } = useTranslation("common");
+  return (
     <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_top,_#f5f1e8,_#d4cec0)]">
       <p className="text-xs uppercase tracking-[0.2em] text-ink/40">
-        Loading map…
+        {t("map.loading")}
       </p>
     </div>
-  ),
+  );
+}
+
+const MapGL = dynamic(() => import("@/components/MapGL"), {
+  ssr: false,
+  loading: () => <MapLoading />,
 });
 
 type MapPageProps = { pins: MapPin[]; routes: Route[] } & SSRConfig;
@@ -126,15 +133,26 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
     });
   }, [locations, activeGroups, searchQuery]);
 
+  // Computed here (a normal component render, where hooks work) and passed
+  // down to MapGL, which reads it via a ref inside its imperative Mapbox
+  // popup-building code — see the Props comment in components/MapGL.tsx.
+  const mapLabels = useMemo(
+    () => ({
+      trailEyebrow: t("map.trailEyebrow"),
+      loop: t("map.loop"),
+      difficultyEasy: t("map.difficulty.easy"),
+      difficultyModerate: t("map.difficulty.moderate"),
+      difficultyHard: t("map.difficulty.hard"),
+      viewPlace: t("actions.viewPlace"),
+    }),
+    [t]
+  );
+
   return (
     <>
       <SeoHead
         title={t("map.title")}
-        description={
-          locale === "fr"
-            ? "Carte interactive de Barbizon — ateliers, sentiers, restaurants et hébergements."
-            : "Interactive map of Barbizon — studios, trails, restaurants, and places to stay."
-        }
+        description={t("map.description")}
         path="/map"
         locale={locale}
       />
@@ -152,6 +170,8 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
               allLocations={locations}
               routes={routes}
               focusSlug={focusSlug}
+              labels={mapLabels}
+              locale={locale}
             />
           </div>
 
@@ -195,6 +215,7 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
                   <button
                     type="button"
                     onClick={() => setSidebarOpen(false)}
+                    aria-label={t("map.close")}
                     className="text-[11px] uppercase tracking-[0.2em] text-ink/40 hover:text-ink"
                   >
                     ✕
@@ -253,7 +274,7 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
                   {visibleLocations.length === 1
                     ? t("map.locationsCountSingular")
                     : t("map.locationsCountPlural")}
-                  {searchQuery && ` matching "${searchQuery}"`}
+                  {searchQuery && ` ${t("map.matching", { query: searchQuery })}`}
                 </p>
               </aside>
             </>

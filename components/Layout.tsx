@@ -32,7 +32,7 @@ export function Layout({ children }: LayoutProps) {
             type="button"
             onClick={toggleMenu}
             className="p-1 text-ink/60 transition-colors duration-300 hover:text-ink"
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-label={menuOpen ? t("a11y.closeMenu") : t("a11y.openMenu")}
             aria-expanded={menuOpen}
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
@@ -54,7 +54,7 @@ export function Layout({ children }: LayoutProps) {
           <button
             type="button"
             className="p-1 text-ink/60 transition-colors duration-300 hover:text-ink"
-            aria-label="Search"
+            aria-label={t("a11y.search")}
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
               stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
@@ -104,7 +104,7 @@ export function Layout({ children }: LayoutProps) {
           <button
             type="button"
             className="p-1 text-ink/60 transition-colors duration-300 hover:text-ink"
-            aria-label="Search"
+            aria-label={t("a11y.search")}
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
               stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"

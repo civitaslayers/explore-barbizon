@@ -1,7 +1,7 @@
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import type { SSRConfig } from "next-i18next/pages";
+import { useTranslation, type SSRConfig } from "next-i18next/pages";
 import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
 import { SeoHead } from "@/components/SeoHead";
 import {
@@ -37,12 +37,13 @@ function formatDistance(meters: number | null): string {
 const TourPage: NextPage<TourPageProps> = ({ tour, routeCoords }) => {
   const router = useRouter();
   const locale = router.locale ?? "fr";
+  const { t } = useTranslation("common");
   const stops = tour.stops;
 
   return (
     <>
       <SeoHead
-        title={`${tour.name} — Explore Barbizon`}
+        title={`${tour.name} — Visit Barbizon`}
         description={tour.description ?? `${tour.name} — a walking tour of Barbizon.`}
         path={`/tours/${tour.slug}`}
         locale={locale}
@@ -55,7 +56,7 @@ const TourPage: NextPage<TourPageProps> = ({ tour, routeCoords }) => {
             <div className="relative z-10 flex h-full flex-col justify-end p-6 md:p-9 lg:p-11">
               <div className="max-w-3xl space-y-3 text-cream">
                 <p className="text-[11px] uppercase tracking-[0.25em] text-cream/60">
-                  Walking Tour
+                  {t("tour.eyebrow")}
                 </p>
                 <h1 className="font-serif text-3xl leading-tight tracking-tight text-cream md:text-4xl">
                   {tour.name}
@@ -76,7 +77,7 @@ const TourPage: NextPage<TourPageProps> = ({ tour, routeCoords }) => {
 
       <p className="mt-6 mb-2 text-xs text-ink/50">
         <Link href="/plan-your-visit" className="no-underline hover:text-ink">
-          ← Plan Your Visit
+          ← {t("actions.backToPlan")}
         </Link>
       </p>
 
@@ -122,13 +123,13 @@ const TourPage: NextPage<TourPageProps> = ({ tour, routeCoords }) => {
                         <div className="relative aspect-square overflow-hidden">
                           <img
                             src={mapUrl}
-                            alt={`Trail map for ${tour.name}`}
+                            alt={t("a11y.trailMap", { name: tour.name })}
                             className="w-full h-full object-cover transition-transform duration-500 ease-soft group-hover:scale-[1.02]"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-ink/30 to-transparent" />
                           <div className="absolute bottom-4 left-4">
                             <span className="text-[10px] uppercase tracking-[0.22em] text-cream/80 bg-ink/50 px-3 py-1.5 rounded-full backdrop-blur-sm">
-                              View on map →
+                              {t("actions.viewOnMap")} →
                             </span>
                           </div>
                         </div>
@@ -165,13 +166,13 @@ const TourPage: NextPage<TourPageProps> = ({ tour, routeCoords }) => {
                       <div className="relative aspect-square overflow-hidden">
                         <img
                           src={mapUrl}
-                          alt={`Trail map for ${tour.name}`}
+                          alt={t("a11y.trailMap", { name: tour.name })}
                           className="w-full h-full object-cover transition-transform duration-500 ease-soft group-hover:scale-[1.02]"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-ink/30 to-transparent" />
                         <div className="absolute bottom-4 left-4">
                           <span className="text-[10px] uppercase tracking-[0.22em] text-cream/80 bg-ink/50 px-3 py-1.5 rounded-full backdrop-blur-sm">
-                            View on map →
+                            {t("actions.viewOnMap")} →
                           </span>
                         </div>
                       </div>
@@ -182,12 +183,12 @@ const TourPage: NextPage<TourPageProps> = ({ tour, routeCoords }) => {
           </div>
 
           <aside className="space-y-5 border-t border-ink/10 pt-6 md:border-t-0 md:pt-0">
-            <p className="eyebrow">Orientation</p>
+            <p className="eyebrow">{t("tour.orientation")}</p>
             <dl className="grid gap-5 text-xs leading-relaxed">
               {formatDuration(tour.duration_minutes) && (
                 <div>
                   <dt className="text-[10px] uppercase tracking-[0.28em] text-ink/40">
-                    Duration
+                    {t("tour.duration")}
                   </dt>
                   <dd className="mt-1.5 font-serif text-sm text-ink/90">
                     {formatDuration(tour.duration_minutes)}
@@ -197,7 +198,7 @@ const TourPage: NextPage<TourPageProps> = ({ tour, routeCoords }) => {
               {formatDistance(tour.distance_meters) && (
                 <div>
                   <dt className="text-[10px] uppercase tracking-[0.28em] text-ink/40">
-                    Distance
+                    {t("tour.distance")}
                   </dt>
                   <dd className="mt-1.5 font-serif text-sm text-ink/90">
                     {formatDistance(tour.distance_meters)}
@@ -207,7 +208,7 @@ const TourPage: NextPage<TourPageProps> = ({ tour, routeCoords }) => {
               {stops.length > 0 && (
                 <div>
                   <dt className="text-[10px] uppercase tracking-[0.28em] text-ink/40">
-                    Stops
+                    {t("tour.stops")}
                   </dt>
                   <dd className="mt-1.5 font-serif text-sm text-ink/90">
                     {stops.length}
@@ -220,7 +221,7 @@ const TourPage: NextPage<TourPageProps> = ({ tour, routeCoords }) => {
 
         {stops.length > 0 && (
           <section className="mt-12 md:mt-16 border-t border-ink/10 pt-10">
-            <p className="eyebrow mb-6">Places along the route</p>
+            <p className="eyebrow mb-6">{t("tour.stopsHeading")}</p>
             <ol className="space-y-8">
               {stops.map((stop, index) => (
                 <li key={stop.stop_order} className="flex gap-5">
@@ -251,7 +252,7 @@ const TourPage: NextPage<TourPageProps> = ({ tour, routeCoords }) => {
                         href={`/map?trail=${tour.slug}&location=${stop.locations.slug}`}
                         className="mt-2 inline-block text-[11px] uppercase tracking-[0.18em] text-ink/40 hover:text-ink transition-colors"
                       >
-                        View on map →
+                        {t("actions.viewOnMap")} →
                       </Link>
                     ) : null}
                   </div>

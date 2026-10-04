@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslation } from "next-i18next/pages";
 
 export type RelatedStory = {
   slug: string;
@@ -15,6 +16,7 @@ export default function RelatedStories({
   stories,
   places
 }: RelatedStoriesProps) {
+  const { t } = useTranslation("common");
   const hasStories = stories && stories.length > 0;
   const hasPlaces = places && places.length > 0;
 
@@ -25,7 +27,7 @@ export default function RelatedStories({
       {hasStories ? (
         <section className="space-y-6">
           <p className="text-xs uppercase tracking-[0.25em] text-ink/60">
-            RELATED ESSAYS
+            {t("story.relatedEssays")}
           </p>
           <div className="space-y-4 md:space-y-5">
             {stories!.map((story) => (
@@ -55,7 +57,7 @@ export default function RelatedStories({
           }
         >
           <p className="text-xs uppercase tracking-[0.25em] text-ink/60">
-            PLACES IN THIS ESSAY
+            {t("story.placesInEssay")}
           </p>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {places!.map((place) => (

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { GetStaticProps, NextPage } from "next";
 import { useRouter } from "next/router";
-import type { SSRConfig } from "next-i18next/pages";
+import { useTranslation, type SSRConfig } from "next-i18next/pages";
 import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
 import { SeoHead } from "@/components/SeoHead";
 import nextI18NextConfig from "@/next-i18next.config";
@@ -18,6 +18,7 @@ type NotFoundPageProps = SSRConfig;
 const NotFoundPage: NextPage<NotFoundPageProps> = () => {
   const router = useRouter();
   const locale = router.locale ?? "fr";
+  const { t } = useTranslation("common");
 
   return (
     <>
@@ -38,11 +39,11 @@ const NotFoundPage: NextPage<NotFoundPageProps> = () => {
       <section className="space-y-6 py-20 text-center">
         <p className="eyebrow">404</p>
         <h1 className="font-serif text-3xl leading-tight text-ink md:text-4xl">
-          {locale === "fr" ? "Page introuvable" : "Page not found"}
+          {t("notFound.heading")}
         </h1>
         <p className="text-sm text-ink/70">
           <Link href="/" className="underline underline-offset-4 hover:text-ink">
-            {locale === "fr" ? "Retour à l'accueil" : "Back to the homepage"}
+            {t("actions.backHome")}
           </Link>
         </p>
       </section>

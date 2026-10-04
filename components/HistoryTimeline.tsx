@@ -2,6 +2,7 @@
 
 import { useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
+import { useTranslation } from "next-i18next/pages";
 
 type TimelineTag = "art" | "forest" | "village" | "legacy";
 
@@ -181,13 +182,9 @@ const events: TimelineEvent[] = [
 
 type FilterKey = "all" | TimelineTag;
 
-const filters: { key: FilterKey; label: string }[] = [
-  { key: "all", label: "All" },
-  { key: "art", label: "Art & painters" },
-  { key: "forest", label: "Forest & nature" },
-  { key: "village", label: "Village life" },
-  { key: "legacy", label: "Legacy" }
-];
+// Display labels now live in common.json (`timeline.filters.*`) — this list
+// only carries the data identifiers used for filtering, untouched.
+const filterKeys: FilterKey[] = ["all", "art", "forest", "village", "legacy"];
 
 function tagPillClasses(tag: TimelineTag): string {
   switch (tag) {
@@ -207,6 +204,7 @@ function eventKey(e: TimelineEvent): string {
 }
 
 export default function HistoryTimeline() {
+  const { t } = useTranslation("common");
   const [filter, setFilter] = useState<FilterKey>("all");
   const [openKey, setOpenKey] = useState<string | null>(null);
 
@@ -220,9 +218,9 @@ export default function HistoryTimeline() {
       <div
         className="mb-8 flex flex-wrap gap-2"
         role="toolbar"
-        aria-label="Filter timeline"
+        aria-label={t("a11y.filterTimeline")}
       >
-        {filters.map(({ key, label }) => {
+        {filterKeys.map((key) => {
           const active = filter === key;
           return (
             <button
@@ -235,7 +233,7 @@ export default function HistoryTimeline() {
                   : "rounded-full border border-ink/20 px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.14em] text-ink/60 transition-colors hover:text-ink"
               }
             >
-              {label}
+              {t(`timeline.filters.${key}`)}
             </button>
           );
         })}
@@ -278,7 +276,7 @@ export default function HistoryTimeline() {
                     <span
                       className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-medium uppercase tracking-[0.18em] ${tagPillClasses(event.tag)}`}
                     >
-                      {event.tag}
+                      {t(`timeline.tags.${event.tag}`)}
                     </span>
                     <p className="mt-2 font-serif text-base text-ink">
                       {event.headline}

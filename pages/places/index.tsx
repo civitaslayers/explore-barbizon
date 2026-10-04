@@ -1,7 +1,7 @@
 import type { GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import type { SSRConfig } from "next-i18next/pages";
+import { useTranslation, type SSRConfig } from "next-i18next/pages";
 import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
 import { useState, useMemo } from "react";
 import ImagePlaceholder from "@/components/ImagePlaceholder";
@@ -34,6 +34,10 @@ type PlacesIndexProps = {
   whereToEat: CuratedPlace[];
   whereToStay: CuratedPlace[];
 } & SSRConfig;
+
+// Internal sentinel for the "show every category" filter state — distinct
+// from its visible label (t("places.filterAll")), which is locale-dependent.
+const ALL_FILTER = "__all__";
 
 const EAT_STAY_SHOP_LAYER = "Eat, Stay & Shop";
 
@@ -194,16 +198,17 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({
 }) => {
   const router = useRouter();
   const locale = router.locale ?? "fr";
-  const [activeCategory, setActiveCategory] = useState("All");
+  const { t } = useTranslation("common");
+  const [activeCategory, setActiveCategory] = useState(ALL_FILTER);
 
   const categories = useMemo(() => {
     const cats = Array.from(new Set(places.map((p) => p.category))).sort();
-    return ["All", ...cats];
+    return [ALL_FILTER, ...cats];
   }, [places]);
 
   const filtered = useMemo(
     () =>
-      activeCategory === "All"
+      activeCategory === ALL_FILTER
         ? places
         : places.filter((p) => p.category === activeCategory),
     [places, activeCategory]
@@ -212,8 +217,8 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({
   return (
     <>
       <SeoHead
-        title="Places — Visit Barbizon"
-        description="Discover the historic ateliers, quiet inns, and forest clearings that defined the Pre-Impressionist era."
+        title={t("places.metaTitle")}
+        description={t("places.metaDescription")}
         path="/places"
         locale={locale}
       />
@@ -221,7 +226,7 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({
       <section className="space-y-10 xl:space-y-12">
         <header className="space-y-5">
           <p className="font-sans text-[10px] uppercase tracking-[0.35em] text-ink/50">
-            Archive Directory
+            {t("places.eyebrow")}
           </p>
           <h1 className="font-serif text-4xl italic leading-[1.05] tracking-tight text-ink md:text-5xl">
             Places of Barbizon
@@ -234,8 +239,8 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({
         </header>
 
         <div className="space-y-10">
-          <CuratedSection eyebrow="Where to eat" items={whereToEat} />
-          <CuratedSection eyebrow="Where to stay" items={whereToStay} />
+          <CuratedSection eyebrow={t("places.whereToEat")} items={whereToEat} />
+          <CuratedSection eyebrow={t("places.whereToStay")} items={whereToStay} />
         </div>
 
         {/* Category filters */}
@@ -250,7 +255,7 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({
                 : "border-transparent text-ink/40 hover:text-ink/70"
                 }`}
             >
-              {cat}
+              {cat === ALL_FILTER ? t("places.filterAll") : cat}
             </button>
           ))}
         </div>
@@ -265,7 +270,7 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({
               {hasMapbox ? (
                 <img
                   src={staticMapUrl(place.longitude, place.latitude)}
-                  alt={`Map location of ${place.name}`}
+                  alt={t("a11y.mapOf", { name: place.name })}
                   className="absolute inset-0 h-full w-full object-cover opacity-80 transition-transform duration-700 ease-soft group-hover:scale-105"
                   loading="lazy"
                 />

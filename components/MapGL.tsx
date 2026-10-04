@@ -372,14 +372,43 @@ type Props = {
   allLocations?: Place[];
   routes: Route[];
   focusSlug?: string;
+  // Computed with t() in the PARENT (pages/map.tsx, a normal React component
+  // where hooks work normally) and read via labelsRef/localeRef inside the
+  // imperative Mapbox popup/event-handler code below — a `t` captured
+  // directly inside those mount-once closures would go stale after a locale
+  // change without a remount. Expected keys: trailEyebrow, loop,
+  // difficultyEasy, difficultyModerate, difficultyHard, viewPlace.
+  labels: Record<string, string>;
+  locale: string;
 };
 
-export default function MapGL({ locations, allLocations, routes, focusSlug }: Props) {
+export default function MapGL({
+  locations,
+  allLocations,
+  routes,
+  focusSlug,
+  labels,
+  locale,
+}: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const routesRef = useRef<Route[]>([]);
   const focusPopupRef = useRef<mapboxgl.Popup | null>(null);
   const hasIntroPlayed = useRef(false);
+  const labelsRef = useRef(labels);
+  const localeRef = useRef(locale);
+
+  useEffect(() => {
+    labelsRef.current = labels;
+  }, [labels]);
+
+  useEffect(() => {
+    localeRef.current = locale;
+  }, [locale]);
+
+  // Locale-aware /places/ link — the default locale (fr) has no URL prefix.
+  const localizedPlaceHref = (slug: string): string =>
+    localeRef.current !== "fr" ? `/${localeRef.current}/places/${slug}` : `/places/${slug}`;
 
   // Initialise map — runs once on mount
   useEffect(() => {
@@ -647,14 +676,24 @@ export default function MapGL({ locations, allLocations, routes, focusSlug }: Pr
           : "?";
         const mapsUrl = `https://maps.apple.com/?daddr=${props.start_lat},${props.start_lng}&dirflg=w`;
         const gmapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${props.start_lat},${props.start_lng}&travelmode=walking`;
+        const difficultyKey =
+          props.difficulty === "easy"
+            ? "difficultyEasy"
+            : props.difficulty === "hard"
+              ? "difficultyHard"
+              : "difficultyModerate";
+        const difficultyLabel =
+          labelsRef.current[difficultyKey] ?? props.difficulty ?? "moderate";
+        const trailEyebrow = labelsRef.current.trailEyebrow ?? "Trail";
+        const loopLabel = labelsRef.current.loop ?? "Loop";
 
         new mapboxgl.Popup({ offset: 12, maxWidth: "280px" })
           .setLngLat(e.lngLat)
           .setHTML(
             `<div style="font-family:system-ui,sans-serif;padding:2px 0">` +
-            `<p style="font-size:10px;text-transform:uppercase;letter-spacing:0.2em;color:rgba(17,17,17,0.4);margin:0 0 5px">Trail · ${props.difficulty ?? "moderate"}</p>` +
+            `<p style="font-size:10px;text-transform:uppercase;letter-spacing:0.2em;color:rgba(17,17,17,0.4);margin:0 0 5px">${trailEyebrow} · ${difficultyLabel}</p>` +
             `<h3 style="font-family:Georgia,serif;font-size:15px;font-weight:400;color:#111;margin:0 0 6px;line-height:1.3">${props.name}</h3>` +
-            `<p style="font-size:11px;color:rgba(17,17,17,0.55);margin:0 0 8px">${km} km · ${hrs} · Loop</p>` +
+            `<p style="font-size:11px;color:rgba(17,17,17,0.55);margin:0 0 8px">${km} km · ${hrs} · ${loopLabel}</p>` +
             (props.description
               ? `<p style="font-size:11px;color:rgba(17,17,17,0.6);margin:0 0 12px;line-height:1.5">${props.description.substring(0, 120)}…</p>`
               : "") +
@@ -729,7 +768,10 @@ export default function MapGL({ locations, allLocations, routes, focusSlug }: Pr
           }
         }
 
-        const href = props.placeSlug ? `/places/${props.placeSlug}` : null;
+        // Locale-prefixed: the raw `/places/${slug}` href below previously
+        // linked every pin popup to the French page even on /en/map.
+        const href = props.placeSlug ? localizedPlaceHref(props.placeSlug) : null;
+        const viewPlaceLabel = labelsRef.current.viewPlace ?? "View place";
 
         new mapboxgl.Popup({ offset: 18, maxWidth: "260px" })
           .setLngLat(coords)
@@ -741,7 +783,7 @@ export default function MapGL({ locations, allLocations, routes, focusSlug }: Pr
               ? `<p style="font-size:11px;color:rgba(17,17,17,0.6);margin:0 0 10px;line-height:1.55">${props.shortDescription}</p>`
               : "") +
             (href
-              ? `<a href="${href}" style="font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:#7A5C3E;text-decoration:none">View place →</a>`
+              ? `<a href="${href}" style="font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:#7A5C3E;text-decoration:none">${viewPlaceLabel} →</a>`
               : "") +
             `</div>`
           )
@@ -814,7 +856,7 @@ export default function MapGL({ locations, allLocations, routes, focusSlug }: Pr
 
     const targetPlaceSlug =
       (target as Place & { placeSlug?: string | null }).placeSlug ?? "";
-    const focusHref = targetPlaceSlug ? `/places/${targetPlaceSlug}` : null;
+    const focusHref = targetPlaceSlug ? localizedPlaceHref(targetPlaceSlug) : null;
 
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
@@ -841,7 +883,7 @@ export default function MapGL({ locations, allLocations, routes, focusSlug }: Pr
                 ? `<p style="font-size:11px;color:rgba(17,17,17,0.6);margin:0 0 10px;line-height:1.55">${target.shortDescription}</p>`
                 : "") +
               (focusHref
-                ? `<a href="${focusHref}" style="font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:#7A5C3E;text-decoration:none">View place →</a>`
+                ? `<a href="${focusHref}" style="font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:#7A5C3E;text-decoration:none">${labelsRef.current.viewPlace ?? "View place"} →</a>`
                 : "") +
               `</div>`
           )

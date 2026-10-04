@@ -27,7 +27,13 @@
     "searchPlaceholder": "Place, trail, studio…",
     "layers": "Layers",
     "locationsCountSingular": "location",
-    "locationsCountPlural": "locations"
+    "locationsCountPlural": "locations",
+    "loading": "Loading map…",
+    "matching": "matching \"{{query}}\"",
+    "trailEyebrow": "Trail",
+    "loop": "Loop",
+    "description": "Interactive map of Barbizon: artists' studios, forest trails, restaurants, places to stay and village shops, all together on a single map.",
+    "difficulty": { "easy": "easy", "moderate": "moderate", "hard": "hard" }
   },
   "layers": {
     "artHistory": "Art & History",
@@ -38,5 +44,61 @@
     "forestNatureMeta": "Trails, viewpoints, climbing areas",
     "practical": "Practical",
     "practicalMeta": "Parking, transport, services"
-  }
+  },
+  "a11y": {
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "search": "Search",
+    "filterTimeline": "Filter timeline",
+    "mapOf": "Map location of {{name}}",
+    "trailMap": "Trail map for {{name}}"
+  },
+  "actions": {
+    "backToPlaces": "Archive Directory",
+    "backToStories": "Stories",
+    "backToPlan": "Plan Your Visit",
+    "backHome": "Back to the homepage",
+    "viewOnMap": "View on map",
+    "viewPlace": "View place",
+    "visitWebsite": "Visit website",
+    "readEssay": "Read essay"
+  },
+  "place": {
+    "narrativeEyebrow": "The place",
+    "website": "Website",
+    "phone": "Phone",
+    "openingHours": "Opening hours"
+  },
+  "places": {
+    "eyebrow": "Archive Directory",
+    "filterAll": "All",
+    "whereToEat": "Where to eat",
+    "whereToStay": "Where to stay",
+    "metaTitle": "Places of Barbizon — Visit Barbizon",
+    "metaDescription": "Discover the historic ateliers, quiet inns, and forest clearings that shaped Barbizon's Pre-Impressionist era — browse every place on the map."
+  },
+  "tour": {
+    "eyebrow": "Walking Tour",
+    "orientation": "Orientation",
+    "duration": "Duration",
+    "distance": "Distance",
+    "stops": "Stops",
+    "stopsHeading": "Places along the route"
+  },
+  "story": {
+    "essays": "Essays",
+    "inTheVillage": "In the village",
+    "relatedEssays": "Related essays",
+    "placesInEssay": "Places in this essay",
+    "dekFallback": "A short essay from the editorial notebook.",
+    "themeFallback": "Editorial"
+  },
+  "timeline": {
+    "filters": { "all": "All", "art": "Art & painters", "forest": "Forest & nature", "village": "Village life", "legacy": "Legacy" },
+    "tags": { "art": "art", "forest": "forest", "village": "village", "legacy": "legacy" }
+  },
+  "days": { "mon": "Mon", "tue": "Tue", "wed": "Wed", "thu": "Thu", "fri": "Fri", "sat": "Sat", "sun": "Sun" },
+  "hoursLabels": { "check_in": "Check-in", "check_out": "Check-out", "default": "Default" },
+  "hoursValue": { "yes": "yes", "no": "no" },
+  "notFound": { "heading": "Page not found" }
 }

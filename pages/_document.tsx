@@ -14,7 +14,7 @@ class MyDocument extends Document {
 
   render() {
     return (
-      <Html lang="en">
+      <Html lang={this.props.__NEXT_DATA__?.locale ?? "fr"}>
         <Head>
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link

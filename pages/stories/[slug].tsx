@@ -1,7 +1,7 @@
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import type { SSRConfig } from "next-i18next/pages";
+import { useTranslation, type SSRConfig } from "next-i18next/pages";
 import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
 import type { ComponentProps } from "react";
 import { marked } from "marked";
@@ -13,11 +13,14 @@ import { buildArticleSchema } from "@/lib/seo";
 import { supabase } from "@/lib/supabase";
 import nextI18NextConfig from "@/next-i18next.config";
 
+// theme/dek are nullable: no hardcoded English fallback at fetch time
+// (mapRowToPageStory) — the page renders a translated fallback instead
+// (story.dek ?? t("story.dekFallback")).
 type StoryPageStory = {
   slug: string;
   title: string;
-  theme: string;
-  dek: string;
+  theme: string | null;
+  dek: string | null;
   body: string;
   author: string | null;
   published_at: string | null;
@@ -49,11 +52,8 @@ type StoryDbRow = {
 };
 
 function mapRowToPageStory(row: StoryDbRow): StoryPageStory {
-  const dek =
-    row.subtitle?.trim() ||
-    excerptFromBody(row.body) ||
-    "A short essay from the editorial notebook.";
-  const theme = row.theme?.trim() || row.author?.trim() || "Editorial";
+  const dek = row.subtitle?.trim() || excerptFromBody(row.body) || null;
+  const theme = row.theme?.trim() || row.author?.trim() || null;
   const body = row.body?.trim() ?? "";
   return {
     slug: row.slug,
@@ -209,6 +209,7 @@ const RELATED: Record<string, ComponentProps<typeof RelatedStories>> = {
 const StoryPage: NextPage<StoryPageProps> = ({ story }) => {
   const router = useRouter();
   const locale = router.locale ?? "fr";
+  const { t } = useTranslation("common");
   const bodyHtml = story.body
     ? marked(story.body, { breaks: true, gfm: true })
     : "";
@@ -218,8 +219,13 @@ const StoryPage: NextPage<StoryPageProps> = ({ story }) => {
   // "subtitle" is the real DB/translations column name (see mapRowToPageStory);
   // `dek` below is a derived display value (subtitle, or a French excerpt
   // fallback) computed at fetch time — falling back to it here keeps a
-  // sensible French dek when no published English subtitle exists yet.
-  const dek = getLocalized(story, locale, "subtitle") || story.dek;
+  // sensible French dek when no published English subtitle exists yet, and
+  // to the translated catalogue fallback when there is no dek at all.
+  const dek =
+    getLocalized(story, locale, "subtitle") ||
+    story.dek ||
+    t("story.dekFallback");
+  const theme = story.theme ?? t("story.themeFallback");
 
   return (
     <>
@@ -246,13 +252,13 @@ const StoryPage: NextPage<StoryPageProps> = ({ story }) => {
       <article className="editorial-measure space-y-8">
         <p className="text-xs text-ink/50">
           <Link href="/stories" className="hover:text-ink">
-            ← Stories
+            ← {t("actions.backToStories")}
           </Link>
         </p>
 
         <header className="space-y-4">
           <p className="text-[11px] uppercase tracking-[0.18em] text-ink/50">
-            {story.theme}
+            {theme}
           </p>
           <h1 className="font-serif text-3xl leading-tight text-ink md:text-4xl">
             {title}

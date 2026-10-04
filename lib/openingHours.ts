@@ -34,6 +34,22 @@ export const DAY_LABELS_FR: Record<DayKey, string> = {
   sun: "Dimanche",
 };
 
+// Translation-KEY counterparts of DAY_LABELS_FR, for the public i18n-aware
+// places/[slug].tsx page (common.json `days.*`). DAY_LABELS_FR above is left
+// untouched — it is also consumed by the CCC admin editor
+// (components/command-center/OpeningHoursEditor.tsx), which is a French-only
+// internal tool with no i18n wiring; repurposing the existing literal-string
+// export to return keys would have regressed that tool's display.
+export const DAY_LABEL_KEYS: Record<DayKey, string> = {
+  mon: "days.mon",
+  tue: "days.tue",
+  wed: "days.wed",
+  thu: "days.thu",
+  fri: "days.fri",
+  sat: "days.sat",
+  sun: "days.sun",
+};
+
 // Legacy full-English day names → canonical 3-letter key. Anything else
 // (already-canonical 3-letter keys, or genuinely non-day keys) passes through
 // unchanged.
@@ -64,6 +80,17 @@ export const NON_DAY_LABELS_FR: Record<string, string> = {
   default: "Par défaut",
 };
 
+// Translation-KEY counterpart of NON_DAY_LABELS_FR (common.json
+// `hoursLabels.*`), for the public places/[slug].tsx page only — see the
+// comment on DAY_LABEL_KEYS above for why NON_DAY_LABELS_FR itself is
+// untouched. Same fallback contract as NON_DAY_LABELS_FR: a key missing here
+// means "render entry.key verbatim", not "needs translation".
+export const NON_DAY_LABEL_KEYS: Record<string, string> = {
+  check_in: "hoursLabels.check_in",
+  check_out: "hoursLabels.check_out",
+  default: "hoursLabels.default",
+};
+
 // The stored shape is documented as Record<string, string> in the fiche plan,
 // but live data also holds object and boolean values (finding 1) — accept
 // unknown values so nothing throws or gets coerced away.
@@ -82,6 +109,20 @@ export function formatHoursValue(value: unknown): string {
     }
   }
   return String(value);
+}
+
+/**
+ * Translation-KEY counterpart of formatHoursValue's boolean branch
+ * ("oui"/"non" — common.json `hoursValue.yes`/`hoursValue.no`), for the
+ * public places/[slug].tsx page. Returns null for any non-boolean value,
+ * meaning "no translation needed, use formatHoursValue()/entry.value
+ * as-is". formatHoursValue itself is untouched because
+ * components/command-center/OpeningHoursEditor.tsx renders its returned
+ * string directly and has no i18n wiring (see DAY_LABEL_KEYS comment).
+ */
+export function formatHoursValueKey(value: unknown): string | null {
+  if (typeof value === "boolean") return value ? "hoursValue.yes" : "hoursValue.no";
+  return null;
 }
 
 export type OtherEntry = {

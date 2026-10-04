@@ -27,7 +27,13 @@
     "searchPlaceholder": "Lieu, sentier, atelier…",
     "layers": "Filtres",
     "locationsCountSingular": "lieu",
-    "locationsCountPlural": "lieux"
+    "locationsCountPlural": "lieux",
+    "loading": "Chargement de la carte…",
+    "matching": "correspondant à « {{query}} »",
+    "trailEyebrow": "Sentier",
+    "loop": "Boucle",
+    "description": "Carte interactive de Barbizon : ateliers d'artistes, sentiers en forêt, restaurants, hébergements et commerces du village réunis sur une seule carte.",
+    "difficulty": { "easy": "facile", "moderate": "modéré", "hard": "difficile" }
   },
   "layers": {
     "artHistory": "Art et Histoire",
@@ -38,5 +44,61 @@
     "forestNatureMeta": "Sentiers, points de vue, sites d'escalade",
     "practical": "Pratique",
     "practicalMeta": "Parkings, transports, services"
-  }
+  },
+  "a11y": {
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu",
+    "search": "Rechercher",
+    "filterTimeline": "Filtrer la chronologie",
+    "mapOf": "Carte situant {{name}}",
+    "trailMap": "Carte du sentier {{name}}"
+  },
+  "actions": {
+    "backToPlaces": "Retour aux lieux",
+    "backToStories": "Retour aux histoires",
+    "backToPlan": "Retour à la préparation",
+    "backHome": "Retour à l'accueil",
+    "viewOnMap": "Voir sur la carte",
+    "viewPlace": "Voir le lieu",
+    "visitWebsite": "Visiter le site",
+    "readEssay": "Lire l'essai"
+  },
+  "place": {
+    "narrativeEyebrow": "Le lieu",
+    "website": "Site web",
+    "phone": "Téléphone",
+    "openingHours": "Horaires"
+  },
+  "places": {
+    "eyebrow": "Répertoire des lieux",
+    "filterAll": "Tous",
+    "whereToEat": "Où manger",
+    "whereToStay": "Où dormir",
+    "metaTitle": "Lieux de Barbizon — Visit Barbizon",
+    "metaDescription": "Découvrez les ateliers historiques, auberges tranquilles et clairières de forêt qui ont marqué Barbizon à l'époque pré-impressionniste."
+  },
+  "tour": {
+    "eyebrow": "Promenade",
+    "orientation": "Repères",
+    "duration": "Durée",
+    "distance": "Distance",
+    "stops": "Étapes",
+    "stopsHeading": "Les lieux du parcours"
+  },
+  "story": {
+    "essays": "Essais",
+    "inTheVillage": "Dans le village",
+    "relatedEssays": "Essais liés",
+    "placesInEssay": "Lieux de cet essai",
+    "dekFallback": "Un court essai du carnet éditorial.",
+    "themeFallback": "Éditorial"
+  },
+  "timeline": {
+    "filters": { "all": "Tout", "art": "Art et peintres", "forest": "Forêt et nature", "village": "Vie du village", "legacy": "Héritage" },
+    "tags": { "art": "art", "forest": "forêt", "village": "village", "legacy": "héritage" }
+  },
+  "days": { "mon": "Lundi", "tue": "Mardi", "wed": "Mercredi", "thu": "Jeudi", "fri": "Vendredi", "sat": "Samedi", "sun": "Dimanche" },
+  "hoursLabels": { "check_in": "Arrivée", "check_out": "Départ", "default": "Par défaut" },
+  "hoursValue": { "yes": "oui", "no": "non" },
+  "notFound": { "heading": "Page introuvable" }
 }
