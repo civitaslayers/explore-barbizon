@@ -20,6 +20,17 @@ release-check findings: a dead `getLocationBySlug()` using the forbidden `select
 a silent catch around the curated-cards query that should log/surface failures instead of quietly
 rendering empty.
 
+---
+2026-10-04 afternoon content work (claude.ai, live DB, verbatim handoff):
+- Art & History, 7 non-plaque records rewritten in French with English. v_translation_health locations: 97 current, 3 draft, 11 missing (7 Heritage Plaques + 4 unpublished).
+- Major corrections: cimetiere-barbizon (Millet and Rousseau are buried in the Chailly-en-Bière cemetery, not Barbizon's; Barbizon became a commune in 1903 and its cemetery was created after that; L'Angélus was not bought by the State after Millet's death: sold 1889, bought back by Chauchard, bequeathed to the Louvre 1909). monument-farman (record conflated the Barbizon stele with the Issy-les-Moulineaux monument; the Barbizon stele is "Aux frères Farman", inaugurated 18 May 1985, on the plain where Maurice Farman landed to reach the family property).
+- Minor corrections: chene-sully, caverne-des-brigands, allee-john-constable (unsourced claims removed). full_description cleared on 6 records where it repeated false claims. All logged in internal_notes with sources.
+- Published EN: allee-john-constable, caverne-des-brigands, cimetiere-barbizon, monument-farman.
+- Draft EN, pending: la-poste-barbizon and mairie-barbizon (facts confirmed by Luigi, awaiting publish approval); chene-sully (Luigi believes the tree may be dead; on-site check needed before publishing; the published French says it is standing).
+- Domain: explorebarbizon.com is now primary, www redirects with 308 (task 06e9fec8 done). Search Console sitemap resubmission pending (Luigi).
+- Possible new pin: Chailly-en-Bière cemetery (real graves of Millet and Rousseau), outside the commune; deferred with the multi-town question.
+---
+
 UI-chrome i18n strings (task cc6e5703) and the FR/EN language switcher (task ea615bf5) merged to
 main (`5a86b67`, fast-forward from `feat/i18n-strings-switcher`) and deployed to production.
 Nav/footer/bottomNav/microcopy/aria-labels now read from `public/locales/{fr,en}/common.json`
