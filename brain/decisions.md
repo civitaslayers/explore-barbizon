@@ -1,3 +1,11 @@
+---
+2026-10-04: Every translation write stamps _meta in the same statement
+Decision: Any write that creates or changes translations.<locale> must set translations.<locale>._meta {source_hash, translated_at, status} in the same SQL statement. source_hash uses the exact md5 expression in v_translation_health. status is 'published' only with Luigi's approval; otherwise 'draft'.
+Reason: Between 2026-08-13 and 2026-10-04, 93 records were migrated without _meta. getLocalized requires _meta.status = 'published', so every /en/ page silently served French for seven weeks and the hreflang gate had nothing to emit. Nothing failed loudly.
+Consequence: Content batches from claude.ai and content-ops must include _meta. v_translation_health is the check: after any batch, stale and draft counts must match intent.
+Migration risk: none (data convention; backfill done 2026-10-04).
+---
+
 ## 2026-10-04
 **Decision:** The per-record hreflang gate uses the same predicate as the render path — `translations.en._meta.status === "published"` plus at least one non-empty translated field — not the mere presence of a `translations->en` key. A single shared helper (`hasPublishedTranslation` in `lib/getLocalized.ts`) is the only definition; `SeoHead` call sites and `pages/sitemap.xml.tsx` both consume it, neither re-implements it.
 **Reason:** `getLocalized()` already refuses to render a translation unless `_meta.status === "published"` (lib/getLocalized.ts step 3, covered by tests 3 and 7). Gating hreflang on key-presence alone would declare `/en/X` as an English alternate for a page that `getLocalized` still renders in French — reinstating the exact byte-identical-duplicate defect the 2026-08-13 decision exists to fix, while *looking* fixed. Two predicates for "has English" is the drift class this project keeps paying for (generated mirrors, dual decision logs).
