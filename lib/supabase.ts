@@ -211,6 +211,23 @@ export async function getPublishedLocations(): Promise<Place[]> {
   return (data as unknown as PlacesListRow[]).map(toLocalizedPlace);
 }
 
+/**
+ * Row shape for getMapPins — selected columns plus the two translations->en
+ * JSON paths (same PostgREST aliases as getPublishedLocations above) needed
+ * for the EN short_description fallback on /en/map.
+ */
+type MapPinRow = {
+  slug: string;
+  name: string;
+  short_description: string | null;
+  latitude: number;
+  longitude: number;
+  route_slug: string | null;
+  en_short_description: string | null;
+  en_status: string | null;
+  categories: { name: string; layer: string } | null;
+};
+
 export type MapPin = {
   slug: string;
   name: string;
@@ -221,6 +238,12 @@ export type MapPin = {
   allCategories: string[];
   placeSlug: string | null;
   routeSlug: string | null;
+  // Raw read-path inputs for lib/getLocalized.ts. snake_case alias because
+  // getLocalized's base-column fallback reads row[field] by exact field name
+  // (same reason Place carries short_description — lib/types.ts). Present
+  // only between getMapPins() and getStaticProps; never shipped in page data.
+  short_description?: string;
+  translations?: Record<string, TranslationEntry> | null;
 };
 
 export async function getMapPins(): Promise<MapPin[]> {
@@ -228,21 +251,30 @@ export async function getMapPins(): Promise<MapPin[]> {
 
   const { data: locsData, error: locsError } = await supabase
     .from("locations")
-    .select("slug, name, short_description, latitude, longitude, route_slug, categories!inner(name, layer)")
+    .select(
+      "slug, name, short_description, latitude, longitude, route_slug, en_short_description:translations->en->>short_description, en_status:translations->en->_meta->>status, categories!inner(name, layer)"
+    )
     .eq("is_published", true);
 
   if (locsError) throw new Error(locsError.message);
 
-  return ((locsData ?? []) as any[]).map((row) => ({
+  return ((locsData ?? []) as unknown as MapPinRow[]).map((row) => ({
     slug: row.slug,
     name: row.name,
     shortDescription: row.short_description ?? "",
+    short_description: row.short_description ?? "",
     latitude: row.latitude,
     longitude: row.longitude,
-    category: (row.categories as any)?.name ?? "Point of Interest",
-    allCategories: [(row.categories as any)?.name ?? "Point of Interest"],
+    category: row.categories?.name ?? "Point of Interest",
+    allCategories: [row.categories?.name ?? "Point of Interest"],
     placeSlug: row.slug,
     routeSlug: row.route_slug ?? null,
+    translations: {
+      en: {
+        short_description: row.en_short_description ?? null,
+        _meta: { status: row.en_status ?? null },
+      },
+    } as unknown as Record<string, TranslationEntry>,
   }));
 }
 

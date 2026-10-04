@@ -13,6 +13,7 @@ import {
   getCategoryGroup,
   type GroupName,
 } from "@/lib/categoryGroups";
+import { getLocalized } from "@/lib/getLocalized";
 import nextI18NextConfig from "@/next-i18next.config";
 
 // Display-only i18n keys for the four fixed layer groups (lib/categoryGroups.ts
@@ -62,6 +63,27 @@ function mapPinToMapGLPlace(
     route_slug: pin.routeSlug ?? null,
     placeSlug: pin.placeSlug,
     allCategories: pin.allCategories,
+  };
+}
+
+/**
+ * Resolve each pin's locale-aware short description where the locale is
+ * already known (getStaticProps runs once per locale), and drop the raw
+ * translation inputs so /map's page data never ships both languages.
+ * Predicate is the shared getLocalized() helper — same one as /places and
+ * the hreflang gate, never re-implemented.
+ */
+function localizeMapPin(pin: MapPin, locale: string): MapPin {
+  return {
+    slug: pin.slug,
+    name: pin.name,
+    shortDescription: getLocalized(pin, locale, "short_description"),
+    latitude: pin.latitude,
+    longitude: pin.longitude,
+    category: pin.category,
+    allCategories: pin.allCategories,
+    placeSlug: pin.placeSlug,
+    routeSlug: pin.routeSlug,
   };
 }
 
@@ -291,11 +313,12 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
 export const getStaticProps: GetStaticProps<MapPageProps> = async ({
   locale,
 }) => {
-  const [pins, routes, translations] = await Promise.all([
+  const [rawPins, routes, translations] = await Promise.all([
     getMapPins(),
     getPublishedRoutes(),
     serverSideTranslations(locale ?? "fr", ["common"], nextI18NextConfig),
   ]);
+  const pins = rawPins.map((pin) => localizeMapPin(pin, locale ?? "fr"));
   return { props: { pins, routes, ...translations }, revalidate: 60 };
 };
 
