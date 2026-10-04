@@ -12,11 +12,11 @@ If no task is given, the queue dispatches one for you — see Step 1.
 
 ## Step 1 — Orient (lead session)
 
-Read `brain/current-state.md`, `brain/task-queue.md`, `brain/decisions.md`.
+Read `brain/current-state.md`, `brain/decisions.md`.
 Confirm the task is unblocked and not a `user-action` item. Do not scan the whole repo.
 
-**No task argument → dispatch from the queue.** The `tasks` table is the canonical
-work queue (`brain/task-queue.md` is a generated display-only mirror). Via the
+**No task argument → dispatch from the queue.** The `tasks` table is the sole
+work queue; CCC's tasks view is the human-readable window onto it. Via the
 Supabase MCP, claim the highest-priority queued task:
 
 ```sql
@@ -82,8 +82,8 @@ values ('<task-id>', 'loop', '<one-line gate summary>', '<commit-hash>');
 ## Step 6 — After approval (human-triggered)
 
 Once the human approves, run the merge / publish / deploy, then update
-`brain/current-state.md` and trigger CCC → brain sync. Brain maintenance is the
-architect/lead's job — not the executor's.
+`brain/current-state.md`. Brain maintenance is the architect/lead's job — not
+the executor's.
 
 For a queue-dispatched task, close it out on the queue:
 
@@ -129,6 +129,6 @@ in the run that filed them.
   session. Use `/next-task` for routing a single step when a full loop is overkill.
 - The gate is enforced structurally (agent tool allowlists + the prod-write guard hook),
   not by this prompt alone. This command describes the flow; the allowlists hold the line.
-- The `tasks` table is the canonical work queue; `brain/task-queue.md` is a generated
-  display-only mirror (`pages/api/brain/sync-tasks.ts`). Dispatch, status, and the gate
-  summary live in `tasks` / `outputs`, never in the mirror.
+- The `tasks` table is the sole work queue; CCC's tasks view is the human-readable
+  window onto it — there is no separate markdown copy to keep in sync. Dispatch,
+  status, and the gate summary live in `tasks` / `outputs`.

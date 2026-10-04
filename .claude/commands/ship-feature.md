@@ -17,7 +17,7 @@ If errors: stop, list them, fix them before proceeding.
 **Step 3 — Sanity checks**
 - Confirm no placeholder strings are visible in user-facing pages ("Future…", "Coming soon…", "TODO", "In future iterations…")
 - Confirm no secrets or tokens appear in any staged files
-- Confirm `brain/current-state.md` and `brain/task-queue.md` exist and are not empty
+- Confirm `brain/current-state.md` exists and is not empty
 
 **Step 4 — Stage and review**
 Run `git status` and `git diff --staged`.

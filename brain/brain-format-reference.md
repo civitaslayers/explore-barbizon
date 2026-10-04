@@ -37,13 +37,12 @@ Read this before editing any brain file. Keep formats consistent — AI sessions
 
 ---
 
-## brain/task-queue.md
+## The tasks table (retired brain/task-queue.md)
 
-> ⚠️ **Generated file — do not edit manually.**  
-> Use the **→ brain** button in CCC, or `POST /api/brain/sync-tasks`, to regenerate from live Supabase task state.  
-> Manual edits will be overwritten on next sync.
-
-Format is auto-generated. Structure: Now / Next / Later / Blocked sections with task lines.
+The `tasks` table (Supabase) is the sole work queue. CCC's tasks page is the
+human-readable window onto it — there is no generated markdown mirror to edit
+or regenerate. `brain/task-queue.md` and its sync endpoint were retired
+2026-08-18 (see `brain/decisions.md`).
 
 ---
 
@@ -77,5 +76,5 @@ Do not edit. Will be removed in a future cleanup.
 - Use plain markdown, no HTML
 - Dates always in `YYYY-MM-DD` format
 - Keep files focused — no strategy documents live here (strategy → `MAIN_BRAIN.md`)
-- After any significant work block: update `current-state.md` first, then trigger CCC → brain sync for `task-queue.md`
+- After any significant work block: update `current-state.md`, and update task status in the `tasks` table (via CCC or the Supabase MCP)
 - Commit brain updates with message: `docs: update brain after [brief description]`

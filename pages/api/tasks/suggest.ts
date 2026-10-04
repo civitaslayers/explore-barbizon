@@ -21,7 +21,7 @@ export type TaskSuggestion = {
  * POST /api/tasks/suggest
  *
  * Audits the current project state and returns 3–7 task suggestions.
- * Context: all current Supabase tasks + brain/current-state.md + brain/task-queue.md
+ * Context: all current Supabase tasks + brain/current-state.md
  * Claude is asked to return ONLY a JSON object — parsed and validated here.
  *
  * Response: { suggestions: TaskSuggestion[] }
@@ -44,14 +44,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const brainDir = path.join(process.cwd(), "brain");
   const currentState = readFileSafe(path.join(brainDir, "current-state.md"));
-  const taskQueue = readFileSafe(path.join(brainDir, "task-queue.md"));
 
   const existingTitles = tasks
     .filter((t) => t.status !== "done")
     .map((t) => `- ${t.title} [${t.assigned_to ?? "unassigned"}, ${t.status}]`)
     .join("\n");
 
-  const prompt = buildPrompt(currentState, taskQueue, existingTitles);
+  const liveTaskQueue = buildLiveTaskQueueSummary(tasks);
+
+  const prompt = buildPrompt(currentState, liveTaskQueue, existingTitles);
 
   let raw: string;
   try {
@@ -75,14 +76,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 // Prompt
 // ---------------------------------------------------------------------------
 
-function buildPrompt(currentState: string, taskQueue: string, existingTitles: string): string {
+function buildPrompt(currentState: string, liveTaskQueue: string, existingTitles: string): string {
   return `You are a project management assistant for ExploreBarbizon — a Next.js/Supabase cultural discovery web app.
 
 ## Current project state
 ${currentState}
 
-## Current task queue (brain snapshot)
-${taskQueue}
+## Current task queue (live from tasks table)
+${liveTaskQueue}
 
 ## All active tasks in the system (to avoid duplicates)
 ${existingTitles || "(none)"}
@@ -127,6 +128,38 @@ Return ONLY a JSON object — no explanation, no markdown, no code fences. Start
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+/**
+ * Renders the live `tasks` array (already loaded via getTasks()) as a
+ * markdown summary grouped by status, for inclusion in the suggestion
+ * prompt. Replaces the old brain/task-queue.md file read — the tasks table
+ * is the sole queue, so suggestions must reflect live state, not a
+ * generated (and now-deleted) mirror.
+ */
+function buildLiveTaskQueueSummary(tasks: Task[]): string {
+  const STATUS_ORDER: Task["status"][] = ["in_progress", "ready", "review", "backlog", "done"];
+  const byStatus = new Map<string, Task[]>();
+  for (const t of tasks) {
+    const list = byStatus.get(t.status) ?? [];
+    list.push(t);
+    byStatus.set(t.status, list);
+  }
+
+  const sections = STATUS_ORDER.filter((s) => byStatus.has(s)).map((status) => {
+    const list = (byStatus.get(status) ?? []).sort(
+      (a, b) => (a.priority ?? 3) - (b.priority ?? 3)
+    );
+    const lines = list.map(
+      (t) =>
+        `- [p${t.priority ?? 3}] ${t.title} (${t.assigned_to ?? "unassigned"}${
+          t.execution_status ? `, ${t.execution_status}` : ""
+        })`
+    );
+    return `### ${status}\n${lines.join("\n")}`;
+  });
+
+  return sections.join("\n\n") || "(no tasks)";
+}
 
 function readFileSafe(filePath: string): string {
   try {

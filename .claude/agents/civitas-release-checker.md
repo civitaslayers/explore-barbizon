@@ -15,7 +15,7 @@ Read all of these before running any checks:
 - `MAIN_BRAIN.md` — design intent and product vision
 - `brain/current-state.md` — what should be done vs. what is claimed done
 - `brain/decisions.md` — decisions that must be reflected in code
-- `brain/task-queue.md` — confirm Now tasks are done, Blocked tasks are not deployed
+- the `tasks` table (via CCC or the Supabase MCP) — confirm ready/in-progress tasks are done, blocked tasks are not deployed
 - `docs/schema-reference.md` — field names and constraints that code must honour
 - `docs/design-direction.md` — visual and editorial rules
 
@@ -37,7 +37,7 @@ Run through all of the following checks and report a pass/fail on each:
 
 ### 4. Brain file freshness
 - Is `brain/current-state.md` dated today or recently?
-- Does `brain/task-queue.md` reflect the actual code state?
+- Does the `tasks` table reflect the actual code state?
 - Are completed items actually done in code?
 
 ### 5. Design direction

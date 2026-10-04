@@ -10,7 +10,6 @@ Identify the highest-priority unblocked task and route it to the correct agent.
 Read only these files:
 
 - brain/current-state.md
-- brain/task-queue.md
 - brain/decisions.md
 
 Do not scan the entire repository.
@@ -19,13 +18,13 @@ Do not scan the entire repository.
 
 ## Step 2 — Select the highest priority task
 
-From `task-queue.md`:
+From the `tasks` table (via CCC or the Supabase MCP):
 
-1. Look in **Now**
+1. Look for `status = 'ready'` (or `execution_status = 'queued'`)
 2. Skip tasks that require **user-action**
-3. Skip tasks in **Blocked**
+3. Skip tasks with `status = 'blocked'`
 
-Select the first remaining task.
+Select the first remaining task, ordered by priority.
 
 ---
 

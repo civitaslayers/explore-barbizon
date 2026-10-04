@@ -1,17 +1,15 @@
 ---
-description: Update brain/current-state.md and brain/task-queue.md to reflect work just completed.
+description: Update brain/current-state.md and the tasks table (via CCC) to reflect work just completed.
 ---
 
 Work just completed: $ARGUMENTS
 
-Update the project brain files to reflect the current state of the repository.
+Update the project brain to reflect the current state of the repository. The
+`tasks` table (Supabase) is the sole work queue — CCC's tasks page is the
+human-readable window onto it. "Update the queue" means editing tasks in CCC
+(or directly in the `tasks` table), not regenerating a file.
 
 Do the following in order:
-
-0. **Sync task state from CCC**:
-   Go to the CCC tasks page and click the **→ brain** button.
-   This regenerates `brain/task-queue.md` from live Supabase task state.
-   Review the output and adjust manually if needed before proceeding.
 
 1. **Update `brain/current-state.md`**:
    - Change the **Status** line to reflect what is now true
@@ -20,11 +18,10 @@ Do the following in order:
    - Update **Next Tasks** — reorder based on what is now most important
    - Update **Next Session Starting Point** to reflect where a new session should begin
 
-2. **Update `brain/task-queue.md`**:
-   - Mark completed tasks as `[x]`
-   - Move newly unblocked tasks from Blocked → Now or Next as appropriate
+2. **Update the `tasks` table** (via CCC or Supabase MCP):
+   - Mark completed tasks `done` (both `status` and `execution_status`)
+   - Move newly unblocked tasks to `ready` as appropriate
    - Add any new tasks discovered during implementation
-   - Update the `Last updated` date
 
 3. If an architectural or product decision was made during the work, add it to `brain/decisions.md` (newest at top) using the format:
    ```
@@ -36,7 +33,7 @@ Do the following in order:
 
 4. If `docs/execution-queue.md` has items that are now complete, mark them `[x]`.
 
-5. Report a summary of all changes made to brain files.
+5. Report a summary of all changes made to brain files and the tasks table.
 
 Then commit all brain file updates with a message like:
 `docs: update brain after [brief description of work]`

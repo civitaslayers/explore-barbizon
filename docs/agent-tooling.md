@@ -12,7 +12,7 @@ This document is the authoritative reference for approved MCP tools and external
 
 External tooling supports the repo brain. It never replaces it.
 
-`brain/current-state.md`, `brain/task-queue.md`, and `brain/decisions.md` remain the single source of truth for project state. MCPs provide real-time docs, research capability, and task decomposition help — not authoritative project memory.
+`brain/current-state.md` and `brain/decisions.md` remain the single source of truth for project narrative; the `tasks` table (Supabase, viewed via CCC) is the single source of truth for work queue state. MCPs provide real-time docs, research capability, and task decomposition help — not authoritative project memory.
 
 ---
 
@@ -130,7 +130,7 @@ export TAVILY_API_KEY=your_key_here
 ## How this interacts with existing workflow
 
 ```
-brain/task-queue.md      → source of truth for what to work on
+tasks table (via CCC)    → source of truth for what to work on
 /next-task               → routes to the right task and agent
 Context7                 → use when writing library code
 Tavily                   → use for research
