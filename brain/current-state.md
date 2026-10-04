@@ -3,20 +3,30 @@
 Last updated: 2026-10-04
 
 ## Status
-French content migration 60% complete as of the last confirmed count (64 of 107 published
-locations) — a parallel French migration batch is in progress on the `locations` table as of
-this session, so that count is not final. Analytics schema live, tracking code not yet written.
-CCC dashboard blind reads FIXED and merged (task 82295116, PR #3, merge 790f1a2) — reads now run
-server-side via supabaseAdmin; the dashboard shows the real queue. PR #4
-(fix/retire-task-queue-mirror, task 0f9858fc) merged to main (292f313 merge commit) and deployed —
-brain/task-queue.md and pages/api/brain/sync-tasks.ts removed; the Supabase `tasks` table is now
-the sole work queue, with CCC's `/command-center/tasks` as the human-readable window onto it.
+Cookieless page-view tracking (task 66deb8a9) and per-record hreflang gating (task eb5f1e3e)
+merged to main (`a11360d`, fast-forward from `feat/tracker-hreflang`) and deployed to production.
+`page_views` is now live (verified: a real preview visit inserted a row with correct
+path/locale/device, no raw IP/UA logged). Hreflang/sitemap alternates are gated on
+`translations.en._meta.status = 'published'` plus a non-empty `name`/`short_description` (the same
+rule `getLocalized()` already used to render translations) — post-merge production seo-audit
+(2026-10-04): 93 of 107 published locations emit real fr/en/x-default alternates, 14 correctly
+gated off (no alternates, `noindex,follow`), 0 hreflang-class failures. Self-correcting in real
+time: a location missing only `name`/`short_description` (`maison-charles-jacque`) was still
+gated when checked pre-merge, then started passing post-merge once claude.ai's parallel migration
+batch filled that field in — no code change needed. `scripts/seo-audit.mjs` updated in the same
+commit to expect the per-record gate. CCC dashboard blind reads FIXED and
+merged (task 82295116, PR #3, merge 790f1a2) — reads now run server-side via supabaseAdmin; the
+dashboard shows the real queue. PR #4 (fix/retire-task-queue-mirror, task 0f9858fc) merged to main
+(292f313 merge commit) and deployed — brain/task-queue.md and pages/api/brain/sync-tasks.ts
+removed; the Supabase `tasks` table is now the sole work queue, with CCC's `/command-center/tasks`
+as the human-readable window onto it.
 
 ---
 2026-10-04 audit (claude.ai, live DB): no deploys or DB writes between 2026-08-18 and 2026-10-04. page_views has 0 rows: the schema shipped 2026-08-13 but the client tracker (task 66deb8a9) never shipped, so no first-party analytics exist for that period. Content at audit time: 107 published, 64 French-native with English in translations->en, 52 with media, 16 with opening hours, 0 video. Open: the 1A mobile board "the day is the product" conflict still has no brain/decisions.md entry.
 ---
 
 ## Last Completed
+- [ops+seo] Tracker + hreflang gating shipped (tasks 66deb8a9, eb5f1e3e; branch feat/tracker-hreflang; merge a11360d, fast-forward to main; deployed 2026-10-04). `pages/api/track.ts` + `components/PageViewTracker.tsx` write to the existing `page_views` schema via `record_page_view()` RPC (service-role client, bot-filtered, sha256 visitor-day hash, no raw IP/UA stored); mounted in `_app.tsx`, no-ops outside `NODE_ENV=production` (fires on Vercel Preview too). `lib/getLocalized.ts` gained `hasPublishedTranslation()`, consumed by both `SeoHead` (new `hasEnglishVersion` prop, default `true` so the ~9 i18n-catalogue pages are unaffected) and `pages/sitemap.xml.tsx` — one predicate, no duplication. Ran through the full loop (architect → implementer → release-checker SHIP) plus two rounds of live preview verification (before and after claude.ai's 93-row translation-status stamp); release-checker, unit tests (6 new `hasPublishedTranslation` cases), and a full local `seo-audit.mjs` run against production data all green. Stories/tours deliberately out of scope (same `translations` contract, queued as follow-ups).
 - [ops] Task queue mirror retired (task 0f9858fc, PR #4, merge 292f313) — brain/task-queue.md and pages/api/brain/sync-tasks.ts deleted; the Supabase `tasks` table is the sole canonical queue, CCC's tasks view is the read-only window onto it. Closed and deployed 2026-10-04.
 - [ops] CCC dashboard blind reads fixed (task 82295116, PR #3, merge 790f1a2) — root cause was lib/commandCenter.ts reading via the anon client against deny-all RLS. New server-only lib/commandCenter.server.ts (getTasksAdmin/getOverviewStatsAdmin via supabaseAdmin, explicit columns); index.tsx + tasks/index.tsx reads moved into getServerSideProps; sync-tasks.ts uses the admin read. Service-role key verified absent from the client bundle. Ran through /run-loop: lead-planned → implementer → release-checker SHIP after 1 HOLD (SSR read failures now surface a banner, not a silent empty list). Follow-ups queued: 08309b0b (suggest.ts same-family blind read), 729ede25 (loop retrospective, .claude/**-gated).
 - [content] French migration, 64 of 107 locations — French in base columns, English into translations->'en'
@@ -31,13 +41,13 @@ the sole work queue, with CCC's `/command-center/tasks` as the human-readable wi
 
 ## Next Tasks
 1. Tighten getStaticProps select on /places — 143 kB, over threshold, grows with each translation batch
-2. Per-record hreflang gating in SeoHead and sitemap
-3. Cookieless page-view tracking implementation
-4. Remaining 43 French migration records
-5. suggest.ts anon blind-read follow-up (task 08309b0b) — swap getTasks() for getTasksAdmin(); small
+2. Remaining French migration records (93 of 107 now have published English; ~14 still need translation + status stamp)
+3. suggest.ts anon blind-read follow-up (task 08309b0b) — swap getTasks() for getTasksAdmin(); small
+4. Stories hreflang gating — same `translations`/`_meta.status` contract as locations, currently unconditional; queued follow-up from the eb5f1e3e branch
+5. page_views retention/purge job (25-month cap per 2026-08-13 decision) — outstanding since the schema shipped
 
 ## Next Session Starting Point
-CCC blind reads fixed and merged (PR #3) — the dashboard now reflects the real queue (the `tasks` table is the sole source; there is no mirror to regenerate). Next priority: tighten getStaticProps on /places, then per-record hreflang gating.
+Tracker + hreflang gating are live in production. Next priority: tighten getStaticProps on /places, then continue the French migration (translations need both the content AND the `_meta.status=published` stamp to actually surface via hreflang/getLocalized).
 
 ## Operational lessons (salvaged from the retired task-queue.md)
 
