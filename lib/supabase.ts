@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./supabase.types";
 import type { Place, PlaceCategory } from "@/lib/types";
-import { hasPublishedTranslation, type LocalizableRow } from "@/lib/getLocalized";
+import { hasPublishedTranslation, type LocalizableRow, type TranslationEntry } from "@/lib/getLocalized";
 
 // ---------------------------------------------------------------------------
 // Client
@@ -51,21 +51,6 @@ export type DbLocation = {
   media?: { url: string; display_order: number }[] | null;
 };
 
-/** Shape returned by getPublishedLocations (explicit public fields + joins). */
-type PublishedLocationRow = {
-  slug: string;
-  name: string;
-  short_description: string | null;
-  full_description: string | null;
-  narrative: string | null;
-  latitude: number;
-  longitude: number;
-  address: string | null;
-  route_slug?: string | null;
-  categories: { name: string } | null;
-  media?: { url: string; display_order: number }[] | null;
-};
-
 /** Shape returned by getLocationBySlug. */
 type LocationRow = DbLocation & {
   categories: { name: string } | null;
@@ -76,7 +61,7 @@ type LocationRow = DbLocation & {
 // Maps DB snake_case fields to the app-level Place type.
 // ---------------------------------------------------------------------------
 
-function toPlace(row: PublishedLocationRow | LocationRow): Place {
+function toPlace(row: LocationRow): Place {
   return {
     slug: row.slug,
     name: row.name,
@@ -93,6 +78,63 @@ function toPlace(row: PublishedLocationRow | LocationRow): Place {
     latitude: row.latitude,
     longitude: row.longitude,
     route_slug: row.route_slug ?? null,
+  };
+}
+
+/**
+ * Shape returned by getPublishedLocations — trimmed to exactly what
+ * pages/places/index.tsx renders, plus the two translations->en JSON paths
+ * needed for the EN short_description fallback (see brain/decisions.md,
+ * 2026-10-04 _meta stamp decision; lib/getLocalized.ts for the read-path
+ * contract). Deliberately NOT part of toPlace()'s row union — this is the
+ * only call site, so its row shape stays scoped to this one query.
+ */
+type PlacesListRow = {
+  slug: string;
+  name: string;
+  short_description: string | null;
+  latitude: number;
+  longitude: number;
+  en_short_description: string | null;
+  en_status: string | null;
+  categories: { name: string } | null;
+  media?: { url: string; display_order: number }[] | null;
+};
+
+/**
+ * Adapter: PlacesListRow → Place, for the /places list page only. Populates
+ * `short_description` + `translations` (not read by toPlace()) so the page
+ * can call lib/getLocalized.ts's getLocalized() instead of unconditionally
+ * rendering the French base column on /en/places.
+ */
+function toLocalizedPlace(row: PlacesListRow): Place {
+  return {
+    slug: row.slug,
+    name: row.name,
+    // address no longer fetched — pages/places/index.tsx never renders
+    // place.location.
+    location: "Barbizon",
+    shortDescription: row.short_description?.trim() ?? "",
+    short_description: row.short_description?.trim() ?? "",
+    description: "",
+    history: null,
+    heroImage: (row.media ?? []).sort((a, b) => a.display_order - b.display_order)[0]?.url ?? null,
+    category: (row.categories?.name ?? "Studio") as PlaceCategory,
+    latitude: row.latitude,
+    longitude: row.longitude,
+    route_slug: null,
+    // getStaticProps serializes this to JSON — undefined is not a valid
+    // JSON value, so missing values use null here, not undefined. (Cast
+    // past TranslationEntry's `status?: string` — that type's `undefined`
+    // is for the in-memory read path in lib/getLocalized.ts, which is
+    // untouched here; null is equally "not published" to its `=== "published"`
+    // check.)
+    translations: {
+      en: {
+        short_description: row.en_short_description ?? null,
+        _meta: { status: row.en_status ?? null },
+      },
+    } as unknown as Record<string, TranslationEntry>,
   };
 }
 
@@ -158,7 +200,7 @@ export async function getPublishedLocations(): Promise<Place[]> {
   const { data, error } = await supabase
     .from("locations")
     .select(
-      "id, name, slug, short_description, full_description, narrative, latitude, longitude, address, phone, website, opening_hours, route_slug, is_premium, is_featured, curation_order, categories!inner(name, layer), media(url, display_order)"
+      "slug, name, short_description, latitude, longitude, en_short_description:translations->en->>short_description, en_status:translations->en->_meta->>status, categories!inner(name, layer), media(url, display_order)"
     )
     .eq("is_published", true)
     .neq("categories.layer", "Practical")
@@ -166,7 +208,7 @@ export async function getPublishedLocations(): Promise<Place[]> {
 
   if (error) throw new Error(error.message);
   if (!data || data.length === 0) throw new Error("No published locations");
-  return (data as PublishedLocationRow[]).map(toPlace);
+  return (data as unknown as PlacesListRow[]).map(toLocalizedPlace);
 }
 
 export type MapPin = {

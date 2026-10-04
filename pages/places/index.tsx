@@ -8,6 +8,7 @@ import ImagePlaceholder from "@/components/ImagePlaceholder";
 import { SeoHead } from "@/components/SeoHead";
 import { getPublishedLocations, supabase } from "@/lib/supabase";
 import type { Place } from "@/lib/types";
+import { getLocalized, type TranslationEntry } from "@/lib/getLocalized";
 import { staticMapUrl, hasMapbox } from "@/lib/mapbox";
 import nextI18NextConfig from "@/next-i18next.config";
 
@@ -17,6 +18,8 @@ type CuratedRow = {
   short_description: string | null;
   is_premium: boolean | null;
   curation_order: number | null;
+  en_short_description: string | null;
+  en_status: string | null;
   categories: { name: string; layer: string; slug: string } | null;
   media: { url: string; display_order: number | null }[] | null;
 };
@@ -25,8 +28,10 @@ type CuratedPlace = {
   slug: string;
   name: string;
   shortDescription: string;
+  short_description: string;
   heroImage: string | null;
   isPremium: boolean;
+  translations?: Record<string, TranslationEntry> | null;
 };
 
 type PlacesIndexProps = {
@@ -78,8 +83,19 @@ function rowToCurated(row: CuratedRow): CuratedPlace {
     slug: row.slug,
     name: row.name,
     shortDescription: row.short_description?.trim() ?? "",
+    short_description: row.short_description?.trim() ?? "",
     heroImage: urls[0]?.url ?? null,
     isPremium: row.is_premium === true,
+    // getStaticProps serializes this to JSON — undefined is not a valid
+    // JSON value, so missing values use null here, not undefined. (Cast
+    // past TranslationEntry's `status?: string` — null is equally "not
+    // published" to getLocalized's `=== "published"` check.)
+    translations: {
+      en: {
+        short_description: row.en_short_description ?? null,
+        _meta: { status: row.en_status ?? null },
+      },
+    } as unknown as Record<string, TranslationEntry>,
   };
 }
 
@@ -103,7 +119,7 @@ async function getFeaturedEatStayCurated(): Promise<{
   const { data, error } = await supabase
     .from("locations")
     .select(
-      "slug, name, short_description, is_premium, curation_order, categories!inner(name, layer, slug), media(url, display_order)"
+      "slug, name, short_description, is_premium, curation_order, en_short_description:translations->en->>short_description, en_status:translations->en->_meta->>status, categories!inner(name, layer, slug), media(url, display_order)"
     )
     .eq("is_published", true)
     .eq("is_featured", true)
@@ -140,6 +156,8 @@ function CuratedSection({
   eyebrow: string;
   items: CuratedPlace[];
 }) {
+  const router = useRouter();
+
   if (items.length === 0) return null;
 
   return (
@@ -178,9 +196,9 @@ function CuratedSection({
                   />
                 ) : null}
               </div>
-              {place.shortDescription ? (
+              {getLocalized(place, router.locale ?? "fr", "short_description") ? (
                 <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-ink/65">
-                  {place.shortDescription}
+                  {getLocalized(place, router.locale ?? "fr", "short_description")}
                 </p>
               ) : null}
             </div>
@@ -287,9 +305,9 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({
                 <h3 className="font-serif text-lg italic leading-tight text-cream">
                   {place.name}
                 </h3>
-                {place.shortDescription && (
+                {getLocalized(place, locale, "short_description") && (
                   <p className="mt-1.5 line-clamp-2 text-[11px] leading-relaxed text-cream/70">
-                    {place.shortDescription}
+                    {getLocalized(place, locale, "short_description")}
                   </p>
                 )}
               </div>
