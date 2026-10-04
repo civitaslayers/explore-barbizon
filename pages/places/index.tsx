@@ -6,6 +6,7 @@ import { serverSideTranslations } from "next-i18next/pages/serverSideTranslation
 import { useState, useMemo } from "react";
 import ImagePlaceholder from "@/components/ImagePlaceholder";
 import { SeoHead } from "@/components/SeoHead";
+import { heroImage800w } from "@/lib/media";
 import { getPublishedLocations, supabase } from "@/lib/supabase";
 import type { Place } from "@/lib/types";
 import { getLocalized, type TranslationEntry } from "@/lib/getLocalized";
@@ -176,7 +177,9 @@ function CuratedSection({
             <div className="relative aspect-[16/10]">
               {place.heroImage ? (
                 <img
-                  src={place.heroImage}
+                  src={heroImage800w(place.heroImage)}
+                  srcSet={`${heroImage800w(place.heroImage)} 800w, ${place.heroImage} 1600w`}
+                  sizes="(min-width: 768px) 20rem, 72vw"
                   alt=""
                   className="h-full w-full object-cover"
                   loading="lazy"

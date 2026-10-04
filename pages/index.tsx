@@ -5,6 +5,7 @@ import type { SSRConfig } from "next-i18next/pages";
 import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
 import ImagePlaceholder from "@/components/ImagePlaceholder";
 import { SeoHead } from "@/components/SeoHead";
+import { heroImage800w } from "@/lib/media";
 import { getLocationCards, type LocationCard } from "@/lib/supabase";
 import nextI18NextConfig from "@/next-i18next.config";
 
@@ -222,7 +223,7 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
                 {place.image ? (
                   <div
                     className="absolute inset-0 bg-ink/40 bg-cover bg-center transition-transform duration-700 ease-soft group-hover:scale-105"
-                    style={{ backgroundImage: `url(${place.image})` }}
+                    style={{ backgroundImage: `url(${heroImage800w(place.image)})` }}
                   />
                 ) : (
                   <ImagePlaceholder
