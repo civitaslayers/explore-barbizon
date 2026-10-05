@@ -329,7 +329,7 @@ Rules:
   perceptible as warmth. Never on the map.
 - **Page transitions:** cross-fade + 8px rise via framer-motion
   `AnimatePresence` in `pages/_app.tsx` (protected file — any task touching it
-  must name it explicitly per .cursor/rules). Card → place page should feel
+  must name it explicitly in the task scope). Card → place page should feel
   continuous, not like a reload.
 - **`prefers-reduced-motion`: reduce** disables reveals, parallax, idle drift,
   and camera choreography globally. Non-negotiable quality floor.

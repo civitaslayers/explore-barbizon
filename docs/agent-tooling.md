@@ -1,6 +1,6 @@
 # Agent Tooling — Civitas Layers / ExploreBarbizon
 
-Last updated: 2026-03-21
+Last updated: 2026-10-05
 
 This document is the authoritative reference for approved MCP tools and external AI tooling in this project.
 
@@ -22,7 +22,9 @@ External tooling supports the repo brain. It never replaces it.
 
 **Purpose:** Injects version-accurate documentation for Next.js, Supabase, Mapbox, React, and other libraries directly into AI responses. Prevents hallucinated or deprecated API usage.
 
-**Status:** Active — configured in `.cursor/mcp.json` and `.claude/settings.json`
+**Status:** Active — the server is registered project-scoped in `.mcp.json`
+(repo root); `.claude/settings.json` sets `enableAllProjectMcpServers: true`
+so Claude Code picks it up automatically.
 
 **When to use:**
 - Writing any code that calls Next.js, Supabase JS, or Mapbox GL APIs
@@ -114,14 +116,14 @@ export TAVILY_API_KEY=your_key_here
 
 **Status:** Deferred.
 
-**Reason:** The repo is currently well-understood via `docs/repo-map.md`, `docs/ai-operating-system.md`, and the branch structure. Introduce only if token cost or context-recall pain becomes a real problem at scale.
+**Reason:** The repo is currently well-understood via `docs/repo-map.md` and the branch structure. Introduce only if token cost or context-recall pain becomes a real problem at scale.
 
 ---
 
 ## What is NOT supported
 
 - `claude plugin install` — this command does not exist in Claude Code CLI
-- Superpowers plugin — no verified official Claude Code CLI implementation; project already has equivalent structure via CLAUDE.md, `.claude/commands/`, and `.cursor/rules/`
+- Superpowers plugin — no verified official Claude Code CLI implementation; project already has equivalent structure via CLAUDE.md and `.claude/commands/`
 - Codebase Memory MCP — deferred (see above)
 - gstack / deer-flow / CrewAI — not actionable at current stage
 

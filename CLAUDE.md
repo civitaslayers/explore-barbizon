@@ -8,13 +8,13 @@ Claude is the **primary thinking partner** — responsible for strategy, archite
 
 Implementation is executed through the **agent loop** (`/run-loop`): civitas-implementer for code and civitas-content-ops for dev-branch SQL. There is no separate hand-off tool.
 
-GPT and Grok are available as supplementary reviewers and researchers.
+Claude Design is adopted for design work but not yet wired into any workflow — do not invent one for it.
 
 ---
 
 # Autonomous Loop (Claude Code)
 
-For tasks run in Claude Code, implementation is no longer hand-stepped through Cursor.
+For tasks run in Claude Code, implementation runs autonomously rather than being hand-stepped.
 The lead session runs an autonomous loop via `/run-loop`:
 
 **civitas-architect** (plan) → **civitas-implementer** (code) or **civitas-content-ops**
@@ -120,6 +120,7 @@ Do not change stack architecture without explicit instruction.
 | Map | Mapbox GL JS |
 | Styling | Tailwind CSS |
 | Editorial layer | Next.js (Stories, About — all surfaces on Vercel) |
+| Language | TypeScript throughout, strict mode, no `any` unless unavoidable |
 
 ---
 
@@ -135,7 +136,7 @@ Claude handles:
 - content narrative writing
 - brain file updates at end of session
 
-Claude may implement directly (without routing through Cursor) for:
+Claude may implement directly (without routing through the agent loop) for:
 
 - XS tasks (1–2 files, bug fixes, SQL, content)
 - Tasks where the change is purely additive and low-risk
@@ -196,6 +197,10 @@ After completing work:
 
 Use the `ship-feature` command after a completed feature.  
 Use the `update-brain` command after any significant state change.
+
+Note: the `decisions` and `memory` Supabase tables are retired (2026-08-16).
+`brain/decisions.md` is the single decision log. `tasks` and `outputs` remain
+canonical in Supabase.
 
 ---
 

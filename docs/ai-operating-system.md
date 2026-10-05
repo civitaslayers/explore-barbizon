@@ -1,6 +1,6 @@
 # Civitas Layers — AI Operating System
 
-Last updated: 2026-04-06
+Last updated: 2026-10-05
 
 This repository uses a structured AI-assisted development workflow.
 The goal is to run AI tools as a coordinated team, each doing only what it does best.
@@ -60,45 +60,14 @@ structural — enforced by each agent's `tools:` allowlist and `prod-write-guard
 
 ---
 
-## Stitch — Design
+## Claude Design
 
-Responsibilities:
-- UI mockups and design exploration
-- visual direction proposals
-
-All Stitch output must be reviewed by Claude against the Tailwind token system
-before being briefed to the agent loop. Mismatches (off-token colours, spacing) are caught here.
-
----
-
-## Perplexity — Sourced Research
-
-Primary tool for historical and cultural research requiring cited sources.
-
-Responsibilities:
-- Barbizon history, artists, locations, archival context
-- heritage listings and institutional records
-- fact-checking content before it enters Supabase
-
-Stronger than GPT/Grok for traceable citations.
-Use when the factual integrity policy requires a verifiable source.
-
----
-
-## GPT — Strategy & Structured Thinking
-
-Responsibilities:
-- task decomposition and planning
-- risk analysis
-- reviewing Claude outputs from a second perspective
-
----
-
-## Grok — Live Web Search
-
-Responsibilities:
-- current web search (news, recent publications, updated records)
-- quick lookups that don't require citation depth
+Claude (claude.ai) is lead for strategy, architecture, SQL, and content.
+Claude Code's agent loop (`/run-loop`) is the sole implementer — there is no
+other tool in the implementation path. Claude Design is adopted for design
+work but **not yet wired into any workflow** — use it directly and ad hoc;
+do not invent a formal operating-loop step for it until a repeatable pattern
+emerges from actual use.
 
 ---
 
@@ -123,7 +92,6 @@ For all historical and cultural content, sources must be evaluated in order of a
 - grappilles.fr — valuable local archive built by a knowledgeable researcher,
   but represents one person's work and must be cross-checked against Tier 1 sources
   before any claim is published
-- GPT, Grok, Perplexity outputs — useful for orientation, never for final facts
 - Wikipedia — useful for leads, never as a primary citation
 
 ## Policy
@@ -150,11 +118,12 @@ For all historical and cultural content, sources must be evaluated in order of a
 claude.ai plan → Claude Code agent loop (architect → implementer → release-checker) → human gate
 
 ## Content tasks
-claude.ai → research direction → Perplexity/Grok research → claude.ai review
+claude.ai → research direction → research (direct or Tavily) → claude.ai review
 → fact-check against Tier 1 sources → SQL generation → Claude executes via Supabase MCP
 
 ## Design tasks
-Stitch mockup → claude.ai design review against token system → agent-loop implementation
+No defined operating-loop step yet. Claude Design is adopted but not wired into
+a workflow — do not invent one until a repeatable pattern emerges from use.
 
 ---
 
@@ -193,6 +162,48 @@ These checks are mandatory before any commit.
 
 Use `/ship-feature` in Claude Code for code validation and commits.
 Content validation is flagged by Claude (claude.ai) before SQL is generated.
+
+---
+
+# CCC Task-Automation HTTP Contract
+
+The Command Center (`/command-center/tasks`) exposes a small HTTP contract for
+dispatching and recording task execution programmatically, independent of the
+UI. Verified against `pages/api/tasks/[id]/dispatch.ts`,
+`pages/api/tasks/[id]/run.ts`, `pages/api/tasks/[id]/outputs.ts`, and
+`scripts/run-task.js`.
+
+- **`POST /api/tasks/[id]/dispatch`** — marks the task dispatched
+  (`execution_status = "in_progress"`) and returns a brief (`brief` prose +
+  `brief_json` structured payload) plus a `callback_url` pointing back at the
+  `outputs` endpoint below. No `NODE_ENV` guard — callable in both
+  development and production (contrast with `/run` below).
+- **`POST /api/tasks/[id]/run`** — **development only**: returns 403 outside
+  `NODE_ENV=development`. Only runs tasks whose `assigned_to` is `claude`.
+  Spawns `claude --print`, piping the brief via stdin, captures stdout as the
+  response, saves it as an `outputs` row, and syncs `task.latest_output` +
+  `execution_status = "review"`.
+- **`POST /api/tasks/[id]/outputs`** — ingestion callback. Body
+  `{ agent, prompt?, response?, version? }`; saves an `outputs` row and, if
+  `response` is present, syncs it to `task.latest_output`. This is the
+  `callback_url` target returned by `dispatch`.
+- **`npm run task <id>`** — CLI equivalent of the above: calls `dispatch`,
+  pipes the returned brief into the `claude` CLI directly (not through
+  `/run`), then `POST`s the result to the returned `callback_url`.
+- **`npm run dev`** (port 3000, falling back to 3001 if occupied) must be
+  running locally for `/run` specifically, since that route is guarded to
+  development only. `dispatch` and `outputs` carry no such guard and can be
+  called against a deployed instance as well as a local dev server.
+
+Note: `dispatch`, `run`, and `outputs` all read/write the `tasks`/`outputs`
+tables through `lib/commandCenter.ts`'s functions, which use the **anon**
+Supabase client (`lib/supabase.ts`), not the service-role client
+(`lib/supabaseAdmin.ts`). Given the 2026-08-13 decision that RLS is deny-all
+for anon on `tasks`/`outputs`, this is a discrepancy worth checking at the
+data layer before relying on these three routes in production — see the
+implementer's handoff notes for this task (`ea050c3a`) for details. This note
+does not assert a confirmed production failure, only an unverified-by-this-pass
+discrepancy between the code path and the documented RLS posture.
 
 ---
 

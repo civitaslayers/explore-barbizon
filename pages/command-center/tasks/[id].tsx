@@ -475,7 +475,7 @@ function RunHandoffBlock({
                 skipAutoTargetRef.current = true;
                 setTarget(e.target.value);
               }}
-              placeholder="claude, cursor, human…"
+              placeholder="claude, human…"
               disabled={recording}
               className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink placeholder-ink/30 focus:outline-none disabled:opacity-60"
             />
@@ -585,12 +585,10 @@ function LatestExecutionResultBlock({ latest }: { latest: Output | null }) {
   );
 }
 
-type RunWithBriefTool = "chatgpt" | "claude" | "cursor";
+type RunWithBriefTool = "claude";
 
 const RUN_WITH_TOOL_LABEL: Record<RunWithBriefTool, string> = {
-  chatgpt: "ChatGPT",
   claude: "Claude",
-  cursor: "Cursor",
 };
 
 function AgentBriefBlock({
@@ -839,19 +837,16 @@ function AgentBriefBlock({
           />
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
-          {(["chatgpt", "claude", "cursor"] as const).map((tool) => (
-            <button
-              key={tool}
-              type="button"
-              disabled={runWithBusyTool !== null}
-              onClick={() => handleRunWithTool(tool)}
-              className="text-[9px] uppercase tracking-[0.12em] px-2 py-1 rounded border border-ink/18 text-ink/55 hover:text-ink hover:border-ink/32 transition-colors disabled:opacity-50"
-            >
-              {runWithBusyTool === tool
-                ? "…"
-                : `Run with ${RUN_WITH_TOOL_LABEL[tool]}`}
-            </button>
-          ))}
+          <button
+            type="button"
+            disabled={runWithBusyTool !== null}
+            onClick={() => handleRunWithTool("claude")}
+            className="text-[9px] uppercase tracking-[0.12em] px-2 py-1 rounded border border-ink/18 text-ink/55 hover:text-ink hover:border-ink/32 transition-colors disabled:opacity-50"
+          >
+            {runWithBusyTool === "claude"
+              ? "…"
+              : `Run with ${RUN_WITH_TOOL_LABEL.claude}`}
+          </button>
         </div>
         {runWithFeedback ? (
           <p
@@ -1050,7 +1045,7 @@ type NextPageWithLayout = NextPage & {
 
 const STATUSES: TaskStatus[] = ["backlog", "ready", "in_progress", "review", "done"];
 /** Quick-pick labels for `outputs.agent` (free-text in DB; presets only). */
-const OUTPUT_AGENT_PRESETS: readonly string[] = ["chatgpt", "claude", "cursor", "manual"];
+const OUTPUT_AGENT_PRESETS: readonly string[] = ["claude", "manual"];
 const AREAS: RelatedArea[] = ["product", "content", "map", "database", "design", "engineering", "seo", "ops"];
 const TASK_TYPES: TaskType[] = [
   "content",
@@ -1067,9 +1062,7 @@ const EXECUTION_STATUSES: ExecutionStatus[] = ["todo", "in_progress", "review", 
 const EXECUTION_QUICK_ACTIONS: ExecutionStatus[] = ["in_progress", "review", "blocked", "done"];
 const ASSIGNEE_PRESETS = [
   "human",
-  "chatgpt",
   "claude",
-  "cursor",
   "codex",
   "openclaw",
   "paperclip",
@@ -1080,8 +1073,6 @@ const ASSIGNEE_PRESETS = [
 const RUN_HANDOFF_TARGET_PRESETS = [
   "human",
   "claude",
-  "cursor",
-  "chatgpt",
   "codex",
   "openclaw",
   "paperclip",
@@ -1096,117 +1087,9 @@ const STATUS_STYLE: Record<TaskStatus, string> = {
 };
 
 const AGENT_STYLE: Record<string, string> = {
-  chatgpt: "bg-umber/10 text-umber",
   claude: "bg-moss/15 text-moss",
-  cursor: "bg-ink/10 text-ink/60",
   manual: "border border-ink/20 text-ink/50",
 };
-
-const AGENT_LANES = [
-  { id: "strategist", label: "Strategist", tool: "chatgpt" },
-  { id: "architect", label: "Architect", tool: "claude" },
-  { id: "implementer", label: "Implementer", tool: "cursor" },
-] as const;
-
-function AgentLanesBlock({
-  task,
-  onUpdated,
-}: {
-  task: Task;
-  onUpdated: (t: Task) => void;
-}) {
-  const [busyLaneId, setBusyLaneId] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<{
-    kind: "ok" | "err";
-    msg: string;
-  } | null>(null);
-
-  const assigneeNorm = (task.assigned_to ?? "").trim().toLowerCase();
-
-  async function assignLane(lane: (typeof AGENT_LANES)[number]) {
-    setBusyLaneId(lane.id);
-    setFeedback(null);
-    try {
-      const updated = await updateTask(task.id, {
-        assigned_to: lane.tool,
-      });
-      onUpdated(updated);
-      setFeedback({ kind: "ok", msg: "Assignee updated" });
-      window.setTimeout(() => setFeedback(null), 2000);
-    } catch (e: unknown) {
-      setFeedback({
-        kind: "err",
-        msg: e instanceof Error ? e.message : "Could not assign",
-      });
-      window.setTimeout(() => setFeedback(null), 4000);
-    } finally {
-      setBusyLaneId(null);
-    }
-  }
-
-  return (
-    <div
-      className="rounded-lg border border-ink/10 bg-ink/[0.02] px-3 py-3 mb-4"
-      aria-label="Agent lanes"
-    >
-      <p className="text-[9px] uppercase tracking-[0.2em] text-ink/30 mb-1">
-        Agent lanes
-      </p>
-      <p className="text-[11px] text-ink/38 leading-snug mb-3">
-        Assignment only — set who owns the task. Use Run with… in the brief to
-        copy a tool-specific brief and optionally log the handoff.
-      </p>
-
-      <ul className="space-y-2">
-        {AGENT_LANES.map((lane) => {
-          const active = assigneeNorm === lane.tool;
-          const laneBusy = busyLaneId === lane.id;
-          const disabled = busyLaneId !== null;
-          return (
-            <li
-              key={lane.id}
-              className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between rounded-md border border-ink/8 bg-white/60 px-2.5 py-2"
-            >
-              <div className="min-w-0 flex flex-wrap items-center gap-x-2 gap-y-1">
-                <span className="text-[12px] font-medium text-ink/75">{lane.label}</span>
-                <span
-                  className={`text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded ${AGENT_STYLE[lane.tool] ?? "bg-ink/8 text-ink/55"}`}
-                >
-                  {lane.tool}
-                </span>
-                {active ? (
-                  <span className="text-[9px] uppercase tracking-[0.1em] text-moss/80">
-                    · Active assignee
-                  </span>
-                ) : null}
-              </div>
-              <div className="flex flex-wrap gap-1.5 shrink-0">
-                <button
-                  type="button"
-                  disabled={disabled}
-                  onClick={() => assignLane(lane)}
-                  className="text-[9px] uppercase tracking-[0.12em] px-2 py-1 rounded border border-ink/18 text-ink/55 hover:text-ink hover:border-ink/32 transition-colors disabled:opacity-50"
-                >
-                  {laneBusy ? "…" : "Assign"}
-                </button>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-
-      {feedback ? (
-        <p
-          className={`text-[10px] mt-2 ${
-            feedback.kind === "ok" ? "text-moss/85" : "text-red-600/85"
-          }`}
-        >
-          {feedback.msg}
-        </p>
-      ) : null}
-    </div>
-  );
-}
 
 const EXECUTION_STATUS_STYLE: Record<ExecutionStatus, string> = {
   todo: "bg-ink/6 text-ink/50",
@@ -2046,7 +1929,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
                   onChange={(e) =>
                     setEditForm({ ...editForm, assigned_to: e.target.value || null })
                   }
-                  placeholder="human, claude, cursor…"
+                  placeholder="human, claude…"
                   className="w-full rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink placeholder-ink/30 focus:outline-none"
                 />
                 <datalist id="ccc-task-assignee-presets">
@@ -2183,13 +2066,6 @@ const TaskDetailPage: NextPageWithLayout = () => {
       {/* Actions */}
       <div className="mb-6">
         <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-4">Actions</p>
-        <AgentLanesBlock
-          task={task}
-          onUpdated={(t) => {
-            setTask(t);
-            setEditForm((f) => ({ ...f, ...t }));
-          }}
-        />
         <NextActionBlock task={task} />
         <AgentBriefBlock
           task={task}
