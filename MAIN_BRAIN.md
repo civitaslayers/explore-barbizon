@@ -215,7 +215,7 @@ Icon clarity over decoration — one visual idea per icon, legible at 32px.
 
 ## Content state
 
-- ~106 published locations across all four layers (Art & History, Practical, ESS, Forest & Nature)
+- Published locations span all four layers (Art & History, Practical, ESS, Forest & Nature) — see the `tasks` table / `v_translation_health` view for current counts rather than a number here, which will go stale
 - Forest & Nature layer: seeded — Apremont cluster complete (climbing sectors, viewpoints, Chêne Sully, Caverne des Brigands)
 - Narratives: present on all Art & History locations; ESS and Forest & Nature mostly missing
 - Stories: zero published — this is the most visible content gap

@@ -1,65 +1,20 @@
 # Roadmap
 
-Last updated: 2026-03-13
+Retired as a maintained checklist (2026-10-05). This file's Phase 1 / Phase 2
+task lists (data integration, schema migrations, dashboard v1 — last updated
+2026-03-13) are stale and superseded by the Supabase `tasks` table, which is
+now the sole canonical work queue (see `brain/decisions.md`, 2026-08-16
+entries, and `CLAUDE.md`). Do not read this file for current priorities —
+read `tasks` (via CCC at `/command-center/tasks`) and `brain/current-state.md`.
+
+Salvaged below: long-term product ideas that were never literal checklist
+items and aren't tracked anywhere else. These are speculative future
+directions, not committed work — if one becomes real work, file it in
+`tasks`.
 
 ---
 
-## Phase 1 — Barbizon MVP (Current)
-
-### Visual shell
-- [x] Replace hero with cinematic looping video — code done, video asset needed
-- [x] Reduce homepage text density — hero stripped to H1 + two CTAs
-- [x] Mobile navigation — hamburger with animated X, active state
-- [x] Featured place cards linkable — wrapped in Link with real slugs
-- [ ] Add real video asset (`/public/videos/hero-barbizon.mp4`)
-- [ ] Add real place images (`/public/images/places/*.jpg`)
-- [ ] Card polish and image treatment pass
-- [ ] Large-screen layout width refinement
-- [ ] Place page visual refinement
-
-### Content and data
-- [ ] Complete Forest & Nature layer (data entry in Supabase)
-- [ ] Polish hero locations
-- [ ] Build first walking trail
-- [ ] Improve featured places presentation
-- [ ] Prepare historical visual works layer (postcards first — use `visual_works` model)
-
-### Data integration
-- [ ] Obtain Supabase `anon` key and add to `.env.local`
-- [ ] Install `@supabase/supabase-js` and create `lib/supabase.ts`
-- [ ] Replace `data/places.ts` with live Supabase query
-- [ ] Replace `data/tours.ts` with live Supabase query
-- [ ] Wire up Mapbox map with live location data
-
-### Schema migrations (sequence matters — see docs/schema-reference.md)
-- [ ] Add `is_published`, `tour_type`, `difficulty` to `tours`
-- [ ] Create `stories` + `story_locations`
-- [ ] Create `artists` + `artist_locations`
-- [ ] Create `visual_works` + `visual_work_locations`
-- [ ] Create `routes`
-- [ ] Create `layers` + migrate `categories.layer` text → FK (breaking change — do last)
-
-### Dashboard v1
-- [ ] Login
-- [ ] Overview
-- [ ] Locations list
-- [ ] Single location editor
-
----
-
-## Phase 2 — Multi-Town Migration (Deferred)
-
-Do not begin until Barbizon MVP is complete.
-
-- [ ] Add `town_settings` table
-- [ ] Establish composite slug discipline
-- [ ] Add `category_templates` and `town_categories`
-- [ ] Build town-aware dashboard logic
-- [ ] Onboard town #2
-
----
-
-## Long-Term Product Features
+## Long-Term Product Ideas (salvaged, speculative, not scheduled)
 
 ### QR infrastructure
 Physical QR plaques around town linking into map/place pages.
@@ -68,10 +23,15 @@ Physical QR plaques around town linking into map/place pages.
 Curated local trails connecting galleries, food, commerce, and culture.
 
 ### Visual works layer
-Paintings, postcards, photographs, and archival imagery linked to places via the `visual_works` + `visual_work_locations` model. Postcards are the practical starting point. Geo attribution uses `geo_confidence` — never assume exact coordinates from mosaics or secondary sources.
+Paintings, postcards, photographs, and archival imagery linked to places via
+the `visual_works` + `visual_work_locations` model (see
+`docs/schema-reference.md` Part 2). Postcards are the practical starting
+point. Geo attribution uses `geo_confidence` — never assume exact coordinates
+from mosaics or secondary sources.
 
 ### Story mode
-Deeper cultural narratives and articles via the `stories` table.
+Deeper cultural narratives and articles via the `stories` table (now live —
+see `docs/schema-reference.md`).
 
 ### AI guide
 Conversational layer grounded in database content. Deferred.
