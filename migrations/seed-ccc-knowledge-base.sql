@@ -1,6 +1,14 @@
 -- Seed CCC knowledge base: decisions, memory, prompt_templates
 -- Run once in Supabase SQL editor.
 -- Sources: brain/decisions.md, brain/current-state.md, docs/agent-tooling.md, CLAUDE.md
+--
+-- APPLIED MIGRATION — historical record, not re-run, not rewritten.
+-- Per brain/decisions.md (2026-08-16): the `decisions` and `memory` Supabase
+-- tables are retired. `brain/decisions.md` is the single decision log; the
+-- rows this file inserted into `decisions` and `memory` below are now
+-- historical only. `prompt_templates` was not part of that retirement and
+-- remains a separate, still-active table — the rows this file inserted
+-- there are still live, not retired.
 
 -- ============================================================
 -- DECISIONS

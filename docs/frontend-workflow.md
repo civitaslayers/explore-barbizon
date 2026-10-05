@@ -1,26 +1,18 @@
-# Frontend Workflow
+# Frontend Workflow — Local Dev & Tailwind
 
-Last updated: 2026-03-28
-
----
-
-## Tool Division
-
-| Role | Responsibility |
-|---|---|
-| Claude | strategy, architecture, task planning, prompts, SQL, content, review |
-| Cursor | code implementation, UI iteration, component changes, page refinement |
-| GPT / Grok | research, second opinions on architecture — not in the implementation loop |
-
-Claude alone is too slow for visual iteration. Cursor handles the actual file edits and build feedback loop.  
-Claude plans → Cursor implements → Claude reviews.
+Last updated: 2026-10-05
 
 ---
 
-## Correct Way to Work with Cursor
+## Workflow
 
-Do not prompt for full rebuilds.  
-Use Cursor in refinement passes:
+Claude (claude.ai) handles strategy, architecture, task planning, prompts,
+SQL, content, and review. Implementation runs through Claude Code's agent
+loop (`/run-loop`): civitas-architect plans → civitas-implementer writes the
+code → civitas-release-checker reviews → human gate. There is no hand-stepped
+editor in the loop — the implementer runs a scoped task to completion.
+
+Refinement passes, not full rebuilds:
 
 1. Build structure once
 2. Refine section by section
@@ -34,9 +26,9 @@ Use Cursor in refinement passes:
 
 Keep open at all times during development:
 
-- Cursor (with the relevant files open)
+- an editor with the relevant files open
 - local browser preview at `http://localhost:3000`
-- terminal running `npm run dev`
+- a terminal running `npm run dev`
 
 ---
 
@@ -66,7 +58,7 @@ npm run dev
 
 ## Tailwind / Build Notes
 
-Cursor has previously introduced non-existent utility classes inside `@apply`, causing build failures.
+AI-assisted edits have previously introduced non-existent utility classes inside `@apply`, causing build failures.
 
 **Example of an invalid class that caused an error:**
 

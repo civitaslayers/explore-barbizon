@@ -4,16 +4,14 @@ import type { Task, TaskLink } from "@/lib/commandCenter";
 export const AGENT_BRIEF_NOT_SET = "Not set";
 
 /** Modes for tool-specific framing; selection is UI-only (not persisted). */
-export type AgentBriefMode = "general" | "chatgpt" | "claude" | "cursor";
+export type AgentBriefMode = "general" | "claude";
 
 export const AGENT_BRIEF_MODE_OPTIONS: {
   mode: AgentBriefMode;
   label: string;
 }[] = [
   { mode: "general", label: "General" },
-  { mode: "chatgpt", label: "ChatGPT" },
   { mode: "claude", label: "Claude" },
-  { mode: "cursor", label: "Cursor" },
 ];
 
 /** Default brief mode from saved assignee (free-text field, common presets). */
@@ -21,7 +19,9 @@ export function defaultAgentBriefModeFromAssignee(
   assignedTo: string | null | undefined
 ): AgentBriefMode {
   const a = (assignedTo ?? "").trim().toLowerCase();
-  if (a === "chatgpt" || a === "claude" || a === "cursor") return a;
+  // Historical rows may still carry retired assignees (chatgpt, cursor) —
+  // fall through gracefully to "general" rather than throwing.
+  if (a === "claude") return a;
   return "general";
 }
 
@@ -69,17 +69,6 @@ function fieldLine(label: string, value: string | null | undefined): string {
 /** Mode-specific preamble; keep wording easy to edit independently of task facts. */
 function toolFramingBlock(mode: Exclude<AgentBriefMode, "general">): string {
   switch (mode) {
-    case "chatgpt":
-      return [
-        "## Brief framing (ChatGPT)",
-        "",
-        "Use for planning, synthesis, structured reasoning, and ideation / research / strategy support.",
-        "",
-        "Guidance: prioritize clarity; produce a structured answer; note assumptions and gaps when they affect the conclusion.",
-        "",
-        "---",
-        "",
-      ].join("\n");
     case "claude":
       return [
         "## Brief framing (Claude)",
@@ -87,17 +76,6 @@ function toolFramingBlock(mode: Exclude<AgentBriefMode, "general">): string {
         "Use for architecture, repo-aware reasoning, scoped change planning, careful constraint-following, and implementation strategy before coding.",
         "",
         "Guidance: if this is not code work, stay useful as rigorous planning or review — avoid improvisation; respect stated boundaries.",
-        "",
-        "---",
-        "",
-      ].join("\n");
-    case "cursor":
-      return [
-        "## Brief framing (Cursor)",
-        "",
-        "Use for in-editor implementation: explicit scope limits, file-local caution, and execution over exploration.",
-        "",
-        "Guidance: prefer a concrete diff or patch-style output; preserve current behavior; do not broaden scope or touch unrelated files.",
         "",
         "Protected files — do NOT touch unless explicitly named in the task scope:",
         "- `pages/_document.tsx` — global HTML shell; changes affect the entire app",
