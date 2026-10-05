@@ -92,7 +92,16 @@
     "relatedEssays": "Related essays",
     "placesInEssay": "Places in this essay",
     "dekFallback": "A short essay from the editorial notebook.",
-    "themeFallback": "Editorial"
+    "themeFallback": "Editorial",
+    "themes": {
+      "Art": "Art",
+      "Conservation": "Conservation",
+      "Landscape": "Landscape",
+      "Studio": "Studio",
+      "Village life": "Village life",
+      "Food": "Food",
+      "Accommodation": "Accommodation"
+    }
   },
   "timeline": {
     "filters": { "all": "All", "art": "Art & painters", "forest": "Forest & nature", "village": "Village life", "legacy": "Legacy" },

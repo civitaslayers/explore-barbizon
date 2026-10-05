@@ -92,7 +92,16 @@
     "relatedEssays": "Récits liés",
     "placesInEssay": "Lieux de ce récit",
     "dekFallback": "Un court récit du carnet éditorial.",
-    "themeFallback": "Éditorial"
+    "themeFallback": "Éditorial",
+    "themes": {
+      "Art": "Art",
+      "Conservation": "Préservation",
+      "Landscape": "Paysage",
+      "Studio": "Atelier",
+      "Village life": "Vie du village",
+      "Food": "Table",
+      "Accommodation": "Hébergement"
+    }
   },
   "timeline": {
     "filters": { "all": "Tout", "art": "Art et peintres", "forest": "Forêt et nature", "village": "Vie du village", "legacy": "Héritage" },

@@ -98,7 +98,7 @@ async function getPublishedStoriesFromSupabase(): Promise<StoriesRowStory[]> {
 const StoriesIndexPage: NextPage<StoriesIndexProps> = ({ stories }) => {
   const router = useRouter();
   const locale = router.locale ?? "fr";
-  const { t } = useTranslation("common");
+  const { t, i18n } = useTranslation("common");
   const { t: tPages } = useTranslation("pages");
   const essays = stories.filter((s) => (s.type ?? "history") === "history");
   const guides = stories.filter((s) => s.type === "guide");
@@ -138,6 +138,11 @@ const StoriesIndexPage: NextPage<StoriesIndexProps> = ({ stories }) => {
                   story.dek ||
                   t("story.dekFallback");
                 const coverAlt = getLocalized(story, locale, "cover_alt");
+                const themeKey = story.theme ? `story.themes.${story.theme}` : null;
+                const themeLabel =
+                  themeKey && i18n.exists(themeKey)
+                    ? t(themeKey)
+                    : t("story.themeFallback");
                 return (
                   <Link
                     key={story.slug}
@@ -159,7 +164,7 @@ const StoriesIndexPage: NextPage<StoriesIndexProps> = ({ stories }) => {
                     ) : null}
                     <article className="min-w-0 flex-1">
                       <p className="text-[11px] uppercase tracking-[0.18em] text-ink/50">
-                        {story.theme ?? t("story.themeFallback")}
+                        {themeLabel}
                       </p>
                       <h2 className="mt-1 font-serif text-lg text-ink">
                         {title}

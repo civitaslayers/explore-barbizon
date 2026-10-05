@@ -204,7 +204,7 @@ const RELATED: Record<string, ComponentProps<typeof RelatedStories>> = {
 const StoryPage: NextPage<StoryPageProps> = ({ story }) => {
   const router = useRouter();
   const locale = router.locale ?? "fr";
-  const { t } = useTranslation("common");
+  const { t, i18n } = useTranslation("common");
   const related = RELATED[story.slug];
 
   const title = getLocalized(story, locale, "title") || story.title;
@@ -217,7 +217,9 @@ const StoryPage: NextPage<StoryPageProps> = ({ story }) => {
     getLocalized(story, locale, "subtitle") ||
     story.dek ||
     t("story.dekFallback");
-  const theme = story.theme ?? t("story.themeFallback");
+  const themeKey = story.theme ? `story.themes.${story.theme}` : null;
+  const theme =
+    themeKey && i18n.exists(themeKey) ? t(themeKey) : t("story.themeFallback");
   const coverAlt = getLocalized(story, locale, "cover_alt");
   const coverCredit = getLocalized(story, locale, "cover_credit");
   const localizedBody = getLocalized(story, locale, "body") || story.body;
