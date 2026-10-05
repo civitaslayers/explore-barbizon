@@ -6,6 +6,7 @@ import { serverSideTranslations } from "next-i18next/pages/serverSideTranslation
 import { SeoHead } from "@/components/SeoHead";
 import { getAllStories, type Story } from "@/data/stories";
 import { getLocalized, type LocalizableRow } from "@/lib/getLocalized";
+import { heroImage800w } from "@/lib/media";
 import { supabase } from "@/lib/supabase";
 import nextI18NextConfig from "@/next-i18next.config";
 
@@ -20,6 +21,8 @@ import nextI18NextConfig from "@/next-i18next.config";
 type StoriesRowStory = Omit<Story, "dek" | "theme"> & {
   dek: string | null;
   theme: string | null;
+  cover_image_url?: string | null;
+  cover_alt?: string | null;
   translations?: LocalizableRow["translations"];
 };
 
@@ -42,6 +45,8 @@ function rowToStory(row: {
   author: string | null;
   theme: string | null;
   type: string | null;
+  cover_image_url: string | null;
+  cover_alt: string | null;
   translations?: LocalizableRow["translations"];
 }): StoriesRowStory {
   const dek = row.subtitle?.trim() || excerptFromBody(row.body) || null;
@@ -53,6 +58,8 @@ function rowToStory(row: {
     dek,
     theme,
     type,
+    cover_image_url: row.cover_image_url,
+    cover_alt: row.cover_alt,
     translations: row.translations,
   };
 }
@@ -62,7 +69,9 @@ async function getPublishedStoriesFromSupabase(): Promise<StoriesRowStory[]> {
 
   const { data, error } = await supabase
     .from("stories")
-    .select("slug, title, subtitle, body, author, theme, type, translations")
+    .select(
+      "slug, title, subtitle, body, author, theme, type, cover_image_url, cover_alt, translations"
+    )
     .eq("is_published", true)
     .order("published_at", { ascending: false })
     .order("created_at", { ascending: false });
@@ -79,6 +88,8 @@ async function getPublishedStoriesFromSupabase(): Promise<StoriesRowStory[]> {
       author: string | null;
       theme: string | null;
       type: string | null;
+      cover_image_url: string | null;
+      cover_alt: string | null;
       translations?: LocalizableRow["translations"];
     }>
   ).map(rowToStory);
@@ -126,13 +137,27 @@ const StoriesIndexPage: NextPage<StoriesIndexProps> = ({ stories }) => {
                   getLocalized(story, locale, "subtitle") ||
                   story.dek ||
                   t("story.dekFallback");
+                const coverAlt = getLocalized(story, locale, "cover_alt");
                 return (
                   <Link
                     key={story.slug}
                     href={`/stories/${story.slug}`}
-                    className="editorial-measure block border-l border-ink/15 pl-4 transition-colors hover:border-ink/40"
+                    className="group editorial-measure flex gap-4 md:gap-6"
                   >
-                    <article>
+                    {story.cover_image_url ? (
+                      <div className="aspect-[4/3] w-28 flex-shrink-0 overflow-hidden rounded-lg bg-surface-container-low sm:w-36 md:w-44">
+                        <img
+                          src={heroImage800w(story.cover_image_url)}
+                          srcSet={`${heroImage800w(story.cover_image_url)} 800w, ${story.cover_image_url} 1600w`}
+                          sizes="(min-width: 768px) 11rem, (min-width: 640px) 9rem, 7rem"
+                          alt={coverAlt}
+                          className="h-full w-full object-cover transition-transform duration-700 ease-soft group-hover:scale-105"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </div>
+                    ) : null}
+                    <article className="min-w-0 flex-1">
                       <p className="text-[11px] uppercase tracking-[0.18em] text-ink/50">
                         {story.theme ?? t("story.themeFallback")}
                       </p>
@@ -165,12 +190,26 @@ const StoriesIndexPage: NextPage<StoriesIndexProps> = ({ stories }) => {
                   getLocalized(story, locale, "subtitle") ||
                   story.dek ||
                   t("story.dekFallback");
+                const coverAlt = getLocalized(story, locale, "cover_alt");
                 return (
                   <Link
                     key={story.slug}
                     href={`/stories/${story.slug}`}
                     className="flex items-start justify-between gap-4 rounded-lg border border-ink/12 px-4 py-3 transition-colors hover:border-ink/25 hover:bg-ink/[0.02]"
                   >
+                    {story.cover_image_url ? (
+                      <div className="aspect-[16/9] w-32 flex-shrink-0 overflow-hidden rounded-md bg-surface-container-low sm:w-40">
+                        <img
+                          src={heroImage800w(story.cover_image_url)}
+                          srcSet={`${heroImage800w(story.cover_image_url)} 800w, ${story.cover_image_url} 1600w`}
+                          sizes="(min-width: 640px) 10rem, 8rem"
+                          alt={coverAlt}
+                          className="h-full w-full object-cover"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </div>
+                    ) : null}
                     <div className="min-w-0 flex-1">
                       <h2 className="font-serif text-base text-ink">
                         {title}
