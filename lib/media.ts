@@ -5,6 +5,10 @@
  * column, no re-ingest. Returns the input unchanged if it doesn't match the
  * expected `-1600.webp` suffix (e.g. a non-R2 URL), so callers never get a
  * broken derived URL.
+ *
+ * Path-agnostic (pure suffix regex), so it also covers `stories.cover_image_url`
+ * story covers (`stories/<slug>-{1600,800}.webp`), not just `locations/.../media.url`
+ * photos.
  */
 export function heroImage800w(url: string): string {
   return url.replace(/-1600\.webp$/, "-800.webp");

@@ -9,6 +9,7 @@ import RelatedStories from "@/components/RelatedStories";
 import { SeoHead } from "@/components/SeoHead";
 import { getAllStories } from "@/data/stories";
 import { getLocalized, type LocalizableRow } from "@/lib/getLocalized";
+import { heroImage800w } from "@/lib/media";
 import { buildArticleSchema } from "@/lib/seo";
 import { supabase } from "@/lib/supabase";
 import nextI18NextConfig from "@/next-i18next.config";
@@ -25,6 +26,8 @@ type StoryPageStory = {
   author: string | null;
   published_at: string | null;
   cover_image_url: string | null;
+  cover_credit: string | null;
+  cover_alt: string | null;
   translations?: LocalizableRow["translations"];
 };
 
@@ -48,6 +51,8 @@ type StoryDbRow = {
   theme: string | null;
   published_at: string | null;
   cover_image_url: string | null;
+  cover_credit: string | null;
+  cover_alt: string | null;
   translations?: LocalizableRow["translations"];
 };
 
@@ -64,6 +69,8 @@ function mapRowToPageStory(row: StoryDbRow): StoryPageStory {
     author: row.author,
     published_at: row.published_at,
     cover_image_url: row.cover_image_url,
+    cover_credit: row.cover_credit,
+    cover_alt: row.cover_alt,
     translations: row.translations,
   };
 }
@@ -88,7 +95,7 @@ async function getPublishedStoryBySlug(
   const { data, error } = await supabase
     .from("stories")
     .select(
-      "slug, title, subtitle, body, author, theme, published_at, cover_image_url, translations"
+      "slug, title, subtitle, body, author, theme, published_at, cover_image_url, cover_credit, cover_alt, translations"
     )
     .eq("slug", slug)
     .eq("is_published", true)
@@ -197,7 +204,7 @@ const RELATED: Record<string, ComponentProps<typeof RelatedStories>> = {
 const StoryPage: NextPage<StoryPageProps> = ({ story }) => {
   const router = useRouter();
   const locale = router.locale ?? "fr";
-  const { t } = useTranslation("common");
+  const { t, i18n } = useTranslation("common");
   const related = RELATED[story.slug];
 
   const title = getLocalized(story, locale, "title") || story.title;
@@ -210,7 +217,11 @@ const StoryPage: NextPage<StoryPageProps> = ({ story }) => {
     getLocalized(story, locale, "subtitle") ||
     story.dek ||
     t("story.dekFallback");
-  const theme = story.theme ?? t("story.themeFallback");
+  const themeKey = story.theme ? `story.themes.${story.theme}` : null;
+  const theme =
+    themeKey && i18n.exists(themeKey) ? t(themeKey) : t("story.themeFallback");
+  const coverAlt = getLocalized(story, locale, "cover_alt");
+  const coverCredit = getLocalized(story, locale, "cover_credit");
   const localizedBody = getLocalized(story, locale, "body") || story.body;
   const bodyHtml = localizedBody
     ? marked(localizedBody, { breaks: true, gfm: true })
@@ -254,6 +265,27 @@ const StoryPage: NextPage<StoryPageProps> = ({ story }) => {
           </h1>
           <p className="text-base leading-relaxed text-ink/80">{dek}</p>
         </header>
+
+        {story.cover_image_url ? (
+          <figure>
+            <div className="aspect-[3/2] w-full overflow-hidden rounded-xl bg-surface-container-low">
+              <img
+                src={story.cover_image_url}
+                srcSet={`${heroImage800w(story.cover_image_url)} 800w, ${story.cover_image_url} 1600w`}
+                sizes="(min-width: 768px) 672px, (min-width: 640px) 608px, calc(100vw - 2rem)"
+                alt={coverAlt}
+                className="h-full w-full object-contain"
+                fetchPriority="high"
+                decoding="async"
+              />
+            </div>
+            {coverCredit ? (
+              <figcaption className="mt-3 font-sans text-[11px] leading-relaxed text-ink/50">
+                {coverCredit}
+              </figcaption>
+            ) : null}
+          </figure>
+        ) : null}
 
         {localizedBody ? (
           <div
@@ -305,6 +337,8 @@ export const getStaticProps: GetStaticProps<StoryPageProps> = async ({
       author: null,
       published_at: null,
       cover_image_url: null,
+      cover_credit: null,
+      cover_alt: null,
     };
     return { props: { story, ...translations }, revalidate: 60 };
   }
