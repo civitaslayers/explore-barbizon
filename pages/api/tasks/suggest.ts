@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import fs from "fs";
 import path from "path";
 import { spawn } from "child_process";
-import { getTasks } from "@/lib/commandCenter";
+import { getTasksAdmin } from "@/lib/commandCenter.server";
 import type { Task } from "@/lib/commandCenter";
 
 export type TaskSuggestion = {
@@ -37,7 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // Gather context.
   let tasks: Task[] = [];
   try {
-    tasks = await getTasks();
+    tasks = await getTasksAdmin();
   } catch (e: unknown) {
     return res.status(500).json({ error: `Failed to load tasks: ${e instanceof Error ? e.message : e}` });
   }
