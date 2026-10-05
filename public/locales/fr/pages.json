@@ -7,6 +7,11 @@
     "hero": {
       "eyebrow": "Atlas culturel",
       "title": "Barbizon, le village des peintres",
+      "titleLines": [
+        "Barbizon :",
+        "le village",
+        "des peintres"
+      ],
       "ctaMap": "Explorer la carte",
       "ctaPlaces": "Découvrir le village"
     },
@@ -116,7 +121,8 @@
         "millet1849": {
           "date": "1849",
           "headline": "Jean-François Millet arrive avec sa famille.",
-          "detail": "Millet quitte Paris en 1849, l'année du choléra. Sa maison de la Grande Rue restera son atelier jusqu'à sa mort : il y peint Le Semeur, Des glaneuses et L'Angélus."
+          "detail": "Millet quitte Paris en 1849, l'année du choléra. Sa maison de la Grande Rue restera son atelier jusqu'à sa mort : il y peint Le Semeur, Des glaneuses et L'Angélus.",
+          "secondEssayLabel": "Et les champs qu'il a peints →"
         },
         "reserve1861": {
           "date": "1861",

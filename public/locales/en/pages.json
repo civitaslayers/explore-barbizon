@@ -7,6 +7,11 @@
     "hero": {
       "eyebrow": "A Cultural Atlas",
       "title": "Barbizon: The Artists' Village",
+      "titleLines": [
+        "Barbizon:",
+        "The Artists'",
+        "Village"
+      ],
       "ctaMap": "Explore the Map",
       "ctaPlaces": "Discover the Village"
     },
@@ -116,7 +121,8 @@
         "millet1849": {
           "date": "1849",
           "headline": "Jean-François Millet arrives with his family.",
-          "detail": "Millet leaves Paris in 1849, the year of the cholera epidemic. His house on the Grande Rue remains his studio until his death: there he paints The Sower, The Gleaners and The Angelus."
+          "detail": "Millet leaves Paris in 1849, the year of the cholera epidemic. His house on the Grande Rue remains his studio until his death: there he paints The Sower, The Gleaners and The Angelus.",
+          "secondEssayLabel": "And the fields he painted →"
         },
         "reserve1861": {
           "date": "1861",

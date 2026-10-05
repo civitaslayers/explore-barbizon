@@ -54,6 +54,14 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
   const router = useRouter();
   const locale = router.locale ?? "fr";
   const { t } = useTranslation("pages");
+  // Per-locale manual line breaks for the hero headline (brain/decisions.md
+  // gate-feedback round, task 1b180958) — an array, not `<br/>`s inside the
+  // string, so each locale controls its own break points. `returnObjects`
+  // is required: i18next defaults to treating a key resolving to a
+  // non-string value as missing.
+  const heroTitleLines = t("home.hero.titleLines", {
+    returnObjects: true,
+  }) as string[];
   return (
     <>
       <SeoHead
@@ -85,7 +93,11 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
             </p>
 
             <h1 className="font-serif text-[3.2rem] italic leading-[0.95] tracking-tight text-cream md:text-[5rem] lg:text-[6rem]">
-              {t("home.hero.title")}
+              {heroTitleLines.map((line) => (
+                <span key={line} className="block">
+                  {line}
+                </span>
+              ))}
             </h1>
 
             <div className="flex flex-wrap gap-3 pt-2">

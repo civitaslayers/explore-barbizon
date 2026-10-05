@@ -1,17 +1,27 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import Link from "next/link";
 import { useTranslation } from "next-i18next/pages";
 
 type TimelineTag = "art" | "forest" | "village" | "legacy";
+
+type EssayLink = {
+  href: string;
+  labelKey: string;
+  // "pages" entries resolve via the pages.json event object itself (the
+  // label text already carries a trailing "→", unlike the shared
+  // common.json "actions.readEssay" label, which the renderer suffixes
+  // with " →" below). Default (omitted) is "common".
+  labelSource?: "pages";
+};
 
 type TimelineEvent = {
   dateKey: string;
   tag: TimelineTag;
   headlineKey: string;
   detailKey: string;
-  essayLinks: { href: string; labelKey: string }[];
+  essayLinks: EssayLink[];
 };
 
 // Display copy (date/headline/detail) lives in pages.json
@@ -60,7 +70,8 @@ const events: TimelineEvent[] = [
     headlineKey: "millet1849",
     detailKey: "millet1849",
     essayLinks: [
-      { href: "/stories/rooms-of-light", labelKey: "actions.readEssay" }
+      { href: "/stories/rooms-of-light", labelKey: "actions.readEssay" },
+      { href: "/stories/the-gleaners", labelKey: "secondEssayLabel", labelSource: "pages" }
     ]
   },
   {
@@ -218,14 +229,20 @@ export default function HistoryTimeline() {
                         </p>
                         {event.essayLinks.length > 0 ? (
                           <p className="mt-2">
-                            {event.essayLinks.map((link) => (
-                              <Link
-                                key={link.href}
-                                href={link.href}
-                                className="underline underline-offset-4 hover:text-ink transition-colors"
-                              >
-                                {tCommon(link.labelKey)} →
-                              </Link>
+                            {event.essayLinks.map((link, index) => (
+                              <Fragment key={link.href}>
+                                {index > 0 ? " " : null}
+                                <Link
+                                  href={link.href}
+                                  className="underline underline-offset-4 hover:text-ink transition-colors"
+                                >
+                                  {link.labelSource === "pages"
+                                    ? tPages(
+                                        `history.timeline.events.${event.headlineKey}.${link.labelKey}`
+                                      )
+                                    : `${tCommon(link.labelKey)} →`}
+                                </Link>
+                              </Fragment>
                             ))}
                           </p>
                         ) : null}
