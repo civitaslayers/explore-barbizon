@@ -5,6 +5,7 @@ import { useTranslation, type SSRConfig } from "next-i18next/pages";
 import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
 import { SeoHead } from "@/components/SeoHead";
 import { getAllStories, type Story } from "@/data/stories";
+import { getLocalized, type LocalizableRow } from "@/lib/getLocalized";
 import { supabase } from "@/lib/supabase";
 import nextI18NextConfig from "@/next-i18next.config";
 
@@ -12,9 +13,14 @@ import nextI18NextConfig from "@/next-i18next.config";
 // always carries literal strings) — the Supabase-sourced rows below have no
 // subtitle/theme fallback at fetch time, so the page renders a translated
 // fallback instead of a hardcoded English string (dek ?? t("story.dekFallback")).
+// `dek` is the FALLBACK value getLocalized(story, locale, "subtitle") falls
+// back to when there's no published translation — mirroring [slug].tsx.
+// `title` stays the raw base-column value (the getLocalized fallback), not a
+// locale-resolved string, so per-locale resolution happens at render time.
 type StoriesRowStory = Omit<Story, "dek" | "theme"> & {
   dek: string | null;
   theme: string | null;
+  translations?: LocalizableRow["translations"];
 };
 
 type StoriesIndexProps = {
@@ -36,11 +42,19 @@ function rowToStory(row: {
   author: string | null;
   theme: string | null;
   type: string | null;
+  translations?: LocalizableRow["translations"];
 }): StoriesRowStory {
   const dek = row.subtitle?.trim() || excerptFromBody(row.body) || null;
   const theme = row.theme?.trim() || row.author?.trim() || null;
   const type = row.type === "guide" ? "guide" : "history";
-  return { slug: row.slug, title: row.title, dek, theme, type };
+  return {
+    slug: row.slug,
+    title: row.title,
+    dek,
+    theme,
+    type,
+    translations: row.translations,
+  };
 }
 
 async function getPublishedStoriesFromSupabase(): Promise<StoriesRowStory[]> {
@@ -48,7 +62,7 @@ async function getPublishedStoriesFromSupabase(): Promise<StoriesRowStory[]> {
 
   const { data, error } = await supabase
     .from("stories")
-    .select("slug, title, subtitle, body, author, theme, type")
+    .select("slug, title, subtitle, body, author, theme, type, translations")
     .eq("is_published", true)
     .order("published_at", { ascending: false })
     .order("created_at", { ascending: false });
@@ -65,6 +79,7 @@ async function getPublishedStoriesFromSupabase(): Promise<StoriesRowStory[]> {
       author: string | null;
       theme: string | null;
       type: string | null;
+      translations?: LocalizableRow["translations"];
     }>
   ).map(rowToStory);
 }
@@ -105,28 +120,35 @@ const StoriesIndexPage: NextPage<StoriesIndexProps> = ({ stories }) => {
               {t("story.essays")}
             </p>
             <div className="space-y-6 md:space-y-8">
-              {essays.map((story) => (
-                <Link
-                  key={story.slug}
-                  href={`/stories/${story.slug}`}
-                  className="editorial-measure block border-l border-ink/15 pl-4 transition-colors hover:border-ink/40"
-                >
-                  <article>
-                    <p className="text-[11px] uppercase tracking-[0.18em] text-ink/50">
-                      {story.theme ?? t("story.themeFallback")}
-                    </p>
-                    <h2 className="mt-1 font-serif text-lg text-ink">
-                      {story.title}
-                    </h2>
-                    <p className="mt-2 text-sm leading-relaxed text-ink/75">
-                      {story.dek ?? t("story.dekFallback")}
-                    </p>
-                    <p className="mt-3 text-[11px] uppercase tracking-[0.16em] text-ink/40">
-                      {t("actions.readEssay")} →
-                    </p>
-                  </article>
-                </Link>
-              ))}
+              {essays.map((story) => {
+                const title = getLocalized(story, locale, "title") || story.title;
+                const dek =
+                  getLocalized(story, locale, "subtitle") ||
+                  story.dek ||
+                  t("story.dekFallback");
+                return (
+                  <Link
+                    key={story.slug}
+                    href={`/stories/${story.slug}`}
+                    className="editorial-measure block border-l border-ink/15 pl-4 transition-colors hover:border-ink/40"
+                  >
+                    <article>
+                      <p className="text-[11px] uppercase tracking-[0.18em] text-ink/50">
+                        {story.theme ?? t("story.themeFallback")}
+                      </p>
+                      <h2 className="mt-1 font-serif text-lg text-ink">
+                        {title}
+                      </h2>
+                      <p className="mt-2 text-sm leading-relaxed text-ink/75">
+                        {dek}
+                      </p>
+                      <p className="mt-3 text-[11px] uppercase tracking-[0.16em] text-ink/40">
+                        {t("actions.readEssay")} →
+                      </p>
+                    </article>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         )}
@@ -137,28 +159,35 @@ const StoriesIndexPage: NextPage<StoriesIndexProps> = ({ stories }) => {
               {t("story.inTheVillage")}
             </p>
             <div className="editorial-measure space-y-3">
-              {guides.map((story) => (
-                <Link
-                  key={story.slug}
-                  href={`/stories/${story.slug}`}
-                  className="flex items-start justify-between gap-4 rounded-lg border border-ink/12 px-4 py-3 transition-colors hover:border-ink/25 hover:bg-ink/[0.02]"
-                >
-                  <div className="min-w-0 flex-1">
-                    <h2 className="font-serif text-base text-ink">
-                      {story.title}
-                    </h2>
-                    <p className="mt-1 line-clamp-2 text-sm leading-snug text-ink/70">
-                      {story.dek ?? t("story.dekFallback")}
-                    </p>
-                  </div>
-                  <span
-                    className="mt-0.5 flex-shrink-0 text-ink/35"
-                    aria-hidden
+              {guides.map((story) => {
+                const title = getLocalized(story, locale, "title") || story.title;
+                const dek =
+                  getLocalized(story, locale, "subtitle") ||
+                  story.dek ||
+                  t("story.dekFallback");
+                return (
+                  <Link
+                    key={story.slug}
+                    href={`/stories/${story.slug}`}
+                    className="flex items-start justify-between gap-4 rounded-lg border border-ink/12 px-4 py-3 transition-colors hover:border-ink/25 hover:bg-ink/[0.02]"
                   >
-                    →
-                  </span>
-                </Link>
-              ))}
+                    <div className="min-w-0 flex-1">
+                      <h2 className="font-serif text-base text-ink">
+                        {title}
+                      </h2>
+                      <p className="mt-1 line-clamp-2 text-sm leading-snug text-ink/70">
+                        {dek}
+                      </p>
+                    </div>
+                    <span
+                      className="mt-0.5 flex-shrink-0 text-ink/35"
+                      aria-hidden
+                    >
+                      →
+                    </span>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         )}

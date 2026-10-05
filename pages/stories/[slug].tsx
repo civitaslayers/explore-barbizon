@@ -198,9 +198,6 @@ const StoryPage: NextPage<StoryPageProps> = ({ story }) => {
   const router = useRouter();
   const locale = router.locale ?? "fr";
   const { t } = useTranslation("common");
-  const bodyHtml = story.body
-    ? marked(story.body, { breaks: true, gfm: true })
-    : "";
   const related = RELATED[story.slug];
 
   const title = getLocalized(story, locale, "title") || story.title;
@@ -214,6 +211,10 @@ const StoryPage: NextPage<StoryPageProps> = ({ story }) => {
     story.dek ||
     t("story.dekFallback");
   const theme = story.theme ?? t("story.themeFallback");
+  const localizedBody = getLocalized(story, locale, "body") || story.body;
+  const bodyHtml = localizedBody
+    ? marked(localizedBody, { breaks: true, gfm: true })
+    : "";
 
   return (
     <>
@@ -254,7 +255,7 @@ const StoryPage: NextPage<StoryPageProps> = ({ story }) => {
           <p className="text-base leading-relaxed text-ink/80">{dek}</p>
         </header>
 
-        {story.body ? (
+        {localizedBody ? (
           <div
             className="prose-story"
             dangerouslySetInnerHTML={{ __html: bodyHtml }}
