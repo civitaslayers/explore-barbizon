@@ -16,6 +16,7 @@
 //   node scripts/upload-media.mjs --dry-run
 //   node scripts/upload-media.mjs --execute              (mutates R2 + DB)
 //   node scripts/upload-media.mjs --dir=media-staging
+//   node scripts/upload-media.mjs --only=auberge-ganne   (single location, dry-run)
 //
 // Env (dotenv from .env.local — see .env.example):
 //   CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_R2_ACCESS_KEY_ID,
@@ -156,9 +157,9 @@ function findNearMatches(target, candidates, limit = 5) {
 // CLI + env
 // ---------------------------------------------------------------------------
 
-class UsageError extends Error {}
+export class UsageError extends Error {}
 
-function parseArgs(argv) {
+export function parseArgs(argv) {
   const dryRunFlag = argv.includes("--dry-run");
   const executeFlag = argv.includes("--execute");
   if (dryRunFlag && executeFlag) {
@@ -167,7 +168,12 @@ function parseArgs(argv) {
   const dirArg = argv.find((a) => a.startsWith("--dir="));
   const dir = dirArg ? dirArg.slice("--dir=".length) : "media-staging";
   const mode = executeFlag ? "execute" : "dry-run";
-  return { mode, dir };
+  const onlyArg = argv.find((a) => a.startsWith("--only="));
+  const only = onlyArg ? onlyArg.slice("--only=".length) : null;
+  if (only !== null && only.trim() === "") {
+    throw new UsageError("--only=<slug> requires a non-empty value");
+  }
+  return { mode, dir, only };
 }
 
 function resolveEnv() {
@@ -546,9 +552,9 @@ function printSummary(summary, mode) {
 async function main() {
   const argv = process.argv.slice(2);
 
-  let mode, dir;
+  let mode, dir, only;
   try {
-    ({ mode, dir } = parseArgs(argv));
+    ({ mode, dir, only } = parseArgs(argv));
   } catch (err) {
     console.error(`Error: ${err.message}`);
     process.exit(2);
@@ -568,6 +574,16 @@ async function main() {
   } catch (err) {
     console.error(`Error: ${err.message}`);
     process.exit(2);
+  }
+
+  if (only !== null) {
+    if (!folderNames.includes(only)) {
+      console.error(
+        `Error: --only=${only} does not match any folder in ${dir}. Available: ${folderNames.join(", ") || "(none)"}`
+      );
+      process.exit(2);
+    }
+    folderNames = [only];
   }
 
   printConfigSummary(config, mode, dir);

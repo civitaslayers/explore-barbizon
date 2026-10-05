@@ -11,6 +11,8 @@ import {
   computeFolderOrders,
   r2KeyFor,
   urlFor,
+  parseArgs,
+  UsageError,
 } from "./upload-media.mjs";
 
 // ---------------------------------------------------------------------------
@@ -117,4 +119,36 @@ test("r2KeyFor: _general/site-asset path", () => {
     r2KeyFor("general", "grande-rue-ambiance-01", 800),
     "general/grande-rue-ambiance-01-800.webp"
   );
+});
+
+// ---------------------------------------------------------------------------
+// parseArgs
+// ---------------------------------------------------------------------------
+
+test("parseArgs: --only=<slug> is parsed, defaults to dry-run/media-staging", () => {
+  assert.deepEqual(parseArgs(["--only=auberge-ganne"]), {
+    mode: "dry-run",
+    dir: "media-staging",
+    only: "auberge-ganne",
+  });
+});
+
+test("parseArgs: no flags -> only defaults to null", () => {
+  assert.deepEqual(parseArgs([]), {
+    mode: "dry-run",
+    dir: "media-staging",
+    only: null,
+  });
+});
+
+test("parseArgs: --only= with empty value throws UsageError", () => {
+  assert.throws(() => parseArgs(["--only="]), UsageError);
+});
+
+test("parseArgs: --execute --only=foo --dir=custom-dir all parsed together", () => {
+  assert.deepEqual(parseArgs(["--execute", "--only=foo", "--dir=custom-dir"]), {
+    mode: "execute",
+    dir: "custom-dir",
+    only: "foo",
+  });
 });
