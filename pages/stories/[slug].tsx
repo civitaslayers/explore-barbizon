@@ -113,8 +113,7 @@ const RELATED: Record<string, ComponentProps<typeof RelatedStories>> = {
       }
     ],
     places: [
-      { slug: "maison-millet", name: "Maison Millet", category: "Studio" },
-      { slug: "grande-rue", name: "Grande Rue", category: "Walk" }
+      { slug: "maison-millet", name: "Maison Millet", category: "Studio" }
     ]
   },
   "paths-to-the-forest": {
@@ -126,11 +125,6 @@ const RELATED: Record<string, ComponentProps<typeof RelatedStories>> = {
       }
     ],
     places: [
-      {
-        slug: "forest-entrance",
-        name: "Forest Entrance",
-        category: "Landscape"
-      },
       {
         slug: "sentier-des-peintres",
         name: "Sentier des Peintres",
@@ -174,8 +168,7 @@ const RELATED: Record<string, ComponentProps<typeof RelatedStories>> = {
       }
     ],
     places: [
-      { slug: "maison-millet", name: "Maison Millet", category: "Studio" },
-      { slug: "grande-rue", name: "Grande Rue", category: "Walk" }
+      { slug: "maison-millet", name: "Maison Millet", category: "Studio" }
     ]
   },
   "how-the-forest-became-a-picture": {
@@ -192,11 +185,6 @@ const RELATED: Record<string, ComponentProps<typeof RelatedStories>> = {
       }
     ],
     places: [
-      {
-        slug: "forest-entrance",
-        name: "Forest Entrance",
-        category: "Landscape"
-      },
       {
         slug: "sentier-des-peintres",
         name: "Sentier des Peintres",

@@ -3,6 +3,7 @@ import type { GetStaticProps, NextPage } from "next";
 import { useRouter } from "next/router";
 import type { SSRConfig } from "next-i18next/pages";
 import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
+import { useTranslation } from "next-i18next/pages";
 import ImagePlaceholder from "@/components/ImagePlaceholder";
 import { SeoHead } from "@/components/SeoHead";
 import { heroImage800w } from "@/lib/media";
@@ -52,11 +53,20 @@ type HomePageProps = {
 const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
   const router = useRouter();
   const locale = router.locale ?? "fr";
+  const { t } = useTranslation("pages");
+  // Per-locale manual line breaks for the hero headline (brain/decisions.md
+  // gate-feedback round, task 1b180958) — an array, not `<br/>`s inside the
+  // string, so each locale controls its own break points. `returnObjects`
+  // is required: i18next defaults to treating a key resolving to a
+  // non-string value as missing.
+  const heroTitleLines = t("home.hero.titleLines", {
+    returnObjects: true,
+  }) as string[];
   return (
     <>
       <SeoHead
-        title="Visit Barbizon — Cultural Cartography"
-        description="Visit Barbizon — a curated cultural guide to the forest-edge village that inspired generations of artists."
+        title={t("home.meta.title")}
+        description={t("home.meta.description")}
         path="/"
         locale={locale}
       />
@@ -79,26 +89,26 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
 
           <div className="fade-in-hero relative z-10 max-w-3xl space-y-6 p-8 md:p-14 lg:p-20">
             <p className="font-sans text-[10px] uppercase tracking-[0.35em] text-cream/60">
-              A Cultural Atlas
+              {t("home.hero.eyebrow")}
             </p>
 
             <h1 className="font-serif text-[3.2rem] italic leading-[0.95] tracking-tight text-cream md:text-[5rem] lg:text-[6rem]">
-              Barbizon:
-              <br />
-              The Artists&apos;
-              <br />
-              Village
+              {heroTitleLines.map((line) => (
+                <span key={line} className="block">
+                  {line}
+                </span>
+              ))}
             </h1>
 
             <div className="flex flex-wrap gap-3 pt-2">
               <Link href="/map" className="btn btn-primary text-[10px]">
-                Explore the Map
+                {t("home.hero.ctaMap")}
               </Link>
               <Link
                 href="/places"
                 className="btn btn-secondary border-cream/40 text-[10px] text-cream hover:border-cream/70 hover:bg-cream/10"
               >
-                Discover the Village
+                {t("home.hero.ctaPlaces")}
               </Link>
             </div>
           </div>
@@ -108,24 +118,15 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
         <section className="grid gap-10 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:items-start">
           <div className="space-y-3">
             <p className="eyebrow">
-              WHY BARBIZON
+              {t("home.why.eyebrow")}
             </p>
             <h2 className="heading-xl">
-              Where art history meets the forest.
+              {t("home.why.title")}
             </h2>
           </div>
           <div className="editorial-measure space-y-4 text-sm leading-relaxed text-ink/80 md:text-base">
-            <p>
-              In the nineteenth century, painters left Paris and settled in this
-              small village at the edge of the Fontainebleau forest. Working
-              outdoors, they studied weather, light, and ordinary rural life,
-              laying groundwork for modern landscape painting.
-            </p>
-            <p>
-              Today Barbizon is still a place of thresholds: between studio and
-              path, stone and sand, village street and forest clearing. Explore
-              Barbizon traces these overlaps rather than listing attractions.
-            </p>
+            <p>{t("home.why.p1")}</p>
+            <p>{t("home.why.p2")}</p>
           </div>
         </section>
 
@@ -133,10 +134,10 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
         <section className="space-y-8">
           <header className="space-y-3 editorial-measure">
             <p className="eyebrow">
-              CHOOSE YOUR PATH
+              {t("home.paths.eyebrow")}
             </p>
             <h2 className="heading-lg">
-              Three ways into Barbizon.
+              {t("home.paths.title")}
             </h2>
           </header>
           <div className="grid gap-5 md:grid-cols-3 md:gap-7">
@@ -146,18 +147,17 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
             >
               <div className="space-y-4">
                 <span className="chip mb-3 inline-block">
-                  Curated Tours
+                  {t("home.paths.map.eyebrow")}
                 </span>
                 <h3 className="font-serif text-base text-ink md:text-lg">
-                  Explore the Map
+                  {t("home.paths.map.title")}
                 </h3>
                 <p className="text-sm leading-relaxed text-ink/75 md:text-[15px]">
-                  See how studios, paths, and clearings relate to one another on
-                  a layered map of the village and forest edge.
+                  {t("home.paths.map.body")}
                 </p>
               </div>
               <span className="mt-5 text-[11px] uppercase tracking-[0.2em] text-ink/50">
-                Open map →
+                {t("home.paths.map.cta")}
               </span>
             </Link>
 
@@ -166,16 +166,18 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
               className="group card card-hover flex flex-col justify-between p-7 md:p-8"
             >
               <div className="space-y-4">
+                <span className="chip mb-3 inline-block">
+                  {t("home.paths.trail.eyebrow")}
+                </span>
                 <h3 className="font-serif text-base text-ink md:text-lg">
-                  Follow a Trail
+                  {t("home.paths.trail.title")}
                 </h3>
                 <p className="text-sm leading-relaxed text-ink/75 md:text-[15px]">
-                  Use gentle walking routes that connect village streets to the
-                  first rock outcrops and forest paths.
+                  {t("home.paths.trail.body")}
                 </p>
               </div>
               <span className="mt-5 text-[11px] uppercase tracking-[0.2em] text-ink/50">
-                View routes →
+                {t("home.paths.trail.cta")}
               </span>
             </Link>
 
@@ -185,18 +187,17 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
             >
               <div className="space-y-4">
                 <span className="chip mb-3 inline-block">
-                  Village Stories
+                  {t("home.paths.stories.eyebrow")}
                 </span>
                 <h3 className="font-serif text-base text-ink md:text-lg">
-                  Read the Stories
+                  {t("home.paths.stories.title")}
                 </h3>
                 <p className="text-sm leading-relaxed text-ink/75 md:text-[15px]">
-                  Short essays on how artists, walkers, and residents have
-                  looked at Barbizon over time.
+                  {t("home.paths.stories.body")}
                 </p>
               </div>
               <span className="mt-5 text-[11px] uppercase tracking-[0.2em] text-ink/50">
-                Open stories →
+                {t("home.paths.stories.cta")}
               </span>
             </Link>
           </div>
@@ -206,10 +207,10 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
         <section className="space-y-8">
           <header className="space-y-3 editorial-measure">
             <p className="eyebrow">
-              FEATURED ENCLAVES
+              {t("home.featured.eyebrow")}
             </p>
             <h2 className="heading-lg">
-              Places that define the village.
+              {t("home.featured.title")}
             </h2>
           </header>
 
@@ -254,33 +255,32 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
         <section className="space-y-8">
           <header className="space-y-3 editorial-measure">
             <p className="eyebrow">
-              MAP PREVIEW
+              {t("home.mapPreview.eyebrow")}
             </p>
             <h2 className="heading-lg">
-              A quiet cartography in progress.
+              {t("home.mapPreview.title")}
             </h2>
           </header>
           <Link href="/map" className="btn btn-secondary text-[11px]">
-            Open the Interactive Map
+            {t("home.mapPreview.cta")}
           </Link>
         </section>
 
         {/* 6. BARBIZON THROUGH TIME */}
         <section className="space-y-8">
           <header className="space-y-3 editorial-measure">
-            <p className="eyebrow">BARBIZON THROUGH TIME</p>
-            <h2 className="heading-lg">Two centuries of looking.</h2>
+            <p className="eyebrow">{t("home.history.eyebrow")}</p>
+            <h2 className="heading-lg">{t("home.history.title")}</h2>
           </header>
           <Link
             href="/history"
             className="group card card-hover flex flex-col justify-between p-7 md:p-8 editorial-measure"
           >
             <p className="text-sm leading-relaxed text-ink/75 md:text-[15px]">
-              Historical postcards, a visual timeline, and the archive of
-              sources behind this project.
+              {t("home.history.body")}
             </p>
             <span className="mt-5 text-[11px] uppercase tracking-[0.2em] text-ink/50">
-              Explore the history →
+              {t("home.history.cta")}
             </span>
           </Link>
         </section>
@@ -289,39 +289,35 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
         <section className="space-y-8">
           <header className="space-y-3 editorial-measure">
             <p className="eyebrow">
-              VISITOR INFO
+              {t("home.visitor.eyebrow")}
             </p>
             <h2 className="heading-lg">
-              Practical notes for a calm visit.
+              {t("home.visitor.title")}
             </h2>
           </header>
           <div className="grid gap-6 text-sm text-ink/80 md:grid-cols-3">
             <div className="card space-y-3 p-6">
               <h3 className="font-serif text-[13px] uppercase tracking-[0.18em] text-ink/70">
-                Where to park
+                {t("home.visitor.park.title")}
               </h3>
               <p className="leading-relaxed">
-                Public parking sits just off the Grande Rue and near the forest
-                entrance. From there, most of the village is reachable on foot
-                within a few minutes.
+                {t("home.visitor.park.body")}
               </p>
             </div>
             <div className="card space-y-3 p-6">
               <h3 className="font-serif text-[13px] uppercase tracking-[0.18em] text-ink/70">
-                Where to start
+                {t("home.visitor.start.title")}
               </h3>
               <p className="leading-relaxed">
-                Begin with a slow walk along the Grande Rue, then visit one
-                small museum or studio before turning toward the forest paths.
+                {t("home.visitor.start.body")}
               </p>
             </div>
             <div className="card space-y-3 p-6">
               <h3 className="font-serif text-[13px] uppercase tracking-[0.18em] text-ink/70">
-                Best time to visit
+                {t("home.visitor.bestTime.title")}
               </h3>
               <p className="leading-relaxed">
-                Early mornings and late afternoons offer softer light and
-                quieter paths, especially outside high summer weekends.
+                {t("home.visitor.bestTime.body")}
               </p>
             </div>
           </div>
@@ -335,7 +331,7 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async ({
   locale,
 }) => {
   const places = await getLocationCards();
-  const translations = await serverSideTranslations(locale ?? "fr", ["common"], nextI18NextConfig);
+  const translations = await serverSideTranslations(locale ?? "fr", ["common", "pages"], nextI18NextConfig);
   return {
     props: { featuredPlaces: buildFeaturedPlaces(places), ...translations },
     revalidate: 60,

@@ -1,0 +1,214 @@
+{
+  "home": {
+    "meta": {
+      "title": "Visit Barbizon — Cartographie culturelle",
+      "description": "Le guide culturel de Barbizon, village des peintres à l'orée de la forêt de Fontainebleau : ateliers, musées, sentiers et adresses, sur une seule carte."
+    },
+    "hero": {
+      "eyebrow": "Atlas culturel",
+      "title": "Barbizon, le village des peintres",
+      "titleLines": [
+        "Barbizon :",
+        "le village",
+        "des peintres"
+      ],
+      "ctaMap": "Explorer la carte",
+      "ctaPlaces": "Découvrir le village"
+    },
+    "why": {
+      "eyebrow": "Pourquoi Barbizon",
+      "title": "Là où l'histoire de l'art rejoint la forêt.",
+      "p1": "Au XIXe siècle, des peintres quittent Paris pour ce petit village à l'orée de la forêt de Fontainebleau. Ils y travaillent en plein air, observent le temps qu'il fait, la lumière, la vie rurale ordinaire, et posent les bases du paysage moderne.",
+      "p2": "Barbizon reste aujourd'hui un lieu de seuils : entre l'atelier et le sentier, la pierre et le sable, la rue du village et la clairière. Visit Barbizon suit ces passages plutôt que d'aligner des curiosités."
+    },
+    "paths": {
+      "eyebrow": "Choisir son chemin",
+      "title": "Trois façons d'entrer dans Barbizon.",
+      "map": {
+        "eyebrow": "La carte",
+        "title": "Explorer la carte",
+        "body": "Voir comment ateliers, chemins et clairières se répondent, sur une carte en couches du village et de la lisière.",
+        "cta": "Ouvrir la carte →"
+      },
+      "trail": {
+        "eyebrow": "Sentiers",
+        "title": "Suivre un sentier",
+        "body": "Des itinéraires à pied, sans difficulté, qui relient les rues du village aux premiers rochers et aux chemins de la forêt.",
+        "cta": "Voir les itinéraires →"
+      },
+      "stories": {
+        "eyebrow": "Récits du village",
+        "title": "Lire les récits",
+        "body": "De courts textes sur la façon dont artistes, promeneurs et habitants ont regardé Barbizon au fil du temps.",
+        "cta": "Lire les récits →"
+      }
+    },
+    "featured": {
+      "eyebrow": "Lieux choisis",
+      "title": "Les lieux qui font le village."
+    },
+    "mapPreview": {
+      "eyebrow": "Aperçu de la carte",
+      "title": "Une cartographie en cours, sans hâte.",
+      "cta": "Ouvrir la carte interactive"
+    },
+    "history": {
+      "eyebrow": "Barbizon au fil du temps",
+      "title": "Deux siècles de regards.",
+      "body": "Cartes postales anciennes, chronologie illustrée et sources qui fondent ce projet.",
+      "cta": "Explorer l'histoire →"
+    },
+    "visitor": {
+      "eyebrow": "Infos pratiques",
+      "title": "Quelques repères pour une visite sans hâte.",
+      "park": {
+        "title": "Où se garer",
+        "body": "Des parkings publics se trouvent juste à côté de la Grande Rue et près de l'entrée de la forêt. De là, presque tout le village se rejoint à pied en quelques minutes."
+      },
+      "start": {
+        "title": "Par où commencer",
+        "body": "Commencez par une promenade lente sur la Grande Rue, visitez un petit musée ou un atelier, puis prenez la direction des chemins de la forêt."
+      },
+      "bestTime": {
+        "title": "Quand venir",
+        "body": "Le matin tôt et en fin d'après-midi, la lumière est plus douce et les chemins plus calmes, surtout en dehors des week-ends de plein été."
+      }
+    }
+  },
+  "about": {
+    "meta": {
+      "title": "À propos — Visit Barbizon",
+      "description": "Visit Barbizon est un guide éditorial, à lire sans hâte, consacré à un village à l'orée de la forêt de Fontainebleau."
+    },
+    "eyebrow": "À propos du projet",
+    "title": "Un atlas discret pour un petit village.",
+    "p1": "Visit Barbizon est un guide éditorial, à lire sans hâte, consacré à un village à l'orée de la forêt de Fontainebleau. Il aborde Barbizon moins comme une liste de curiosités que comme un réseau de relations : des ateliers et des chemins, le temps qu'il fait et la pierre, des pièces et des itinéraires.",
+    "p2": "Le projet se conçoit comme une cartographie culturelle plutôt que comme une liste à cocher. Les lieux sont choisis pour la manière dont ils cadrent la lumière et le mouvement ; les récits retracent la façon dont artistes et visiteurs ont lu ce paysage au fil du temps.",
+    "p3": "Visit Barbizon est propulsé par Civitas Layers, une plateforme de récits géolocalisés, construits par couches."
+  },
+  "history": {
+    "meta": {
+      "title": "Histoire — Visit Barbizon",
+      "description": "Cartes postales anciennes, chronologie illustrée et sources du projet : deux siècles d'histoire du village des peintres."
+    },
+    "eyebrow": "Barbizon au fil du temps",
+    "title": "Un village, une forêt et deux siècles de regards.",
+    "intro": "Aux côtés des photographies et des cartes d'aujourd'hui, Visit Barbizon s'appuie sur des cartes postales anciennes, des guides et des images d'archives. Le village est regardé et décrit depuis bientôt deux siècles. Cette page rassemble quelques-unes de ces manières de voir, et retrace les événements qui ont façonné ce qu'il y a à voir.",
+    "timeline": {
+      "eyebrow": "Chronologie",
+      "title": "Moments clés, de 1822 à aujourd'hui.",
+      "events": {
+        "corot1822": {
+          "date": "1822",
+          "headline": "Corot peint en forêt de Fontainebleau.",
+          "detail": "Camille Corot fait ses premières études en forêt de Fontainebleau. D'autres paysagistes suivent, et la pratique du travail sur le motif, en plein air, s'installe. Barbizon, simple hameau à la lisière, devient bientôt leur point de chute."
+        },
+        "aubergeGanne": {
+          "date": "Années 1820–1860",
+          "headline": "L'auberge Ganne, foyer des peintres.",
+          "detail": "François Ganne et sa femme tiennent sur la Grande Rue une épicerie qui sert à boire et à manger, puis loge des hôtes. Des années 1820 aux années 1860, des peintres y séjournent ; ils décorent les meubles, les panneaux et jusqu'aux murs des chambres. L'auberge devient le foyer de ce qu'on appellera l'École de Barbizon."
+        },
+        "denecourt1842": {
+          "date": "1842",
+          "headline": "Denecourt balise les premiers sentiers.",
+          "detail": "Ancien sergent de l'Empire devenu le « Sylvain » de Fontainebleau, Claude-François Denecourt trace à partir de 1842 des sentiers balisés de flèches bleues, souvent présentés comme les premiers sentiers de randonnée balisés au monde. Il en ouvrira environ 150 kilomètres et publie des guides pour les promeneurs. Beaucoup des circuits d'aujourd'hui suivent encore ses tracés."
+        },
+        "rousseau1847": {
+          "date": "1847",
+          "headline": "Théodore Rousseau s'installe à Barbizon.",
+          "detail": "Rousseau loue une maison sur la Grande Rue et installe son atelier dans la grange attenante ; il y vivra les vingt dernières années de sa vie. Refusé au Salon pendant plus de dix ans, il y est de nouveau admis après la révolution de 1848, qui lui vaut aussi une commande de l'État."
+        },
+        "millet1849": {
+          "date": "1849",
+          "headline": "Jean-François Millet arrive avec sa famille.",
+          "detail": "Millet quitte Paris en 1849, l'année du choléra. Sa maison de la Grande Rue restera son atelier jusqu'à sa mort : il y peint Le Semeur, Des glaneuses et L'Angélus.",
+          "secondEssayLabel": "Et les champs qu'il a peints →"
+        },
+        "reserve1861": {
+          "date": "1861",
+          "headline": "Une « réserve artistique » protège la forêt.",
+          "detail": "Après des années de démarches menées notamment par Rousseau et les peintres, un décret du 13 août 1861 soustrait aux coupes 1 097 hectares de la forêt de Fontainebleau, au nom de leur valeur artistique. On y voit souvent la première réserve naturelle au monde. L'argument était esthétique : ce paysage méritait d'être protégé parce que les peintres avaient appris à le regarder."
+        },
+        "rousseauDeath": {
+          "date": "1867",
+          "headline": "Mort de Théodore Rousseau.",
+          "detail": "Rousseau meurt à Barbizon en décembre 1867. Il est inhumé au cimetière de Chailly-en-Bière : Barbizon n'est alors qu'un hameau de cette commune."
+        },
+        "milletDeath": {
+          "date": "1875",
+          "headline": "Mort de Millet ; Barbizon devient un lieu de pèlerinage.",
+          "detail": "Millet meurt en janvier 1875 et rejoint Rousseau au cimetière de Chailly ; Corot disparaît quelques semaines plus tard. La génération fondatrice s'efface, mais l'intérêt pour Barbizon ne faiblit pas : une nouvelle forme de tourisme culturel s'y enracine."
+        },
+        "commune1903": {
+          "date": "1903",
+          "headline": "Barbizon devient une commune.",
+          "detail": "Jusque-là hameau de Chailly-en-Bière, Barbizon devient une commune à part entière en 1903. Le village gagne son autonomie, et bientôt son propre cimetière."
+        },
+        "musee1995": {
+          "date": "1995",
+          "headline": "L'auberge Ganne devient musée.",
+          "detail": "Acquise par la commune en 1987, l'ancienne auberge est restaurée. Les travaux révèlent à l'étage, sous les papiers peints et les badigeons, les dessins et pochades laissés sur les murs par les peintres. Le musée ouvre en 1995 ; le Département de Seine-et-Marne en reprend la gestion en 2004."
+        },
+        "today": {
+          "date": "Aujourd'hui",
+          "headline": "Même échelle, même rue, même lisière.",
+          "detail": "Barbizon reste une longue rue entre la plaine cultivée et la forêt. Ce qui a attiré les peintres, la lumière, le sentiment de seuil, la proximité du sauvage, est en grande partie intact."
+        }
+      }
+    },
+    "postcards": {
+      "eyebrow": "Cartes postales et photographies",
+      "title": "Comment le village se regardait.",
+      "comingSoon": "Bientôt",
+      "body": "Cartes postales anciennes, illustrations de guides et photographies d'archives viendront ici."
+    },
+    "painters": {
+      "eyebrow": "Les peintres",
+      "title": "Ceux qui sont venus regarder.",
+      "millet": "S'installe à Barbizon en 1849 et y reste jusqu'à sa mort.",
+      "rousseau": "S'installe à Barbizon en 1847. Figure de proue de l'école.",
+      "corot": "Peint en forêt de Fontainebleau dès les années 1820.",
+      "daubigny": "Connu pour ses paysages de rivière, peints sur l'Oise et la Seine."
+    },
+    "sources": {
+      "eyebrow": "Sources et provenance",
+      "title": "D'où viennent ces informations.",
+      "p1": "Les contenus historiques de cette plateforme sont vérifiés auprès de sources institutionnelles : base Mérimée / POP, Archives départementales de Seine-et-Marne, Gallica / BnF, Musée départemental des peintres de Barbizon. Les recherches d'archives locales de grappilles.fr nourrissent de nombreux récits et sont créditées comme une contribution précieuse.",
+      "p2": "L'exactitude est un principe du projet. Une date, un nom ou un lieu n'est publié qu'une fois confirmé par au moins une source institutionnelle, ou par une connaissance locale directe. Les corrections sont les bienvenues : info@explorebarbizon.com.",
+      "grappillesCta": "Visiter grappilles.fr →",
+      "p3": "La connaissance du village s'appuie aussi sur Barbizon, le Guide, le blog de Jean-Michel Mahenc, ancien président de l'Office de tourisme de Barbizon, consacré à la vie du village, à ses restaurants, ses boutiques et ses sentiers. Comme grappilles.fr, il sert de piste de recherche : ce que nous publions est recoupé avec les sources ci-dessus.",
+      "guideCta": "Barbizon, le Guide →"
+    }
+  },
+  "plan": {
+    "meta": {
+      "title": "Préparer sa visite — Visit Barbizon",
+      "description": "Une trame simple pour une journée à Barbizon : partir de la carte, choisir quelques lieux, suivre un itinéraire à pied."
+    },
+    "eyebrow": "Préparer sa visite",
+    "title": "Une trame simple pour une journée à Barbizon.",
+    "intro": "Partez de la carte, choisissez quelques lieux et suivez l'un des itinéraires à pied. Cette page rassemblera bientôt les informations pratiques ; pour l'instant, elle propose une façon d'organiser votre temps.",
+    "step1": {
+      "title": "1. S'orienter",
+      "body": "Commencez par la {{mapLink}} pour voir comment le village rejoint la forêt.",
+      "mapLink": "carte interactive"
+    },
+    "step2": {
+      "title": "2. Choisir quelques lieux",
+      "body": "Choisissez deux ou trois lieux plutôt que beaucoup. Par exemple :"
+    },
+    "step3": {
+      "title": "3. Suivre un itinéraire",
+      "body": "Suivez l'un des circuits comme une trame souple :"
+    }
+  },
+  "stories": {
+    "meta": {
+      "title": "Récits — Visit Barbizon",
+      "description": "De courts récits sur la façon dont Barbizon a été regardé : par les fenêtres des ateliers, le long des chemins de la forêt, dans le calme des petits musées."
+    },
+    "eyebrow": "Carnet éditorial",
+    "title": "De courts récits sur la lumière, les intérieurs et les chemins.",
+    "intro": "Comment Barbizon a été regardé : par les fenêtres des ateliers, le long des chemins de la forêt, dans le calme des petits musées."
+  }
+}

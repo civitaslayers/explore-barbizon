@@ -2,6 +2,7 @@ import type { GetStaticProps, NextPage } from "next";
 import { useRouter } from "next/router";
 import type { SSRConfig } from "next-i18next/pages";
 import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
+import { useTranslation } from "next-i18next/pages";
 import { SeoHead } from "@/components/SeoHead";
 import nextI18NextConfig from "@/next-i18next.config";
 
@@ -10,41 +11,29 @@ type AboutPageProps = SSRConfig;
 const AboutPage: NextPage<AboutPageProps> = () => {
   const router = useRouter();
   const locale = router.locale ?? "fr";
+  const { t } = useTranslation("pages");
   return (
     <>
       <SeoHead
-        title="About — Visit Barbizon"
-        description="Visit Barbizon is a slow, editorial guide to a village on the edge of the Fontainebleau forest."
+        title={t("about.meta.title")}
+        description={t("about.meta.description")}
         path="/about"
         locale={locale}
       />
       <section className="space-y-8">
         <header className="editorial-measure space-y-4">
           <p className="text-xs uppercase tracking-[0.25em] text-ink/60">
-            ABOUT THIS PROJECT
+            {t("about.eyebrow")}
           </p>
           <h1 className="font-serif text-3xl leading-tight text-ink md:text-4xl">
-            A quiet atlas for a small village.
+            {t("about.title")}
           </h1>
         </header>
 
         <div className="editorial-measure space-y-4 text-sm leading-relaxed text-ink/80 md:text-base">
-          <p>
-            Visit Barbizon is a slow, editorial guide to a village on the edge
-            of the Fontainebleau forest. It treats Barbizon less as a list of
-            attractions and more as a field of relationships: studios and paths,
-            weather and stone, rooms and routes.
-          </p>
-          <p>
-            The project is built as a cultural cartography rather than a
-            checklist. Places are selected for the ways they frame light and
-            movement; stories trace how artists and visitors have read this
-            landscape over time.
-          </p>
-          <p>
-            Visit Barbizon is powered by Civitas Layers, a platform for
-            layered, place‑based narratives.
-          </p>
+          <p>{t("about.p1")}</p>
+          <p>{t("about.p2")}</p>
+          <p>{t("about.p3")}</p>
         </div>
       </section>
     </>
@@ -54,7 +43,7 @@ const AboutPage: NextPage<AboutPageProps> = () => {
 export const getStaticProps: GetStaticProps<AboutPageProps> = async ({
   locale,
 }) => {
-  const translations = await serverSideTranslations(locale ?? "fr", ["common"], nextI18NextConfig);
+  const translations = await serverSideTranslations(locale ?? "fr", ["common", "pages"], nextI18NextConfig);
   return { props: { ...translations }, revalidate: 60 };
 };
 
