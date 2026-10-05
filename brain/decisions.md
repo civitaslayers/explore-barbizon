@@ -1,4 +1,12 @@
 ---
+
+## 2026-10-05
+**Decision:** CCC's deleted Decisions and Memory pages (`pages/command-center/decisions/index.tsx`, `pages/command-center/memory/index.tsx`, removed in the 2026-10-05 overnight session, task `a05a2c04`) 404 — they are not redirected to a replacement.
+**Reason:** The `/command-center/pins` → Atlas precedent redirected because the page's function moved to a new location. Here nothing moved: the underlying `decisions`/`memory` Supabase tables are retired (2026-08-16 decision, above), not relocated, so there is no destination a redirect could honestly point to. A redirect would imply continuity that doesn't exist; a 404 is more honest.
+**Consequence:** Any stray internal link to either old CCC route breaks visibly (404) rather than silently landing somewhere unrelated. The replacement surface for "where did this go" is the plain outbound link to `brain/decisions.md` on GitHub added to the CCC Overview page in the same task.
+**Migration risk:** none — confirmed via repo-wide grep that nothing else links to either deleted route.
+
+---
 2026-10-04: Every translation write stamps _meta in the same statement
 Decision: Any write that creates or changes translations.<locale> must set translations.<locale>._meta {source_hash, translated_at, status} in the same SQL statement. source_hash uses the exact md5 expression in v_translation_health. status is 'published' only with Luigi's approval; otherwise 'draft'.
 Reason: Between 2026-08-13 and 2026-10-04, 93 records were migrated without _meta. getLocalized requires _meta.status = 'published', so every /en/ page silently served French for seven weeks and the hreflang gate had nothing to emit. Nothing failed loudly.

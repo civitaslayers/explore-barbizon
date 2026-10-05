@@ -1,8 +1,44 @@
 # Current State
 
-Last updated: 2026-10-04
+Last updated: 2026-10-05
 
 ## Status
+**2026-10-05 overnight session — merged.** 10 queued tasks (11 task rows — task 10
+covered two) were worked end-to-end (plan → implement → review) overnight on
+individual `overnight/*` branches off `main` (`ec8f13e`), each pushed with a Vercel
+preview, none merged at the time. This morning, on Luigi's explicit approval, all 10
+branches were merged to `main` locally in dependency order and pushed once
+(`ec8f13e..11ad938`), producing a single production deploy. Two rebase-first merges
+(`overnight/cards-800w-srcset` before `overnight/curated-cards-error-handling`'s
+`CuratedSection` edits, and `overnight/stale-strategy-docs` before `overnight/
+reconcile-claude-only-tool-model`'s `CLAUDE.md` edits) completed with zero real
+conflicts — both pairs touched the same file but different lines/sections, so content
+from both sides was retained automatically. Build/lint/tsc/test/`check:i18n` all green
+after every merge step and on the final merged `main`; `seo-audit` showed 32
+pre-existing title/meta-description length failures on stories/tours editorial copy,
+confirmed unrelated to any of the 10 merges (zero diff vs. the pre-merge commit on
+`pages/stories`, `pages/tours`, or SEO rendering code) — Luigi approved proceeding
+past this pre-existing debt rather than blocking the push on it. Rollback target if
+needed: `dpl_7HWkA3HcmsyZvRL3Kpe6DwajUkdG` (commit `ec8f13e`, the production
+deployment immediately before this push). Post-deploy verification on
+`explorebarbizon.com`: `/sitemap.xml` includes `/history` and `/stories`; `/en/map`
+page-data shows the English short description for `auberge-ganne`; `/places` curated
+cards render real content (not the new empty-state fallback). All 11 task rows set to
+`done`; all 10 `overnight/*` branches deleted, local and origin. Fixed: `/en/map`
+locale bug, missing sitemap routes, silent curated-cards catch, dead
+`getLocationBySlug()`, 800w card images, `suggest.ts` RLS-blind-read, CCC Decisions/
+Memory panel removal (pages deleted outright, 404 not redirect — Luigi approved),
+`upload-media.mjs --only` flag, Claude-only tool model doc/code reconciliation, stale
+strategy docs (`MAIN_BRAIN.md` counts, `architecture-summary.md`,
+`brain/roadmap.md`) + `tasks.status`/`execution_status` orthogonality documentation.
+11 follow-up tasks filed overnight (10 new + 1 addendum to pre-existing task
+`5c3e4fcf`), highest-priority being a newly-found RLS-blind-read bug in the
+task-automation HTTP contract itself (`dispatch.ts`/`run.ts`/`outputs.ts`) — not
+fixed, deliberately kept out of scope. Full per-task detail in
+`~/overnight-report-2026-10-05.md` (outside the repo). Decision 1 proposed in that
+report (map-popup locale predicate reuse) needs no `brain/decisions.md` entry — it
+only confirms the existing one-predicate rule, per Luigi.
+
 `/places` payload trim + EN short_description fallback fix (task 8ec7a8fb) merged to main
 (`511c2e2`, fast-forward from `feat/places-payload-trim`) and deployed to production. `/places`
 page-data dropped from ~142-145 kB to ~85-88 kB (both locales) by trimming
