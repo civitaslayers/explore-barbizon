@@ -1,182 +1,111 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useTranslation } from "next-i18next/pages";
 
 type TimelineTag = "art" | "forest" | "village" | "legacy";
 
 type TimelineEvent = {
-  date: string;
+  dateKey: string;
   tag: TimelineTag;
-  headline: string;
-  detail: ReactNode;
+  headlineKey: string;
+  detailKey: string;
+  essayLinks: { href: string; labelKey: string }[];
 };
 
+// Display copy (date/headline/detail) lives in pages.json
+// (`history.timeline.events.<id>.*`) — this list only carries the stable
+// ids, tags, and essay-link targets. `tag` values are code identifiers;
+// their display labels come from common.json (`timeline.tags.*`,
+// `timeline.filters.*`), untouched by this list.
 const events: TimelineEvent[] = [
   {
-    date: "1810s",
-    tag: "forest",
-    headline: "Fontainebleau forest mapped and opened for walkers.",
-    detail:
-      "Royal hunting ground for centuries, the Fontainebleau forest gradually opened to civilian visitors. Its sandstone formations, ancient oaks, and shifting light attracted early Romantic painters seeking an alternative to classical Italian landscape."
-  },
-  {
-    date: "1822",
+    dateKey: "corot1822",
     tag: "art",
-    headline: "First painters arrive from Paris, drawn by the light.",
-    detail: (
-      <>
-        Camille Corot and contemporaries made early excursions to paint in the
-        Fontainebleau region. The village of Barbizon, with its simple inn and
-        proximity to the forest edge, proved a practical base. The practice of
-        painting directly outdoors — en plein air — began in earnest.{" "}
-        <Link
-          href="/stories/how-the-forest-became-a-picture"
-          className="underline underline-offset-4 hover:text-ink transition-colors"
-        >
-          Read the essay →
-        </Link>
-      </>
-    )
+    headlineKey: "corot1822",
+    detailKey: "corot1822",
+    essayLinks: [
+      { href: "/stories/how-the-forest-became-a-picture", labelKey: "actions.readEssay" }
+    ]
   },
   {
-    date: "1830s",
+    dateKey: "aubergeGanne",
     tag: "village",
-    headline: "Père Ganne opens his inn to painters on credit.",
-    detail: (
-      <>
-        François Ganne, a Barbizon grocer, began accepting paintings as payment
-        for room and board. The Auberge Ganne became the social centre of what
-        would become the Barbizon School — a loose community of artists sharing
-        meals, arguments, and sketches on the inn&apos;s walls.{" "}
-        <Link
-          href="/stories/inn-paintings-dinner"
-          className="underline underline-offset-4 hover:text-ink transition-colors"
-        >
-          Read the essay →
-        </Link>
-      </>
-    )
+    headlineKey: "aubergeGanne",
+    detailKey: "aubergeGanne",
+    essayLinks: [
+      { href: "/stories/inn-paintings-dinner", labelKey: "actions.readEssay" }
+    ]
   },
   {
-    date: "1847",
-    tag: "art",
-    headline: "Théodore Rousseau settles permanently at 55 Grande Rue.",
-    detail: (
-      <>
-        Rousseau rented a house on the Grande Rue and installed his studio in the
-        adjoining barn. The following year the Revolution of 1848 brought him his
-        first official recognition — a state commission and, for the first time,
-        acceptance at the Salon. He never left Barbizon.
-      </>
-    )
-  },
-  {
-    date: "1849",
-    tag: "art",
-    headline: "Jean-François Millet arrives with his family, stays 26 years.",
-    detail: (
-      <>
-        Millet arrived after the cholera epidemic in Paris. His house on the
-        Grande Rue became his studio for the rest of his life. Here he produced
-        The Gleaners, The Angelus, and The Sower.{" "}
-        <Link
-          href="/stories/rooms-of-light"
-          className="underline underline-offset-4 hover:text-ink transition-colors"
-        >
-          Read the essay →
-        </Link>
-        {" "}
-        <Link
-          href="/stories/the-gleaners"
-          className="underline underline-offset-4 hover:text-ink transition-colors"
-        >
-          And the fields he painted →
-        </Link>
-      </>
-    )
-  },
-  {
-    date: "1853",
+    dateKey: "denecourt1842",
     tag: "forest",
-    headline: "Denecourt carves the first marked paths through the forest.",
-    detail: (
-      <>
-        Claude-François Denecourt, the &apos;hermit of Fontainebleau,&apos;
-        hand-carved hundreds of kilometres of marked trails. His guidebooks
-        mapped the forest for visitors and artists alike. Many of today&apos;s
-        walking routes still follow his original paths.{" "}
-        <Link
-          href="/stories/paths-to-the-forest"
-          className="underline underline-offset-4 hover:text-ink transition-colors"
-        >
-          Read the essay →
-        </Link>
-      </>
-    )
+    headlineKey: "denecourt1842",
+    detailKey: "denecourt1842",
+    essayLinks: [
+      { href: "/stories/paths-to-the-forest", labelKey: "actions.readEssay" }
+    ]
   },
   {
-    date: "1861",
+    dateKey: "rousseau1847",
+    tag: "art",
+    headlineKey: "rousseau1847",
+    detailKey: "rousseau1847",
+    essayLinks: []
+  },
+  {
+    dateKey: "millet1849",
+    tag: "art",
+    headlineKey: "millet1849",
+    detailKey: "millet1849",
+    essayLinks: [
+      { href: "/stories/rooms-of-light", labelKey: "actions.readEssay" }
+    ]
+  },
+  {
+    dateKey: "reserve1861",
     tag: "forest",
-    headline: "Napoleon III decrees the first nature reserve in history.",
-    detail: (
-      <>
-        After years of campaigning by Rousseau and other painters, Napoleon III set
-        aside 1,097 hectares of Fontainebleau as an &quot;artistic reserve&quot; on
-        13 August 1861 — the first land anywhere to be protected by law. The
-        argument was made in aesthetic terms: the landscape had value because
-        artists had taught people to see it.{" "}
-        <Link
-          href="/stories/paths-to-the-forest"
-          className="underline underline-offset-4 hover:text-ink transition-colors"
-        >
-          Read the essay →
-        </Link>
-      </>
-    )
+    headlineKey: "reserve1861",
+    detailKey: "reserve1861",
+    essayLinks: [
+      { href: "/stories/paths-to-the-forest", labelKey: "actions.readEssay" }
+    ]
   },
   {
-    date: "1867",
+    dateKey: "rousseauDeath",
     tag: "art",
-    headline: "Barbizon painters receive recognition at the Paris Exposition.",
-    detail:
-      "After decades of mixed Salon reception, the Barbizon School was officially celebrated at the Exposition Universelle. International collectors began acquiring the work in large quantities."
+    headlineKey: "rousseauDeath",
+    detailKey: "rousseauDeath",
+    essayLinks: []
   },
   {
-    date: "1875",
+    dateKey: "milletDeath",
     tag: "art",
-    headline: "Death of Millet. Barbizon becomes a site of pilgrimage.",
-    detail:
-      "With Millet's death and Rousseau's a few years earlier, the founding generation passed. Yet interest in Barbizon intensified — a new kind of cultural tourism took root."
+    headlineKey: "milletDeath",
+    detailKey: "milletDeath",
+    essayLinks: []
   },
   {
-    date: "1890s",
+    dateKey: "commune1903",
     tag: "village",
-    headline: "The Grande Rue fills with studios, galleries, and visitors.",
-    detail:
-      "Barbizon transformed from a working peasant village into a destination. Studios multiplied, postcards circulated, and guidebooks described the walk from the inn to Millet's house."
+    headlineKey: "commune1903",
+    detailKey: "commune1903",
+    essayLinks: []
   },
   {
-    date: "1945",
+    dateKey: "musee1995",
     tag: "legacy",
-    headline: "Post-war recognition of Barbizon's influence on Impressionism.",
-    detail:
-      "Historians drew the direct line: Monet, Pissarro, and Renoir worked in the shadow of what Rousseau, Millet, and Corot established at Barbizon. The practice of painting light outdoors — Barbizon planted that seed."
+    headlineKey: "musee1995",
+    detailKey: "musee1995",
+    essayLinks: []
   },
   {
-    date: "1987",
+    dateKey: "today",
     tag: "legacy",
-    headline: "Auberge Ganne reopens as the Musée des Peintres de Barbizon.",
-    detail:
-      "The inn where painters once paid in sketches was carefully restored. The painted walls — still visible beneath layers of time — were preserved behind glass."
-  },
-  {
-    date: "Today",
-    tag: "legacy",
-    headline: "The village endures — same scale, same street, same forest edge.",
-    detail:
-      "Barbizon remains a single street between open farmland and ancient forest. The proportions that drew painters here — the light, the threshold quality, the closeness of the wild — are largely intact."
+    headlineKey: "today",
+    detailKey: "today",
+    essayLinks: []
   }
 ];
 
@@ -199,12 +128,9 @@ function tagPillClasses(tag: TimelineTag): string {
   }
 }
 
-function eventKey(e: TimelineEvent): string {
-  return `${e.date}\u0000${e.headline}`;
-}
-
 export default function HistoryTimeline() {
-  const { t } = useTranslation("common");
+  const { t: tCommon } = useTranslation("common");
+  const { t: tPages } = useTranslation("pages");
   const [filter, setFilter] = useState<FilterKey>("all");
   const [openKey, setOpenKey] = useState<string | null>(null);
 
@@ -218,7 +144,7 @@ export default function HistoryTimeline() {
       <div
         className="mb-8 flex flex-wrap gap-2"
         role="toolbar"
-        aria-label={t("a11y.filterTimeline")}
+        aria-label={tCommon("a11y.filterTimeline")}
       >
         {filterKeys.map((key) => {
           const active = filter === key;
@@ -233,7 +159,7 @@ export default function HistoryTimeline() {
                   : "rounded-full border border-ink/20 px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.14em] text-ink/60 transition-colors hover:text-ink"
               }
             >
-              {t(`timeline.filters.${key}`)}
+              {tCommon(`timeline.filters.${key}`)}
             </button>
           );
         })}
@@ -247,7 +173,7 @@ export default function HistoryTimeline() {
 
         <ul className="relative m-0 list-none p-0">
           {filtered.map((event) => {
-            const key = eventKey(event);
+            const key = event.dateKey;
             const isOpen = openKey === key;
             return (
               <li key={key} className="m-0 p-0">
@@ -261,7 +187,7 @@ export default function HistoryTimeline() {
                 >
                   <div className="w-[90px] shrink-0 pt-0.5 text-right">
                     <span className="text-[13px] font-medium tabular-nums text-ink/60">
-                      {event.date}
+                      {tPages(`history.timeline.events.${event.dateKey}.date`)}
                     </span>
                   </div>
                   <div className="relative flex w-5 shrink-0 justify-center pt-1.5">
@@ -276,10 +202,10 @@ export default function HistoryTimeline() {
                     <span
                       className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-medium uppercase tracking-[0.18em] ${tagPillClasses(event.tag)}`}
                     >
-                      {t(`timeline.tags.${event.tag}`)}
+                      {tCommon(`timeline.tags.${event.tag}`)}
                     </span>
                     <p className="mt-2 font-serif text-base text-ink">
-                      {event.headline}
+                      {tPages(`history.timeline.events.${event.headlineKey}.headline`)}
                     </p>
                     <div
                       className={`overflow-hidden transition-[max-height] duration-300 ease-out ${
@@ -287,7 +213,22 @@ export default function HistoryTimeline() {
                       }`}
                     >
                       <div className="mt-3 text-sm leading-relaxed text-ink/70">
-                        {event.detail}
+                        <p>
+                          {tPages(`history.timeline.events.${event.detailKey}.detail`)}
+                        </p>
+                        {event.essayLinks.length > 0 ? (
+                          <p className="mt-2">
+                            {event.essayLinks.map((link) => (
+                              <Link
+                                key={link.href}
+                                href={link.href}
+                                className="underline underline-offset-4 hover:text-ink transition-colors"
+                              >
+                                {tCommon(link.labelKey)} →
+                              </Link>
+                            ))}
+                          </p>
+                        ) : null}
                       </div>
                     </div>
                   </div>

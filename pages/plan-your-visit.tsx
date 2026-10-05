@@ -3,25 +3,42 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import type { SSRConfig } from "next-i18next/pages";
 import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
+import { useTranslation } from "next-i18next/pages";
 import { SeoHead } from "@/components/SeoHead";
 import { getLocationCards, getPublishedTours } from "@/lib/supabase";
-import type { LocationCard } from "@/lib/supabase";
 import type { TourListItem } from "@/lib/types";
 import nextI18NextConfig from "@/next-i18next.config";
 
+// Explicit editorial order, not alphabetical-first-three (brain/decisions.md
+// task 1b180958). Verified live and published; none in the Practical layer.
+const EXAMPLE_PLACE_SLUGS = ["maison-millet", "auberge-ganne", "point-de-vue-apremont"] as const;
+
+type ExamplePlace = { slug: string; name: string };
+
 type PlanPageProps = {
-  places: LocationCard[];
+  examplePlaces: ExamplePlace[];
   tours: TourListItem[];
 } & SSRConfig;
 
-const PlanYourVisitPage: NextPage<PlanPageProps> = ({ places, tours }) => {
+// Mid-sentence inline link with no <Trans> helper in this codebase: split the
+// translated string on a sentinel inserted in place of {{mapLink}}, render
+// the link between the two halves.
+const MAP_LINK_SENTINEL = "@@MAPLINK@@";
+
+const PlanYourVisitPage: NextPage<PlanPageProps> = ({ examplePlaces, tours }) => {
   const router = useRouter();
   const locale = router.locale ?? "fr";
+  const { t } = useTranslation("pages");
+
+  const [step1Before, step1After] = t("plan.step1.body", {
+    mapLink: MAP_LINK_SENTINEL,
+  }).split(MAP_LINK_SENTINEL);
+
   return (
     <>
       <SeoHead
-        title="Plan Your Visit — Visit Barbizon"
-        description="A quiet framework for a day in Barbizon: start with a map, choose a few places, and follow a slow walking route."
+        title={t("plan.meta.title")}
+        description={t("plan.meta.description")}
         path="/plan-your-visit"
         locale={locale}
       />
@@ -29,44 +46,42 @@ const PlanYourVisitPage: NextPage<PlanPageProps> = ({ places, tours }) => {
       <section className="space-y-10">
         <header className="editorial-measure space-y-4">
           <p className="text-xs uppercase tracking-[0.25em] text-ink/60">
-            PLAN YOUR VISIT
+            {t("plan.eyebrow")}
           </p>
           <h1 className="font-serif text-3xl leading-tight text-ink md:text-4xl">
-            A quiet framework for a day in Barbizon.
+            {t("plan.title")}
           </h1>
           <p className="text-sm leading-relaxed text-ink/80 md:text-base">
-            Start with a map, choose a few places, and follow one of the slow
-            walking routes. This page will eventually gather practical details;
-            for now, it sketches a structure for your time.
+            {t("plan.intro")}
           </p>
         </header>
 
         <section className="grid gap-10 md:grid-cols-3">
           <div className="space-y-3 border border-ink/10 bg-cream/70 p-5">
             <h2 className="font-serif text-sm uppercase tracking-[0.2em] text-ink/80">
-              1. Orient yourself
+              {t("plan.step1.title")}
             </h2>
             <p className="text-xs leading-relaxed text-ink/75">
-              Begin with the{" "}
+              {step1Before}
               <Link
                 href="/map"
                 className="underline-offset-4 hover:underline"
               >
-                Explore Map
-              </Link>{" "}
-              to get a sense of how the village meets the forest.
+                {t("plan.step1.mapLink")}
+              </Link>
+              {step1After}
             </p>
           </div>
 
           <div className="space-y-3 border border-ink/10 bg-cream/70 p-5">
             <h2 className="font-serif text-sm uppercase tracking-[0.2em] text-ink/80">
-              2. Choose a few places
+              {t("plan.step2.title")}
             </h2>
             <p className="text-xs leading-relaxed text-ink/75">
-              Select two or three places rather than many. For example:
+              {t("plan.step2.body")}
             </p>
             <ul className="mt-2 space-y-1 text-xs text-ink/80">
-              {places.slice(0, 3).map((place) => (
+              {examplePlaces.map((place) => (
                 <li key={place.slug}>
                   <Link
                     href={`/places/${place.slug}`}
@@ -81,10 +96,10 @@ const PlanYourVisitPage: NextPage<PlanPageProps> = ({ places, tours }) => {
 
           <div className="space-y-3 border border-ink/10 bg-cream/70 p-5">
             <h2 className="font-serif text-sm uppercase tracking-[0.2em] text-ink/80">
-              3. Walk a route
+              {t("plan.step3.title")}
             </h2>
             <p className="text-xs leading-relaxed text-ink/75">
-              Follow one of the slow tours as a loose framework:
+              {t("plan.step3.body")}
             </p>
             <ul className="mt-2 space-y-1 text-xs text-ink/80">
               {tours.map((tour) => (
@@ -111,7 +126,7 @@ export const getStaticProps: GetStaticProps<PlanPageProps> = async ({
   const [toursData, places, translations] = await Promise.all([
     getPublishedTours(),
     getLocationCards(),
-    serverSideTranslations(locale ?? "fr", ["common"], nextI18NextConfig),
+    serverSideTranslations(locale ?? "fr", ["common", "pages"], nextI18NextConfig),
   ]);
   const tours = toursData.map((t) => ({
     slug: t.slug,
@@ -120,7 +135,19 @@ export const getStaticProps: GetStaticProps<PlanPageProps> = async ({
     durationHours: Math.round((t.duration_minutes ?? 120) / 60),
     stops: t.stops.map((s) => s.location_id),
   }));
-  return { props: { places, tours, ...translations }, revalidate: 60 };
+
+  const bySlug = new Map(places.map((p) => [p.slug, p]));
+  const examplePlaces: ExamplePlace[] = [];
+  for (const slug of EXAMPLE_PLACE_SLUGS) {
+    const place = bySlug.get(slug);
+    if (place) {
+      examplePlaces.push({ slug: place.slug, name: place.name });
+    } else {
+      console.warn(`[plan-your-visit] example place slug not found: ${slug}`);
+    }
+  }
+
+  return { props: { examplePlaces, tours, ...translations }, revalidate: 60 };
 };
 
 export default PlanYourVisitPage;
