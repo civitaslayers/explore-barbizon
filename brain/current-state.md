@@ -3,6 +3,33 @@
 Last updated: 2026-10-05
 
 ## Status
+**2026-10-05 editorial prose merge.** Tasks `1b180958` (homepage/about/history/
+plan-your-visit FR/EN prose + HistoryTimeline restructure) and `15dbdb55`
+(`pages/stories/index.tsx` FR/EN prose) merged to `main` via `ef92e5c` on branch
+`feat/editorial-prose-i18n`, pushed once (`8dc8416..ef92e5c`), one production
+deploy (`dpl_9gtJLW4nbMpDFNCxxzNH5Pq5ytQ8`, READY, aliased to
+`explorebarbizon.com`). Rollback target: `dpl_3RGbZsEFB2i9m188TcNuDVS1iLYN`
+(commit `8dc8416`, prior production). New `public/locales/{fr,en}/pages.json`
+carries all editorial prose for home/about/history/plan-your-visit/stories,
+copied verbatim from Luigi-approved sources (a claude.ai-authored markdown
+handoff for the first four pages, direct chat-supplied strings for stories and
+two gate-feedback fixes). `HistoryTimeline.tsx` restructured from 13 to 11
+events (`{dateKey,tag,headlineKey,detailKey,essayLinks}`), the homepage hero
+now renders per-locale line breaks via a `titleLines` array (not `<br/>`), and
+`scripts/check-i18n-strings.mjs` gained a permanent FR/EN key-parity check
+(there was never a `KNOWN_UNMIGRATED` allow-list to remove, despite being
+asked for one three times across this task — confirmed absent each time).
+`tours.name` typo fixed directly in the DB by claude.ai (`Parcours des
+Mosaïques`) — EN variant not expressible, `tours` has no `translations`
+column, follow-up task filed. Verified on production: `/`, `/en` show the
+3-line hero in both locales; `/history`, `/en/history`, `/stories`,
+`/en/stories` all 200 with correct FR/EN titles and copy. Known gap, not
+fixed here: homepage/`/places` category eyebrows (e.g. "Artist House") still
+render English on FR routes — this is DB data (`categories.name`), not a
+hardcoded string, and doubles as a lookup key in `MapGL.tsx`'s icon map —
+follow-up task filed, needs a `categories.slug`-keyed label map, not a direct
+translation of `categories.name`.
+
 **2026-10-05 overnight session — merged.** 10 queued tasks (11 task rows — task 10
 covered two) were worked end-to-end (plan → implement → review) overnight on
 individual `overnight/*` branches off `main` (`ec8f13e`), each pushed with a Vercel
