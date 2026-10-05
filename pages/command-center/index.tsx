@@ -118,33 +118,6 @@ const CommandCenterIndex: NextPageWithLayout<CommandCenterIndexProps> = ({
               </div>
             </section>
 
-            {/* Recent decisions */}
-            <section>
-              <div className="flex items-baseline justify-between mb-3">
-                <p className="eyebrow">Recent Decisions</p>
-                <Link href="/command-center/decisions" className="text-[10px] text-ink/40 no-underline hover:text-ink uppercase tracking-[0.15em]">
-                  All →
-                </Link>
-              </div>
-              <div className="border border-ink/10 rounded-lg overflow-hidden">
-                {stats.recentDecisions.length === 0 ? (
-                  <p className="text-sm text-ink/35 px-4 py-6 text-center">No decisions yet</p>
-                ) : (
-                  stats.recentDecisions.map((d, i) => (
-                    <div
-                      key={d.id}
-                      className={`px-4 py-3 ${i > 0 ? "border-t border-ink/8" : ""}`}
-                    >
-                      <p className="text-sm text-ink leading-snug">{d.title}</p>
-                      {d.decision && (
-                        <p className="text-[11px] text-ink/45 mt-0.5 line-clamp-1">{d.decision}</p>
-                      )}
-                    </div>
-                  ))
-                )}
-              </div>
-            </section>
-
             {/* Recent outputs */}
             <section>
               <div className="flex items-baseline justify-between mb-3">
@@ -175,34 +148,21 @@ const CommandCenterIndex: NextPageWithLayout<CommandCenterIndexProps> = ({
                 )}
               </div>
             </section>
-
-            {/* Recent memory */}
-            <section>
-              <div className="flex items-baseline justify-between mb-3">
-                <p className="eyebrow">Recent Memory</p>
-                <Link href="/command-center/memory" className="text-[10px] text-ink/40 no-underline hover:text-ink uppercase tracking-[0.15em]">
-                  All →
-                </Link>
-              </div>
-              <div className="border border-ink/10 rounded-lg overflow-hidden">
-                {stats.recentMemory.length === 0 ? (
-                  <p className="text-sm text-ink/35 px-4 py-6 text-center">No memory entries yet</p>
-                ) : (
-                  stats.recentMemory.map((m, i) => (
-                    <div
-                      key={m.id}
-                      className={`px-4 py-3 ${i > 0 ? "border-t border-ink/8" : ""}`}
-                    >
-                      <p className="text-[10px] uppercase tracking-[0.15em] text-ink/40 mb-0.5">{m.key}</p>
-                      <p className="text-[11px] text-ink/60 line-clamp-2 leading-relaxed">{m.content}</p>
-                    </div>
-                  ))
-                )}
-              </div>
-            </section>
           </div>
         </div>
       )}
+
+      <p className="mt-8 text-[11px] text-ink/40">
+        Decision log:{" "}
+        <a
+          href="https://github.com/civitaslayers/explore-barbizon/blob/main/brain/decisions.md"
+          target="_blank"
+          rel="noreferrer"
+          className="text-umber no-underline hover:text-moss"
+        >
+          brain/decisions.md ↗
+        </a>
+      </p>
     </div>
   );
 };
@@ -273,9 +233,9 @@ export const getServerSideProps: GetServerSideProps<
     translationHealth = [];
   }
 
-  // Overview stats — admin read (task 82295116). Previously fetched
-  // client-side via the anon `getOverviewStats`, which is deny-all under RLS
-  // and silently returned zeros/[] (the CCC "blind reads" bug).
+  // Overview stats — admin read. Previously fetched client-side via an
+  // anon read, which is deny-all under RLS and silently returned zeros/[]
+  // (the CCC "blind reads" bug, task 82295116).
   let stats: Stats | null = null;
   let statsError: string | null = null;
   try {
