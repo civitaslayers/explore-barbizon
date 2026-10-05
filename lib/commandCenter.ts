@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabase";
 // Types
 // ---------------------------------------------------------------------------
 // DB timestamps use DEFAULT now(); updated_at is maintained by triggers on
-// tasks, memory, and prompt_templates.
+// tasks and prompt_templates.
 
 export type TaskStatus = "backlog" | "ready" | "in_progress" | "review" | "done";
 export type TaskType =
@@ -72,24 +72,6 @@ export type Output = {
   prompt: string | null;
   response: string | null;
   version: number;
-  created_at: string;
-};
-
-export type Decision = {
-  id: string;
-  title: string;
-  context: string | null;
-  decision: string;
-  reasoning: string | null;
-  created_at: string;
-};
-
-export type Memory = {
-  id: string;
-  key: string; // Unique constraint (memory_key_key); upsert uses key as logical identifier
-  content: string;
-  category: string | null;
-  updated_at: string;
   created_at: string;
 };
 
@@ -282,87 +264,6 @@ export async function deleteOutput(id: string): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// Decisions
-// ---------------------------------------------------------------------------
-
-export async function getDecisions(): Promise<Decision[]> {
-  if (!supabase) throw new Error("Supabase not configured");
-  const { data, error } = await supabase
-    .from("decisions")
-    .select("*")
-    .order("created_at", { ascending: false });
-  if (error) throw new Error(error.message);
-  return (data ?? []) as Decision[];
-}
-
-export async function createDecision(
-  input: Omit<Decision, "id" | "created_at">
-): Promise<Decision> {
-  if (!supabase) throw new Error("Supabase not configured");
-  const { data, error } = await supabase
-    .from("decisions")
-    .insert(input)
-    .select()
-    .single();
-  if (error) throw new Error(error.message);
-  return data as Decision;
-}
-
-export async function updateDecision(
-  id: string,
-  input: Partial<Omit<Decision, "id" | "created_at">>
-): Promise<Decision> {
-  if (!supabase) throw new Error("Supabase not configured");
-  const { data, error } = await supabase
-    .from("decisions")
-    .update(input)
-    .eq("id", id)
-    .select()
-    .single();
-  if (error) throw new Error(error.message);
-  return data as Decision;
-}
-
-export async function deleteDecision(id: string): Promise<void> {
-  if (!supabase) throw new Error("Supabase not configured");
-  const { error } = await supabase.from("decisions").delete().eq("id", id);
-  if (error) throw new Error(error.message);
-}
-
-// ---------------------------------------------------------------------------
-// Memory
-// ---------------------------------------------------------------------------
-
-export async function getMemory(): Promise<Memory[]> {
-  if (!supabase) throw new Error("Supabase not configured");
-  const { data, error } = await supabase
-    .from("memory")
-    .select("*")
-    .order("updated_at", { ascending: false });
-  if (error) throw new Error(error.message);
-  return (data ?? []) as Memory[];
-}
-
-export async function upsertMemory(
-  input: Omit<Memory, "id" | "created_at" | "updated_at">
-): Promise<Memory> {
-  if (!supabase) throw new Error("Supabase not configured");
-  const { data, error } = await supabase
-    .from("memory")
-    .upsert(input, { onConflict: "key" })
-    .select()
-    .single();
-  if (error) throw new Error(error.message);
-  return data as Memory;
-}
-
-export async function deleteMemory(id: string): Promise<void> {
-  if (!supabase) throw new Error("Supabase not configured");
-  const { error } = await supabase.from("memory").delete().eq("id", id);
-  if (error) throw new Error(error.message);
-}
-
-// ---------------------------------------------------------------------------
 // Prompt Templates
 // ---------------------------------------------------------------------------
 
@@ -411,45 +312,4 @@ export async function deletePromptTemplate(id: string): Promise<void> {
     .delete()
     .eq("id", id);
   if (error) throw new Error(error.message);
-}
-
-// ---------------------------------------------------------------------------
-// Overview stats
-// ---------------------------------------------------------------------------
-
-export async function getOverviewStats() {
-  if (!supabase) throw new Error("Supabase not configured");
-
-  const [tasks, recentOutputs, recentDecisions, recentMemory] =
-    await Promise.all([
-      supabase.from("tasks").select("id, title, status, assigned_to, updated_at").order("updated_at", { ascending: false }),
-      supabase.from("outputs").select("*").order("created_at", { ascending: false }).limit(5),
-      supabase.from("decisions").select("*").order("created_at", { ascending: false }).limit(5),
-      supabase.from("memory").select("*").order("updated_at", { ascending: false }).limit(5),
-    ]);
-
-  if (tasks.error) throw new Error(tasks.error.message);
-  if (recentOutputs.error) throw new Error(recentOutputs.error.message);
-  if (recentDecisions.error) throw new Error(recentDecisions.error.message);
-  if (recentMemory.error) throw new Error(recentMemory.error.message);
-
-  const statusOrder: TaskStatus[] = ["backlog", "ready", "in_progress", "review", "done"];
-  const tasksByStatus = statusOrder.reduce(
-    (acc, s) => {
-      acc[s] = 0;
-      return acc;
-    },
-    {} as Record<string, number>
-  );
-  for (const t of tasks.data ?? []) {
-    if (t.status in tasksByStatus) tasksByStatus[t.status]++;
-  }
-
-  return {
-    tasksByStatus,
-    recentTasks: (tasks.data ?? []).slice(0, 5),
-    recentOutputs: recentOutputs.data ?? [],
-    recentDecisions: recentDecisions.data ?? [],
-    recentMemory: recentMemory.data ?? [],
-  };
 }

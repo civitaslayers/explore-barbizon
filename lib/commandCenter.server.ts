@@ -5,7 +5,7 @@ import { taskFromRow, type Task, type TaskStatus } from "@/lib/commandCenter";
 // Server-only Command Center reads (task 82295116 — CCC blind-read fix).
 //
 // `lib/commandCenter.ts`'s functions run against the ANON client, which is
-// deny-all under RLS for tasks/outputs/decisions/memory/task_links — they
+// deny-all under RLS for tasks/outputs/task_links — they
 // silently return [] / zero counts rather than erroring. This module reads
 // the same tables via `supabaseAdmin` (service role) and is meant to be
 // called ONLY from `getServerSideProps` or API routes — never from a client
@@ -61,37 +61,24 @@ export async function getTasksAdmin(): Promise<Task[]> {
 }
 
 /**
- * Overview stats for the CCC dashboard, admin-read. Same shape/return as
- * `getOverviewStats` in `lib/commandCenter.ts`.
+ * Overview stats for the CCC dashboard, admin-read: task status counts,
+ * recent tasks, and recent outputs.
  */
 export async function getOverviewStatsAdmin() {
-  const [tasks, recentOutputs, recentDecisions, recentMemory] =
-    await Promise.all([
-      supabaseAdmin
-        .from("tasks")
-        .select("id, title, status, assigned_to, updated_at")
-        .order("updated_at", { ascending: false }),
-      supabaseAdmin
-        .from("outputs")
-        .select("id, task_id, agent, prompt, response, version, created_at")
-        .order("created_at", { ascending: false })
-        .limit(5),
-      supabaseAdmin
-        .from("decisions")
-        .select("id, title, context, decision, reasoning, created_at")
-        .order("created_at", { ascending: false })
-        .limit(5),
-      supabaseAdmin
-        .from("memory")
-        .select("id, key, content, category, updated_at, created_at")
-        .order("updated_at", { ascending: false })
-        .limit(5),
-    ]);
+  const [tasks, recentOutputs] = await Promise.all([
+    supabaseAdmin
+      .from("tasks")
+      .select("id, title, status, assigned_to, updated_at")
+      .order("updated_at", { ascending: false }),
+    supabaseAdmin
+      .from("outputs")
+      .select("id, task_id, agent, prompt, response, version, created_at")
+      .order("created_at", { ascending: false })
+      .limit(5),
+  ]);
 
   if (tasks.error) throw new Error(tasks.error.message);
   if (recentOutputs.error) throw new Error(recentOutputs.error.message);
-  if (recentDecisions.error) throw new Error(recentDecisions.error.message);
-  if (recentMemory.error) throw new Error(recentMemory.error.message);
 
   const statusOrder: TaskStatus[] = [
     "backlog",
@@ -115,7 +102,5 @@ export async function getOverviewStatsAdmin() {
     tasksByStatus,
     recentTasks: (tasks.data ?? []).slice(0, 5),
     recentOutputs: recentOutputs.data ?? [],
-    recentDecisions: recentDecisions.data ?? [],
-    recentMemory: recentMemory.data ?? [],
   };
 }
