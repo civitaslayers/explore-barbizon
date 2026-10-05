@@ -3,6 +3,16 @@
 Last updated: 2026-10-05
 
 ## Status
+
+---
+2026-10-05 content work (claude.ai, live DB, verbatim handoff):
+- Stories: all 9 migrated to French-native (base columns) with English in translations.en +published; byte-verified against reviewed batch files. v_translation_health stories: 9 current.
+- Fact corrections in stories: Hugo/Sand moved from the 1850s to the 1870s; "le grand refusé"; 300,000 gold francs figure removed (belongs to 1870s debates); Ganne "paid in paintings" now framed as legend; museum opened 1995 (bought 1987, departmental 2004); Denecourt 1842 and "le Sylvain"; protection = artistic series 1853, decree 13 August 1861 (1,097 ha = 542 + 555); Gleaners 1889 sale + Pommery donation 1890 confirmed (Orsay); guides cross-checked against locations (Barjole, L'Ermitage, Muse Galerie no. 82, Via Veneto, Bas-Bréau/Siron, L'Esquisse museum, population). Broken body links /places/forest-entrance, /places/grande-rue, /places/musee-de-barbizon removed.
+- Guides: Besharat superlatives reduced to facts; transparency line added to where-to-stay (Luigi's decision); Le P'tit Angélus, Artemis Suite & Gîte (independent B&Bs) and Galerie L'Angélus added.
+- Locations corrected (FR+EN, _meta current): ae-ganne (payment legend, 1820s, 1987/1995/2004), les-pleiades (Daubigny ownership and 1830s claims removed, plaque kept), lesquisse (one sentence). Location EN also published: la-poste-barbizon, mairie-barbizon, chene-sully. tours.name "Parcours des Mosaïques".
+- Locations: 100 current, 11 missing (7 Heritage Plaques + 4 unpublished).
+---
+
 **2026-10-05 story cover images + getLocalized wiring merge.** Tasks
 `46b54e68` (story cover images, done) and the `getLocalized` wiring
 prerequisite of `be763b6d` (stories French-canonical migration, task itself
