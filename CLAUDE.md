@@ -221,6 +221,19 @@ canonical in Supabase.
   it — there is no file mirror. Dispatch and status (`execution_status`:
   `queued → in_progress → at_gate → done | blocked`) live in `tasks` / `outputs`
   — see `.claude/commands/run-loop.md`.
+- **`status` and `execution_status` are orthogonal, not redundant** (resolved
+  2026-08-16). `status` is the triage field — `backlog` (parked idea) vs
+  `ready` (committed work). `execution_status` is the pipeline field —
+  `todo → queued → in_progress → review → at_gate → done`. The same
+  `execution_status` value can legitimately appear under either `status`
+  value; there is no 1:1 mapping between them. The only invariant is `done` in
+  either column implies `done` in both, and that invariant is enforced by a
+  database trigger (`public.sync_task_done_status()` / `tasks_sync_done`), not
+  by agent discipline — `/run-loop` may continue writing `execution_status`
+  alone when closing a task; the trigger syncs `status` automatically. Do not
+  "fix" this later by writing both fields redundantly, and do not add a
+  status/execution_status consistency check to civitas-release-checker — the
+  database owns this invariant now.
 - **Governance.** claude.ai dispatches and reviews; agents execute; irreversible
   actions (merge/deploy, prod SQL, publish, spend) are approved by Luigi. The
   dispatcher never approves its own irreversible actions. The system may *propose*

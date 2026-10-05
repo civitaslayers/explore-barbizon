@@ -299,6 +299,29 @@ These override any default assumptions in queries, migrations, or AI-assisted se
 
 ---
 
+### Operational table — `tasks`: `status` vs `execution_status`
+
+Not a Civitas Layers content table, but documented here since the two
+columns are easy to conflate. They are **intentionally orthogonal, not
+redundant** (resolved 2026-08-16):
+
+- `status` — the triage field: `backlog` (parked idea) vs `ready` (committed
+  work).
+- `execution_status` — the pipeline field: `todo → queued → in_progress →
+  review → at_gate → done`.
+
+The same `execution_status` value can legitimately appear under either
+`status` value — there is no 1:1 mapping between them. The only invariant is
+`done` in either column implies `done` in both, and that invariant is
+enforced by a database trigger (`public.sync_task_done_status()` /
+`tasks_sync_done`), not by agent discipline. `/run-loop` may continue writing
+`execution_status` alone when closing a task — the trigger syncs `status`
+automatically. Do not write both fields redundantly to "fix" this, and do not
+add a status/execution_status consistency check to civitas-release-checker —
+the database owns this invariant now.
+
+---
+
 ### Data rules — locations vs location_functions
 
 **One address, one business** → one `locations` row. No `location_functions` needed.
