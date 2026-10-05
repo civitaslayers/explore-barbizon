@@ -11,6 +11,9 @@ import {
   computeFolderOrders,
   r2KeyFor,
   urlFor,
+  parseArgs,
+  UsageError,
+  validateOnlyTarget,
 } from "./upload-media.mjs";
 
 // ---------------------------------------------------------------------------
@@ -117,4 +120,70 @@ test("r2KeyFor: _general/site-asset path", () => {
     r2KeyFor("general", "grande-rue-ambiance-01", 800),
     "general/grande-rue-ambiance-01-800.webp"
   );
+});
+
+// ---------------------------------------------------------------------------
+// parseArgs
+// ---------------------------------------------------------------------------
+
+test("parseArgs: --only=<slug> is parsed, defaults to dry-run/media-staging", () => {
+  assert.deepEqual(parseArgs(["--only=auberge-ganne"]), {
+    mode: "dry-run",
+    dir: "media-staging",
+    only: "auberge-ganne",
+  });
+});
+
+test("parseArgs: no flags -> only defaults to null", () => {
+  assert.deepEqual(parseArgs([]), {
+    mode: "dry-run",
+    dir: "media-staging",
+    only: null,
+  });
+});
+
+test("parseArgs: --only= with empty value throws UsageError", () => {
+  assert.throws(() => parseArgs(["--only="]), UsageError);
+});
+
+test("parseArgs: --execute --only=foo --dir=custom-dir all parsed together", () => {
+  assert.deepEqual(parseArgs(["--execute", "--only=foo", "--dir=custom-dir"]), {
+    mode: "execute",
+    dir: "custom-dir",
+    only: "foo",
+  });
+});
+
+// ---------------------------------------------------------------------------
+// validateOnlyTarget (task 0b1fd1c4) — `--only` must scope to exactly one
+// LOCATION folder and must never match a `_`-prefixed general/site-asset
+// folder, even if that folder exists in the raw staging dir listing.
+// ---------------------------------------------------------------------------
+
+test("validateOnlyTarget: only === null (flag not passed) is always valid", () => {
+  assert.equal(validateOnlyTarget(null, ["auberge-ganne"], ["_general"]), null);
+});
+
+test("validateOnlyTarget: --only matching a real location folder is valid", () => {
+  assert.equal(
+    validateOnlyTarget("auberge-ganne", ["auberge-ganne", "maison-45"], ["_general"]),
+    null
+  );
+});
+
+test("validateOnlyTarget: --only=_general (a real _-prefixed folder) is rejected, never silently processed", () => {
+  const err = validateOnlyTarget("_general", ["auberge-ganne"], ["_general"]);
+  assert.match(err, /general\/site-asset folder/);
+  assert.match(err, /_general/);
+});
+
+test("validateOnlyTarget: any `_`-prefixed value is rejected even if it doesn't exist as a folder", () => {
+  const err = validateOnlyTarget("_nonexistent", ["auberge-ganne"], []);
+  assert.match(err, /general\/site-asset folder/);
+});
+
+test("validateOnlyTarget: unknown non-underscore slug is rejected with a does-not-match message", () => {
+  const err = validateOnlyTarget("some-fake-slug-xyz", ["auberge-ganne"], ["_general"]);
+  assert.match(err, /does not match any folder/);
+  assert.doesNotMatch(err, /general\/site-asset folder/);
 });

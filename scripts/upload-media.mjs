@@ -16,6 +16,7 @@
 //   node scripts/upload-media.mjs --dry-run
 //   node scripts/upload-media.mjs --execute              (mutates R2 + DB)
 //   node scripts/upload-media.mjs --dir=media-staging
+//   node scripts/upload-media.mjs --only=auberge-ganne   (single location, dry-run)
 //
 // Env (dotenv from .env.local — see .env.example):
 //   CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_R2_ACCESS_KEY_ID,
@@ -111,6 +112,36 @@ export function urlFor(baseUrl, key) {
   return `${baseUrl.replace(/\/+$/, "")}/${key}`;
 }
 
+/**
+ * Validate `--only=<slug>` against the folder lists AFTER the `_`-prefix
+ * split. `--only` scopes to exactly one LOCATION folder — it must never
+ * match a `_`-prefixed general/site-asset folder (those are always
+ * processed in full, or not at all; they are never an `--only` target).
+ *
+ * Returns an error message string if `only` is invalid, or `null` if it's
+ * either valid or not supplied (`only === null`).
+ */
+export function validateOnlyTarget(only, locationFolders, generalFolders) {
+  if (only === null) return null;
+
+  if (only.startsWith("_") || generalFolders.includes(only)) {
+    return (
+      `--only=${only} is a general/site-asset folder. --only scopes to a single ` +
+      `LOCATION folder only — "_"-prefixed folders are never a valid --only target. ` +
+      `Available location folders: ${locationFolders.join(", ") || "(none)"}`
+    );
+  }
+
+  if (!locationFolders.includes(only)) {
+    return (
+      `--only=${only} does not match any folder. ` +
+      `Available location folders: ${locationFolders.join(", ") || "(none)"}`
+    );
+  }
+
+  return null;
+}
+
 function stripExt(filename) {
   const ext = extname(filename);
   return filename.slice(0, filename.length - ext.length);
@@ -156,9 +187,9 @@ function findNearMatches(target, candidates, limit = 5) {
 // CLI + env
 // ---------------------------------------------------------------------------
 
-class UsageError extends Error {}
+export class UsageError extends Error {}
 
-function parseArgs(argv) {
+export function parseArgs(argv) {
   const dryRunFlag = argv.includes("--dry-run");
   const executeFlag = argv.includes("--execute");
   if (dryRunFlag && executeFlag) {
@@ -167,7 +198,12 @@ function parseArgs(argv) {
   const dirArg = argv.find((a) => a.startsWith("--dir="));
   const dir = dirArg ? dirArg.slice("--dir=".length) : "media-staging";
   const mode = executeFlag ? "execute" : "dry-run";
-  return { mode, dir };
+  const onlyArg = argv.find((a) => a.startsWith("--only="));
+  const only = onlyArg ? onlyArg.slice("--only=".length) : null;
+  if (only !== null && only.trim() === "") {
+    throw new UsageError("--only=<slug> requires a non-empty value");
+  }
+  return { mode, dir, only };
 }
 
 function resolveEnv() {
@@ -546,9 +582,9 @@ function printSummary(summary, mode) {
 async function main() {
   const argv = process.argv.slice(2);
 
-  let mode, dir;
+  let mode, dir, only;
   try {
-    ({ mode, dir } = parseArgs(argv));
+    ({ mode, dir, only } = parseArgs(argv));
   } catch (err) {
     console.error(`Error: ${err.message}`);
     process.exit(2);
@@ -568,6 +604,19 @@ async function main() {
   } catch (err) {
     console.error(`Error: ${err.message}`);
     process.exit(2);
+  }
+
+  let generalFolders = folderNames.filter((n) => n.startsWith("_"));
+  let locationFolders = folderNames.filter((n) => !n.startsWith("_"));
+
+  const onlyError = validateOnlyTarget(only, locationFolders, generalFolders);
+  if (onlyError) {
+    console.error(`Error: ${onlyError}`);
+    process.exit(2);
+  }
+  if (only !== null) {
+    locationFolders = [only];
+    generalFolders = [];
   }
 
   printConfigSummary(config, mode, dir);
@@ -596,9 +645,6 @@ async function main() {
   }
   const slugMap = new Map((locations ?? []).map((l) => [l.slug, l.id]));
   const allSlugs = [...slugMap.keys()];
-
-  const generalFolders = folderNames.filter((n) => n.startsWith("_"));
-  const locationFolders = folderNames.filter((n) => !n.startsWith("_"));
 
   const summary = {
     foldersOk: 0,
