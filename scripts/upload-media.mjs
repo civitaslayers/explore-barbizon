@@ -112,6 +112,36 @@ export function urlFor(baseUrl, key) {
   return `${baseUrl.replace(/\/+$/, "")}/${key}`;
 }
 
+/**
+ * Validate `--only=<slug>` against the folder lists AFTER the `_`-prefix
+ * split. `--only` scopes to exactly one LOCATION folder — it must never
+ * match a `_`-prefixed general/site-asset folder (those are always
+ * processed in full, or not at all; they are never an `--only` target).
+ *
+ * Returns an error message string if `only` is invalid, or `null` if it's
+ * either valid or not supplied (`only === null`).
+ */
+export function validateOnlyTarget(only, locationFolders, generalFolders) {
+  if (only === null) return null;
+
+  if (only.startsWith("_") || generalFolders.includes(only)) {
+    return (
+      `--only=${only} is a general/site-asset folder. --only scopes to a single ` +
+      `LOCATION folder only — "_"-prefixed folders are never a valid --only target. ` +
+      `Available location folders: ${locationFolders.join(", ") || "(none)"}`
+    );
+  }
+
+  if (!locationFolders.includes(only)) {
+    return (
+      `--only=${only} does not match any folder. ` +
+      `Available location folders: ${locationFolders.join(", ") || "(none)"}`
+    );
+  }
+
+  return null;
+}
+
 function stripExt(filename) {
   const ext = extname(filename);
   return filename.slice(0, filename.length - ext.length);
@@ -576,14 +606,17 @@ async function main() {
     process.exit(2);
   }
 
+  let generalFolders = folderNames.filter((n) => n.startsWith("_"));
+  let locationFolders = folderNames.filter((n) => !n.startsWith("_"));
+
+  const onlyError = validateOnlyTarget(only, locationFolders, generalFolders);
+  if (onlyError) {
+    console.error(`Error: ${onlyError}`);
+    process.exit(2);
+  }
   if (only !== null) {
-    if (!folderNames.includes(only)) {
-      console.error(
-        `Error: --only=${only} does not match any folder in ${dir}. Available: ${folderNames.join(", ") || "(none)"}`
-      );
-      process.exit(2);
-    }
-    folderNames = [only];
+    locationFolders = [only];
+    generalFolders = [];
   }
 
   printConfigSummary(config, mode, dir);
@@ -612,9 +645,6 @@ async function main() {
   }
   const slugMap = new Map((locations ?? []).map((l) => [l.slug, l.id]));
   const allSlugs = [...slugMap.keys()];
-
-  const generalFolders = folderNames.filter((n) => n.startsWith("_"));
-  const locationFolders = folderNames.filter((n) => !n.startsWith("_"));
 
   const summary = {
     foldersOk: 0,
