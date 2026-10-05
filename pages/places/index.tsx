@@ -6,6 +6,7 @@ import { serverSideTranslations } from "next-i18next/pages/serverSideTranslation
 import { useState, useMemo } from "react";
 import ImagePlaceholder from "@/components/ImagePlaceholder";
 import { SeoHead } from "@/components/SeoHead";
+import { categoryLabel } from "@/lib/categoryLabel";
 import { heroImage800w } from "@/lib/media";
 import { getPublishedLocations, supabase } from "@/lib/supabase";
 import type { Place } from "@/lib/types";
@@ -224,10 +225,18 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({
   const { t } = useTranslation("common");
   const [activeCategory, setActiveCategory] = useState(ALL_FILTER);
 
-  const categories = useMemo(() => {
-    const cats = Array.from(new Set(places.map((p) => p.category))).sort();
-    return [ALL_FILTER, ...cats];
-  }, [places]);
+  const categoryOptions = useMemo(() => {
+    const byCategory = new Map<string, string>();
+    for (const p of places) {
+      if (!byCategory.has(p.category)) {
+        byCategory.set(p.category, categoryLabel(p.categorySlug, p.category, t));
+      }
+    }
+    const options = Array.from(byCategory.entries())
+      .map(([value, label]) => ({ value, label }))
+      .sort((a, b) => a.label.localeCompare(b.label, locale));
+    return [{ value: ALL_FILTER, label: t("places.filterAll") }, ...options];
+  }, [places, t, locale]);
 
   const filtered = useMemo(
     () =>
@@ -271,17 +280,17 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({
 
         {/* Category filters */}
         <div className="-mx-4 flex gap-0 overflow-x-auto border-b border-outline-variant/30 pb-1 scrollbar-none px-4 md:mx-0 md:px-0">
-          {categories.map((cat) => (
+          {categoryOptions.map(({ value, label }) => (
             <button
-              key={cat}
+              key={value}
               type="button"
-              onClick={() => setActiveCategory(cat)}
-              className={`-mb-px flex-shrink-0 border-b-2 px-4 pb-3 font-sans text-[10px] uppercase tracking-[0.2em] transition-all duration-300 ${activeCategory === cat
+              onClick={() => setActiveCategory(value)}
+              className={`-mb-px flex-shrink-0 border-b-2 px-4 pb-3 font-sans text-[10px] uppercase tracking-[0.2em] transition-all duration-300 ${activeCategory === value
                 ? "border-ink font-medium text-ink"
                 : "border-transparent text-ink/40 hover:text-ink/70"
                 }`}
             >
-              {cat === ALL_FILTER ? t("places.filterAll") : cat}
+              {label}
             </button>
           ))}
         </div>
@@ -308,7 +317,7 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({
 
               <div className="absolute bottom-0 left-0 right-0 p-5">
                 <span className="chip mb-2 inline-block">
-                  {place.category}
+                  {categoryLabel(place.categorySlug, place.category, t)}
                 </span>
                 <h3 className="font-serif text-lg italic leading-tight text-cream">
                   {place.name}

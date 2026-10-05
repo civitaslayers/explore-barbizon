@@ -1,3 +1,13 @@
+/**
+ * Lookup-key default for a null `categories` join — NOT a display string.
+ * All three consuming queries use `categories!inner(...)`, so this is
+ * unreachable; it exists so getCategoryGroup / CATEGORY_ICON always receive a
+ * key they recognise. User-visible labels resolve from `categories.slug` via
+ * lib/categoryLabel.ts.
+ */
+export const DEFAULT_CATEGORY_NAME = "Point of Interest";
+export const DEFAULT_CATEGORY_SLUG = "point-of-interest";
+
 export const GROUP_NAMES = [
   "Art & History",
   "Eat & Stay",

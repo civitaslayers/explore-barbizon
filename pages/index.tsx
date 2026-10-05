@@ -6,6 +6,7 @@ import { serverSideTranslations } from "next-i18next/pages/serverSideTranslation
 import { useTranslation } from "next-i18next/pages";
 import ImagePlaceholder from "@/components/ImagePlaceholder";
 import { SeoHead } from "@/components/SeoHead";
+import { categoryLabel } from "@/lib/categoryLabel";
 import { heroImage800w } from "@/lib/media";
 import { getLocationCards, type LocationCard } from "@/lib/supabase";
 import nextI18NextConfig from "@/next-i18next.config";
@@ -24,6 +25,7 @@ type FeaturedPlaceCard = {
   description: string;
   image: string | null;
   category: string;
+  categorySlug: string | null;
 };
 
 function buildFeaturedPlaces(places: LocationCard[]): FeaturedPlaceCard[] {
@@ -43,6 +45,7 @@ function buildFeaturedPlaces(places: LocationCard[]): FeaturedPlaceCard[] {
     description: p.shortDescription,
     image: p.heroImage,
     category: p.category,
+    categorySlug: p.categorySlug,
   }));
 }
 
@@ -54,6 +57,7 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
   const router = useRouter();
   const locale = router.locale ?? "fr";
   const { t } = useTranslation("pages");
+  const { t: tCommon } = useTranslation("common");
   // Per-locale manual line breaks for the hero headline (brain/decisions.md
   // gate-feedback round, task 1b180958) — an array, not `<br/>`s inside the
   // string, so each locale controls its own break points. `returnObjects`
@@ -237,7 +241,7 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
 
                 <div className="absolute bottom-0 left-0 right-0 border-t border-white/10 bg-surface-variant/60 p-5 backdrop-blur-sm">
                   <p className="mb-1 font-sans text-[9px] uppercase tracking-[0.25em] text-cream/60">
-                    {place.category}
+                    {categoryLabel(place.categorySlug, place.category, tCommon)}
                   </p>
                   <h3 className="font-serif text-base italic leading-tight text-cream">
                     {place.name}

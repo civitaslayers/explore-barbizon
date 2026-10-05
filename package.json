@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "task": "node scripts/run-task.js",
-    "test": "node --test lib/getLocalized.test.ts scripts/upload-media.test.mjs",
+    "test": "node --test lib/getLocalized.test.ts lib/categoryLabel.test.ts scripts/upload-media.test.mjs",
     "seo-audit": "node scripts/seo-audit.mjs",
     "check:i18n": "node scripts/check-i18n-strings.mjs",
     "upload-media": "node scripts/upload-media.mjs"

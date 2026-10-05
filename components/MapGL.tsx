@@ -229,6 +229,7 @@ function buildGeoJSON(locations: Place[]): GeoJSON.FeatureCollection {
           slug: loc.slug,
           name: loc.name,
           category: loc.category,
+          categorySlug: loc.categorySlug ?? "",
           group,
           iconId: getCategoryIconId(loc.category),
           shortDescription: loc.shortDescription ?? "",
@@ -379,6 +380,12 @@ type Props = {
   // change without a remount. Expected keys: trailEyebrow, loop,
   // difficultyEasy, difficultyModerate, difficultyHard, viewPlace.
   labels: Record<string, string>;
+  // categories.slug -> localized display label (lib/categoryLabel.ts's
+  // buildCategoryLabels, computed with t() in the parent). Same reason as
+  // `labels` above: read via a ref inside the imperative Mapbox popup
+  // builders below, which run in mount-once closures that would otherwise go
+  // stale after a locale change without a remount.
+  categoryLabels: Record<string, string>;
   locale: string;
 };
 
@@ -388,6 +395,7 @@ export default function MapGL({
   routes,
   focusSlug,
   labels,
+  categoryLabels,
   locale,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -396,11 +404,16 @@ export default function MapGL({
   const focusPopupRef = useRef<mapboxgl.Popup | null>(null);
   const hasIntroPlayed = useRef(false);
   const labelsRef = useRef(labels);
+  const categoryLabelsRef = useRef(categoryLabels);
   const localeRef = useRef(locale);
 
   useEffect(() => {
     labelsRef.current = labels;
   }, [labels]);
+
+  useEffect(() => {
+    categoryLabelsRef.current = categoryLabels;
+  }, [categoryLabels]);
 
   useEffect(() => {
     localeRef.current = locale;
@@ -743,6 +756,7 @@ export default function MapGL({
           slug: string;
           name: string;
           category: string;
+          categorySlug: string;
           shortDescription: string;
           route_slug: string;
           placeSlug: string;
@@ -772,12 +786,14 @@ export default function MapGL({
         // linked every pin popup to the French page even on /en/map.
         const href = props.placeSlug ? localizedPlaceHref(props.placeSlug) : null;
         const viewPlaceLabel = labelsRef.current.viewPlace ?? "View place";
+        const categoryEyebrow =
+          categoryLabelsRef.current[props.categorySlug] || props.category;
 
         new mapboxgl.Popup({ offset: 18, maxWidth: "260px" })
           .setLngLat(coords)
           .setHTML(
             `<div style="font-family:system-ui,sans-serif;padding:2px 0">` +
-            `<p style="font-size:10px;text-transform:uppercase;letter-spacing:0.2em;color:rgba(17,17,17,0.4);margin:0 0 5px">${props.category}</p>` +
+            `<p style="font-size:10px;text-transform:uppercase;letter-spacing:0.2em;color:rgba(17,17,17,0.4);margin:0 0 5px">${categoryEyebrow}</p>` +
             `<h3 style="font-family:Georgia,serif;font-size:15px;font-weight:400;color:#111;margin:0 0 ${props.shortDescription ? "7px" : "10px"};line-height:1.3">${props.name}</h3>` +
             (props.shortDescription
               ? `<p style="font-size:11px;color:rgba(17,17,17,0.6);margin:0 0 10px;line-height:1.55">${props.shortDescription}</p>`
@@ -873,11 +889,13 @@ export default function MapGL({
 
       timeoutId = setTimeout(() => {
         focusPopupRef.current?.remove();
+        const categoryEyebrow =
+          categoryLabelsRef.current[target.categorySlug ?? ""] || target.category;
         const popup = new mapboxgl.Popup({ offset: 18, maxWidth: "260px" })
           .setLngLat([target.longitude, target.latitude])
           .setHTML(
             `<div style="font-family:system-ui,sans-serif;padding:2px 0">` +
-              `<p style="font-size:10px;text-transform:uppercase;letter-spacing:0.2em;color:rgba(17,17,17,0.4);margin:0 0 5px">${target.category}</p>` +
+              `<p style="font-size:10px;text-transform:uppercase;letter-spacing:0.2em;color:rgba(17,17,17,0.4);margin:0 0 5px">${categoryEyebrow}</p>` +
               `<h3 style="font-family:Georgia,serif;font-size:15px;font-weight:400;color:#111;margin:0 0 ${target.shortDescription ? "7px" : "10px"};line-height:1.3">${target.name}</h3>` +
               (target.shortDescription
                 ? `<p style="font-size:11px;color:rgba(17,17,17,0.6);margin:0 0 10px;line-height:1.55">${target.shortDescription}</p>`
