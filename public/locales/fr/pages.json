@@ -201,5 +201,14 @@
       "title": "3. Suivre un itinéraire",
       "body": "Suivez l'un des circuits comme une trame souple :"
     }
+  },
+  "stories": {
+    "meta": {
+      "title": "Récits — Visit Barbizon",
+      "description": "De courts récits sur la façon dont Barbizon a été regardé : par les fenêtres des ateliers, le long des chemins de la forêt, dans le calme des petits musées."
+    },
+    "eyebrow": "Carnet éditorial",
+    "title": "De courts récits sur la lumière, les intérieurs et les chemins.",
+    "intro": "Comment Barbizon a été regardé : par les fenêtres des ateliers, le long des chemins de la forêt, dans le calme des petits musées."
   }
 }

@@ -201,5 +201,14 @@
       "title": "3. Walk a route",
       "body": "Follow one of the routes as a loose framework:"
     }
+  },
+  "stories": {
+    "meta": {
+      "title": "Stories — Visit Barbizon",
+      "description": "Short essays on how Barbizon has been looked at: through studio windows, along forest paths, and in the quiet of small museums."
+    },
+    "eyebrow": "Editorial Notebook",
+    "title": "Short essays on light, rooms, and routes.",
+    "intro": "How Barbizon has been looked at: through studio windows, along forest paths, and in the quiet of small museums."
   }
 }

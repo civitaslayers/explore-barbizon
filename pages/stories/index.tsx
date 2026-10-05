@@ -73,14 +73,15 @@ const StoriesIndexPage: NextPage<StoriesIndexProps> = ({ stories }) => {
   const router = useRouter();
   const locale = router.locale ?? "fr";
   const { t } = useTranslation("common");
+  const { t: tPages } = useTranslation("pages");
   const essays = stories.filter((s) => (s.type ?? "history") === "history");
   const guides = stories.filter((s) => s.type === "guide");
 
   return (
     <>
       <SeoHead
-        title="Stories — Visit Barbizon"
-        description="Short essays on how Barbizon has been looked at: through studio windows, along forest paths, and in the quiet of small museums."
+        title={tPages("stories.meta.title")}
+        description={tPages("stories.meta.description")}
         path="/stories"
         locale={locale}
       />
@@ -88,14 +89,13 @@ const StoriesIndexPage: NextPage<StoriesIndexProps> = ({ stories }) => {
       <section className="space-y-10">
         <header className="editorial-measure space-y-4">
           <p className="text-xs uppercase tracking-[0.25em] text-ink/60">
-            EDITORIAL NOTEBOOK
+            {tPages("stories.eyebrow")}
           </p>
           <h1 className="font-serif text-3xl leading-tight text-ink md:text-4xl">
-            Short essays on light, rooms, and routes.
+            {tPages("stories.title")}
           </h1>
           <p className="text-sm leading-relaxed text-ink/80 md:text-base">
-            Stories on how Barbizon has been looked at: through studio windows,
-            along forest paths, and in the quiet of small museums.
+            {tPages("stories.intro")}
           </p>
         </header>
 
@@ -170,7 +170,7 @@ const StoriesIndexPage: NextPage<StoriesIndexProps> = ({ stories }) => {
 export const getStaticProps: GetStaticProps<StoriesIndexProps> = async ({
   locale,
 }) => {
-  const translations = await serverSideTranslations(locale ?? "fr", ["common"], nextI18NextConfig);
+  const translations = await serverSideTranslations(locale ?? "fr", ["common", "pages"], nextI18NextConfig);
   try {
     const stories = await getPublishedStoriesFromSupabase();
     return { props: { stories, ...translations }, revalidate: 60 };
