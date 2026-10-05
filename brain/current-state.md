@@ -3,6 +3,50 @@
 Last updated: 2026-10-05
 
 ## Status
+**2026-10-05 story cover images + getLocalized wiring merge.** Tasks
+`46b54e68` (story cover images, done) and the `getLocalized` wiring
+prerequisite of `be763b6d` (stories French-canonical migration, task itself
+still open — content authorship is the remaining piece) merged to `main` via
+two sequential merges (`b3aeb70`, `88045fe`), pushed once
+(`5beeb24..88045fe`), one production deploy (`dpl_6Y9L1JA78EHWfDN3C63XQ76zT2Hh`,
+READY). Rollback target: `dpl_9gtJLW4nbMpDFNCxxzNH5Pq5ytQ8` (commit `5beeb24`,
+prior production).
+
+`pages/stories/index.tsx` and `pages/stories/[slug].tsx` now correctly read
+`title`/`subtitle`/`body` through `getLocalized()` (previously `index.tsx`
+didn't call it at all, and `[slug].tsx` wired title/subtitle but not body) —
+confirmed behavior-neutral today, since no story row has a published
+`translations.en` yet.
+
+Schema: `stories.cover_credit`, `stories.cover_alt` added (migration
+`add_stories_cover_credit_alt.sql`, approved by Luigi). All 9 `stories` rows
+now carry `cover_image_url`/`cover_credit`/`cover_alt` in FR base columns,
+mirrored into `translations.en` (dormant — no `_meta` written for these two
+fields, surfaces once `be763b6d`'s content migration publishes the row). 5
+public-domain paintings (Millet ×2, Monet, Rousseau, Corot — each verified
+PD-Art/CC0 directly off its Wikimedia Commons file page, not assumed)
+uploaded to R2 under `stories/<slug>-{1600,800}.webp`; 4 covers reuse existing
+own-site location photography, no re-upload. `/stories` index: essay cards
+get 4:3 thumbnails, "Dans le village" guide cards get 16:9; story detail
+pages get a full-width `object-contain` hero (paintings aren't cropped) with
+a conditional credit caption (only when `cover_credit` is non-null). Story
+`theme` values also localized (`story.themes.*` in `common.json`, 7 known DB
+values mapped, unknown falls back to `story.themeFallback`) — `
+components/RelatedStories.tsx` still renders `theme` raw/unmapped on the same
+page, flagged as an addendum to the pre-existing `33c21389` follow-up
+(replace the hardcoded `RELATED` const with a DB-sourced query), not fixed
+here.
+
+Verified on production: `/stories`, `/en/stories` show covers + localized
+theme labels; `/stories/the-gleaners` shows hero + correct FR credit caption;
+`/stories/inn-paintings-dinner` shows hero with zero caption elements
+(own-photo cover, no credit, by design).
+
+**Next:** claude.ai will write the French story text (title/subtitle/body,
+all 9 rows) into the DB per task `be763b6d`'s remaining scope. One redeploy
+needed afterward for the static pages to pick it up — no code change
+required, the read path is already wired.
+
 **2026-10-05 editorial prose merge.** Tasks `1b180958` (homepage/about/history/
 plan-your-visit FR/EN prose + HistoryTimeline restructure) and `15dbdb55`
 (`pages/stories/index.tsx` FR/EN prose) merged to `main` via `ef92e5c` on branch
