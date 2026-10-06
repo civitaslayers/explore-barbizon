@@ -1,8 +1,30 @@
 # Current State
 
-Last updated: 2026-10-05
+Last updated: 2026-10-06
 
 ## Status
+
+**2026-10-06 "My day" decision, PR #5.** Task `a44d7765` (done).
+`brain/decisions.md` gains the 2026-10-06 entry: the day planner from the
+Barbizon Mobile Rethink board is a layer on the map, not a new product model,
+and 1A's "the day is the product" / Today-tab premise is rejected.
+`MAIN_BRAIN.md` gains one line under "Product model" pointing to that entry.
+This is an explicit exception, approved by Luigi, to the do-not-modify rule.
+The branch `docs/my-day-decision` was cherry-picked from `origin/main`,
+reviewed by Luigi and merged as `ba10c79`. Doc-only, so it needs no deploy or
+SEO audit. Tasks table: `a44d7765` is done and `3c5b17b5` (planner v0) moved
+from `backlog` to `ready`. `/run-loop` has not been started for it.
+
+---
+2026-10-06 design review and planning (claude.ai, live DB, verbatim handoff):
+- Session start: 107 of 111 locations published, 100 with English; 54 non-done tasks.
+- "Barbizon Mobile Rethink" (Claude Design project 7b5a0592) revisited. 1A conflict resolved: the day planner ("My day") is a layer on the map, not a new product model. Recorded in brain/decisions.md 2026-10-06 (PR #5, merge ba10c79).
+- Planner dependencies unchanged since the 2026-08-15 review: opening_hours on 16 of 107 published, media on 52 of 107, 0 video, phone on 27 of 107, no price or amenities columns, no parking-distance table, 2 tours.
+- page_views now holds 69 rows (0 at the 2026-10-04 audit).
+- Tasks filed after a duplicate check: a44d7765 record decision (done), 3c5b17b5 planner v0 (ready, P2), f7e2a3e7 2A token inversion (ready, P3), a0fea870 opening hours backfill (ready, P2, human), d074fa2e Auberge Ganne 1987 vs 1995 verification (ready, P2), 7233da57 location_parking_distances (backlog, P4), fed18dd4 planner v1 hours-aware (backlog, P4).
+- Places grid photography from the 2A board is covered by existing task bd73b953; no new row filed.
+- Open, awaiting Luigi: the two P1 Heritage Plaque tasks overlap (verification must precede migration); not yet linked or merged.
+- Duplicate copies of the decision commits remain on overnight2/claude-only-tool-model-cleanup and drop out when that branch is rebased onto main.
 
 ---
 2026-10-05 content work (claude.ai, live DB, verbatim handoff):
