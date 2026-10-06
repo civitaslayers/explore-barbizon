@@ -20,38 +20,6 @@ export const supabase =
     ? createClient<Database>(supabaseUrl, supabaseAnonKey)
     : null;
 
-// ---------------------------------------------------------------------------
-// DB types (snake_case, matching the live locations schema exactly)
-// ---------------------------------------------------------------------------
-
-export type DbLocation = {
-  id: string;
-  town_id: string | null;
-  category_id: string | null;
-  name: string;
-  slug: string;
-  short_description: string | null;
-  full_description: string | null;
-  narrative: string | null;
-  latitude: number;
-  longitude: number;
-  address: string | null;
-  phone: string | null;
-  website: string | null;
-  opening_hours: Record<string, string> | null;
-  is_published: boolean | null;
-  is_premium: boolean | null;
-  is_featured: boolean | null;
-  qr_code_url: string | null;
-  show_on_map: boolean | null;
-  show_in_editorial: boolean | null;
-  created_at: string | null;
-  curation_order: number | null;
-  updated_at: string | null;
-  route_slug?: string | null;
-  media?: { url: string; display_order: number }[] | null;
-};
-
 /**
  * Shape returned by getPublishedLocations — trimmed to exactly what
  * pages/places/index.tsx renders, plus the two translations->en JSON paths

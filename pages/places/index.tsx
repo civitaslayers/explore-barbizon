@@ -177,10 +177,15 @@ function CuratedSection({
           >
             <div className="relative aspect-[16/10]">
               {place.heroImage ? (
+                /* 21rem = the widest this card ever renders: (70rem max-w-content − 4rem
+                   md:px-8 − 3rem of md:gap-6) / 3 columns. Mobile is narrower
+                   (min(72vw, 20rem)), so one conservative value never under-states, and
+                   with only 800w/1600w candidates it picks 800w at DPR 1–2 on every
+                   viewport. */
                 <img
                   src={heroImage800w(place.heroImage)}
                   srcSet={`${heroImage800w(place.heroImage)} 800w, ${place.heroImage} 1600w`}
-                  sizes="(min-width: 768px) 20rem, 72vw"
+                  sizes="21rem"
                   alt=""
                   className="h-full w-full object-cover"
                   loading="lazy"
