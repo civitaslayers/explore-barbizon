@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import { useTranslation, type SSRConfig } from "next-i18next/pages";
 import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
 import { useState, useMemo } from "react";
+import AddToDayButton from "@/components/AddToDayButton";
 import ImagePlaceholder from "@/components/ImagePlaceholder";
 import { SeoHead } from "@/components/SeoHead";
 import { categoryLabel } from "@/lib/categoryLabel";
@@ -170,10 +171,13 @@ function CuratedSection({
       </p>
       <div className="-mx-4 flex gap-4 overflow-x-auto px-4 pb-1 scrollbar-none snap-x snap-mandatory md:mx-0 md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:px-0 md:pb-0">
         {items.map((place) => (
-          <Link
+          <div
             key={place.slug}
+            className="relative flex w-[72vw] max-w-[20rem] flex-shrink-0 snap-start md:w-auto md:max-w-none"
+          >
+          <Link
             href={`/places/${place.slug}`}
-            className="flex w-[72vw] max-w-[20rem] flex-shrink-0 snap-start flex-col overflow-hidden rounded-xl border border-outline-variant/40 bg-surface transition-colors hover:border-ink/25 md:w-auto md:max-w-none"
+            className="flex w-full flex-col overflow-hidden rounded-xl border border-outline-variant/40 bg-surface transition-colors hover:border-ink/25"
           >
             <div className="relative aspect-[16/10]">
               {place.heroImage ? (
@@ -213,6 +217,13 @@ function CuratedSection({
               ) : null}
             </div>
           </Link>
+          <AddToDayButton
+            variant="icon"
+            slug={place.slug}
+            name={place.name}
+            className="absolute right-3 top-3 z-10"
+          />
+          </div>
         ))}
       </div>
     </div>
@@ -302,8 +313,8 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({
 
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 xl:gap-8">
           {filtered.map((place) => (
+            <div key={place.slug} className="relative">
             <Link
-              key={place.slug}
               href={`/places/${place.slug}`}
               className="group relative block aspect-[4/3] overflow-hidden rounded-2xl bg-ink/10"
             >
@@ -334,6 +345,13 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({
                 )}
               </div>
             </Link>
+            <AddToDayButton
+              variant="icon"
+              slug={place.slug}
+              name={place.name}
+              className="absolute right-3 top-3 z-10"
+            />
+            </div>
           ))}
         </div>
       </section>

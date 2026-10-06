@@ -5,7 +5,9 @@ import { useRouter } from "next/router";
 import { useTranslation, type SSRConfig } from "next-i18next/pages";
 import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
 import type { ReactNode } from "react";
+import AddToDayButton from "@/components/AddToDayButton";
 import ImagePlaceholder from "@/components/ImagePlaceholder";
+import { useMyDay } from "@/lib/useMyDay";
 import {
   getLocationFull,
   getPublishedLocationSlugs,
@@ -39,6 +41,8 @@ function UnifiedPlaceArticle({
   locale: string;
 }) {
   const { t } = useTranslation("common");
+  const { has } = useMyDay();
+  const inDay = has(place.slug);
   const heroImage = place.heroImage;
   const name = getLocalized(place, locale, "name") || place.name;
   const localizedNarrative = getLocalized(place, locale, "narrative");
@@ -102,6 +106,23 @@ function UnifiedPlaceArticle({
           <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/[0.06]" />
         </div>
       </header>
+
+      <div className="flex flex-col items-stretch gap-3 md:flex-row md:items-center">
+        <AddToDayButton
+          variant="pill"
+          slug={place.slug}
+          name={name}
+          className="w-full md:w-auto"
+        />
+        {inDay ? (
+          <Link
+            href="/map"
+            className="text-center font-sans text-[10px] uppercase tracking-[0.18em] text-umber hover:text-ink md:text-left"
+          >
+            {t("myDay.viewOnMap")} →
+          </Link>
+        ) : null}
+      </div>
 
       {narrativeParagraphs.length > 0 ? (
         <HistorySection paragraphs={narrativeParagraphs} />
