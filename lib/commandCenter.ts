@@ -267,16 +267,6 @@ export async function deleteOutput(id: string): Promise<void> {
 // Prompt Templates
 // ---------------------------------------------------------------------------
 
-export async function getPromptTemplates(): Promise<PromptTemplate[]> {
-  if (!supabase) throw new Error("Supabase not configured");
-  const { data, error } = await supabase
-    .from("prompt_templates")
-    .select("*")
-    .order("name");
-  if (error) throw new Error(error.message);
-  return (data ?? []) as PromptTemplate[];
-}
-
 export async function createPromptTemplate(
   input: Omit<PromptTemplate, "id" | "created_at" | "updated_at">
 ): Promise<PromptTemplate> {

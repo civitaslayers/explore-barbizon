@@ -1,5 +1,11 @@
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { taskFromRow, type Output, type Task, type TaskStatus } from "@/lib/commandCenter";
+import {
+  taskFromRow,
+  type Output,
+  type Task,
+  type TaskStatus,
+  type PromptTemplate,
+} from "@/lib/commandCenter";
 
 // ---------------------------------------------------------------------------
 // Server-only Command Center reads and writes (task 82295116 — CCC blind-read
@@ -175,4 +181,23 @@ export async function createOutputAdmin(
     .single();
   if (error) throw new Error(error.message);
   return data as Output;
+}
+
+const PROMPT_TEMPLATE_COLUMNS =
+  "id, name, target_agent, description, template, created_at, updated_at";
+
+/**
+ * All prompt templates, admin-read, same ordering as the retired anon
+ * getPromptTemplates() (name asc). prompt_templates has a deny-all RLS
+ * policy for public (cmd ALL, qual false), so the anon read returned []
+ * with no error — a blind read, not an empty library (task f219286a).
+ */
+export async function getPromptTemplatesAdmin(): Promise<PromptTemplate[]> {
+  const { data, error } = await supabaseAdmin
+    .from("prompt_templates")
+    .select(PROMPT_TEMPLATE_COLUMNS)
+    .order("name");
+
+  if (error) throw new Error(error.message);
+  return (data ?? []) as PromptTemplate[];
 }

@@ -147,9 +147,12 @@ Prompt template library per agent for CCC.
 ### Usage in code
 
 - Listing:
-  - `getPromptTemplates()`:
+  - `getPromptTemplatesAdmin()` (`lib/commandCenter.server.ts`, service role):
     - `.order("name")`
-- Create/update:
+- Create/update/delete:
+  - Still run through the anon client (`lib/commandCenter.ts`), which is
+    blocked by the deny-all RLS policy — follow-up task `b696ede8` filed to
+    move writes to an admin path.
   - Writes `name`, `target_agent`, `description`, `template`.
 
 #### Triggers
