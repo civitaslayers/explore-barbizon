@@ -23,14 +23,26 @@ type PromptsPageProps = {
   templatesError?: string | null;
 };
 
-const AGENTS = ["chatgpt", "claude", "cursor", "manual"];
+/**
+ * Selectable prompt_templates.target_agent values. Claude-only tool model:
+ * Claude is the only AI tool in the workflow, and "manual" covers templates
+ * a human runs by hand. target_agent is free text, so historical rows may
+ * still carry retired values (chatgpt, cursor) — not offered here, but kept
+ * selectable when editing an existing row (see agentOptions) so editing
+ * cannot silently rewrite them.
+ */
+const AGENTS = ["claude", "manual"];
 
 const AGENT_STYLE: Record<string, string> = {
-  chatgpt: "bg-umber/10 text-umber",
   claude: "bg-moss/15 text-moss",
-  cursor: "bg-ink/10 text-ink/60",
   manual: "border border-ink/20 text-ink/50",
 };
+
+/** Keeps a legacy/retired target_agent selectable, so opening and saving a
+ *  historical row cannot silently rewrite it to the first option. */
+function agentOptions(current: string): string[] {
+  return AGENTS.includes(current) ? AGENTS : [current, ...AGENTS];
+}
 
 const emptyForm = {
   name: "",
@@ -294,7 +306,7 @@ const PromptsPage: NextPageWithLayout<PromptsPageProps> = ({
                           onChange={(e) => setEditForm({ ...editForm, target_agent: e.target.value })}
                           className="rounded border border-ink/20 bg-white px-2 py-1.5 text-sm text-ink focus:outline-none"
                         >
-                          {AGENTS.map((a) => (
+                          {agentOptions(editForm.target_agent).map((a) => (
                             <option key={a} value={a}>{a}</option>
                           ))}
                         </select>
