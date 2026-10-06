@@ -4,6 +4,72 @@ Last updated: 2026-10-06
 
 ## Status
 
+**2026-10-06 overnight session 2 — merged.** 7 queued tasks (15 task rows —
+several jobs each covered multiple task IDs) were worked end-to-end
+(plan → implement → review) overnight on individual `overnight2/*` branches
+off `main`, each pushed with build/lint/test/check:i18n green. This morning,
+on Luigi's explicit approval, all 7 branches were rebased onto current
+`main` (which had since gained PRs #5 and #6, the day-planner decision) and
+merged locally in the report's recommended order, then pushed once
+(`c4c6c93..50fca45`), producing one production deploy
+(`dpl_FEPePo9RMRpsWjQPYCHnrg28xdbk`, READY). Rollback target if needed:
+`dpl_8fTDBTzcE3SoDTFDJ8rj7v61S9AQ` (commit `c4c6c93`, the production
+deployment immediately before this push).
+
+Two merge-time conflicts, both predicted in the overnight report:
+`lib/commandCenter.server.ts` (two branches each appended new admin-client
+functions at the same insertion point — resolved by keeping both blocks) and
+`docs/ccc-schema.md` (two branches independently reached the same fix for
+the `target_agent` column line — resolved by keeping the docs-updates
+branch's version, per Luigi's explicit call). Full verification gate
+(tsc/lint/test/check:i18n/build) green after every merge step and on the
+final merged `main`; `seo-audit` against a local build showed 23
+pre-existing title/meta-description length failures on story/tour/location
+editorial copy (zero hreflang/JSON-LD/sitemap failures) — confirmed
+unrelated to any of the 7 merges, same pre-existing debt class explicitly
+accepted before. Post-deploy verification on `explorebarbizon.com`:
+`/places` and `/en/places` serve correctly localized category labels (French
+on `/places`, English on `/en/places`); `/map` page-data confirms each pin
+carries both the unchanged `category` lookup key and the new `categorySlug`
+field. All 15 task rows set to `done`. Branch cleanup: `git cherry`
+confirmed the stray mixed branch (`overnight2/claude-only-tool-model-cleanup`,
+noted as a loose end in the entry below) and its local backup added nothing
+not already on `main` by content — both deleted, local only, never pushed.
+All 7 merged `overnight2/*` branches deleted, local and origin.
+
+Fixed across the 7 branches: category display labels now localize on FR/EN
+routes (homepage, `/places`, map popups) via a slug-keyed
+`categories.<slug>` catalogue; three more RLS-blind-read instances
+(dispatch/run/outputs.ts, prompt_templates) via the established admin-client
+pattern — the task-automation HTTP contract had never actually worked
+end-to-end before, since every call 404'd under deny-all RLS; a real UI
+data-loss bug in the CCC tasks list (closed `<select>` going blank for
+unknown assignee values, destructive clear option at the blank select's
+first position); two previously-broken task templates (code/research
+presets defaulting to retired `cursor`/`chatgpt`, un-runnable by
+`/api/tasks/[id]/run.ts`'s own gate) now default to `claude`; an LLM prompt
+that was teaching itself to assign new tasks to a retired tool fixed; four
+doc/migration-comment fixes (sources.md, ccc-schema.md decisions/memory
+tombstone, schema-reference.md now documents live `stories`/`routes`); three
+hygiene fixes (dead `DbLocation` type, a spent 1055-line corrective patch,
+an imprecise image `sizes` hint). A read-only investigation confirmed
+`page_views.referrer_host` is null by design, not bug — Luigi chose option
+(a) (accept `document.referrer` from the beacon body, first page load only,
+hostname-only extraction) for the follow-up task (`dd1a7f49`); not yet
+implemented.
+
+`CLAUDE.md`'s `MAIN_BRAIN.md` hard constraint now carries an explicit
+exception line (Luigi's instruction): modification is allowed only when
+Luigi explicitly asks for it in the current session, and only to record a
+decision already written to `brain/decisions.md` — written to close the gap
+the overnight session flagged around the day-planner PR #5 edit below.
+
+Full per-branch detail, the verification results, and the complete list of
+follow-up tasks filed are in `~/overnight-report-2026-10-06.md` (outside the
+repo, not re-duplicated here).
+
+---
+
 **2026-10-06 "My day" decision, PR #5.** Task `a44d7765` (done).
 `brain/decisions.md` gains the 2026-10-06 entry: the day planner from the
 Barbizon Mobile Rethink board is a layer on the map, not a new product model,

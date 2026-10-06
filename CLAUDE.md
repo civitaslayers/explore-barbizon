@@ -273,4 +273,5 @@ canonical in Supabase.
 - Do not run `git push --force`
 - Do not expose secrets in committed files — `.env.local` is gitignored
 - Do not modify `MAIN_BRAIN.md` — it is the master reference document
+  Exception: MAIN_BRAIN.md may be modified only when Luigi explicitly asks for it in the current session, and only to record a decision already written to brain/decisions.md.
 - Supabase project ref: `afqyrxtfbspghpfulvmy`
