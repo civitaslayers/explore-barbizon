@@ -1,5 +1,13 @@
 ---
 
+## 2026-10-06
+**Decision:** The day planner ("My day") from the "Barbizon Mobile Rethink" Claude Design board (project 7b5a0592) is adopted as a layer on the map, not as a new product model. "The map is the product" stands unchanged. The 1A board's premise that "the day is the product", with a Today tab that demotes the Atlas to a picker, is rejected. A visitor's chosen places render on the Atlas as a numbered walking route.
+**Reason:** 1A's core insight is sound: the nav was built from content types, not from what a visitor is doing. But it superseded a locked decision, and the map already has the primitives a planner needs (pins, coordinates, route rendering). Making the planner map-native keeps the product model intact and gives the feature a natural home. 1A was also built on stale data (42 places vs 107 published) and on facts the database does not hold (hours on 16 of 107, no price, no parking distances).
+**Consequence:** Planner ships in stages, each honest with live data. v0 (task 3c5b17b5): "Add to my day" on cards, place pages and pin panel; selection in localStorage; shareable URL of ordered slugs; numbered walking route on /map; no schema, no auth, no hours logic. v1 (task fed18dd4): hours-aware warnings, gated on the opening-hours backfill (a0fea870) and location_parking_distances (7233da57). The 1A mobile shell (Today tab, three/four-tab rework) is deferred until v0 usage is observed in page_views. Every planner fact slot renders conditionally, never a placeholder. All new UI strings are French-canonical. The 2A desktop board remains a refinement and proceeds independently (token inversion f7e2a3e7; Places grid photography under bd73b953). Design copy cannot ship until the Auberge Ganne date is verified (d074fa2e).
+**Migration risk:** none for v0. v1 adds one table via a human-gated migration.
+
+---
+
 ## 2026-10-05
 **Decision:** CCC's deleted Decisions and Memory pages (`pages/command-center/decisions/index.tsx`, `pages/command-center/memory/index.tsx`, removed in the 2026-10-05 overnight session, task `a05a2c04`) 404 — they are not redirected to a replacement.
 **Reason:** The `/command-center/pins` → Atlas precedent redirected because the page's function moved to a new location. Here nothing moved: the underlying `decisions`/`memory` Supabase tables are retired (2026-08-16 decision, above), not relocated, so there is no destination a redirect could honestly point to. A redirect would imply continuity that doesn't exist; a 404 is more honest.
