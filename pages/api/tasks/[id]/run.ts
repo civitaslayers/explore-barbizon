@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { spawn } from "child_process";
-import { getTask, createOutput, updateTask } from "@/lib/commandCenter";
+import { getTaskAdmin, createOutputAdmin, updateTaskAdmin } from "@/lib/commandCenter.server";
 import {
   buildAgentTaskBrief,
   defaultAgentBriefModeFromAssignee,
@@ -37,7 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   let task;
   try {
-    task = await getTask(id);
+    task = await getTaskAdmin(id);
   } catch (e: unknown) {
     return res.status(500).json({ error: e instanceof Error ? e.message : "Failed to fetch task" });
   }
@@ -52,7 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   // Mark as running.
-  await updateTask(id, { execution_status: "in_progress" });
+  await updateTaskAdmin(id, { execution_status: "in_progress" });
 
   // Build the brief.
   const mode = defaultAgentBriefModeFromAssignee(task.assigned_to);
@@ -64,28 +64,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     response = await runClaude(brief);
   } catch (e: unknown) {
     // Revert execution status so the task isn't stuck as in_progress.
-    await updateTask(id, { execution_status: "todo" });
+    await updateTaskAdmin(id, { execution_status: "todo" });
     return res.status(500).json({
       error: e instanceof Error ? e.message : "claude CLI failed",
     });
   }
 
   if (!response) {
-    await updateTask(id, { execution_status: "todo" });
+    await updateTaskAdmin(id, { execution_status: "todo" });
     return res.status(500).json({ error: "claude returned empty output" });
   }
 
   // Persist output.
   let output;
   try {
-    output = await createOutput({
+    output = await createOutputAdmin({
       task_id: id,
       agent: "claude",
       prompt: brief,
       response,
       version: 1,
     });
-    await updateTask(id, {
+    await updateTaskAdmin(id, {
       latest_output: response,
       execution_status: "review",
     });
