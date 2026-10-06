@@ -3,6 +3,18 @@
 -- Two tasks already exist (Forest & Nature category, Boulder trails) — this script
 -- does not touch them. All new tasks are inserted fresh.
 -- Last updated: 2026-03-21
+--
+-- APPLIED MIGRATION — historical record, not re-run, not rewritten.
+-- Applied 2026-03-21. The `tasks` table is now the canonical queue
+-- (brain/decisions.md, 2026-07-15 / 2026-08-16 — reference only, do not
+-- open/edit that file). Re-running would duplicate every row below — do not
+-- run. The `assigned_to = 'cursor'` values and any "Tavily MCP in Cursor"
+-- note in this file are historical — Cursor/ChatGPT and the multi-tool
+-- workflow were retired 2026-08-16 (Claude-only). `assigned_to` remains free
+-- text by design, so historical rows keep retired values and the CCC UI
+-- renders unknown assignees gracefully — these strings are deliberately not
+-- rewritten. Current task state lives in the `tasks` table, not in this
+-- file.
 
 -- ============================================================
 -- NOW — Ready to start immediately (priority 1–2)
