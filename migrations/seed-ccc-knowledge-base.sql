@@ -9,6 +9,14 @@
 -- historical only. `prompt_templates` was not part of that retirement and
 -- remains a separate, still-active table — the rows this file inserted
 -- there are still live, not retired.
+--
+-- CORRECTION (2026-10-06): the DECISIONS and MEMORY blocks inserted into the
+-- now-retired decisions/memory tables are historical only. Several rows
+-- describe surfaces that no longer exist: CCC's Decisions/Memory pages
+-- (deleted 2026-10-05, 404 by design), brain/task-queue.md and
+-- /api/brain/sync-tasks (retired 2026-08-16), and the multi-tool agent model
+-- (Cursor/ChatGPT/GPT/Grok/Perplexity retired 2026-08-16, Claude-only).
+-- prompt_templates rows remain live. Not re-run, not rewritten.
 
 -- ============================================================
 -- DECISIONS
