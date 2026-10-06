@@ -99,12 +99,14 @@ Analyse the current state and suggest 4–7 new tasks that would move the projec
 For each suggestion, choose:
 - task_type: one of code, data, ops, design, content, research
 - related_area: one of engineering, database, design, content, ops, product
-- assigned_to: one of claude, cursor, human (claude = architecture/planning/SQL; cursor = UI/frontend code; human = content entry, asset creation, external actions)
+- assigned_to: one of claude, human (claude = architecture/planning/SQL and code via the agent loop, including UI/frontend work; human = content entry, asset creation, external actions)
 - priority: 1 (urgent) to 5 (later)
+
+Older tasks shown above may list a retired assignee (cursor, chatgpt) — never reuse one for a new suggestion.
 
 Also write two fields that pre-populate the agent brief so it is ready to copy and paste:
 - next_step: a single concrete action sentence — what the agent should do first (e.g. "Read pages/places/[slug].tsx and audit the hero image treatment at mobile and large viewport")
-- implementation_notes: 2–5 bullet points covering scope, constraints, key files to touch, and anything the agent must not change. Tailor the depth and framing to the assigned_to agent (cursor = file paths and diff constraints; claude = architecture scope and schema rules; human = exact manual steps).
+- implementation_notes: 2–5 bullet points covering scope, constraints, key files to touch, and anything the agent must not change. Tailor the depth and framing to the assigned_to agent (claude = architecture scope, schema rules, and file paths/diff constraints; human = exact manual steps).
 
 Return ONLY a JSON object — no explanation, no markdown, no code fences. Start your response with { and end with }.
 
@@ -116,7 +118,7 @@ Return ONLY a JSON object — no explanation, no markdown, no code fences. Start
       "priority": 3,
       "task_type": "code",
       "related_area": "engineering",
-      "assigned_to": "cursor",
+      "assigned_to": "claude",
       "rationale": "Why this task is needed now, what it unblocks",
       "next_step": "Single concrete first action sentence",
       "implementation_notes": "- Bullet 1\\n- Bullet 2\\n- Bullet 3"
