@@ -85,6 +85,8 @@ This means:
 
 **The map is the product. All editorial content is a funnel into the map.**
 
+The day planner ("My day") is a layer on the map, not a separate product (see brain/decisions.md, 2026-10-06).
+
 ---
 
 
