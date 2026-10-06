@@ -1,6 +1,6 @@
 # Research Sources — Civitas Layers / ExploreBarbizon
 
-Last updated: 2026-04-02
+Last updated: 2026-10-06
 
 This file is the canonical reference for approved research sources.
 It is tied to the factual integrity policy in `brain/decisions.md`.
@@ -42,8 +42,7 @@ before any claim is published.
 | grappilles.fr | Valuable local archive — credited as research contribution, not primary authority |
 | barbizonvillagedespeintres.wordpress.com | Blog by Jean-Michel Mahenc, former Président de l'Office du Tourisme de Barbizon. Rich in village anecdote, commerce listings, celebrity history, restaurants and trails. Not updated since ~2015 but historically valuable. Same policy as grappilles.fr. |
 | cpbarbizon.wordpress.com | Second site by the same author as grappilles.fr — same rules apply |
-| Perplexity | Good for sourced research leads; citations must be traced to originals |
-| GPT / Grok / Claude | Useful for orientation; never cite AI output as a source |
+| claude.ai research session | Useful for orientation and finding leads; never cite AI output as a source — trace every lead to a Tier 1 or Tier 2 original |
 | Wikipedia | Useful for leads and context; never cite as primary source |
 | Cirkwi / Balad'Nature / Decathlon Outdoor | Trail metadata and GPX files — verify coordinates against field observation |
 
@@ -69,7 +68,7 @@ However:
 
 When drafting content in claude.ai:
 1. Claude will flag any claim that needs source verification
-2. Use Perplexity or Grok to find the Tier 1 record
+2. Research in a claude.ai session to find the Tier 1 record; Tier 3 leads such as grappilles.fr are cross-checked against Tier 1 before publishing
 3. If a Tier 1 source confirms: proceed to SQL generation
 4. If unverifiable: either hold the content or note uncertainty in the editorial text
 
