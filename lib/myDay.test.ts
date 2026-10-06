@@ -9,6 +9,7 @@ import {
   suggestOrder,
   moveItem,
   formatDistance,
+  popupDayToggleState,
   MY_DAY_MAX_STOPS,
 } from "./myDay.ts";
 
@@ -70,4 +71,15 @@ test("formatDistance FR/EN", () => {
   assert.equal(formatDistance(1234, "fr"), "1,2 km");
   assert.equal(formatDistance(1234, "en"), "1.2 km");
   assert.equal(formatDistance(999, "en"), "1.0 km");
+});
+
+test("popupDayToggleState hides the popup button while viewing a shared day", () => {
+  // Shared view: never offer an edit of the hidden stored day, whatever its state.
+  assert.equal(popupDayToggleState("a", [], false, true), "hidden");
+  assert.equal(popupDayToggleState("a", ["a"], false, true), "hidden");
+  assert.equal(popupDayToggleState("z", ["a"], true, true), "hidden");
+  // Own view: unchanged behaviour.
+  assert.equal(popupDayToggleState("a", ["a"], true, false), "in-day");
+  assert.equal(popupDayToggleState("z", ["a"], true, false), "full");
+  assert.equal(popupDayToggleState("z", ["a"], false, false), "add");
 });

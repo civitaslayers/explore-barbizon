@@ -270,6 +270,7 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
               dayStops={dayStops}
               daySlugs={myDay.slugs}
               dayFull={myDay.isFull}
+              dayShared={shared}
               onToggleDay={myDay.toggle}
               fitDayToken={fitDayToken}
             />

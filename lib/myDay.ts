@@ -86,6 +86,23 @@ export function suggestOrder<T extends LatLng>(stops: T[]): T[] {
   return ordered;
 }
 
+export type PopupDayToggleState = "hidden" | "in-day" | "full" | "add";
+
+// State of the "Add to my day" button in a map pin popup. While a shared day
+// is displayed the button is hidden: it would otherwise edit the visitor's
+// stored day, which is not on screen. Saving a shared day goes through the
+// panel's explicit save/replace action only.
+export function popupDayToggleState(
+  slug: string,
+  ownSlugs: readonly string[],
+  ownFull: boolean,
+  viewingShared: boolean
+): PopupDayToggleState {
+  if (viewingShared) return "hidden";
+  if (ownSlugs.includes(slug)) return "in-day";
+  return ownFull ? "full" : "add";
+}
+
 export function moveItem<T>(arr: T[], from: number, to: number): T[] {
   if (
     from === to ||

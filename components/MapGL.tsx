@@ -5,6 +5,7 @@ import type { Place } from "@/lib/types";
 import type { Route } from "@/lib/supabase";
 import { getCategoryGroup, GROUP_COLORS } from "@/lib/categoryGroups";
 import { DEFAULT_LIGHT_PRESET } from "@/lib/mapLight";
+import { popupDayToggleState } from "@/lib/myDay";
 import type { DayStop } from "@/components/MyDayPanel";
 
 // ---------------------------------------------------------------------------
@@ -454,10 +455,12 @@ type Props = {
   locale: string;
   // "My day" overlay (task 3c5b17b5). dayStops = resolved, ordered stops that
   // are drawn; daySlugs = raw stored slugs (popup button state); dayFull =
-  // the stored day is at its cap. fitDayToken bumps to request a camera fit.
+  // the stored day is at its cap; dayShared = a shared ?day is displayed, so
+  // the popup button is hidden. fitDayToken bumps to request a camera fit.
   dayStops: DayStop[];
   daySlugs: string[];
   dayFull: boolean;
+  dayShared: boolean;
   onToggleDay: (slug: string) => void;
   fitDayToken: number;
 };
@@ -473,6 +476,7 @@ export default function MapGL({
   dayStops,
   daySlugs,
   dayFull,
+  dayShared,
   onToggleDay,
   fitDayToken,
 }: Props) {
@@ -501,6 +505,7 @@ export default function MapGL({
   const dayStopsRef = useRef(dayStops);
   const daySlugsRef = useRef(daySlugs);
   const dayFullRef = useRef(dayFull);
+  const daySharedRef = useRef(dayShared);
   const onToggleDayRef = useRef(onToggleDay);
   const dayRefreshersRef = useRef<Set<() => void>>(new Set());
 
@@ -511,8 +516,16 @@ export default function MapGL({
       ?.querySelector<HTMLButtonElement>("[data-day-toggle]");
     if (!btn) return;
     const refresh = () => {
-      const inDay = daySlugsRef.current.includes(slug);
-      const blocked = dayFullRef.current && !inDay;
+      const state = popupDayToggleState(
+        slug,
+        daySlugsRef.current,
+        dayFullRef.current,
+        daySharedRef.current
+      );
+      // Inline display (not `hidden`) — the button's inline style sets display.
+      btn.style.display = state === "hidden" ? "none" : "block";
+      const inDay = state === "in-day";
+      const blocked = state === "full";
       btn.textContent = inDay
         ? (labelsRef.current.inDay ?? "In my day")
         : blocked
@@ -525,6 +538,7 @@ export default function MapGL({
     };
     refresh();
     btn.addEventListener("click", () => {
+      if (daySharedRef.current) return;
       onToggleDayRef.current(slug);
     });
     dayRefreshersRef.current.add(refresh);
@@ -1097,6 +1111,7 @@ export default function MapGL({
     dayStopsRef.current = dayStops;
     daySlugsRef.current = daySlugs;
     dayFullRef.current = dayFull;
+    daySharedRef.current = dayShared;
     onToggleDayRef.current = onToggleDay;
     dayRefreshersRef.current.forEach((refresh) => refresh());
     const map = mapRef.current;
@@ -1106,7 +1121,7 @@ export default function MapGL({
       src?.setData(buildDayGeoJSON(dayStops));
     };
     map.isStyleLoaded() ? update() : map.once("load", update);
-  }, [dayStops, daySlugs, dayFull, onToggleDay]);
+  }, [dayStops, daySlugs, dayFull, dayShared, onToggleDay]);
 
   // Camera fit on request (panel opened / shared day arrived).
   useEffect(() => {
