@@ -1,8 +1,9 @@
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { taskFromRow, type Task, type TaskStatus } from "@/lib/commandCenter";
+import { taskFromRow, type Output, type Task, type TaskStatus } from "@/lib/commandCenter";
 
 // ---------------------------------------------------------------------------
-// Server-only Command Center reads (task 82295116 — CCC blind-read fix).
+// Server-only Command Center reads and writes (task 82295116 — CCC blind-read
+// fix; task 10d2c7fc — dispatch/run/outputs blind-read fix).
 //
 // `lib/commandCenter.ts`'s functions run against the ANON client, which is
 // deny-all under RLS for tasks/outputs/task_links — they
@@ -103,4 +104,75 @@ export async function getOverviewStatsAdmin() {
     recentTasks: (tasks.data ?? []).slice(0, 5),
     recentOutputs: recentOutputs.data ?? [],
   };
+}
+
+/**
+ * Single task, admin-read, by id. Same `source`-column generated-types lag
+ * as `getTasksAdmin` — reuses `TASK_COLUMNS` and the same untyped-cast
+ * workaround. Returns `null` on a missing row (mirrors `getTask`'s contract)
+ * so callers can 404 — this is load-bearing for the dispatch/run/outputs
+ * routes.
+ */
+export async function getTaskAdmin(id: string): Promise<Task | null> {
+  const untypedAdmin = supabaseAdmin as unknown as {
+    from: (table: string) => {
+      select: (columns: string) => {
+        eq: (column: string, value: string) => {
+          maybeSingle: () => Promise<{
+            data: unknown;
+            error: { message: string; code?: string } | null;
+          }>;
+        };
+      };
+    };
+  };
+
+  const { data, error } = await untypedAdmin
+    .from("tasks")
+    .select(TASK_COLUMNS)
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) {
+    if (error.code === "PGRST116") return null;
+    throw new Error(error.message);
+  }
+  if (!data) return null;
+  return taskFromRow(data as Task);
+}
+
+/**
+ * Admin update of a task. Deliberately does not select/return the updated
+ * row — no dispatch/run/outputs call site needs it, and selecting would
+ * re-trip the `source`-column generated-types lag documented above.
+ * `.select("id").single()` is kept only so a vanished row still throws
+ * (preserves today's loud-failure behavior on update).
+ */
+export async function updateTaskAdmin(
+  id: string,
+  input: Partial<Omit<Task, "id" | "created_at" | "updated_at">>
+): Promise<void> {
+  const { error } = await supabaseAdmin
+    .from("tasks")
+    .update(input)
+    .eq("id", id)
+    .select("id")
+    .single();
+  if (error) throw new Error(error.message);
+}
+
+/**
+ * Admin insert of an output row. `outputs`' generated types are complete
+ * (no `source`-style lag), so no untyped cast is needed here.
+ */
+export async function createOutputAdmin(
+  input: Omit<Output, "id" | "created_at">
+): Promise<Output> {
+  const { data, error } = await supabaseAdmin
+    .from("outputs")
+    .insert(input)
+    .select("id, task_id, agent, prompt, response, version, created_at")
+    .single();
+  if (error) throw new Error(error.message);
+  return data as Output;
 }

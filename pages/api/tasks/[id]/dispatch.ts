@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getTask, updateTask } from "@/lib/commandCenter";
+import { getTaskAdmin, updateTaskAdmin } from "@/lib/commandCenter.server";
 import {
   buildAgentTaskBrief,
   defaultAgentBriefModeFromAssignee,
@@ -31,7 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const task = await getTask(id);
+    const task = await getTaskAdmin(id);
     if (!task) return res.status(404).json({ error: "Task not found" });
 
     // Resolve agent: explicit body param wins, falls back to task assignment.
@@ -40,7 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const agent = bodyAgent || task.assigned_to || "general";
 
     // Mark as dispatched.
-    await updateTask(id, { execution_status: "in_progress" });
+    await updateTaskAdmin(id, { execution_status: "in_progress" });
 
     // Build the text brief using the existing brief system.
     const mode = defaultAgentBriefModeFromAssignee(agent);

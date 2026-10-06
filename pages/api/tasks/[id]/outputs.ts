@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getTask, createOutput, updateTask } from "@/lib/commandCenter";
+import { getTaskAdmin, createOutputAdmin, updateTaskAdmin } from "@/lib/commandCenter.server";
 
 /**
  * POST /api/tasks/[id]/outputs
@@ -29,10 +29,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const task = await getTask(id);
+    const task = await getTaskAdmin(id);
     if (!task) return res.status(404).json({ error: "Task not found" });
 
-    const output = await createOutput({
+    const output = await createOutputAdmin({
       task_id: id,
       agent: agent.trim(),
       prompt: typeof prompt === "string" ? prompt.trim() || null : null,
@@ -42,7 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Sync latest_output on the task so the detail page reflects the new output.
     if (typeof response === "string" && response.trim()) {
-      await updateTask(id, { latest_output: response.trim() });
+      await updateTaskAdmin(id, { latest_output: response.trim() });
     }
 
     return res.status(201).json({ success: true, output });
