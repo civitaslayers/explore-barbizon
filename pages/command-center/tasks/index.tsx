@@ -1,6 +1,6 @@
 import type { GetServerSideProps, NextPage } from "next";
 import type { ReactElement, ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { CommandCenterLayout } from "@/components/CommandCenterLayout";
@@ -33,12 +33,18 @@ type TasksPageProps = {
 const STATUSES: TaskStatus[] = ["backlog", "ready", "in_progress", "review", "done"];
 const AREAS: RelatedArea[] = ["product", "content", "map", "database", "design", "engineering", "seo", "ops"];
 
-const ASSIGNEE_FILTER_PRESETS = [
+// Settable presets — aligned with what the detail page (tasks/[id].tsx) can
+// actually write via its own ASSIGNEE_PRESETS. `cursor`/`chatgpt` are retired:
+// no longer offered as fresh picks here, but a row already holding one of
+// those values still renders it (see TaskRow's own-value injection below)
+// rather than going blank, and the assignee FILTER below still surfaces them
+// via the union with values actually present in the loaded tasks.
+const ASSIGNEE_EDIT_PRESETS = [
   "human",
   "claude",
-  "cursor",
-  "chatgpt",
   "codex",
+  "openclaw",
+  "paperclip",
 ] as const;
 
 const STATUS_STYLE: Record<TaskStatus, string> = {
@@ -101,7 +107,7 @@ type TaskRowProps = {
   onRun: (task: Task) => void;
   onCopyBrief: (task: Task) => void;
   onStatusChange: (id: string, status: TaskStatus) => void;
-  onAssigneeChange: (id: string, assignee: string) => void;
+  onAssigneeChange: (id: string, assignee: string, previous: string | null) => void;
   onDelete: (id: string) => void;
 };
 
@@ -165,20 +171,33 @@ function TaskRow({ task, isFirst, runningId, copiedId, onRun, onCopyBrief, onSta
         </select>
       </td>
       <td className="px-4 py-3">
-        <select
-          value={task.assigned_to ?? ""}
-          onChange={(e) => onAssigneeChange(task.id, e.target.value)}
-          className={`text-[10px] uppercase tracking-[0.15em] px-2 py-0.5 rounded-full border-0 cursor-pointer focus:outline-none bg-transparent ${
-            task.assigned_to?.trim()
-              ? (AGENT_STYLE[task.assigned_to.trim().toLowerCase()] ?? "text-ink/45")
-              : "text-ink/25"
-          }`}
-        >
-          <option value="">—</option>
-          {ASSIGNEE_FILTER_PRESETS.map((a) => (
-            <option key={a} value={a}>{a}</option>
-          ))}
-        </select>
+        {(() => {
+          const current = task.assigned_to ?? "";
+          const isPreset = (ASSIGNEE_EDIT_PRESETS as readonly string[]).includes(current);
+          return (
+            <select
+              value={current}
+              onChange={(e) => onAssigneeChange(task.id, e.target.value, task.assigned_to ?? null)}
+              className={`text-[10px] uppercase tracking-[0.15em] px-2 py-0.5 rounded-full border-0 cursor-pointer focus:outline-none bg-transparent ${
+                task.assigned_to?.trim()
+                  ? (AGENT_STYLE[task.assigned_to.trim().toLowerCase()] ?? "text-ink/45")
+                  : "text-ink/25"
+              }`}
+            >
+              <option value="">—</option>
+              {ASSIGNEE_EDIT_PRESETS.map((a) => (
+                <option key={a} value={a}>{a}</option>
+              ))}
+              {/* Row holds a value outside the settable preset list (e.g. a
+                  retired value like `cursor`/`chatgpt`, or anything else
+                  written elsewhere) — render it as its own option so the
+                  select never silently goes blank-for-unknown. */}
+              {current !== "" && !isPreset && (
+                <option value={current}>{current}</option>
+              )}
+            </select>
+          );
+        })()}
       </td>
       <td className="px-4 py-3">
         {task.related_area && (
@@ -316,18 +335,27 @@ const TasksPage: NextPageWithLayout<TasksPageProps> = ({
       setTasks((prev) =>
         prev.map((t) => (t.id === id ? { ...t, status, ...extra } : t))
       );
-    } catch {
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Failed to update status");
       await router.replace(router.asPath, undefined, { scroll: false });
     }
   }
 
-  async function handleAssigneeChange(id: string, assignee: string) {
+  async function handleAssigneeChange(id: string, assignee: string, previous: string | null) {
+    // Clearing a previously-set assignee is destructive (no undo, no
+    // confirm elsewhere) — guard only this transition.
+    if (!assignee && previous) {
+      if (!confirm(`Clear the assignee "${previous}"? This cannot be undone.`)) {
+        return;
+      }
+    }
     try {
       await updateTask(id, { assigned_to: assignee || null });
       setTasks((prev) =>
         prev.map((t) => (t.id === id ? { ...t, assigned_to: assignee || null } : t))
       );
-    } catch {
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Failed to update assignee");
       await router.replace(router.asPath, undefined, { scroll: false });
     }
   }
@@ -445,6 +473,18 @@ const TasksPage: NextPageWithLayout<TasksPageProps> = ({
     }
   }
 
+  // The assignee FILTER must stay able to find rows holding a value that was
+  // dropped from the settable-edit preset list above (e.g. retired
+  // `cursor`/`chatgpt`, or anything else written via the detail page or API)
+  // — union the presets with whatever `assigned_to` values are actually
+  // present in the currently-loaded tasks.
+  const assigneeFilterOptions = useMemo(() => {
+    const present = new Set(
+      tasks.map((t) => (t.assigned_to ?? "").trim()).filter(Boolean)
+    );
+    return Array.from(new Set([...ASSIGNEE_EDIT_PRESETS, ...present]));
+  }, [tasks]);
+
   const filtered = tasks
     .filter((t) => {
       if (filterStatus && t.status !== filterStatus) return false;
@@ -540,7 +580,7 @@ const TasksPage: NextPageWithLayout<TasksPageProps> = ({
             className="w-full rounded border border-ink/20 bg-white px-3 py-2 text-sm text-ink placeholder-ink/30 focus:outline-none focus:border-ink/50 resize-none"
           />
           <datalist id="ccc-new-task-assignee-presets">
-            {ASSIGNEE_FILTER_PRESETS.map((p) => (
+            {ASSIGNEE_EDIT_PRESETS.map((p) => (
               <option key={p} value={p} />
             ))}
           </datalist>
@@ -619,7 +659,7 @@ const TasksPage: NextPageWithLayout<TasksPageProps> = ({
           className="rounded border border-ink/20 bg-white px-3 py-1.5 text-[11px] uppercase tracking-[0.15em] text-ink focus:outline-none"
         >
           <option value="">All assignees</option>
-          {ASSIGNEE_FILTER_PRESETS.map((a) => (
+          {assigneeFilterOptions.map((a) => (
             <option key={a} value={a}>{a}</option>
           ))}
         </select>
