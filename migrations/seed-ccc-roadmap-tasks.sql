@@ -6,10 +6,9 @@
 --
 -- APPLIED MIGRATION — historical record, not re-run, not rewritten.
 -- Applied 2026-03-21. The `tasks` table is now the canonical queue
--- (brain/decisions.md, 2026-07-15 / 2026-08-16 — reference only, do not
--- open/edit that file). Re-running would duplicate every row below — do not
--- run. The `assigned_to = 'cursor'` values and any "Tavily MCP in Cursor"
--- note in this file are historical — Cursor/ChatGPT and the multi-tool
+-- (brain/decisions.md, 2026-07-15 / 2026-08-16). Re-running would duplicate
+-- every row below — do not run. The `assigned_to = 'cursor'` values and any
+-- "Tavily MCP in Cursor" note in this file are historical — Cursor/ChatGPT and the multi-tool
 -- workflow were retired 2026-08-16 (Claude-only). `assigned_to` remains free
 -- text by design, so historical rows keep retired values and the CCC UI
 -- renders unknown assignees gracefully — these strings are deliberately not
