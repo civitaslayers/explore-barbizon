@@ -39,14 +39,14 @@ All endpoints are Next.js API routes under `pages/api/`. Endpoints marked **dev-
 
 Marks a task as dispatched and returns a full agent brief. Sets `execution_status = "in_progress"` on the task.
 
-**Request:** No body required. Optionally pass `{ "agent": "cursor" }` to override `task.assigned_to`.
+**Request:** No body required. Optionally pass `{ "agent": "claude" }` to override `task.assigned_to`.
 
 **Response:**
 ```json
 {
   "success": true,
   "task_id": "uuid",
-  "agent": "cursor",
+  "agent": "claude",
   "dispatched_at": "2026-03-25T10:00:00.000Z",
   "brief": "Human-readable prose brief for the agent...",
   "brief_json": {
@@ -113,7 +113,7 @@ Generic callback for agents to submit task output. **Not dev-only** — designed
 **Request:**
 ```json
 {
-  "agent": "cursor",
+  "agent": "claude",
   "prompt": "optional — the prompt that was sent to the agent",
   "response": "The agent's output…",
   "version": 1
@@ -129,7 +129,7 @@ Generic callback for agents to submit task output. **Not dev-only** — designed
   "output": {
     "id": "uuid",
     "task_id": "uuid",
-    "agent": "cursor",
+    "agent": "claude",
     "prompt": "string | null",
     "response": "string | null",
     "version": 1,

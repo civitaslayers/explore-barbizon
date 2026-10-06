@@ -1,6 +1,6 @@
 ## Civitas Command Center (CCC) Schema
 
-Last updated: 2026-03-20
+Last updated: 2026-10-06
 
 Source: Supabase project `afqyrxtfbspghpfulvmy` (Civitas Layers, eu-west-2, Postgres 17)
 
@@ -15,12 +15,11 @@ Current CCC tables:
 
 - `tasks`
 - `outputs`
-- `decisions`
-- `memory`
 - `prompt_templates`
 - `task_links`
 
 These tables power the `/command-center` routes in the Next.js app via `lib/commandCenter.ts`.
+`decisions` and `memory` are retired (2026-08-16) and no longer read by the app — see the tombstone section below.
 
 ---
 
@@ -92,7 +91,7 @@ Timeline of AI or manual outputs related to tasks.
 |-----------|---------|----------|-------|
 | id        | uuid    | NO       | Primary key, assumed `uuid_generate_v4()` default |
 | task_id   | uuid    | YES      | Optional FK to `tasks.id`; can be `NULL` for orphaned outputs |
-| agent     | text    | NO       | Name of the agent (`chatgpt`, `claude`, `cursor`, `manual`, etc.) |
+| agent     | text    | NO       | Free text; current values are `claude` and `manual`; historical rows may still contain retired tool names, render unknown agents gracefully |
 | prompt    | text    | YES      | Prompt text (if any) |
 | response  | text    | YES      | Output text (if any) |
 | version   | integer | YES      | Version counter; DB default `1` |
@@ -117,62 +116,15 @@ Timeline of AI or manual outputs related to tasks.
 
 ---
 
-## `decisions`
+## Retired — decisions, memory
 
-Internal log of architecture, product, and operational decisions with context and reasoning.
-
-### Columns (expected by code)
-
-| Column     | Type    | Nullable | Notes |
-|-----------|---------|----------|-------|
-| id        | uuid    | NO       | Primary key, assumed `uuid_generate_v4()` default |
-| title     | text    | NO       | Short decision title |
-| context   | text    | YES      | Optional surrounding context |
-| decision  | text    | NO       | The decision itself |
-| reasoning | text    | YES      | Why this decision was made |
-| created_at | timestamptz | YES | Creation timestamp; default `now()`; used for ordering |
-
-### Usage in code
-
-- Listing:
-  - `getDecisions()`:
-    - `.order("created_at", { ascending: false })`
-- Create/update:
-  - Writes `title`, `context`, `decision`, `reasoning`.
-
-Note: There is no `updated_at` column or trigger on `decisions`; only `created_at` is tracked in the database.
-
----
-
-## `memory`
-
-Structured internal knowledge base for CCC.
-
-### Columns (expected by code)
-
-| Column     | Type    | Nullable | Notes |
-|-----------|---------|----------|-------|
-| id        | uuid    | NO       | Primary key, assumed `uuid_generate_v4()` default |
-| key       | text    | NO       | **Logical identifier**, expected to be unique |
-| content   | text    | NO       | Free-form content associated with the key |
-| category  | text    | YES      | Category label (e.g. `stack`, `product`, `design`, `context`, `schema`, `ops`, `other`) |
-| updated_at | timestamptz | YES | Last update timestamp; default `now()`; used for ordering in UI |
-| created_at | timestamptz | YES | Creation timestamp; default `now()` |
-
-### Usage in code
-
-- Listing:
-  - `getMemory()`:
-    - `.order("updated_at", { ascending: false })`
-- Upsert:
-  - `upsertMemory(input)`:
-    - `.upsert(input, { onConflict: "key" }).select().single()`
-  - **Requires** a unique index/constraint on `key`.
-
-#### Constraints and triggers
-
-- Unique constraint `memory_key_key` enforces **one row per `key`**.
-- Trigger `memory_updated_at` (BEFORE UPDATE) calls `set_updated_at()` to bump `updated_at` on every update.
+Retired 2026-08-16 per `brain/decisions.md`. The `decisions` and `memory` tables
+still exist in Postgres with their rows — nothing was dropped. No app surface
+reads them: `getDecisions`, `getMemory`, `upsertMemory`, and `getOverviewStats`
+were removed from `lib/commandCenter.ts` (task a05a2c04, 2026-10-05). CCC's
+Decisions and Memory pages were deleted and 404 by design (not redirected).
+The decision log is `brain/decisions.md`, reached from the CCC Overview page
+via a plain outbound link. Do not reintroduce either table's CRUD path.
 
 ---
 
@@ -186,7 +138,7 @@ Prompt template library per agent for CCC.
 |------------|---------|----------|-------|
 | id         | uuid    | NO       | Primary key, assumed `uuid_generate_v4()` default |
 | name       | text    | NO       | Human-readable template name |
-| target_agent | text  | NO       | Target agent label (e.g. `chatgpt`, `claude`, `cursor`) |
+| target_agent | text  | NO       | Free text; e.g. `claude`, `manual` |
 | description | text   | YES      | Optional description |
 | template   | text    | NO       | Prompt template body |
 | created_at | timestamptz | YES | Creation timestamp; default `now()` |
@@ -236,7 +188,6 @@ This is a minimal additive linking layer:
 - All CCC tables are assumed to use **UUID primary keys** and **timestamptz timestamps** with sensible defaults.
 - The app enforces enum-like behavior in TypeScript for `status` and `related_area`, but the database is expected to store them as simple `text` fields.
 - Legacy column `assigned_agent` was removed; use `assigned_to` only (migration `migrations/drop-task-assigned-agent.sql`).
-- `memory.key` **must be unique** for upsert behavior to work correctly.
 - `outputs.task_id` is modeled as nullable in TypeScript; the database should either allow `NULL` or the type definition should be tightened if `NOT NULL` is desired.
 - `task_links` uses `UNIQUE (task_id, entity_type, entity_id)` to prevent duplicate attachments.
 
