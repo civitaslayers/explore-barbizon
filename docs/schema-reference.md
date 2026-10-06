@@ -1,6 +1,6 @@
 # Schema Reference
 
-Last updated: 2026-04-03
+Last updated: 2026-10-06
 Source: Live Supabase project `afqyrxtfbspghpfulvmy` (Civitas Layers' Project, eu-west-2, Postgres 17)
 
 ---
@@ -165,6 +165,65 @@ FKs: `tour_id` → `tours.id`, `location_id` → `locations.id`
 
 ---
 
+### `stories`
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| id | uuid | NO | gen_random_uuid() |
+| town_id | uuid | YES | — |
+| slug | text | NO | — |
+| title | text | NO | — |
+| subtitle | text | YES | — |
+| body | text | YES | — |
+| cover_image_url | text | YES | — |
+| cover_credit | text | YES | — |
+| cover_alt | text | YES | — |
+| author | text | YES | — |
+| theme | text | YES | — |
+| type | text | YES | — |
+| published_at | timestamptz | YES | — |
+| is_published | boolean | NO | false |
+| is_premium | boolean | NO | false |
+| created_at | timestamptz | NO | now() |
+| updated_at | timestamptz | NO | now() |
+
+FK: `town_id` → `towns.id` ON DELETE SET NULL
+
+Indexes: `stories_slug_unique` (UNIQUE on `slug`), `stories_town_id_idx`, and a partial index on published listing order.
+
+Note: `cover_credit`/`cover_alt` added 2026-10-05 — `cover_credit` is the artist/museum attribution caption for painting covers (null for own-site photography, in which case no caption renders), `cover_alt` is accessibility alt text and always present. FR lives in base columns, EN in `translations.en.{cover_credit,cover_alt}` behind the same `_meta.status === 'published'` gate as other translated fields.
+
+> **Live verification note:** `theme`/`type` column types are inferred from app code, not a live schema introspection — flag for verification on next introspection pass.
+
+---
+
+### `routes`
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| id | uuid | NO | uuid_generate_v4() |
+| town_id | uuid | YES | — |
+| name | text | NO | — |
+| slug | text | NO | — |
+| description | text | YES | — |
+| distance_meters | integer | YES | — |
+| duration_minutes | integer | YES | — |
+| difficulty | text | YES | — |
+| geojson | jsonb | NO | — |
+| start_lat | double precision | YES | — |
+| start_lng | double precision | YES | — |
+| color | text | YES | '#4A5E3A' |
+| is_published | boolean | NO | false |
+| created_at | timestamptz | YES | now() |
+
+FK: `town_id` → `towns.id`
+
+Note: `slug` is UNIQUE. `difficulty` is constrained via CHECK to `easy`, `moderate`, `challenging`.
+
+Note: `geojson` is NOT NULL in the live schema — this diverges from this doc's own Part 2 proposal section below, which lists `geojson` as nullable.
+
+---
+
 ### `users`
 
 | Column | Type | Nullable | Default |
@@ -270,6 +329,8 @@ media.location_id               → locations.id
 tours.town_id                   → towns.id
 tour_stops.tour_id              → tours.id
 tour_stops.location_id          → locations.id
+stories.town_id                 → towns.id
+routes.town_id                  → towns.id
 ```
 
 ---
@@ -288,14 +349,13 @@ These override any default assumptions in queries, migrations, or AI-assisted se
 
 ### Current Schema Gaps
 
-- `stories` table now EXISTS (live — migration `add-stories-table.sql`; has `is_published`)
 - No `artists` table
 - No `paintings` table
-- `routes` table now EXISTS (live — migration `create-routes-circuit-des-peintres.sql`; has `geojson`, `difficulty`, `is_published`)
 - No `layers` table — layer identity is encoded as a plain text field on `categories`
 - `media` is location-scoped only — cannot attach images to tours, stories, or artists
 - `tours` now HAS an `is_published` flag (added 2026-07-13 with the i18n groundwork)
-- No unique constraints visible on slug columns (may exist as indexes, not visible through information_schema)
+- No unique constraints visible on most slug columns (may exist as indexes, not visible through information_schema) — `stories.slug` and `routes.slug` are the exception: both are explicitly UNIQUE (`stories_slug_unique`, and a unique constraint on `routes.slug`)
+- No `story_locations` join table — no stories↔locations relationship exists in the schema
 
 ---
 
@@ -355,6 +415,9 @@ All proposed tables are additive. No existing columns or IDs should be altered.
 ---
 
 ### Proposed: `stories`
+
+> **Shipped — see Part 1 for the live shape.** Only the `story_locations`
+> junction table remains unbuilt from the original proposal below.
 
 Editorial content. Long-form articles, cultural essays, archival texts.
 
@@ -483,6 +546,8 @@ The existing `tours` table is sound but missing three fields:
 
 ### Proposed: `routes`
 
+> **Shipped — see Part 1 for the live shape.**
+
 Geographic paths, decoupled from tour narrative. Allows a path to exist before editorial content is written, and allows the same path to be reused.
 
 | Column | Type | Notes |
@@ -548,8 +613,8 @@ towns
 ### Implementation sequence (when ready)
 
 1. Add `is_published`, `tour_type`, `difficulty` to `tours` — safe, additive
-2. Create `stories` + `story_locations` — no impact on existing tables
+2. **Done/shipped** — Create `stories` — see Part 1. `story_locations` remains unbuilt.
 3. Create `artists` + `artist_locations` — no impact on existing tables
 4. Create `visual_works` + `visual_work_locations` — requires `artists` to exist first; no coordinates required at any stage
-5. Create `routes` — requires `tours` to exist (already does)
+5. **Done/shipped** — Create `routes` — see Part 1.
 6. Create `layers` and migrate `categories.layer` text → `layer_id` FK — this is the one breaking change; sequence last
