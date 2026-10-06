@@ -134,7 +134,7 @@ export default function MyDayPanel({
   return (
     <aside
       aria-labelledby="my-day-title"
-      className="absolute inset-x-0 bottom-0 z-30 flex max-h-[65%] flex-col overflow-hidden rounded-t-[30px] shadow-card md:inset-x-auto md:bottom-4 md:right-4 md:max-h-[calc(100%-7rem)] md:w-96 md:rounded-card"
+      className="absolute inset-x-0 bottom-12 z-30 flex max-h-[65%] flex-col overflow-hidden rounded-[30px] shadow-card md:inset-x-auto md:bottom-10 md:right-4 md:max-h-[calc(100%-7rem)] md:w-96 md:rounded-card"
     >
       <div className="flex-shrink-0 bg-ink px-6 pb-5 pt-5 text-cream">
         <div className="flex items-start justify-between gap-3">

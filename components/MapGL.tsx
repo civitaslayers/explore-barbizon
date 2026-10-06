@@ -309,6 +309,53 @@ function buildPinPopupContent(p: PinPopupInput): string {
   );
 }
 
+// Pan the map so an opened popup is not hidden under the floating controls
+// (page overlays + Mapbox control corners) or clipped by the map edge.
+// Re-checked once after the pan, since Mapbox may re-anchor the popup.
+// Module-level so the mount-once effects don't take it as a dependency.
+function keepPopupClear(
+  map: mapboxgl.Map,
+  popup: mapboxgl.Popup,
+  getOverlays: () => (HTMLElement | null)[],
+  recheck = true
+) {
+  requestAnimationFrame(() => {
+    const el = popup.getElement();
+    if (!el || !popup.isOpen()) return;
+    const box = map.getContainer().getBoundingClientRect();
+    const p = el.getBoundingClientRect();
+    const margin = 12;
+    const obstacles: HTMLElement[] = [
+      ...getOverlays().filter((o): o is HTMLElement => o !== null),
+      ...Array.from(
+        map
+          .getContainer()
+          .querySelectorAll<HTMLElement>(
+            ".mapboxgl-ctrl-top-left, .mapboxgl-ctrl-top-right, .mapboxgl-ctrl-bottom-right"
+          )
+      ),
+    ];
+    let down = Math.max(0, box.top + margin - p.top);
+    let up = Math.max(0, p.bottom - (box.bottom - margin));
+    for (const o of obstacles) {
+      const r = o.getBoundingClientRect();
+      if (r.width === 0 || r.height === 0) continue;
+      const overlaps =
+        r.left < p.right && r.right > p.left && r.top < p.bottom && r.bottom > p.top;
+      if (!overlaps) continue;
+      if (r.top + r.height / 2 < p.top + p.height / 2) {
+        down = Math.max(down, r.bottom + margin - p.top);
+      } else {
+        up = Math.max(up, p.bottom - (r.top - margin));
+      }
+    }
+    const dy = down > 0 ? -down : up;
+    if (dy === 0) return;
+    map.panBy([0, dy], { duration: prefersReducedMotion() ? 0 : 300 });
+    if (recheck) map.once("moveend", () => keepPopupClear(map, popup, getOverlays, false));
+  });
+}
+
 function buildRoutesGeoJSON(routes: Route[]): GeoJSON.FeatureCollection {
   return {
     type: "FeatureCollection",
@@ -463,6 +510,9 @@ type Props = {
   dayShared: boolean;
   onToggleDay: (slug: string) => void;
   fitDayToken: number;
+  // Page-level controls floating over the map (pages/map.tsx). An opened
+  // popup is panned clear of these and of Mapbox's own control corners.
+  getOverlayElements?: () => (HTMLElement | null)[];
 };
 
 export default function MapGL({
@@ -479,6 +529,7 @@ export default function MapGL({
   dayShared,
   onToggleDay,
   fitDayToken,
+  getOverlayElements,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -508,6 +559,11 @@ export default function MapGL({
   const daySharedRef = useRef(dayShared);
   const onToggleDayRef = useRef(onToggleDay);
   const dayRefreshersRef = useRef<Set<() => void>>(new Set());
+
+  const getOverlayElementsRef = useRef(getOverlayElements);
+  useEffect(() => {
+    getOverlayElementsRef.current = getOverlayElements;
+  }, [getOverlayElements]);
 
   // Wire the popup's "Add to my day" button; keeps its label in sync while open.
   const attachDayToggle = (popup: mapboxgl.Popup, slug: string) => {
@@ -888,7 +944,7 @@ export default function MapGL({
         const trailEyebrow = labelsRef.current.trailEyebrow ?? "Trail";
         const loopLabel = labelsRef.current.loop ?? "Loop";
 
-        new mapboxgl.Popup({ offset: 12, maxWidth: "280px" })
+        const trailPopup = new mapboxgl.Popup({ offset: 12, maxWidth: "280px" })
           .setLngLat(e.lngLat)
           .setHTML(
             `<div style="font-family:system-ui,sans-serif;padding:2px 0">` +
@@ -903,8 +959,9 @@ export default function MapGL({
             `<a href="${gmapsUrl}" target="_blank" style="flex:1;font-size:10px;text-transform:uppercase;letter-spacing:0.15em;color:#F5F1E8;background:#4A5E3A;padding:7px 10px;border-radius:20px;text-decoration:none;text-align:center">Google Maps</a>` +
             `</div>` +
             `</div>`
-          )
-          .addTo(map);
+          );
+        trailPopup.addTo(map);
+        keepPopupClear(map, trailPopup, () => getOverlayElementsRef.current?.() ?? []);
       });
 
       // Hover cursor + highlight
@@ -996,6 +1053,7 @@ export default function MapGL({
           })
           .addTo(map);
         attachDayToggle(pinPopup, props.slug);
+        keepPopupClear(map, pinPopup, () => getOverlayElementsRef.current?.() ?? []);
       });
 
       map.on("click", (e) => {
@@ -1092,6 +1150,7 @@ export default function MapGL({
           )
           .addTo(map);
         attachDayToggle(popup, target.slug);
+        keepPopupClear(map, popup, () => getOverlayElementsRef.current?.() ?? []);
         focusPopupRef.current = popup;
       }, 1300);
     };

@@ -3,7 +3,7 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useTranslation, type SSRConfig } from "next-i18next/pages";
 import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
-import { useCallback, useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import MyDayPanel, { type DayStop } from "@/components/MyDayPanel";
 import { SeoHead } from "@/components/SeoHead";
 import { buildCategoryLabels } from "@/lib/categoryLabel";
@@ -113,6 +113,13 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dayOpen, setDayOpen] = useState(false);
+  // Overlays an opened map popup must be panned clear of (MapGL keepPopupClear).
+  const controlsRef = useRef<HTMLDivElement>(null);
+  const dayChipRef = useRef<HTMLButtonElement>(null);
+  const getOverlayElements = useCallback(
+    () => [controlsRef.current, dayChipRef.current],
+    []
+  );
   const [fitDayToken, setFitDayToken] = useState(0);
   const [sharedAutoOpened, setSharedAutoOpened] = useState(false);
   const [prevFocusSlug, setPrevFocusSlug] = useState<string | undefined>(
@@ -251,11 +258,12 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
         locale={locale}
       />
 
-      {/* Map container — fills the viewport below the nav */}
-      <div
-        className="overflow-hidden rounded-3xl border border-ink/10 shadow-card"
-        style={{ height: "calc(100dvh - 7.5rem)" }}
-      >
+      {/* Map container — fills the viewport below the nav. `isolate` keeps
+          every map overlay's z-index inside this box, so the sticky site
+          header (z-40) and mobile bottom nav (z-50) always paint above them.
+          Mobile is 3rem shorter so the map, its attribution and the day chip
+          end above the fixed bottom nav. */}
+      <div className="isolate h-[calc(100dvh-10.5rem)] overflow-hidden rounded-3xl border border-ink/10 shadow-card md:h-[calc(100dvh-7.5rem)]">
         <div className="relative h-full w-full">
           {/* Map — always full width/height */}
           <div className="absolute inset-0">
@@ -273,11 +281,16 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
               dayShared={shared}
               onToggleDay={myDay.toggle}
               fitDayToken={fitDayToken}
+              getOverlayElements={getOverlayElements}
             />
           </div>
 
           {/* Floating controls — top left */}
-          <div className="absolute left-4 top-4 z-40 flex flex-col gap-2">
+          <div
+            ref={controlsRef}
+            data-map-overlay="controls"
+            className="absolute left-4 top-4 z-40 flex flex-col gap-2"
+          >
             {/* Toggle button */}
             <button
               type="button"
@@ -291,18 +304,6 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
               <span>{sidebarOpen ? t("map.close") : t("map.layersAndSearch")}</span>
             </button>
 
-            {/* My day chip */}
-            <button
-              type="button"
-              onClick={() => (dayOpen ? closeDay() : openDay())}
-              aria-expanded={dayOpen}
-              className="chip inline-flex h-[34px] items-center self-start shadow-sm"
-            >
-              {dayStops.length > 0
-                ? t("myDay.chipCount", { count: dayStops.length })
-                : t("myDay.chip")}
-            </button>
-
             {/* Location count badge */}
             <div className="rounded-full border border-ink/10 bg-cream/90 px-4 py-2 text-[11px] text-ink/50 shadow-sm backdrop-blur-sm">
               {visibleLocations.length}{" "}
@@ -312,6 +313,23 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
               {searchQuery && ` · "${searchQuery}"`}
             </div>
           </div>
+
+          {/* My day chip — bottom right, where the panel opens. Lifted clear of
+              the Mapbox attribution (bottom-right, must stay visible). */}
+          {!dayOpen && (
+            <button
+              ref={dayChipRef}
+              type="button"
+              data-map-overlay="day-chip"
+              onClick={openDay}
+              aria-expanded={false}
+              className="chip absolute bottom-12 right-4 z-30 inline-flex h-[34px] items-center shadow-sm md:bottom-10"
+            >
+              {dayStops.length > 0
+                ? t("myDay.chipCount", { count: dayStops.length })
+                : t("myDay.chip")}
+            </button>
+          )}
 
           {dayOpen && (
             <MyDayPanel
