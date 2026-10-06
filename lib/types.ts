@@ -11,6 +11,9 @@ export type Place = {
   history: string | null;
   heroImage: string | null;
   category: PlaceCategory;
+  /** categories.slug — DISPLAY-label key only (lib/categoryLabel.ts). Never a
+   *  lookup key: icons/groups/filters all still key on `category` (the name). */
+  categorySlug?: string | null;
   latitude: number;
   longitude: number;
   route_slug?: string | null;

@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./supabase.types";
 import type { Place, PlaceCategory } from "@/lib/types";
 import { hasPublishedTranslation, type LocalizableRow, type TranslationEntry } from "@/lib/getLocalized";
+import { DEFAULT_CATEGORY_NAME } from "@/lib/categoryGroups";
 
 // ---------------------------------------------------------------------------
 // Client
@@ -68,7 +69,7 @@ type PlacesListRow = {
   longitude: number;
   en_short_description: string | null;
   en_status: string | null;
-  categories: { name: string } | null;
+  categories: { name: string; slug: string } | null;
   media?: { url: string; display_order: number }[] | null;
 };
 
@@ -90,7 +91,8 @@ function toLocalizedPlace(row: PlacesListRow): Place {
     description: "",
     history: null,
     heroImage: (row.media ?? []).sort((a, b) => a.display_order - b.display_order)[0]?.url ?? null,
-    category: (row.categories?.name ?? "Studio") as PlaceCategory,
+    category: (row.categories?.name ?? DEFAULT_CATEGORY_NAME) as PlaceCategory,
+    categorySlug: row.categories?.slug ?? null,
     latitude: row.latitude,
     longitude: row.longitude,
     route_slug: null,
@@ -121,7 +123,7 @@ type LocationCardRow = {
   slug: string;
   name: string;
   short_description: string | null;
-  categories: { name: string; layer: string } | null;
+  categories: { name: string; slug: string; layer: string } | null;
   media: { url: string; display_order: number }[] | null;
 };
 
@@ -130,6 +132,7 @@ export type LocationCard = {
   name: string;
   shortDescription: string;
   category: string;
+  categorySlug: string | null;
   heroImage: string | null;
 };
 
@@ -138,7 +141,8 @@ function toLocationCard(row: LocationCardRow): LocationCard {
     slug: row.slug,
     name: row.name,
     shortDescription: row.short_description ?? "",
-    category: row.categories?.name ?? "Point of Interest",
+    category: row.categories?.name ?? DEFAULT_CATEGORY_NAME,
+    categorySlug: row.categories?.slug ?? null,
     heroImage:
       (row.media ?? []).sort((a, b) => a.display_order - b.display_order)[0]
         ?.url ?? null,
@@ -154,7 +158,7 @@ export async function getLocationCards(): Promise<LocationCard[]> {
   const { data, error } = await supabase
     .from("locations")
     .select(
-      "slug, name, short_description, categories!inner(name, layer), media(url, display_order)"
+      "slug, name, short_description, categories!inner(name, slug, layer), media(url, display_order)"
     )
     .eq("is_published", true)
     .neq("categories.layer", "Practical")
@@ -171,7 +175,7 @@ export async function getPublishedLocations(): Promise<Place[]> {
   const { data, error } = await supabase
     .from("locations")
     .select(
-      "slug, name, short_description, latitude, longitude, en_short_description:translations->en->>short_description, en_status:translations->en->_meta->>status, categories!inner(name, layer), media(url, display_order)"
+      "slug, name, short_description, latitude, longitude, en_short_description:translations->en->>short_description, en_status:translations->en->_meta->>status, categories!inner(name, slug, layer), media(url, display_order)"
     )
     .eq("is_published", true)
     .neq("categories.layer", "Practical")
@@ -196,7 +200,7 @@ type MapPinRow = {
   route_slug: string | null;
   en_short_description: string | null;
   en_status: string | null;
-  categories: { name: string; layer: string } | null;
+  categories: { name: string; slug: string; layer: string } | null;
 };
 
 export type MapPin = {
@@ -206,6 +210,7 @@ export type MapPin = {
   latitude: number;
   longitude: number;
   category: string;
+  categorySlug: string | null;
   allCategories: string[];
   placeSlug: string | null;
   routeSlug: string | null;
@@ -223,7 +228,7 @@ export async function getMapPins(): Promise<MapPin[]> {
   const { data: locsData, error: locsError } = await supabase
     .from("locations")
     .select(
-      "slug, name, short_description, latitude, longitude, route_slug, en_short_description:translations->en->>short_description, en_status:translations->en->_meta->>status, categories!inner(name, layer)"
+      "slug, name, short_description, latitude, longitude, route_slug, en_short_description:translations->en->>short_description, en_status:translations->en->_meta->>status, categories!inner(name, slug, layer)"
     )
     .eq("is_published", true);
 
@@ -236,8 +241,9 @@ export async function getMapPins(): Promise<MapPin[]> {
     short_description: row.short_description ?? "",
     latitude: row.latitude,
     longitude: row.longitude,
-    category: row.categories?.name ?? "Point of Interest",
-    allCategories: [row.categories?.name ?? "Point of Interest"],
+    category: row.categories?.name ?? DEFAULT_CATEGORY_NAME,
+    categorySlug: row.categories?.slug ?? null,
+    allCategories: [row.categories?.name ?? DEFAULT_CATEGORY_NAME],
     placeSlug: row.slug,
     routeSlug: row.route_slug ?? null,
     translations: {

@@ -5,6 +5,7 @@ import { useTranslation, type SSRConfig } from "next-i18next/pages";
 import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
 import { useEffect, useState, useMemo } from "react";
 import { SeoHead } from "@/components/SeoHead";
+import { buildCategoryLabels } from "@/lib/categoryLabel";
 import type { Place, PlaceCategory } from "@/lib/types";
 import { getMapPins, getPublishedRoutes, type MapPin, type Route } from "@/lib/supabase";
 import {
@@ -58,6 +59,7 @@ function mapPinToMapGLPlace(
     history: null,
     heroImage: null,
     category: pin.category as PlaceCategory,
+    categorySlug: pin.categorySlug,
     latitude: pin.latitude,
     longitude: pin.longitude,
     route_slug: pin.routeSlug ?? null,
@@ -81,6 +83,7 @@ function localizeMapPin(pin: MapPin, locale: string): MapPin {
     latitude: pin.latitude,
     longitude: pin.longitude,
     category: pin.category,
+    categorySlug: pin.categorySlug,
     allCategories: pin.allCategories,
     placeSlug: pin.placeSlug,
     routeSlug: pin.routeSlug,
@@ -90,6 +93,7 @@ function localizeMapPin(pin: MapPin, locale: string): MapPin {
 const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
   const { t } = useTranslation("common");
   const locations = useMemo(() => pins.map(mapPinToMapGLPlace), [pins]);
+  const categoryLabels = useMemo(() => buildCategoryLabels(pins, t), [pins, t]);
   const router = useRouter();
   const locale = router.locale ?? "fr";
   const focusSlug =
@@ -193,6 +197,7 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
               routes={routes}
               focusSlug={focusSlug}
               labels={mapLabels}
+              categoryLabels={categoryLabels}
               locale={locale}
             />
           </div>
