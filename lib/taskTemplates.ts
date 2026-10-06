@@ -18,6 +18,12 @@ export type TaskTemplate = {
   defaults: TaskTemplateDefaults;
 };
 
+/**
+ * Defaults use only the current assignee set — "claude" for tool work run
+ * through the agent loop, "human" for genuinely manual work. Retired
+ * assignees (cursor, chatgpt) are never defaulted here, though historical
+ * task rows may still carry them.
+ */
 export const TASK_TEMPLATES: readonly TaskTemplate[] = [
   {
     id: "content",
@@ -37,7 +43,7 @@ export const TASK_TEMPLATES: readonly TaskTemplate[] = [
     defaults: {
       task_type: "code",
       execution_status: "todo",
-      assigned_to: "cursor",
+      assigned_to: "claude",
       next_step: "Implement scoped change only",
     },
   },
@@ -57,7 +63,7 @@ export const TASK_TEMPLATES: readonly TaskTemplate[] = [
     defaults: {
       task_type: "research",
       execution_status: "todo",
-      assigned_to: "chatgpt",
+      assigned_to: "claude",
       next_step: "Produce structured summary",
     },
   },
