@@ -5,6 +5,7 @@ import type { Place } from "@/lib/types";
 import type { Route } from "@/lib/supabase";
 import { getCategoryGroup, GROUP_COLORS } from "@/lib/categoryGroups";
 import { DEFAULT_LIGHT_PRESET } from "@/lib/mapLight";
+import type { DayStop } from "@/components/MyDayPanel";
 
 // ---------------------------------------------------------------------------
 // SVG icons — teardrop pin, 28×36 display; viewBox 0 0 40 46
@@ -245,6 +246,68 @@ function buildGeoJSON(locations: Place[]): GeoJSON.FeatureCollection {
   };
 }
 
+// "My day" overlay — numbered stop points plus one straight LineString through
+// the stops in order (>= 2). Lives in its own source so the trail handlers
+// (hideAllRoutes / routes setData) never touch it.
+function buildDayGeoJSON(stops: DayStop[]): GeoJSON.FeatureCollection {
+  const features: GeoJSON.Feature[] = stops.map((s, i) => ({
+    type: "Feature",
+    properties: { slug: s.slug, n: i + 1 },
+    geometry: { type: "Point", coordinates: [s.longitude, s.latitude] },
+  }));
+  if (stops.length >= 2) {
+    features.push({
+      type: "Feature",
+      properties: {},
+      geometry: {
+        type: "LineString",
+        coordinates: stops.map((s) => [s.longitude, s.latitude]),
+      },
+    });
+  }
+  return { type: "FeatureCollection", features };
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+type PinPopupInput = {
+  slug: string;
+  category: string;
+  // categories.slug and the parent's localized label map (lib/categoryLabel.ts).
+  categorySlug: string;
+  categoryLabels: Record<string, string>;
+  name: string;
+  shortDescription: string | null | undefined;
+  href: string | null;
+  viewPlaceLabel: string;
+};
+
+// Shared by the pin-click popup and the ?location focus popup. Appends the
+// "Add to my day" toggle (wired after .addTo(map) by attachDayToggle).
+function buildPinPopupContent(p: PinPopupInput): string {
+  // categories.slug -> localized label; falls back to the raw category name.
+  const categoryEyebrow = p.categoryLabels[p.categorySlug] || p.category;
+  return (
+    `<div style="font-family:system-ui,sans-serif;padding:2px 0">` +
+    `<p style="font-size:10px;text-transform:uppercase;letter-spacing:0.2em;color:rgba(17,17,17,0.4);margin:0 0 5px">${categoryEyebrow}</p>` +
+    `<h3 style="font-family:Georgia,serif;font-size:15px;font-weight:400;color:#111;margin:0 0 ${p.shortDescription ? "7px" : "10px"};line-height:1.3">${p.name}</h3>` +
+    (p.shortDescription
+      ? `<p style="font-size:11px;color:rgba(17,17,17,0.6);margin:0 0 10px;line-height:1.55">${p.shortDescription}</p>`
+      : "") +
+    (p.href
+      ? `<a href="${p.href}" style="font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:#7A5C3E;text-decoration:none">${p.viewPlaceLabel} →</a>`
+      : "") +
+    `<button type="button" data-day-toggle="${escapeHtml(p.slug)}" style="display:block;width:100%;height:34px;margin-top:10px;border:0;border-radius:999px;background:#111111;color:#F5F1E8;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.18em;cursor:pointer"></button>` +
+    `</div>`
+  );
+}
+
 function buildRoutesGeoJSON(routes: Route[]): GeoJSON.FeatureCollection {
   return {
     type: "FeatureCollection",
@@ -314,7 +377,8 @@ const prefersReducedMotion = () =>
 // synchronously regardless of router hydration state.
 const hasFocusParam = () =>
   typeof window !== "undefined" &&
-  new URLSearchParams(window.location.search).has("location");
+  (new URLSearchParams(window.location.search).has("location") ||
+    new URLSearchParams(window.location.search).has("day"));
 
 // Heuristic, NOT a device-performance measurement: enable 3D terrain only on
 // desktop-class input (mouse/trackpad). Mid-range touch devices are the terrain
@@ -378,7 +442,8 @@ type Props = {
   // imperative Mapbox popup/event-handler code below — a `t` captured
   // directly inside those mount-once closures would go stale after a locale
   // change without a remount. Expected keys: trailEyebrow, loop,
-  // difficultyEasy, difficultyModerate, difficultyHard, viewPlace.
+  // difficultyEasy, difficultyModerate, difficultyHard, viewPlace, addToDay,
+  // inDay, dayFull.
   labels: Record<string, string>;
   // categories.slug -> localized display label (lib/categoryLabel.ts's
   // buildCategoryLabels, computed with t() in the parent). Same reason as
@@ -387,6 +452,14 @@ type Props = {
   // stale after a locale change without a remount.
   categoryLabels: Record<string, string>;
   locale: string;
+  // "My day" overlay (task 3c5b17b5). dayStops = resolved, ordered stops that
+  // are drawn; daySlugs = raw stored slugs (popup button state); dayFull =
+  // the stored day is at its cap. fitDayToken bumps to request a camera fit.
+  dayStops: DayStop[];
+  daySlugs: string[];
+  dayFull: boolean;
+  onToggleDay: (slug: string) => void;
+  fitDayToken: number;
 };
 
 export default function MapGL({
@@ -397,6 +470,11 @@ export default function MapGL({
   labels,
   categoryLabels,
   locale,
+  dayStops,
+  daySlugs,
+  dayFull,
+  onToggleDay,
+  fitDayToken,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -418,6 +496,40 @@ export default function MapGL({
   useEffect(() => {
     localeRef.current = locale;
   }, [locale]);
+
+  // "My day" refs — read inside the mount-once Mapbox closures (labelsRef pattern).
+  const dayStopsRef = useRef(dayStops);
+  const daySlugsRef = useRef(daySlugs);
+  const dayFullRef = useRef(dayFull);
+  const onToggleDayRef = useRef(onToggleDay);
+  const dayRefreshersRef = useRef<Set<() => void>>(new Set());
+
+  // Wire the popup's "Add to my day" button; keeps its label in sync while open.
+  const attachDayToggle = (popup: mapboxgl.Popup, slug: string) => {
+    const btn = popup
+      .getElement()
+      ?.querySelector<HTMLButtonElement>("[data-day-toggle]");
+    if (!btn) return;
+    const refresh = () => {
+      const inDay = daySlugsRef.current.includes(slug);
+      const blocked = dayFullRef.current && !inDay;
+      btn.textContent = inDay
+        ? (labelsRef.current.inDay ?? "In my day")
+        : blocked
+          ? (labelsRef.current.dayFull ?? "Day is full")
+          : (labelsRef.current.addToDay ?? "Add to my day");
+      btn.disabled = blocked;
+      btn.setAttribute("aria-pressed", String(inDay));
+      btn.style.opacity = blocked ? "0.5" : "1";
+      btn.style.cursor = blocked ? "not-allowed" : "pointer";
+    };
+    refresh();
+    btn.addEventListener("click", () => {
+      onToggleDayRef.current(slug);
+    });
+    dayRefreshersRef.current.add(refresh);
+    popup.on("close", () => dayRefreshersRef.current.delete(refresh));
+  };
 
   // Locale-aware /places/ link — the default locale (fr) has no URL prefix.
   const localizedPlaceHref = (slug: string): string =>
@@ -652,6 +764,68 @@ export default function MapGL({
         },
       });
 
+      // ── My day overlay ────────────────────────────────────────────────────
+      // Separate source from `routes` so trail hide/reset handlers never clear
+      // it. Same line recipe as the trails; dashes signal "not a path".
+      map.addSource("my-day", {
+        type: "geojson",
+        data: buildDayGeoJSON(dayStopsRef.current),
+      });
+      map.addLayer({
+        id: "my-day-outline",
+        type: "line",
+        source: "my-day",
+        slot: "middle",
+        filter: ["==", ["geometry-type"], "LineString"],
+        layout: { "line-join": "round", "line-cap": "round" },
+        paint: {
+          "line-color": "#7A5C3E",
+          "line-width": 5,
+          "line-opacity": 0.3,
+        },
+      });
+      map.addLayer({
+        id: "my-day-line",
+        type: "line",
+        source: "my-day",
+        slot: "middle",
+        filter: ["==", ["geometry-type"], "LineString"],
+        layout: { "line-join": "round", "line-cap": "round" },
+        paint: {
+          "line-color": "#7A5C3E",
+          "line-width": 3,
+          "line-opacity": 0.9,
+          "line-dasharray": [2, 1.5],
+        },
+      });
+      map.addLayer({
+        id: "my-day-stops",
+        type: "circle",
+        source: "my-day",
+        slot: "top",
+        filter: ["==", ["geometry-type"], "Point"],
+        paint: {
+          "circle-radius": 11,
+          "circle-color": "#7A5C3E",
+          "circle-stroke-width": 3,
+          "circle-stroke-color": C,
+        },
+      });
+      map.addLayer({
+        id: "my-day-stop-numbers",
+        type: "symbol",
+        source: "my-day",
+        slot: "top",
+        filter: ["==", ["geometry-type"], "Point"],
+        layout: {
+          "text-field": ["to-string", ["get", "n"]],
+          "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+          "text-size": 12,
+          "text-allow-overlap": true,
+        },
+        paint: { "text-color": C },
+      });
+
       // Intro camera glide — settles from the forest-edge start frame into the
       // resting village frame, once (guarded by hasIntroPlayed so a style
       // reload never re-triggers it).
@@ -786,22 +960,20 @@ export default function MapGL({
         // linked every pin popup to the French page even on /en/map.
         const href = props.placeSlug ? localizedPlaceHref(props.placeSlug) : null;
         const viewPlaceLabel = labelsRef.current.viewPlace ?? "View place";
-        const categoryEyebrow =
-          categoryLabelsRef.current[props.categorySlug] || props.category;
 
-        new mapboxgl.Popup({ offset: 18, maxWidth: "260px" })
+        const pinPopup = new mapboxgl.Popup({ offset: 18, maxWidth: "260px" })
           .setLngLat(coords)
           .setHTML(
-            `<div style="font-family:system-ui,sans-serif;padding:2px 0">` +
-            `<p style="font-size:10px;text-transform:uppercase;letter-spacing:0.2em;color:rgba(17,17,17,0.4);margin:0 0 5px">${categoryEyebrow}</p>` +
-            `<h3 style="font-family:Georgia,serif;font-size:15px;font-weight:400;color:#111;margin:0 0 ${props.shortDescription ? "7px" : "10px"};line-height:1.3">${props.name}</h3>` +
-            (props.shortDescription
-              ? `<p style="font-size:11px;color:rgba(17,17,17,0.6);margin:0 0 10px;line-height:1.55">${props.shortDescription}</p>`
-              : "") +
-            (href
-              ? `<a href="${href}" style="font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:#7A5C3E;text-decoration:none">${viewPlaceLabel} →</a>`
-              : "") +
-            `</div>`
+            buildPinPopupContent({
+              slug: props.slug,
+              category: props.category,
+              categorySlug: props.categorySlug,
+              categoryLabels: categoryLabelsRef.current,
+              name: props.name,
+              shortDescription: props.shortDescription,
+              href,
+              viewPlaceLabel,
+            })
           )
           .on("close", () => {
             hideAllRoutes(map);
@@ -809,6 +981,7 @@ export default function MapGL({
             src?.setData(buildRoutesGeoJSON(routesRef.current));
           })
           .addTo(map);
+        attachDayToggle(pinPopup, props.slug);
       });
 
       map.on("click", (e) => {
@@ -889,23 +1062,22 @@ export default function MapGL({
 
       timeoutId = setTimeout(() => {
         focusPopupRef.current?.remove();
-        const categoryEyebrow =
-          categoryLabelsRef.current[target.categorySlug ?? ""] || target.category;
         const popup = new mapboxgl.Popup({ offset: 18, maxWidth: "260px" })
           .setLngLat([target.longitude, target.latitude])
           .setHTML(
-            `<div style="font-family:system-ui,sans-serif;padding:2px 0">` +
-              `<p style="font-size:10px;text-transform:uppercase;letter-spacing:0.2em;color:rgba(17,17,17,0.4);margin:0 0 5px">${categoryEyebrow}</p>` +
-              `<h3 style="font-family:Georgia,serif;font-size:15px;font-weight:400;color:#111;margin:0 0 ${target.shortDescription ? "7px" : "10px"};line-height:1.3">${target.name}</h3>` +
-              (target.shortDescription
-                ? `<p style="font-size:11px;color:rgba(17,17,17,0.6);margin:0 0 10px;line-height:1.55">${target.shortDescription}</p>`
-                : "") +
-              (focusHref
-                ? `<a href="${focusHref}" style="font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:#7A5C3E;text-decoration:none">${labelsRef.current.viewPlace ?? "View place"} →</a>`
-                : "") +
-              `</div>`
+            buildPinPopupContent({
+              slug: target.slug,
+              category: target.category,
+              categorySlug: target.categorySlug ?? "",
+              categoryLabels: categoryLabelsRef.current,
+              name: target.name,
+              shortDescription: target.shortDescription,
+              href: focusHref,
+              viewPlaceLabel: labelsRef.current.viewPlace ?? "View place",
+            })
           )
           .addTo(map);
+        attachDayToggle(popup, target.slug);
         focusPopupRef.current = popup;
       }, 1300);
     };
@@ -918,6 +1090,56 @@ export default function MapGL({
       focusPopupRef.current = null;
     };
   }, [focusSlug, locations, allLocations]);
+
+  // Day overlay data + popup button state. Refs are synced first so the load
+  // handler (which seeds from dayStopsRef) and the popup refreshers agree.
+  useEffect(() => {
+    dayStopsRef.current = dayStops;
+    daySlugsRef.current = daySlugs;
+    dayFullRef.current = dayFull;
+    onToggleDayRef.current = onToggleDay;
+    dayRefreshersRef.current.forEach((refresh) => refresh());
+    const map = mapRef.current;
+    if (!map) return;
+    const update = () => {
+      const src = map.getSource("my-day") as mapboxgl.GeoJSONSource | undefined;
+      src?.setData(buildDayGeoJSON(dayStops));
+    };
+    map.isStyleLoaded() ? update() : map.once("load", update);
+  }, [dayStops, daySlugs, dayFull, onToggleDay]);
+
+  // Camera fit on request (panel opened / shared day arrived).
+  useEffect(() => {
+    if (fitDayToken === 0) return;
+    const map = mapRef.current;
+    if (!map) return;
+    const fit = () => {
+      const stops = dayStopsRef.current;
+      if (stops.length === 0) return;
+      if (stops.length === 1) {
+        map.flyTo({
+          center: [stops[0].longitude, stops[0].latitude],
+          zoom: 16,
+          duration: prefersReducedMotion() ? 0 : 1200,
+        });
+        return;
+      }
+      const bounds = new mapboxgl.LngLatBounds();
+      stops.forEach((st) => bounds.extend([st.longitude, st.latitude]));
+      const desktop = window.matchMedia("(min-width: 768px)").matches;
+      map.fitBounds(bounds, {
+        padding: {
+          top: 80,
+          left: 40,
+          right: desktop ? 440 : 40,
+          bottom: desktop ? 80 : 360,
+        },
+        maxZoom: 17,
+        duration: prefersReducedMotion() ? 0 : 1200,
+      });
+    };
+    map.isStyleLoaded() ? fit() : map.once("load", fit);
+  }, [fitDayToken]);
 
   return <div ref={containerRef} className="h-full w-full" />;
 }

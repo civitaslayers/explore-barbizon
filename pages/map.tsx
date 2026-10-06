@@ -3,9 +3,12 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useTranslation, type SSRConfig } from "next-i18next/pages";
 import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
-import { useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
+import MyDayPanel, { type DayStop } from "@/components/MyDayPanel";
 import { SeoHead } from "@/components/SeoHead";
 import { buildCategoryLabels } from "@/lib/categoryLabel";
+import { MY_DAY_MAX_STOPS, MY_DAY_QUERY_PARAM, parseDayParam } from "@/lib/myDay";
+import { useMyDay } from "@/lib/useMyDay";
 import type { Place, PlaceCategory } from "@/lib/types";
 import { getMapPins, getPublishedRoutes, type MapPin, type Route } from "@/lib/supabase";
 import {
@@ -109,6 +112,9 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
   ]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [dayOpen, setDayOpen] = useState(false);
+  const [fitDayToken, setFitDayToken] = useState(0);
+  const [sharedAutoOpened, setSharedAutoOpened] = useState(false);
   const [prevFocusSlug, setPrevFocusSlug] = useState<string | undefined>(
     undefined
   );
@@ -137,6 +143,65 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
       }
     }
   }
+
+  // ── My day ────────────────────────────────────────────────────────────
+  // Resolved against ALL published pins (the layer/search filter never hides
+  // day stops). A ?day= list that differs from the stored one is a read-only
+  // "shared" view and never writes storage on its own.
+  const myDay = useMyDay();
+  const dayParamRaw = router.isReady ? router.query[MY_DAY_QUERY_PARAM] : undefined;
+  const sharedKey = parseDayParam(dayParamRaw).join(",");
+  const sharedSlugs = useMemo(
+    () => (sharedKey ? sharedKey.split(",") : []),
+    [sharedKey]
+  );
+  const ownKey = myDay.slugs.join(",");
+  const shared = sharedSlugs.length > 0 && sharedKey !== ownKey;
+  const activeSlugs = shared ? sharedSlugs : myDay.slugs;
+  const dayStops = useMemo<DayStop[]>(() => {
+    const bySlug = new Map(locations.map((l) => [l.slug, l]));
+    const out: DayStop[] = [];
+    for (const slug of activeSlugs) {
+      const l = bySlug.get(slug);
+      if (l) {
+        out.push({
+          slug,
+          name: l.name,
+          latitude: l.latitude,
+          longitude: l.longitude,
+        });
+      }
+    }
+    return out;
+  }, [locations, activeSlugs]);
+  const unavailableCount = activeSlugs.length - dayStops.length;
+
+  const openDay = () => {
+    setDayOpen(true);
+    setSidebarOpen(false);
+    setFitDayToken((n) => n + 1);
+  };
+  const closeDay = useCallback(() => setDayOpen(false), []);
+
+  // A shared day opens the panel once and fits the camera to it.
+  if (shared && !sharedAutoOpened) {
+    setSharedAutoOpened(true);
+    openDay();
+  }
+
+  const clearDayParam = () => {
+    const { [MY_DAY_QUERY_PARAM]: _omit, ...rest } = router.query;
+    void _omit;
+    router.replace({ pathname: "/map", query: rest }, undefined, { shallow: true });
+  };
+
+  const reorderOwn = (ordered: string[]) =>
+    myDay.replaceAll([...ordered, ...myDay.slugs.filter((s) => !ordered.includes(s))]);
+
+  const saveShared = () => {
+    myDay.replaceAll(dayStops.map((s) => s.slug));
+    clearDayParam();
+  };
 
   const toggleGroup = (group: GroupName) =>
     setActiveGroups((prev) =>
@@ -170,6 +235,9 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
       difficultyModerate: t("map.difficulty.moderate"),
       difficultyHard: t("map.difficulty.hard"),
       viewPlace: t("actions.viewPlace"),
+      addToDay: t("myDay.add"),
+      inDay: t("myDay.added"),
+      dayFull: t("myDay.full", { max: MY_DAY_MAX_STOPS }),
     }),
     [t]
   );
@@ -199,6 +267,11 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
               labels={mapLabels}
               categoryLabels={categoryLabels}
               locale={locale}
+              dayStops={dayStops}
+              daySlugs={myDay.slugs}
+              dayFull={myDay.isFull}
+              onToggleDay={myDay.toggle}
+              fitDayToken={fitDayToken}
             />
           </div>
 
@@ -207,11 +280,26 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
             {/* Toggle button */}
             <button
               type="button"
-              onClick={() => setSidebarOpen((v) => !v)}
+              onClick={() => {
+                if (!sidebarOpen) setDayOpen(false);
+                setSidebarOpen((v) => !v);
+              }}
               className="flex items-center gap-2 rounded-full border border-ink/15 bg-cream/95 px-4 py-2.5 text-[11px] uppercase tracking-[0.2em] text-ink shadow-sm backdrop-blur-sm transition-all hover:bg-cream"
             >
               <span>{sidebarOpen ? "✕" : "☰"}</span>
               <span>{sidebarOpen ? t("map.close") : t("map.layersAndSearch")}</span>
+            </button>
+
+            {/* My day chip */}
+            <button
+              type="button"
+              onClick={() => (dayOpen ? closeDay() : openDay())}
+              aria-expanded={dayOpen}
+              className="chip inline-flex h-[34px] items-center self-start shadow-sm"
+            >
+              {dayStops.length > 0
+                ? t("myDay.chipCount", { count: dayStops.length })
+                : t("myDay.chip")}
             </button>
 
             {/* Location count badge */}
@@ -223,6 +311,23 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
               {searchQuery && ` · "${searchQuery}"`}
             </div>
           </div>
+
+          {dayOpen && (
+            <MyDayPanel
+              stops={dayStops}
+              shared={shared}
+              unavailableCount={unavailableCount}
+              storedCount={myDay.slugs.length}
+              persisted={myDay.persisted}
+              locale={locale}
+              onClose={closeDay}
+              onReorder={reorderOwn}
+              onRemove={myDay.remove}
+              onClear={myDay.clear}
+              onSaveShared={saveShared}
+              onBackToMine={clearDayParam}
+            />
+          )}
 
           {/* Sidebar drawer — desktop */}
           {sidebarOpen && (
