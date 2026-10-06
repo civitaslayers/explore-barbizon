@@ -1,17 +1,26 @@
-import type { NextPage } from "next";
+import type { GetServerSideProps, NextPage } from "next";
 import type { ReactElement, ReactNode } from "react";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import { CommandCenterLayout } from "@/components/CommandCenterLayout";
 import {
-  getPromptTemplates,
   createPromptTemplate,
   updatePromptTemplate,
   deletePromptTemplate,
 } from "@/lib/commandCenter";
 import type { PromptTemplate } from "@/lib/commandCenter";
+import { getPromptTemplatesAdmin } from "@/lib/commandCenter.server";
 
-type NextPageWithLayout = NextPage & {
+type NextPageWithLayout<P = object> = NextPage<P> & {
   getLayout?: (page: ReactElement) => ReactNode;
+};
+
+type PromptsPageProps = {
+  initialTemplates: PromptTemplate[];
+  /** Set when the admin-read getServerSideProps fetch itself failed — an
+   * empty `initialTemplates` in this case means "read failed", not "zero
+   * templates", and must render distinctly from a genuine empty library. */
+  templatesError?: string | null;
 };
 
 const AGENTS = ["chatgpt", "claude", "cursor", "manual"];
@@ -30,10 +39,13 @@ const emptyForm = {
   template: "",
 };
 
-const PromptsPage: NextPageWithLayout = () => {
-  const [templates, setTemplates] = useState<PromptTemplate[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+const PromptsPage: NextPageWithLayout<PromptsPageProps> = ({
+  initialTemplates,
+  templatesError,
+}) => {
+  const router = useRouter();
+  const [templates, setTemplates] = useState<PromptTemplate[]>(initialTemplates);
+  const [error, setError] = useState<string | null>(templatesError ?? null);
 
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
@@ -46,19 +58,12 @@ const PromptsPage: NextPageWithLayout = () => {
   const [copied, setCopied] = useState<string | null>(null);
 
   useEffect(() => {
-    load();
-  }, []);
+    setTemplates(initialTemplates);
+    setError(templatesError ?? null);
+  }, [initialTemplates, templatesError]);
 
-  async function load() {
-    setLoading(true);
-    try {
-      setTemplates(await getPromptTemplates());
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Failed to load templates");
-    } finally {
-      setLoading(false);
-    }
-  }
+  const refresh = () =>
+    router.replace(router.asPath, undefined, { scroll: false });
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -74,7 +79,7 @@ const PromptsPage: NextPageWithLayout = () => {
       });
       setForm(emptyForm);
       setShowForm(false);
-      await load();
+      await refresh();
     } catch (e: unknown) {
       setFormError(e instanceof Error ? e.message : "Failed to create");
     } finally {
@@ -92,7 +97,7 @@ const PromptsPage: NextPageWithLayout = () => {
         template: editForm.template.trim(),
       });
       setEditingId(null);
-      await load();
+      await refresh();
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Failed to update");
     } finally {
@@ -104,7 +109,7 @@ const PromptsPage: NextPageWithLayout = () => {
     if (!confirm("Delete this template?")) return;
     try {
       await deletePromptTemplate(id);
-      setTemplates((prev) => prev.filter((t) => t.id !== id));
+      await refresh();
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Failed to delete");
     }
@@ -200,11 +205,7 @@ const PromptsPage: NextPageWithLayout = () => {
         </p>
       )}
 
-      {loading && (
-        <p className="text-sm text-ink/40 py-8 text-center">Loading...</p>
-      )}
-
-      {!loading && templates.length === 0 && (
+      {!error && templates.length === 0 && (
         <p className="text-sm text-ink/35 py-10 text-center border border-ink/8 rounded-xl">
           No prompt templates yet.
         </p>
@@ -344,5 +345,25 @@ const PromptsPage: NextPageWithLayout = () => {
 PromptsPage.getLayout = (page: ReactElement) => (
   <CommandCenterLayout>{page}</CommandCenterLayout>
 );
+
+// ---------------------------------------------------------------------------
+// getServerSideProps — admin-read prompt template list (task f219286a).
+// prompt_templates has a deny-all RLS policy for public, so the previous
+// anon-client getPromptTemplates() silently returned [] — a blind read, not
+// an empty library. getPromptTemplatesAdmin() reads via supabaseAdmin
+// (service role), server-only. Write paths (create/update/delete) stay on
+// the anon client for now (follow-up task b696ede8).
+// ---------------------------------------------------------------------------
+
+export const getServerSideProps: GetServerSideProps<PromptsPageProps> = async () => {
+  try {
+    const initialTemplates = await getPromptTemplatesAdmin();
+    return { props: { initialTemplates, templatesError: null } };
+  } catch (e) {
+    const templatesError =
+      e instanceof Error ? e.message : "Failed to load prompt templates";
+    return { props: { initialTemplates: [], templatesError } };
+  }
+};
 
 export default PromptsPage;
