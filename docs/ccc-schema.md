@@ -39,7 +39,7 @@ Execution queue for work across product, content, map, schema, and operations.
 | related_area   | text    | YES      | One of: `product`, `content`, `map`, `database`, `design`, `engineering`, `seo`, `ops` (enforced in app code) |
 | task_type      | text    | YES      | Work class: `content`, `code`, `map`, `data`, `ops`, `design`, `research`, `other` (app-enforced on forms) |
 | execution_status | text | YES   | Execution posture: `todo`, `in_progress`, `review`, `blocked`, `done` (distinct from queue `status`) |
-| assigned_to    | text    | YES      | Free text. Operator presets `human`, `claude`. Loop-written values `civitas-architect`, `civitas-implementer`, `civitas-content-ops` (set by /run-loop as provenance). Retired `cursor` persists on historical rows; UI renders unknown values and never blanks them. NULL = unassigned. |
+| assigned_to    | text    | YES      | Free text. Operator presets `human`, `claude`. Loop-agent values `civitas-architect`, `civitas-implementer`, `civitas-content-ops` are written by the lead session when dispatching (not offered as UI picks). Retired `cursor` persists on historical rows; UI renders unknown values and never blanks them. NULL = unassigned. |
 | latest_output  | text    | YES      | Latest result / draft / implementation summary |
 | last_action_note | text | YES     | Short note on last action or handoff |
 | next_step      | text    | YES      | One-line instruction for the next actor (handoff readability) |
@@ -91,7 +91,7 @@ Timeline of AI or manual outputs related to tasks.
 |-----------|---------|----------|-------|
 | id        | uuid    | NO       | Primary key, assumed `uuid_generate_v4()` default |
 | task_id   | uuid    | YES      | Optional FK to `tasks.id`; can be `NULL` for orphaned outputs |
-| agent     | text    | NO       | Free text. Live values: `loop` and `review` (written by /run-loop), `claude`; `manual` is the preset for hand-entered outputs. Historical rows may hold `cursor`. Render unknown agents gracefully. |
+| agent     | text    | NO       | Free text. Live values: `loop` (written by /run-loop at the gate), `review` (written by the dev-only `/api/tasks/[id]/review` endpoint), `claude`; `manual` is the preset for hand-entered outputs. Historical rows may hold `cursor`. Render unknown agents gracefully. |
 | prompt    | text    | YES      | Prompt text (if any) |
 | response  | text    | YES      | Output text (if any) |
 | version   | integer | YES      | Version counter; DB default `1` |
