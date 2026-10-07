@@ -1,6 +1,21 @@
 -- Completed CCC development tasks — session 2026-03-21 to 2026-03-22
 -- Run once in Supabase SQL editor to record the CCC automation work in task history.
 -- All tasks are inserted as status=done, execution_status=done.
+--
+-- APPLIED MIGRATION — historical record, not re-run, not rewritten.
+-- Applied in 2026-03 (session 2026-03-21/22); at least one of its titles exists
+-- twice in `tasks` today, so it may already have been run twice — one more
+-- reason never to run it again. Re-running would insert a duplicate of every
+-- row below (plain INSERT, no idempotency key) — do not run; the "Run once in
+-- Supabase SQL editor" line above is the original instruction, kept for
+-- record, not a live one. The `tasks` table is the canonical queue
+-- (brain/decisions.md, 2026-07-15 / 2026-08-16); current task state lives
+-- there, not in this file. Several descriptions below record work on surfaces
+-- since retired — POST /api/brain/sync-tasks, the → brain button and the
+-- brain/task-queue.md mirror (retired 2026-08-16, deleted 2026-10-04) — and
+-- are historical only. The one "cursor" in this file is the CSS wait cursor
+-- on the Run button, not the retired Cursor tool; `assigned_to = 'claude'`
+-- values are current vocabulary, not retired ones.
 
 INSERT INTO tasks (title, description, status, priority, task_type, related_area, execution_status, assigned_to) VALUES
 

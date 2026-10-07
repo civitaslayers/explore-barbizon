@@ -55,10 +55,30 @@ Execution queue for work across product, content, map, schema, and operations.
 
 #### Queue status vs execution posture
 
-- **`status`** — queue / pipeline state; set by the human operator.
-- **`execution_status`** — current execution posture; set by whoever is actively working the task.
-- They are **independent** and **not** auto-synced in the app.
-- **Convention:** when `execution_status` becomes `done`, the operator should move `status` to `review` or `done` as appropriate.
+- **`status`** — the triage field, set by the human operator: `backlog` (parked
+  idea) vs `ready` (committed work); `in_progress`, `review`, `done` are the
+  remaining kanban lanes (`done` is also set by the trigger below).
+- **`execution_status`** — the pipeline field, written by whoever is executing
+  the task (normally `/run-loop`): `todo → queued → in_progress → review →
+  at_gate → done | blocked`. `queued`, `at_gate`, `blocked` are the loop
+  vocabulary added by `migrations/tasks_canonical_queue_dispatch.sql`
+  (2026-07-15, CHECK `tasks_execution_status_check`); `todo` and `review` are
+  legacy CCC values, still valid.
+- They are **orthogonal, not redundant** (resolved 2026-08-16). The same
+  `execution_status` value can legitimately appear under either `backlog` or
+  `ready`; there is no 1:1 mapping, and the app code does not sync them.
+- The **one invariant** — `done` in either column implies `done` in both — is
+  enforced by the database trigger `tasks_sync_done`
+  (`public.sync_task_done_status()`), not by operator convention or agent
+  discipline. `/run-loop` writes `execution_status = 'done'` alone and the
+  trigger sets `status` to match; nobody moves `status` by hand. Do not write
+  both fields redundantly to "fix" this, and do not add a
+  status/execution_status consistency check to civitas-release-checker — the
+  database owns this invariant.
+- Canonical statement: `docs/schema-reference.md` → "Operational table —
+  `tasks`: `status` vs `execution_status`", mirrored in the CLAUDE.md
+  session-discipline paragraph of the same name. This section summarises
+  them; it does not supersede them.
 
 ### Usage in code
 
@@ -78,6 +98,11 @@ Note: Although `priority` is nullable in the database, the application relies on
 #### Triggers
 
 - `tasks_updated_at` (BEFORE UPDATE) calls `set_updated_at()` to bump `updated_at` on every update.
+- `tasks_sync_done` (BEFORE INSERT OR UPDATE, FOR EACH ROW) calls
+  `public.sync_task_done_status()` to enforce the done-invariant between
+  `status` and `execution_status` (see "Queue status vs execution posture"
+  above). Applied 2026-08-16 via Supabase MCP; there is no file for it under
+  `migrations/` — the live definition is the one in `pg_trigger` / `pg_proc`.
 
 ---
 
