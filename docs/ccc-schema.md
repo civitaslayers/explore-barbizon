@@ -60,10 +60,10 @@ Execution queue for work across product, content, map, schema, and operations.
   remaining kanban lanes (`done` is also set by the trigger below).
 - **`execution_status`** — the pipeline field, written by whoever is executing
   the task (normally `/run-loop`): `todo → queued → in_progress → review →
-  at_gate → done | blocked`. `queued`, `at_gate`, `blocked` are the loop
-  vocabulary added by `migrations/tasks_canonical_queue_dispatch.sql`
-  (2026-07-15, CHECK `tasks_execution_status_check`); `todo` and `review` are
-  legacy CCC values, still valid.
+  at_gate → done | blocked`. `queued` and `at_gate` are the loop vocabulary
+  added by `migrations/tasks_canonical_queue_dispatch.sql` (2026-07-15, CHECK
+  `tasks_execution_status_check`); `todo`, `review` and `blocked` are legacy
+  CCC values, still valid (`blocked` is also written by the loop).
 - They are **orthogonal, not redundant** (resolved 2026-08-16). The same
   `execution_status` value can legitimately appear under either `backlog` or
   `ready`; there is no 1:1 mapping, and the app code does not sync them.
@@ -71,13 +71,15 @@ Execution queue for work across product, content, map, schema, and operations.
   enforced by the database trigger `tasks_sync_done`
   (`public.sync_task_done_status()`), not by operator convention or agent
   discipline. `/run-loop` writes `execution_status = 'done'` alone and the
-  trigger sets `status` to match; nobody moves `status` by hand. Do not write
+  trigger sets `status` to match; nobody needs to move `status` to `done` by
+  hand. Do not write
   both fields redundantly to "fix" this, and do not add a
   status/execution_status consistency check to civitas-release-checker — the
   database owns this invariant.
 - Canonical statement: `docs/schema-reference.md` → "Operational table —
   `tasks`: `status` vs `execution_status`", mirrored in the CLAUDE.md
-  session-discipline paragraph of the same name. This section summarises
+  session-discipline bullet "`status` and `execution_status` are orthogonal,
+  not redundant". This section summarises
   them; it does not supersede them.
 
 ### Usage in code
@@ -101,7 +103,7 @@ Note: Although `priority` is nullable in the database, the application relies on
 - `tasks_sync_done` (BEFORE INSERT OR UPDATE, FOR EACH ROW) calls
   `public.sync_task_done_status()` to enforce the done-invariant between
   `status` and `execution_status` (see "Queue status vs execution posture"
-  above). Applied 2026-08-16 via Supabase MCP; there is no file for it under
+  above). Applied on or before 2026-08-16 (brain/decisions.md); there is no file for it under
   `migrations/` — the live definition is the one in `pg_trigger` / `pg_proc`.
 
 ---
