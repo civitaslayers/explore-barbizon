@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { CommandCenterLayout } from "@/components/CommandCenterLayout";
-import { createTask, updateTask, deleteTask } from "@/lib/commandCenter";
+import { apiCreateTask, apiUpdateTask, apiDeleteTask } from "@/lib/commandCenterClient";
 import type { Task, TaskStatus, RelatedArea } from "@/lib/commandCenter";
 import { getTasksAdmin } from "@/lib/commandCenter.server";
 import {
@@ -307,7 +307,7 @@ const TasksPage: NextPageWithLayout<TasksPageProps> = ({
     setFormError(null);
     try {
       const execFields = executionFieldsForCreate(creationTemplate);
-      await createTask({
+      await apiCreateTask({
         title: form.title.trim(),
         description: form.description.trim() || null,
         status: form.status,
@@ -331,7 +331,7 @@ const TasksPage: NextPageWithLayout<TasksPageProps> = ({
   async function handleStatusChange(id: string, status: TaskStatus) {
     const extra = status === "done" ? { execution_status: "done" as const } : {};
     try {
-      await updateTask(id, { status, ...extra });
+      await apiUpdateTask(id, { status, ...extra });
       setTasks((prev) =>
         prev.map((t) => (t.id === id ? { ...t, status, ...extra } : t))
       );
@@ -350,7 +350,7 @@ const TasksPage: NextPageWithLayout<TasksPageProps> = ({
       }
     }
     try {
-      await updateTask(id, { assigned_to: assignee || null });
+      await apiUpdateTask(id, { assigned_to: assignee || null });
       setTasks((prev) =>
         prev.map((t) => (t.id === id ? { ...t, assigned_to: assignee || null } : t))
       );
@@ -432,7 +432,7 @@ const TasksPage: NextPageWithLayout<TasksPageProps> = ({
     const toAdd = suggestions.filter((_, i) => acceptedIndexes.has(i));
     try {
       for (const s of toAdd) {
-        await createTask({
+        await apiCreateTask({
           title: s.title,
           description: s.description,
           status: "backlog",
@@ -466,7 +466,7 @@ const TasksPage: NextPageWithLayout<TasksPageProps> = ({
   async function handleDelete(id: string) {
     if (!confirm("Delete this task and all its outputs?")) return;
     try {
-      await deleteTask(id);
+      await apiDeleteTask(id);
       setTasks((prev) => prev.filter((t) => t.id !== id));
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Failed to delete");
