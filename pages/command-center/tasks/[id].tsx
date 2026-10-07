@@ -1060,23 +1060,16 @@ const TASK_TYPES: TaskType[] = [
 const EXECUTION_STATUSES: ExecutionStatus[] = ["todo", "in_progress", "review", "blocked", "done"];
 /** Quick actions only cycle through active handoff postures (not `todo`). */
 const EXECUTION_QUICK_ACTIONS: ExecutionStatus[] = ["in_progress", "review", "blocked", "done"];
-const ASSIGNEE_PRESETS = [
-  "human",
-  "claude",
-  "codex",
-  "openclaw",
-  "paperclip",
-  "unassigned",
-] as const;
+/**
+ * Operator presets only. Rows may hold machine-written values
+ * (civitas-architect/implementer/content-ops from /run-loop) or retired ones
+ * (cursor); the field is a free-text input + datalist so they render and
+ * re-save unchanged.
+ */
+const ASSIGNEE_PRESETS = ["human", "claude"] as const;
 
 /** Presets for recording where a brief was handed (datalist); free text allowed. */
-const RUN_HANDOFF_TARGET_PRESETS = [
-  "human",
-  "claude",
-  "codex",
-  "openclaw",
-  "paperclip",
-] as const;
+const RUN_HANDOFF_TARGET_PRESETS = ["human", "claude"] as const;
 
 const STATUS_STYLE: Record<TaskStatus, string> = {
   backlog: "bg-ink/8 text-ink/50",

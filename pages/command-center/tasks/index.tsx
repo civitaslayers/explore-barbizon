@@ -33,19 +33,12 @@ type TasksPageProps = {
 const STATUSES: TaskStatus[] = ["backlog", "ready", "in_progress", "review", "done"];
 const AREAS: RelatedArea[] = ["product", "content", "map", "database", "design", "engineering", "seo", "ops"];
 
-// Settable presets — aligned with what the detail page (tasks/[id].tsx) can
-// actually write via its own ASSIGNEE_PRESETS. `cursor`/`chatgpt` are retired:
-// no longer offered as fresh picks here, but a row already holding one of
-// those values still renders it (see TaskRow's own-value injection below)
-// rather than going blank, and the assignee FILTER below still surfaces them
-// via the union with values actually present in the loaded tasks.
-const ASSIGNEE_EDIT_PRESETS = [
-  "human",
-  "claude",
-  "codex",
-  "openclaw",
-  "paperclip",
-] as const;
+// Operator-settable presets, same set as tasks/[id].tsx ASSIGNEE_PRESETS and
+// lib/taskTemplates.ts. `cursor`/`chatgpt` are retired and `civitas-*` values
+// are written by /run-loop, not picked here; any row holding one still renders
+// (TaskRow own-value injection) and the FILTER unions presets with values
+// present in loaded tasks.
+const ASSIGNEE_EDIT_PRESETS = ["human", "claude"] as const;
 
 const STATUS_STYLE: Record<TaskStatus, string> = {
   backlog: "bg-ink/8 text-ink/50",
@@ -55,11 +48,9 @@ const STATUS_STYLE: Record<TaskStatus, string> = {
   done: "bg-ink text-cream",
 };
 
+// Unknown/retired values fall through to the neutral fallback at the call sites.
 const AGENT_STYLE: Record<string, string> = {
-  chatgpt: "bg-umber/10 text-umber",
   claude: "bg-moss/15 text-moss",
-  cursor: "bg-ink/10 text-ink/60",
-  manual: "border border-ink/20 text-ink/50",
 };
 
 const EXECUTION_STATUS_STYLE: Record<string, string> = {
