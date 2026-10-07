@@ -9,6 +9,7 @@ import {
   suggestOrder,
   totalMeters,
 } from "@/lib/myDay";
+import { formatDuration, type WalkingRoute } from "@/lib/walkingRoute";
 
 export type DayStop = {
   slug: string;
@@ -19,6 +20,12 @@ export type DayStop = {
 
 type Props = {
   stops: DayStop[];
+  /**
+   * Mapbox Directions walking route for `stops` (task 0f159817); null while
+   * loading or on any failure, in which case the v0 straight-line numbers
+   * and "à vol d'oiseau" strings render unchanged.
+   */
+  route: WalkingRoute | null;
   shared: boolean;
   unavailableCount: number;
   storedCount: number;
@@ -41,6 +48,7 @@ const textBtn =
 
 export default function MyDayPanel({
   stops,
+  route,
   shared,
   unavailableCount,
   storedCount,
@@ -87,6 +95,8 @@ export default function MyDayPanel({
   const slugs = stops.map((s) => s.slug);
   const legs = legDistancesMeters(stops);
   const total = totalMeters(stops);
+  // Only trust a route whose leg count matches the stops on screen.
+  const routed = route !== null && route.legs.length === stops.length - 1;
   const suggested = suggestOrder(stops);
   const canSuggest =
     !shared &&
@@ -160,7 +170,12 @@ export default function MyDayPanel({
         </h2>
         {stops.length >= 2 ? (
           <p className="mt-2 text-[11px] text-cream/60">
-            {t("myDay.totalDistance", { distance: formatDistance(total, locale) })}
+            {routed
+              ? t("myDay.totalWalk", {
+                  distance: formatDistance(route.totalMeters, locale),
+                  duration: formatDuration(route.totalSeconds, locale),
+                })
+              : t("myDay.totalDistance", { distance: formatDistance(total, locale) })}
           </p>
         ) : null}
       </div>
@@ -220,9 +235,14 @@ export default function MyDayPanel({
                     </div>
                     {!last ? (
                       <p className="mt-1.5 text-[10px] font-medium uppercase tracking-[0.14em] text-umber">
-                        {t("myDay.legDistance", {
-                          distance: formatDistance(legs[i], locale),
-                        })}
+                        {routed
+                          ? t("myDay.legWalk", {
+                              distance: formatDistance(route.legs[i].distanceMeters, locale),
+                              duration: formatDuration(route.legs[i].durationSeconds, locale),
+                            })
+                          : t("myDay.legDistance", {
+                              distance: formatDistance(legs[i], locale),
+                            })}
                       </p>
                     ) : null}
                   </div>
@@ -245,7 +265,7 @@ export default function MyDayPanel({
 
         {stops.length >= 2 ? (
           <p className="mt-4 text-[11px] leading-relaxed text-ink/50">
-            {t("myDay.distanceNote")}
+            {routed ? t("myDay.routeNote") : t("myDay.distanceNote")}
           </p>
         ) : null}
 
