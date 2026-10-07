@@ -5,15 +5,13 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { CommandCenterLayout } from "@/components/CommandCenterLayout";
 import {
-  getTask,
-  updateTask,
-  getOutputsForTask,
-  createOutput,
-  deleteOutput,
-  getTaskLinks,
-  createTaskLink,
-  deleteTaskLink,
-} from "@/lib/commandCenter";
+  apiGetTaskDetail,
+  apiUpdateTask,
+  apiCreateOutput,
+  apiDeleteOutput,
+  apiCreateTaskLink,
+  apiDeleteTaskLink,
+} from "@/lib/commandCenterClient";
 import type {
   Task,
   Output,
@@ -389,7 +387,7 @@ function RunHandoffBlock({
     setRecording(true);
     setFeedback(null);
     try {
-      const updated = await updateTask(task.id, {
+      const updated = await apiUpdateTask(task.id, {
         last_run_target: trimmedTarget,
         last_run_note: note.trim() || null,
         last_run_at: new Date().toISOString(),
@@ -702,7 +700,7 @@ function AgentBriefBlock({
 
       patch.source_prompt = text;
       try {
-        const updated = await updateTask(task.id, patch);
+        const updated = await apiUpdateTask(task.id, patch);
         onUpdated(updated);
       } catch (e: unknown) {
         const saveErr =
@@ -1245,6 +1243,8 @@ const TaskDetailPage: NextPageWithLayout = () => {
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Task>>({});
   const [saving, setSaving] = useState(false);
+  /** Inline Save failure; `error` is load-failure-only (replaces the page). */
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [executionPatching, setExecutionPatching] = useState(false);
   const [executionFeedback, setExecutionFeedback] = useState<{
     kind: "ok" | "err";
@@ -1333,19 +1333,15 @@ const TaskDetailPage: NextPageWithLayout = () => {
     setLoading(true);
     setError(null);
     try {
-      const [t, o, links] = await Promise.all([
-        getTask(taskId),
-        getOutputsForTask(taskId),
-        getTaskLinks(taskId),
-      ]);
-      if (!t) {
+      const d = await apiGetTaskDetail(taskId);
+      if (!d) {
         setError("Task not found.");
         return;
       }
-      setTask(t);
-      setEditForm(t);
-      setOutputs(o);
-      setTaskLinks(links);
+      setTask(d.task);
+      setEditForm(d.task);
+      setOutputs(d.outputs);
+      setTaskLinks(d.links);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Failed to load task");
     } finally {
@@ -1354,8 +1350,8 @@ const TaskDetailPage: NextPageWithLayout = () => {
   }
 
   async function refreshTaskLinks(taskId: string) {
-    const links = await getTaskLinks(taskId);
-    setTaskLinks(links);
+    const d = await apiGetTaskDetail(taskId);
+    if (d) setTaskLinks(d.links);
   }
 
   async function handleAttachToPlace(e: React.FormEvent) {
@@ -1398,17 +1394,10 @@ const TaskDetailPage: NextPageWithLayout = () => {
         return;
       }
 
-      // Helpers currently throw, but keep this page resilient if they return { error }.
-      const createResult: any = await createTaskLink({
-        task_id: task.id,
+      await apiCreateTaskLink(task.id, {
         entity_type: "location",
         entity_id: resolvedLocationId,
       });
-      if (createResult?.error) {
-        throw new Error(
-          createResult.error.message ?? "Failed to attach location"
-        );
-      }
 
       await refreshTaskLinks(task.id);
       setAttachSlug("");
@@ -1470,16 +1459,10 @@ const TaskDetailPage: NextPageWithLayout = () => {
         return;
       }
 
-      const createResult: any = await createTaskLink({
-        task_id: task.id,
+      await apiCreateTaskLink(task.id, {
         entity_type: "tour",
         entity_id: resolvedTourId,
       });
-      if (createResult?.error) {
-        throw new Error(
-          createResult.error.message ?? "Failed to attach tour"
-        );
-      }
 
       await refreshTaskLinks(task.id);
       setAttachTourSlug("");
@@ -1508,14 +1491,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
     const isTour = link?.entity_type === "tour";
     const setErr = isTour ? setAttachTourError : setAttachError;
     try {
-      const deleteResult: any = await deleteTaskLink(linkId);
-      if (deleteResult?.error) {
-        setErr(
-          deleteResult.error.message ?? (isTour ? "Failed to unlink tour" : "Failed to unlink location")
-        );
-        return;
-      }
-
+      await apiDeleteTaskLink(task.id, linkId);
       await refreshTaskLinks(task.id);
     } catch (e: unknown) {
       const message =
@@ -1530,7 +1506,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
     if (!task) return;
     setSaving(true);
     try {
-      const updated = await updateTask(task.id, {
+      const updated = await apiUpdateTask(task.id, {
         title: editForm.title,
         description: editForm.description ?? null,
         status: editForm.status,
@@ -1549,8 +1525,11 @@ const TaskDetailPage: NextPageWithLayout = () => {
       });
       setTask(updated);
       setEditing(false);
+      setSaveError(null);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Failed to save");
+      // Inline next to Save/Cancel — `error` is reserved for load failures,
+      // which replace the whole page.
+      setSaveError(e instanceof Error ? e.message : "Failed to save");
     } finally {
       setSaving(false);
     }
@@ -1561,7 +1540,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
     setExecutionPatching(true);
     setExecutionFeedback(null);
     try {
-      const updated = await updateTask(task.id, { execution_status: next });
+      const updated = await apiUpdateTask(task.id, { execution_status: next });
       setTask(updated);
       setEditForm((f) => ({ ...f, ...updated }));
       setExecutionFeedback({ kind: "ok", msg: "Updated" });
@@ -1583,8 +1562,9 @@ const TaskDetailPage: NextPageWithLayout = () => {
     setSavingOutput(true);
     setOutputError(null);
     try {
-      await createOutput({
-        task_id: task.id,
+      // POST /api/tasks/[id]/outputs also syncs tasks.latest_output when a
+      // response is present, so re-fetch the task alongside the outputs.
+      await apiCreateOutput(task.id, {
         agent: outputForm.agent,
         prompt: outputForm.prompt.trim() || null,
         response: outputForm.response.trim() || null,
@@ -1592,8 +1572,12 @@ const TaskDetailPage: NextPageWithLayout = () => {
       });
       setOutputForm(emptyOutputForm);
       setShowOutputForm(false);
-      const updated = await getOutputsForTask(task.id);
-      setOutputs(updated);
+      const d = await apiGetTaskDetail(task.id);
+      if (d) {
+        setOutputs(d.outputs);
+        setTask(d.task);
+        setEditForm((f) => ({ ...f, ...d.task }));
+      }
     } catch (e: unknown) {
       setOutputError(e instanceof Error ? e.message : "Failed to add output");
     } finally {
@@ -1602,15 +1586,20 @@ const TaskDetailPage: NextPageWithLayout = () => {
   }
 
   async function handleDeleteOutput(outputId: string) {
+    if (!task) return;
     if (!confirm("Delete this output?")) return;
+    setOutputError(null);
     try {
-      await deleteOutput(outputId);
+      await apiDeleteOutput(task.id, outputId);
       setOutputs((prev) => prev.filter((o) => o.id !== outputId));
-    } catch {
-      // reload on failure
-      if (task) {
-        const updated = await getOutputsForTask(task.id);
-        setOutputs(updated);
+    } catch (e: unknown) {
+      setOutputError(e instanceof Error ? e.message : "Failed to delete output");
+      // Re-sync the list so the UI reflects what the server actually has.
+      try {
+        const d = await apiGetTaskDetail(task.id);
+        if (d) setOutputs(d.outputs);
+      } catch {
+        // keep the current list; the error above is already visible
       }
     }
   }
@@ -1757,7 +1746,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
                   {saving ? "Saving..." : "Save"}
                 </button>
                 <button
-                  onClick={() => { setEditing(false); setEditForm(task); }}
+                  onClick={() => { setEditing(false); setEditForm(task); setSaveError(null); }}
                   className="text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded border border-ink/20 text-ink/50 hover:text-ink hover:border-ink/40 transition-colors"
                 >
                   Cancel
@@ -1773,6 +1762,9 @@ const TaskDetailPage: NextPageWithLayout = () => {
             )}
           </div>
         </div>
+        {editing && saveError && (
+          <p className="text-xs text-red-600 mb-3">{saveError}</p>
+        )}
 
         {/* Description */}
         {editing ? (
@@ -2077,8 +2069,8 @@ const TaskDetailPage: NextPageWithLayout = () => {
             setEditForm((f) => ({ ...f, ...t }));
           }}
           onRun={async () => {
-            const updated = await getOutputsForTask(task.id);
-            setOutputs(updated);
+            const d = await apiGetTaskDetail(task.id);
+            if (d) setOutputs(d.outputs);
           }}
         />
 
@@ -2219,14 +2211,17 @@ const TaskDetailPage: NextPageWithLayout = () => {
             </button>
           </div>
 
+          {/* Rendered outside the collapsible form so delete failures are
+              visible even when the form is closed. */}
+          {outputError && (
+            <p className="text-xs text-red-600 mb-3">{outputError}</p>
+          )}
+
           {showOutputForm && (
             <form
               onSubmit={handleAddOutput}
               className="mb-4 p-4 border border-ink/10 rounded-xl bg-ink/[0.02] space-y-3"
             >
-              {outputError && (
-                <p className="text-xs text-red-600">{outputError}</p>
-              )}
               <div className="flex gap-3">
                 <select
                   value={outputForm.agent}
