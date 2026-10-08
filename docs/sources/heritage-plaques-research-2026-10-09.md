@@ -18,7 +18,8 @@ above Tier 3 found tonight). Where Tier 3 pages agree with each other this is no
 Quotes are verbatim from the page as fetched; where a page could not be read, this is
 stated and nothing is reconstructed. Entry headers of the Mahenc transcriptions are
 copied as printed (« >> à droite, au N°… » / « << à gauche, au N°… »); the street is the
-page section's, not printed in the entry.
+page section's, not printed in the entry. Inside a quoted entry, « - » marks a
+heading or paragraph break on the page, not a printed character.
 
 Luigi decides what gets published. Nothing here was written into `locations`.
 
@@ -116,12 +117,12 @@ Published text: "A long-abandoned hotel on the rue Jean-François Millet, former
 
 **Claim 3b — "formerly the Hôtel Bellevue".** Verdict: **confirmed by policy** (mairie map), **unsupported independently** (one concordant Tier 3 lead).
 - Mairie circuit text as transcribed by the Mahenc blog (Tier 3): « Rue Jean-François Millet N°14 — Autrefois « Hôtel Bellevue » pension de famille, tenu par une ancienne famille de Barbizon, hébergea entre autres PICASSO et sa famille. »
-- Same page, Grande Rue section, three consecutive N°31 lines: « >> à droite, au N°31 – Restaurant « L'ANGÉLUS» » (described there as the former bar of the Hôtel Bellevue at the back of the park) and « >> à droite, au N°31 au fond du parc : HÔTEL BUDGET INN' ». Together with the 2014 sale to Budget Inn in the registry, this supports a Bellevue → Saint-Hérem → Budget Inn lineage on the same plot; it does not add a Tier 1 source.
+- Same page, Grande Rue section, three N°31 headings (not consecutive; a mosaic entry sits between them): « >> à droite, au N°31 – Restaurant « L'ANGÉLUS» » (described there as the former bar of the Hôtel Bellevue at the back of the park) and « >> à droite, au N°31 au fond du parc : HÔTEL BUDGET INN' ». Together with the 2014 sale to Budget Inn in the registry, this supports a Bellevue → Saint-Hérem → Budget Inn lineage on the same plot; it does not add a Tier 1 source.
 
 **Claim 3c — "where Picasso and his family once stayed".** Verdict: **confirmed by policy**, **unsupported by independent evidence**, and in tension with the documented record.
 - Only source: the mairie circuit entry above (no date, no family name of the hosts).
 - Picasso's documented summer with Olga and the infant Paulo in this area is Fontainebleau, 1921 (fr.wikipedia « Pablo Picasso », lead: « Durant l'été, il s'installe avec Olga et Paulo à Fontainebleau »; the MoMA « Picasso in Fontainebleau » exhibition page returned 403, so it is not quoted; search-engine summaries of it give a rented villa at 33 boulevard Leclerc, July–September 1921). No Tier 1/2 source read tonight places the family at a Barbizon pension. A Barbizon stay is not impossible (Barbizon is about 10 km by road from Fontainebleau, reference data) but it is unverified.
-- Recommendation under the d566f33e standard: move the Picasso sentence to `internal_notes` tagged unverified, keep "formerly the Hôtel Bellevue" (policy Tier 1), and replace "long-abandoned" with "closed since 2016".
+- Recommendation under the d566f33e standard: move the Picasso sentence to `internal_notes` tagged unverified, keep "formerly the Hôtel Bellevue" (policy Tier 1), and replace "long-abandoned" with "closed since 2011; in liquidation from 2014" (registry dates; check the building on site).
 
 ---
 
