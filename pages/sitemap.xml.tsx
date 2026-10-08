@@ -21,9 +21,10 @@ import {
 // `getPublishedLocationSitemapEntries` (lib/supabase.ts) reports a genuinely
 // published English translation, via the same predicate as
 // getLocalized/SeoHead (`hasPublishedTranslation`). Stories and tours are
-// out of scope for this task (same `translations` contract, queued
-// follow-up for stories; tours have no `translations` column at all) and
-// keep `hasAlternates: true` unconditionally.
+// out of scope for this task (both tables now have a `translations` column;
+// gating them is a queued follow-up because it must flip SeoHead, the
+// switcher and the sitemap together — see brain/decisions.md 2026-10-04)
+// and keep `hasAlternates: true` unconditionally.
 // ---------------------------------------------------------------------------
 
 const BASE_URL = "https://explorebarbizon.com";
@@ -111,7 +112,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
         path: `/tours/${slug}`,
         priority: "0.6",
         changefreq: "monthly",
-        // Out of scope for this task — tours have no translations column.
+        // Out of scope — see header comment (tours do have `translations`; all null today).
         hasAlternates: true,
       });
     }

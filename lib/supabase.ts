@@ -91,6 +91,9 @@ type LocationCardRow = {
   slug: string;
   name: string;
   short_description: string | null;
+  en_name: string | null;
+  en_short_description: string | null;
+  en_status: string | null;
   categories: { name: string; slug: string; layer: string } | null;
   media: { url: string; display_order: number }[] | null;
 };
@@ -102,6 +105,12 @@ export type LocationCard = {
   category: string;
   categorySlug: string | null;
   heroImage: string | null;
+  // Raw read-path inputs for lib/getLocalized.ts. snake_case alias because
+  // getLocalized's base-column fallback reads row[field] by exact field name
+  // (same reason Place carries short_description — lib/types.ts). Present
+  // only between getLocationCards() and getStaticProps; never shipped in page data.
+  short_description?: string;
+  translations?: Record<string, TranslationEntry> | null;
 };
 
 function toLocationCard(row: LocationCardRow): LocationCard {
@@ -109,11 +118,19 @@ function toLocationCard(row: LocationCardRow): LocationCard {
     slug: row.slug,
     name: row.name,
     shortDescription: row.short_description ?? "",
+    short_description: row.short_description ?? "",
     category: row.categories?.name ?? DEFAULT_CATEGORY_NAME,
     categorySlug: row.categories?.slug ?? null,
     heroImage:
       (row.media ?? []).sort((a, b) => a.display_order - b.display_order)[0]
         ?.url ?? null,
+    translations: {
+      en: {
+        name: row.en_name ?? null,
+        short_description: row.en_short_description ?? null,
+        _meta: { status: row.en_status ?? null },
+      },
+    } as unknown as Record<string, TranslationEntry>,
   };
 }
 
@@ -126,7 +143,7 @@ export async function getLocationCards(): Promise<LocationCard[]> {
   const { data, error } = await supabase
     .from("locations")
     .select(
-      "slug, name, short_description, categories!inner(name, slug, layer), media(url, display_order)"
+      "slug, name, short_description, en_name:translations->en->>name, en_short_description:translations->en->>short_description, en_status:translations->en->_meta->>status, categories!inner(name, slug, layer), media(url, display_order)"
     )
     .eq("is_published", true)
     .neq("categories.layer", "Practical")
@@ -134,7 +151,7 @@ export async function getLocationCards(): Promise<LocationCard[]> {
 
   if (error) throw new Error(error.message);
   if (!data || data.length === 0) throw new Error("No published locations");
-  return (data as LocationCardRow[]).map(toLocationCard);
+  return (data as unknown as LocationCardRow[]).map(toLocationCard);
 }
 
 export async function getPublishedLocations(): Promise<Place[]> {
@@ -166,6 +183,7 @@ type MapPinRow = {
   latitude: number;
   longitude: number;
   route_slug: string | null;
+  en_name: string | null;
   en_short_description: string | null;
   en_status: string | null;
   categories: { name: string; slug: string; layer: string } | null;
@@ -196,7 +214,7 @@ export async function getMapPins(): Promise<MapPin[]> {
   const { data: locsData, error: locsError } = await supabase
     .from("locations")
     .select(
-      "slug, name, short_description, latitude, longitude, route_slug, en_short_description:translations->en->>short_description, en_status:translations->en->_meta->>status, categories!inner(name, slug, layer)"
+      "slug, name, short_description, latitude, longitude, route_slug, en_name:translations->en->>name, en_short_description:translations->en->>short_description, en_status:translations->en->_meta->>status, categories!inner(name, slug, layer)"
     )
     .eq("is_published", true);
 
@@ -216,6 +234,7 @@ export async function getMapPins(): Promise<MapPin[]> {
     routeSlug: row.route_slug ?? null,
     translations: {
       en: {
+        name: row.en_name ?? null,
         short_description: row.en_short_description ?? null,
         _meta: { status: row.en_status ?? null },
       },
@@ -237,15 +256,21 @@ export type Route = {
   color: string | null;
 };
 
-export async function getPublishedRoutes(): Promise<Route[]> {
+/** Route + raw translations, present only between getPublishedRoutes() and
+ *  pages/map.tsx getStaticProps (localizeRoute strips it). Never page data. */
+export type RouteRow = Route & {
+  translations?: Record<string, TranslationEntry> | null;
+};
+
+export async function getPublishedRoutes(): Promise<RouteRow[]> {
   if (!supabase) throw new Error("Supabase not configured");
   const { data, error } = await supabase
     .from("routes")
-    .select("id, name, slug, description, distance_meters, duration_minutes, difficulty, geojson, start_lat, start_lng, color")
+    .select("id, name, slug, description, distance_meters, duration_minutes, difficulty, geojson, start_lat, start_lng, color, translations")
     .eq("is_published", true)
     .order("name");
   if (error) throw new Error(error.message);
-  return (data ?? []) as unknown as Route[];
+  return (data ?? []) as unknown as RouteRow[];
 }
 
 /**
@@ -468,6 +493,7 @@ export type DbTour = {
   duration_minutes: number | null;
   distance_meters: number | null;
   cover_image_url: string | null;
+  translations?: Record<string, TranslationEntry> | null;
 };
 
 export type DbTourStop = {
@@ -476,12 +502,14 @@ export type DbTourStop = {
   location_id: string;
   stop_order: number;
   stop_narrative: string | null;
+  translations?: Record<string, TranslationEntry> | null;
   locations: {
     name: string;
     slug: string;
     short_description: string | null;
     latitude: number;
     longitude: number;
+    translations?: Record<string, TranslationEntry> | null;
   } | null;
 };
 
@@ -504,10 +532,10 @@ export async function getPublishedTours(): Promise<TourWithStops[]> {
     .from("tours")
     .select(
       `
-      id, town_id, name, slug, description, duration_minutes, distance_meters, cover_image_url,
+      id, town_id, name, slug, description, duration_minutes, distance_meters, cover_image_url, translations,
       tour_stops (
-        id, tour_id, location_id, stop_order, stop_narrative,
-        locations ( name, slug, short_description, latitude, longitude )
+        id, tour_id, location_id, stop_order, stop_narrative, translations,
+        locations ( name, slug, short_description, latitude, longitude, translations )
       )
     `
     )
@@ -518,7 +546,7 @@ export async function getPublishedTours(): Promise<TourWithStops[]> {
   if (error) throw new Error(error.message);
   if (!data?.length) throw new Error("No tours found");
 
-  return (data as (DbTour & { tour_stops?: DbTourStop[] })[]).map((row) => {
+  return (data as unknown as (DbTour & { tour_stops?: DbTourStop[] })[]).map((row) => {
     const { tour_stops, ...rest } = row;
     return {
       ...rest,
@@ -548,10 +576,10 @@ export async function getTourBySlugFromSupabase(
     .from("tours")
     .select(
       `
-      id, town_id, name, slug, description, duration_minutes, distance_meters, cover_image_url,
+      id, town_id, name, slug, description, duration_minutes, distance_meters, cover_image_url, translations,
       tour_stops (
-        id, tour_id, location_id, stop_order, stop_narrative,
-        locations ( name, slug, short_description, latitude, longitude )
+        id, tour_id, location_id, stop_order, stop_narrative, translations,
+        locations ( name, slug, short_description, latitude, longitude, translations )
       )
     `
     )
@@ -565,7 +593,7 @@ export async function getTourBySlugFromSupabase(
     throw new Error(error.message);
   }
 
-  const row = data as DbTour & { tour_stops?: DbTourStop[] };
+  const row = data as unknown as DbTour & { tour_stops?: DbTourStop[] };
   const { tour_stops, ...rest } = row;
   return {
     ...rest,

@@ -11,7 +11,7 @@ import { MY_DAY_MAX_STOPS, MY_DAY_QUERY_PARAM, parseDayParam } from "@/lib/myDay
 import { useMyDay } from "@/lib/useMyDay";
 import { useWalkingRoute } from "@/lib/useWalkingRoute";
 import type { Place, PlaceCategory } from "@/lib/types";
-import { getMapPins, getPublishedRoutes, type MapPin, type Route } from "@/lib/supabase";
+import { getMapPins, getPublishedRoutes, type MapPin, type Route, type RouteRow } from "@/lib/supabase";
 import {
   GROUP_NAMES,
   GROUP_DOT_TAILWIND,
@@ -82,7 +82,7 @@ function mapPinToMapGLPlace(
 function localizeMapPin(pin: MapPin, locale: string): MapPin {
   return {
     slug: pin.slug,
-    name: pin.name,
+    name: getLocalized(pin, locale, "name") || pin.name,
     shortDescription: getLocalized(pin, locale, "short_description"),
     latitude: pin.latitude,
     longitude: pin.longitude,
@@ -91,6 +91,28 @@ function localizeMapPin(pin: MapPin, locale: string): MapPin {
     allCategories: pin.allCategories,
     placeSlug: pin.placeSlug,
     routeSlug: pin.routeSlug,
+  };
+}
+
+/**
+ * Same for routes: resolve name/description for the known locale and drop
+ * the raw `translations` column, so the trail popups (components/MapGL.tsx →
+ * lib/popupHtml.ts) receive resolved strings and /map's page data never
+ * ships both languages. Same getLocalized() predicate as the pins.
+ */
+function localizeRoute(route: RouteRow, locale: string): Route {
+  return {
+    id: route.id,
+    name: getLocalized(route, locale, "name") || route.name,
+    slug: route.slug,
+    description: getLocalized(route, locale, "description") || null,
+    distance_meters: route.distance_meters,
+    duration_minutes: route.duration_minutes,
+    difficulty: route.difficulty,
+    geojson: route.geojson,
+    start_lat: route.start_lat,
+    start_lng: route.start_lng,
+    color: route.color,
   };
 }
 
@@ -448,12 +470,13 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
 export const getStaticProps: GetStaticProps<MapPageProps> = async ({
   locale,
 }) => {
-  const [rawPins, routes, translations] = await Promise.all([
+  const [rawPins, rawRoutes, translations] = await Promise.all([
     getMapPins(),
     getPublishedRoutes(),
     serverSideTranslations(locale ?? "fr", ["common"], nextI18NextConfig),
   ]);
   const pins = rawPins.map((pin) => localizeMapPin(pin, locale ?? "fr"));
+  const routes = rawRoutes.map((r) => localizeRoute(r, locale ?? "fr"));
   return { props: { pins, routes, ...translations }, revalidate: 60 };
 };
 

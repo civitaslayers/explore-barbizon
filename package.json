@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "task": "node scripts/run-task.js",
-    "test": "node --test lib/getLocalized.test.ts lib/categoryLabel.test.ts lib/myDay.test.ts lib/commandCenterValidation.test.ts lib/commandCenterClient.test.ts lib/rlsBoundary.test.ts scripts/upload-media.test.mjs lib/popupHtml.test.ts lib/walkingRoute.test.ts lib/relatedStories.test.ts scripts/bootstrap-worktree.test.mjs",
+    "test": "node --test lib/getLocalized.test.ts lib/categoryLabel.test.ts lib/myDay.test.ts lib/commandCenterValidation.test.ts lib/commandCenterClient.test.ts lib/rlsBoundary.test.ts scripts/upload-media.test.mjs lib/popupHtml.test.ts lib/walkingRoute.test.ts lib/relatedStories.test.ts scripts/bootstrap-worktree.test.mjs lib/featuredPlaces.test.ts lib/tourPage.test.ts",
     "seo-audit": "node scripts/seo-audit.mjs",
     "check:i18n": "node scripts/check-i18n-strings.mjs",
     "upload-media": "node scripts/upload-media.mjs",
