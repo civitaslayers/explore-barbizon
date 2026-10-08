@@ -3,13 +3,19 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useTranslation, type SSRConfig } from "next-i18next/pages";
 import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
-import type { ComponentProps } from "react";
 import { marked } from "marked";
 import RelatedStories from "@/components/RelatedStories";
 import { SeoHead } from "@/components/SeoHead";
+import { RELATED_SLUGS } from "@/data/relatedStories";
 import { getAllStories } from "@/data/stories";
 import { getLocalized, type LocalizableRow } from "@/lib/getLocalized";
 import { heroImage800w } from "@/lib/media";
+import {
+  resolveRelated,
+  type RelatedContent,
+  type RelatedPlaceRow,
+  type RelatedStoryRow,
+} from "@/lib/relatedStories";
 import { buildArticleSchema } from "@/lib/seo";
 import { supabase } from "@/lib/supabase";
 import nextI18NextConfig from "@/next-i18next.config";
@@ -33,6 +39,7 @@ type StoryPageStory = {
 
 type StoryPageProps = {
   story: StoryPageStory;
+  related: RelatedContent;
 } & SSRConfig;
 
 function excerptFromBody(body: string | null, maxLen = 220): string {
@@ -110,102 +117,43 @@ async function getPublishedStoryBySlug(
   return mapRowToPageStory(data as unknown as StoryDbRow);
 }
 
-const RELATED: Record<string, ComponentProps<typeof RelatedStories>> = {
-  "rooms-of-light": {
-    stories: [
-      {
-        slug: "inn-paintings-dinner",
-        title: "The Inn Where Paintings Paid for Dinner",
-        theme: "Village life"
-      }
-    ],
-    places: [
-      { slug: "maison-millet", name: "Maison Millet", category: "Studio" }
-    ]
-  },
-  "paths-to-the-forest": {
-    stories: [
-      {
-        slug: "inn-paintings-dinner",
-        title: "The Inn Where Paintings Paid for Dinner",
-        theme: "Village life"
-      }
-    ],
-    places: [
-      {
-        slug: "sentier-des-peintres",
-        name: "Sentier des Peintres",
-        category: "Walk"
-      }
-    ]
-  },
-  "inn-paintings-dinner": {
-    stories: [
-      {
-        slug: "rooms-of-light",
-        title: "Rooms of Light in a Forest Village",
-        theme: "Studio"
-      },
-      {
-        slug: "paths-to-the-forest",
-        title: "Paths to the Forest Edge",
-        theme: "Landscape"
-      }
-    ],
-    places: [
-      { slug: "auberge-ganne", name: "Auberge Ganne", category: "Museum" },
-      {
-        slug: "musee-de-barbizon",
-        name: "Musée de Barbizon",
-        category: "Museum"
-      }
-    ]
-  },
-  "the-gleaners": {
-    stories: [
-      {
-        slug: "rooms-of-light",
-        title: "Rooms of Light in a Forest Village",
-        theme: "Studio"
-      },
-      {
-        slug: "paths-to-the-forest",
-        title: "Paths to the Forest Edge",
-        theme: "Landscape"
-      }
-    ],
-    places: [
-      { slug: "maison-millet", name: "Maison Millet", category: "Studio" }
-    ]
-  },
-  "how-the-forest-became-a-picture": {
-    stories: [
-      {
-        slug: "paths-to-the-forest",
-        title: "Paths to the Forest Edge",
-        theme: "Landscape"
-      },
-      {
-        slug: "the-gleaners",
-        title: "The Gleaners and What They Were Looking At",
-        theme: "Landscape"
-      }
-    ],
-    places: [
-      {
-        slug: "sentier-des-peintres",
-        name: "Sentier des Peintres",
-        category: "Walk"
-      }
-    ]
-  }
-};
+// Related-content rows for the sidebar. Bounded `.in()` queries on the
+// editorial slug lists (data/relatedStories.ts); only published records,
+// explicit column lists. Display values are resolved per locale in
+// resolveRelated() so the page props carry cards, never raw translations.
+async function getRelatedStoryRows(slugs: string[]): Promise<RelatedStoryRow[]> {
+  if (!supabase) throw new Error("Supabase not configured");
+  if (slugs.length === 0) return [];
 
-const StoryPage: NextPage<StoryPageProps> = ({ story }) => {
+  const { data, error } = await supabase
+    .from("stories")
+    .select("slug, title, theme, translations")
+    .in("slug", slugs)
+    .eq("is_published", true);
+
+  if (error) throw new Error(error.message);
+  return (data ?? []) as unknown as RelatedStoryRow[];
+}
+
+async function getRelatedPlaceRows(slugs: string[]): Promise<RelatedPlaceRow[]> {
+  if (!supabase) throw new Error("Supabase not configured");
+  if (slugs.length === 0) return [];
+
+  // No `!inner` on categories: a location with a null category still resolves.
+  const { data, error } = await supabase
+    .from("locations")
+    .select("slug, name, translations, categories(name, slug)")
+    .in("slug", slugs)
+    .eq("is_published", true);
+
+  if (error) throw new Error(error.message);
+  return (data ?? []) as unknown as RelatedPlaceRow[];
+}
+
+const StoryPage: NextPage<StoryPageProps> = ({ story, related }) => {
   const router = useRouter();
   const locale = router.locale ?? "fr";
   const { t, i18n } = useTranslation("common");
-  const related = RELATED[story.slug];
 
   const title = getLocalized(story, locale, "title") || story.title;
   // "subtitle" is the real DB/translations column name (see mapRowToPageStory);
@@ -293,7 +241,7 @@ const StoryPage: NextPage<StoryPageProps> = ({ story }) => {
             dangerouslySetInnerHTML={{ __html: bodyHtml }}
           />
         ) : null}
-        {related ? <RelatedStories {...related} /> : null}
+        <RelatedStories stories={related.stories} places={related.places} />
       </article>
     </>
   );
@@ -324,7 +272,23 @@ export const getStaticProps: GetStaticProps<StoryPageProps> = async ({
   try {
     const story = await getPublishedStoryBySlug(slug);
     if (!story) return { notFound: true };
-    return { props: { story, ...translations }, revalidate: 60 };
+
+    const spec = RELATED_SLUGS[slug];
+    let related: RelatedContent = { stories: [], places: [] };
+    if (spec) {
+      try {
+        const [storyRows, placeRows] = await Promise.all([
+          getRelatedStoryRows(spec.stories),
+          getRelatedPlaceRows(spec.places),
+        ]);
+        related = resolveRelated(slug, spec, storyRows, placeRows, locale ?? "fr");
+      } catch (err) {
+        // The story itself still renders; only the sidebar is empty.
+        console.error(`[stories/[slug]] related content query failed for ${slug}`, err);
+      }
+    }
+
+    return { props: { story, related, ...translations }, revalidate: 60 };
   } catch {
     const s = getAllStories().find((x) => x.slug === slug);
     if (!s) return { notFound: true };
@@ -340,7 +304,8 @@ export const getStaticProps: GetStaticProps<StoryPageProps> = async ({
       cover_credit: null,
       cover_alt: null,
     };
-    return { props: { story, ...translations }, revalidate: 60 };
+    const related: RelatedContent = { stories: [], places: [] };
+    return { props: { story, related, ...translations }, revalidate: 60 };
   }
 };
 

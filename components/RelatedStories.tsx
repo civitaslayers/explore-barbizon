@@ -1,22 +1,18 @@
 import Link from "next/link";
 import { useTranslation } from "next-i18next/pages";
-
-export type RelatedStory = {
-  slug: string;
-  title: string;
-  theme: string;
-};
+import { categoryLabel } from "@/lib/categoryLabel";
+import type { RelatedPlaceCard, RelatedStoryCard } from "@/lib/relatedStories";
 
 export type RelatedStoriesProps = {
-  stories?: RelatedStory[];
-  places?: { slug: string; name: string; category: string }[];
+  stories?: RelatedStoryCard[];
+  places?: RelatedPlaceCard[];
 };
 
 export default function RelatedStories({
   stories,
   places
 }: RelatedStoriesProps) {
-  const { t } = useTranslation("common");
+  const { t, i18n } = useTranslation("common");
   const hasStories = stories && stories.length > 0;
   const hasPlaces = places && places.length > 0;
 
@@ -30,20 +26,25 @@ export default function RelatedStories({
             {t("story.relatedEssays")}
           </p>
           <div className="space-y-4 md:space-y-5">
-            {stories!.map((story) => (
-              <Link
-                key={story.slug}
-                href={`/stories/${story.slug}`}
-                className="block border-l border-ink/15 pl-4 transition-colors hover:border-ink/40"
-              >
-                <p className="text-[11px] uppercase tracking-[0.18em] text-ink/50">
-                  {story.theme}
-                </p>
-                <h2 className="mt-1 font-serif text-base text-ink md:text-lg">
-                  {story.title}
-                </h2>
-              </Link>
-            ))}
+            {stories!.map((story) => {
+              const themeKey = story.theme ? `story.themes.${story.theme}` : null;
+              const themeLabel =
+                themeKey && i18n.exists(themeKey) ? t(themeKey) : t("story.themeFallback");
+              return (
+                <Link
+                  key={story.slug}
+                  href={`/stories/${story.slug}`}
+                  className="block border-l border-ink/15 pl-4 transition-colors hover:border-ink/40"
+                >
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-ink/50">
+                    {themeLabel}
+                  </p>
+                  <h2 className="mt-1 font-serif text-base text-ink md:text-lg">
+                    {story.title}
+                  </h2>
+                </Link>
+              );
+            })}
           </div>
         </section>
       ) : null}
@@ -67,7 +68,9 @@ export default function RelatedStories({
                 className="border border-ink/10 p-4 transition-colors hover:border-ink/25"
               >
                 <p className="font-serif text-ink">{place.name}</p>
-                <p className="mt-1 text-xs text-ink/50">{place.category}</p>
+                <p className="mt-1 text-xs text-ink/50">
+                  {categoryLabel(place.categorySlug, place.categoryName, t)}
+                </p>
               </Link>
             ))}
           </div>
