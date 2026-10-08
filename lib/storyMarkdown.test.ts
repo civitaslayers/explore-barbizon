@@ -105,6 +105,92 @@ test("M-H10: a quote inside a link title cannot break the attribute", () => {
   assert.ok(out.includes('title="a&quot;b"'), out);
 });
 
+// --- Raw-block passthrough (marked's inRawBlock state) ---------------------
+//
+// An inline <pre>/<code>/<kbd>/<script> opener puts marked's lexer into
+// "raw block" mode: subsequent text tokens are flagged escaped:true and the
+// default text renderer emits them verbatim. Anything the tag regex rejects
+// ("<img/src=x …>") would then reach the page raw. These cases pin the
+// walkTokens fix in lib/storyMarkdown.ts.
+
+const RAW_TAG = /<(img|svg|a|b)\//i;
+
+test("M-H11: inline <script> opener then <img/…> on the same line is escaped", () => {
+  const out = renderStoryMarkdown("Texte <script><img/src=x onerror=alert(1)>");
+  assert.ok(!RAW_TAG.test(out), out);
+  assert.ok(out.includes("&lt;script&gt;&lt;img/src=x onerror=alert(1)&gt;"), out);
+});
+
+test("M-H12: <pre>, <code>, <kbd>, <SCRIPT>, <script type=x> openers are all neutralised", () => {
+  const cases: Array<[string, string]> = [
+    ["Texte <pre><img/src=x onerror=alert(1)>", "&lt;img/src=x"],
+    ["Texte <code><svg/onload=alert(1)>", "&lt;svg/onload=alert(1)&gt;"],
+    ['Texte <kbd><a/href="javascript:alert(1)">clic</a>', "&lt;a/href="],
+    ["Texte <SCRIPT><img/src=x onerror=alert(1)>", "&lt;img/src=x"],
+    ["Texte <script type=x><img/src=x onerror=alert(1)>", "&lt;img/src=x"],
+  ];
+  for (const [input, expected] of cases) {
+    const out = renderStoryMarkdown(input);
+    assert.ok(!RAW_TAG.test(out), `${input} -> ${out}`);
+    // No raw <a> element at all (the escaped literal text still reads "href=").
+    assert.ok(!/<a[\s/>]/i.test(out), `${input} -> ${out}`);
+    assert.ok(out.includes(expected), `${input} -> ${out}`);
+  }
+});
+
+test("M-H13: raw-block state does not leak into later paragraphs or list items", () => {
+  const out = renderStoryMarkdown(
+    "Intro <script>\n\nDeuxième paragraphe <img/src=x onerror=alert(1)> fin\n\n- item <b/onclick=alert(1)>x",
+  );
+  assert.ok(!RAW_TAG.test(out), out);
+  assert.ok(out.includes("<p>Intro &lt;script&gt;</p>"), out);
+  assert.ok(
+    out.includes("<p>Deuxième paragraphe &lt;img/src=x onerror=alert(1)&gt; fin</p>"),
+    out,
+  );
+  assert.ok(out.includes("<li>item &lt;b/onclick=alert(1)&gt;x</li>"), out);
+});
+
+test("M-H14: opener inside emphasis, link text, heading, table cell, blockquote", () => {
+  const cases: Array<[string, string]> = [
+    ["**<script>**<img/src=x onerror=alert(1)>", "<strong>&lt;script&gt;</strong>&lt;img/src=x onerror=alert(1)&gt;"],
+    [
+      "[<script><img/src=x onerror=alert(1)>](https://ex.com)",
+      '<a href="https://ex.com">&lt;script&gt;&lt;img/src=x onerror=alert(1)&gt;</a>',
+    ],
+    ["# T <script><img/src=x onerror=alert(1)>", "T &lt;script&gt;&lt;img/src=x onerror=alert(1)&gt;</h1>"],
+    ["| a |\n|---|\n| <script><img/src=x onerror=alert(1)> |", "<td>&lt;script&gt;&lt;img/src=x onerror=alert(1)&gt;</td>"],
+    ["> q <script><img/src=x onerror=alert(1)>", "q &lt;script&gt;&lt;img/src=x onerror=alert(1)&gt;"],
+  ];
+  for (const [input, expected] of cases) {
+    const out = renderStoryMarkdown(input);
+    assert.ok(!RAW_TAG.test(out), `${input} -> ${out}`);
+    assert.ok(out.includes(expected), `${input} -> ${out}`);
+  }
+});
+
+test("M-H15: plain < > & after an inline <script> opener are still escaped", () => {
+  const out = renderStoryMarkdown("Texte <script> 1 < 2 > 0 & co");
+  assert.ok(out.includes("&lt;script&gt; 1 &lt; 2 &gt; 0 &amp; co"), out);
+  assert.ok(!out.includes(" 1 < 2 "), out);
+});
+
+test("M-H16: backslash after a single slash in href renders text only", () => {
+  const out = renderStoryMarkdown("[x](/\\evil.example/x)");
+  assert.ok(!out.includes("href="), out);
+  assert.ok(out.includes("x"), out);
+});
+
+test("M-H17: walkTokens fix keeps M-F6 byte-equality and M-F4 no-double-escape", () => {
+  const body =
+    "## Sous-titre\n\nUn **paragraphe** avec un [lien](/places/auberge-ganne) et une\nligne suivante.\n\n- a\n- b";
+  assert.equal(renderStoryMarkdown(body), marked(body, { breaks: true, gfm: true }));
+  const entities = renderStoryMarkdown("Texte &amp; &lt;script&gt; fin");
+  assert.ok(entities.includes("&amp; &lt;script&gt; fin"), entities);
+  assert.ok(!entities.includes("&amp;lt;"), entities);
+  assert.ok(!entities.includes("&amp;amp;"), entities);
+});
+
 // --- Feature preservation --------------------------------------------------
 
 test("M-F1: headings, emphasis, lists, blockquote, strikethrough, tables", () => {

@@ -16,16 +16,17 @@
 // `marked` export is not mutated for any other importer.
 // ---------------------------------------------------------------------------
 
-import { Marked, type Tokens } from "marked";
+import { Marked, type Token, type Tokens } from "marked";
 import { escapeHtml } from "./popupHtml.ts";
 
 // Positive allowlist on the raw, undecoded href. Everything else — javascript:,
 // data:, vbscript:, entity-encoded schemes (&#106;avascript:), leading
 // whitespace or control characters, scheme-less "www.example.com",
-// protocol-relative "//evil.example" (a single "/" must not be followed by
-// another "/") — falls through to text-only output. A blocklist would have to
+// protocol-relative "//evil.example" or "/\evil.example" (a single "/" must
+// not be followed by another "/" or a backslash, which some browsers normalise
+// to "/") — falls through to text-only output. A blocklist would have to
 // anticipate every encoding trick; an allowlist does not.
-const SAFE_URL = /^(?:https?:\/\/|mailto:|\/(?!\/)|#|\.\.?\/)/i;
+const SAFE_URL = /^(?:https?:\/\/|mailto:|\/(?![\/\\])|#|\.\.?\/)/i;
 
 function safeUrl(href: string): string | null {
   if (!SAFE_URL.test(href)) return null;
@@ -40,6 +41,22 @@ function safeUrl(href: string): string | null {
 const storyMarked = new Marked({
   breaks: true,
   gfm: true,
+  // marked's raw-block passthrough — DO NOT REMOVE. When the inline tokenizer
+  // meets an opener matching /^<(pre|code|kbd|script)(\s|>)/i it sets
+  // lexer.state.inRawBlock = true and, until the matching closer, every
+  // inline text token is emitted with `escaped: true`; the default
+  // Renderer.text then returns such text UNESCAPED. The html() override below
+  // escapes the opener tag itself but cannot reset that lexer state, so any
+  // later "<img/src=x onerror=…>" (anything marked's tag regex rejects) would
+  // reach the page raw — for the rest of the document, across paragraphs,
+  // lists, headings, tables and blockquotes. Clearing the flag here, before
+  // rendering, makes marked's own entity-preserving text escaper run on every
+  // text token, so "<" / ">" / "&" always come out as entities.
+  walkTokens(token: Token) {
+    if (token.type === "text" && "escaped" in token) {
+      (token as Tokens.Text).escaped = false;
+    }
+  },
   renderer: {
     // Raw HTML — block or inline, including comments — becomes visible
     // literal text. The token text is unescaped source, so the full escaper
