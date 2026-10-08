@@ -7,6 +7,7 @@ import { getCategoryGroup, GROUP_COLORS } from "@/lib/categoryGroups";
 import { DEFAULT_LIGHT_PRESET } from "@/lib/mapLight";
 import { popupDayToggleState } from "@/lib/myDay";
 import { buildPinPopupContent, buildTrailPopupContent } from "@/lib/popupHtml";
+import type { RouteLineString } from "@/lib/walkingRoute";
 import type { DayStop } from "@/components/MyDayPanel";
 
 // ---------------------------------------------------------------------------
@@ -248,10 +249,15 @@ function buildGeoJSON(locations: Place[]): GeoJSON.FeatureCollection {
   };
 }
 
-// "My day" overlay — numbered stop points plus one straight LineString through
-// the stops in order (>= 2). Lives in its own source so the trail handlers
-// (hideAllRoutes / routes setData) never touch it.
-function buildDayGeoJSON(stops: DayStop[]): GeoJSON.FeatureCollection {
+// "My day" overlay — numbered stop points plus one LineString (>= 2 stops):
+// the Mapbox Directions walking geometry when routed (task 0f159817), else
+// the straight line through the stops in order. `routed` drives the dash.
+// Lives in its own source so the trail handlers (hideAllRoutes / routes
+// setData) never touch it.
+function buildDayGeoJSON(
+  stops: DayStop[],
+  route: RouteLineString | null
+): GeoJSON.FeatureCollection {
   const features: GeoJSON.Feature[] = stops.map((s, i) => ({
     type: "Feature",
     properties: { slug: s.slug, n: i + 1 },
@@ -260,8 +266,8 @@ function buildDayGeoJSON(stops: DayStop[]): GeoJSON.FeatureCollection {
   if (stops.length >= 2) {
     features.push({
       type: "Feature",
-      properties: {},
-      geometry: {
+      properties: { routed: route !== null },
+      geometry: route ?? {
         type: "LineString",
         coordinates: stops.map((s) => [s.longitude, s.latitude]),
       },
@@ -466,6 +472,8 @@ type Props = {
   // the stored day is at its cap; dayShared = a shared ?day is displayed, so
   // the popup button is hidden. fitDayToken bumps to request a camera fit.
   dayStops: DayStop[];
+  /** Walking geometry from Mapbox Directions; null = straight-line fallback. */
+  dayRoute: RouteLineString | null;
   daySlugs: string[];
   dayFull: boolean;
   dayShared: boolean;
@@ -485,6 +493,7 @@ export default function MapGL({
   categoryLabels,
   locale,
   dayStops,
+  dayRoute,
   daySlugs,
   dayFull,
   dayShared,
@@ -515,6 +524,7 @@ export default function MapGL({
 
   // "My day" refs — read inside the mount-once Mapbox closures (labelsRef pattern).
   const dayStopsRef = useRef(dayStops);
+  const dayRouteRef = useRef(dayRoute);
   const daySlugsRef = useRef(daySlugs);
   const dayFullRef = useRef(dayFull);
   const daySharedRef = useRef(dayShared);
@@ -797,10 +807,11 @@ export default function MapGL({
 
       // ── My day overlay ────────────────────────────────────────────────────
       // Separate source from `routes` so trail hide/reset handlers never clear
-      // it. Same line recipe as the trails; dashes signal "not a path".
+      // it. Same line recipe as the trails; dashes signal "not a path"
+      // (straight-line fallback), solid = routed walking geometry.
       map.addSource("my-day", {
         type: "geojson",
-        data: buildDayGeoJSON(dayStopsRef.current),
+        data: buildDayGeoJSON(dayStopsRef.current, dayRouteRef.current),
       });
       map.addLayer({
         id: "my-day-outline",
@@ -826,7 +837,13 @@ export default function MapGL({
           "line-color": "#7A5C3E",
           "line-width": 3,
           "line-opacity": 0.9,
-          "line-dasharray": [2, 1.5],
+          // Data-driven (GL JS >= 2.3): solid when routed, dashed fallback.
+          "line-dasharray": [
+            "case",
+            ["boolean", ["get", "routed"], false],
+            ["literal", [1, 0]],
+            ["literal", [2, 1.5]],
+          ],
         },
       });
       map.addLayer({
@@ -1120,6 +1137,7 @@ export default function MapGL({
   // handler (which seeds from dayStopsRef) and the popup refreshers agree.
   useEffect(() => {
     dayStopsRef.current = dayStops;
+    dayRouteRef.current = dayRoute;
     daySlugsRef.current = daySlugs;
     dayFullRef.current = dayFull;
     daySharedRef.current = dayShared;
@@ -1129,10 +1147,10 @@ export default function MapGL({
     if (!map) return;
     const update = () => {
       const src = map.getSource("my-day") as mapboxgl.GeoJSONSource | undefined;
-      src?.setData(buildDayGeoJSON(dayStops));
+      src?.setData(buildDayGeoJSON(dayStops, dayRoute));
     };
     map.isStyleLoaded() ? update() : map.once("load", update);
-  }, [dayStops, daySlugs, dayFull, dayShared, onToggleDay]);
+  }, [dayStops, dayRoute, daySlugs, dayFull, dayShared, onToggleDay]);
 
   // Camera fit on request (panel opened / shared day arrived).
   useEffect(() => {

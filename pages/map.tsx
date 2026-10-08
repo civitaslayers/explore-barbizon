@@ -9,6 +9,7 @@ import { SeoHead } from "@/components/SeoHead";
 import { buildCategoryLabels } from "@/lib/categoryLabel";
 import { MY_DAY_MAX_STOPS, MY_DAY_QUERY_PARAM, parseDayParam } from "@/lib/myDay";
 import { useMyDay } from "@/lib/useMyDay";
+import { useWalkingRoute } from "@/lib/useWalkingRoute";
 import type { Place, PlaceCategory } from "@/lib/types";
 import { getMapPins, getPublishedRoutes, type MapPin, type Route } from "@/lib/supabase";
 import {
@@ -182,6 +183,9 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
     return out;
   }, [locations, activeSlugs]);
   const unavailableCount = activeSlugs.length - dayStops.length;
+  // Walking route for the active (own or shared) ordered stops. Lives here,
+  // not in the panel, so opening/closing the panel never triggers a request.
+  const walking = useWalkingRoute(dayStops);
 
   const openDay = () => {
     setDayOpen(true);
@@ -276,6 +280,7 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
               categoryLabels={categoryLabels}
               locale={locale}
               dayStops={dayStops}
+              dayRoute={walking.route?.geometry ?? null}
               daySlugs={myDay.slugs}
               dayFull={myDay.isFull}
               dayShared={shared}
@@ -334,6 +339,7 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
           {dayOpen && (
             <MyDayPanel
               stops={dayStops}
+              route={walking.route}
               shared={shared}
               unavailableCount={unavailableCount}
               storedCount={myDay.slugs.length}
