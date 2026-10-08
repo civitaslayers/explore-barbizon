@@ -2,6 +2,25 @@
 -- Status: HUMAN-GATED. Luigi approves; claude.ai executes via Supabase MCP
 --         (apply_migration). DO NOT run from the loop.
 --
+-- APPLIED MIGRATION — historical record, not re-run, not rewritten.
+-- Applied 2026-07-15 by claude.ai via Supabase MCP and verified live
+-- (brain/decisions.md, 2026-07-15: tasks.source + its CHECK, the
+-- execution_status superset CHECK and outputs.commit_hash all present; all
+-- 66 rows valid). The loop has written queued/at_gate/blocked and
+-- source='loop' rows against these constraints ever since. Re-running would
+-- error on the duplicate constraint names (no IF NOT EXISTS on `add
+-- constraint`) and roll back — harmless but pointless; do not run. The
+-- "Status: HUMAN-GATED" lines above are the original gate instruction, kept
+-- for record.
+-- Two references in the Design block below are stale and deliberately left
+-- as written: the brain/task-queue.md mirror and pages/api/brain/sync-tasks.ts
+-- were retired 2026-08-16 and deleted 2026-10-04 (PR #4); getOverviewStats was
+-- removed from lib/commandCenter.ts 2026-10-05 (task a05a2c04) — the CCC
+-- overview now reads getOverviewStatsAdmin in lib/commandCenter.server.ts.
+-- tasks.status is therefore no longer "the sole input" to any mirror; the
+-- status/execution_status done-invariant is enforced by the tasks_sync_done
+-- trigger (2026-08-16), which post-dates this file.
+--
 -- Design (introspected 2026-07-15 against project afqyrxtfbspghpfulvmy — no
 -- invented columns):
 --   * tasks.status          — UNCHANGED human kanban lane
