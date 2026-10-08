@@ -33,6 +33,7 @@
     "trailEyebrow": "Sentier",
     "loop": "Boucle",
     "description": "Carte interactive de Barbizon : ateliers d'artistes, sentiers en forêt, restaurants, hébergements et commerces du village réunis sur une seule carte.",
+    "heading": "Explorer la carte de Barbizon",
     "difficulty": { "easy": "facile", "moderate": "moyen", "hard": "difficile" }
   },
   "layers": {
@@ -84,7 +85,8 @@
     "search": "Rechercher",
     "filterTimeline": "Filtrer la chronologie",
     "mapOf": "Carte situant {{name}}",
-    "trailMap": "Carte du sentier {{name}}"
+    "trailMap": "Carte du sentier {{name}}",
+    "skipToContent": "Aller au contenu"
   },
   "actions": {
     "backToPlaces": "Retour aux lieux",

@@ -33,6 +33,7 @@
     "trailEyebrow": "Trail",
     "loop": "Loop",
     "description": "Interactive map of Barbizon: artists' studios, forest trails, restaurants, places to stay and village shops, all together on a single map.",
+    "heading": "Explore the map of Barbizon",
     "difficulty": { "easy": "easy", "moderate": "moderate", "hard": "hard" }
   },
   "layers": {
@@ -84,7 +85,8 @@
     "search": "Search",
     "filterTimeline": "Filter timeline",
     "mapOf": "Map location of {{name}}",
-    "trailMap": "Trail map for {{name}}"
+    "trailMap": "Trail map for {{name}}",
+    "skipToContent": "Skip to content"
   },
   "actions": {
     "backToPlaces": "Archive Directory",
