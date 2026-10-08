@@ -1,4 +1,5 @@
 import Head from "next/head";
+import { serializeJsonLd } from "@/lib/jsonLd";
 
 // ---------------------------------------------------------------------------
 // components/SeoHead.tsx
@@ -109,7 +110,7 @@ export function SeoHead({
       {jsonLd ? (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
         />
       ) : null}
     </Head>
