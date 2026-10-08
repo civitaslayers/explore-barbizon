@@ -1,6 +1,6 @@
 ## Civitas Command Center (CCC) Schema
 
-Last updated: 2026-10-06
+Last updated: 2026-10-08
 
 Source: Supabase project `afqyrxtfbspghpfulvmy` (Civitas Layers, eu-west-2, Postgres 17)
 
@@ -38,7 +38,7 @@ Execution queue for work across product, content, map, schema, and operations.
 | priority       | integer | YES      | Sort key; DB default `3`; app treats it as numeric for ordering |
 | related_area   | text    | YES      | One of: `product`, `content`, `map`, `database`, `design`, `engineering`, `seo`, `ops` (enforced in app code) |
 | task_type      | text    | YES      | Work class: `content`, `code`, `map`, `data`, `ops`, `design`, `research`, `other` (app-enforced on forms) |
-| execution_status | text | YES   | Execution posture: `todo`, `in_progress`, `review`, `blocked`, `done` (distinct from queue `status`) |
+| execution_status | text | YES   | Execution posture / loop lifecycle: `todo`, `queued`, `in_progress`, `review`, `at_gate`, `blocked`, `done` — CHECK `tasks_execution_status_check` (migration `migrations/tasks_canonical_queue_dispatch.sql`); distinct from queue `status`, see "Queue status vs execution posture" below |
 | assigned_to    | text    | YES      | Free text. Operator presets `human`, `claude`. Loop-agent values `civitas-architect`, `civitas-implementer`, `civitas-content-ops` are written by the lead session when dispatching (not offered as UI picks). Retired `cursor` persists on historical rows; UI renders unknown values and never blanks them. NULL = unassigned. |
 | latest_output  | text    | YES      | Latest result / draft / implementation summary |
 | last_action_note | text | YES     | Short note on last action or handoff |

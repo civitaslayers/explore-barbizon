@@ -1,9 +1,38 @@
 # Current State
 
-Last updated: 2026-10-06
+Last updated: 2026-10-08
 
 ## Status
 
+**2026-10-08 overnight session 3 — merged and deployed.** Seven `overnight3/*`
+branches (jobs 1–7 of the 2026-10-07 overnight session, ten task IDs) were
+merged locally on `main` in the reviewed order (docs-stale-sections →
+tool-model-remnants → rls-blind-family → popup-escaping → my-day-directions →
+stories-related-db → worktree-bootstrap), pushed once as `f9a1cf8`, and
+deployed as `dpl_6iQJF8wLxqN7EwFwhn7tuAfozmKA` (READY, production). Rollback
+target: `dpl_6UVBQYefXdnRRkrxrJv2N1ZaAPdS` (commit `46cae34`). Conflicts were
+limited to the `package.json` test line at every step (union kept) plus two
+adjacent import lines in `components/MapGL.tsx` (both kept). Pre-push gate on
+the merged tree: tsc clean, lint 0 errors / 9 pre-existing warnings,
+check:i18n pass, build green, 130/130 tests. Post-deploy: `scripts/seo-audit.mjs`
+against production shows the same 23 known failures as before (task 749c5760),
+none new; `/en/stories/rooms-of-light` serves the English sidebar; `/map` 200
+with the v0.1 strings; `/api/tasks` and `/api/tasks/prompt-templates` return 401
+without Basic Auth. Landed: popup HTML escaping (`lib/popupHtml.ts`), the
+RLS-blind family closed (all CCC mutations via `/api/tasks/…`, anon helpers
+deleted, `lib/rlsBoundary.test.ts`), Claude-only presets, My day v0.1 walking
+routes via Mapbox Directions (Luigi's allowance / forest spot-check /
+`walking_speed` decisions still open), DB-sourced related stories, the stale
+docs fixes, and `scripts/bootstrap-worktree.mjs`. Tasks 2663bba1, 0c6961fa,
+fe9f0e5d, b696ede8, 838c32a4, 0f159817, 33c21389, 4849c0f0, 9764665c, 760db1c3
+set to done; the eight `overnight3/*` branches deleted. Audit follow-ups filed
+2026-10-07: aa55488c, 1b0ab544 (visitor-visible French on /en), fe8ecbb1
+(contrast), 3bb15319, 749c5760, 7066408c, bc8e61e7, plus fde4fa7c, aa74362d,
+d9f5e4c3, a46d0dc9. Open for Luigi: `.claude/settings.json` allowlist for the
+bootstrap script; the pre-commit-hook assumption in CLAUDE.md/run-loop (no such
+hook exists); 56029c79 should also move prompt-templates to `/api/prompt-templates`.
+
+---
 **2026-10-06 overnight session 2 — merged.** 7 queued tasks (15 task rows —
 several jobs each covered multiple task IDs) were worked end-to-end
 (plan → implement → review) overnight on individual `overnight2/*` branches

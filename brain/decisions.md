@@ -1,5 +1,43 @@
 ---
 
+## 2026-10-07
+_Overnight session 3 (Fable 5.1), merged to main 2026-10-08 as `f9a1cf8`. Decision texts drafted by civitas-architect per job and carried verbatim from the session's plan files; full report at `~/overnight-report-2026-10-07.md` on Luigi's Mac (the repo copy on branch overnight3/report-2026-10-07 was not merged; the branch was deleted after the merge)._
+
+### CCC data access: all mutations and the task-detail read via /api/tasks/… (tasks 0c6961fa, fe9f0e5d, b696ede8; overnight session 3, job 2)
+**Decision:** All Command Center mutations and the task-detail read go through API routes under /api/tasks/… (the only Basic-Auth-protected API prefix that fits), including prompt_templates at /api/tasks/prompt-templates[/id]. lib/commandCenter.ts loses every anon Supabase function and becomes a types-only module (plus taskFromRow); lib/commandCenter.server.ts is the sole data access layer for tasks, outputs, task_links, prompt_templates.
+**Reason:** Deny-all RLS makes the anon client silently return []/no-op on these tables. The three pages run mutations in the browser, so an import swap is impossible; routes are required. middleware.ts cannot be edited this session, and any route outside its matcher would be an unauthenticated service-role writer on a public site. Deleting the anon functions (nothing imports them after this change) removes the trap outright.
+**Consequence:** Ugly-but-safe URL /api/tasks/prompt-templates; follow-up (middleware.ts → proxy.ts, Next 16 deprecation) moves it to /api/prompt-templates with a matcher entry. Adding an output from the detail page now also syncs tasks.latest_output (reuses POST /api/tasks/[id]/outputs). updateTaskAdmin returns the fresh row (Task | null) instead of void. A node --test boundary test fails if any non-server file touches a deny-all table.
+**Migration risk:** none (app-layer only; one git mv of pages/api/tasks/[id]/outputs.ts → outputs/index.ts, URL unchanged).
+
+---
+
+### My day v0.1: Mapbox Directions walking routes, client-side (task 0f159817; job 4)
+**Decision:** My day v0.1 routes the ordered stops through Mapbox Directions (walking) client-side with the existing public token; one debounced (400 ms) request per change of the ordered coordinate list, hard-capped at 10 waypoints before any request, 8 s timeout, bounded success cache keyed by 6-decimal coordinates. Walking time comes only from the Directions duration; totals are the sum of the returned legs. Any failure renders the v0 straight-line numbers with the unchanged "à vol d'oiseau" strings and the dashed line; routed state swaps to solid line + "à pied" strings + a Mapbox/forest caveat. suggestOrder stays straight-line.
+**Reason:** The route must draw whenever a day exists, so routing is automatic but structurally bounded. The token is already public and URL-restrictable, so a proxy buys nothing. Loading and fallback share the v0 rendering so the panel never shows a blank or unlabelled number.
+**Consequence:** lib/walkingRoute.ts (+tests), lib/useWalkingRoute.ts; my-day-line dash data-driven on `routed`. Mapbox snaps waypoints to the nearest way. walking_speed at Mapbox default pending the forest spot-check; allowance check is Luigi's gate. Only coordinates + token leave the browser; keep strict-origin-when-cross-origin, never no-referrer.
+**Migration risk:** none.
+
+---
+
+### Stories: related content stays a slug mapping resolved from the DB (task 33c21389; job 5)
+**Decision:** Option (a): "which stories/places are related" stays a slug-only mapping in code (new data/relatedStories.ts), every display value resolved from the DB inside getStaticProps through getLocalized(), labelled at render through the existing story.themes.* i18n gating and categoryLabel(). Option (b) rejected: no story↔location relationship exists in the schema; same-theme derivation for stories would empty most sidebars (the curated pairs are deliberately cross-theme). Consequence: RELATED const with English literals deleted; RelatedStories props change; pure helper lib/relatedStories.ts with tests; getStaticProps gains two bounded .in() queries and ships only resolved cards. Unpublished/missing slugs dropped at build time. Mapping goes stale when stories are added (code edit) — price of no schema; the real home is story_locations in the deferred target schema. Migration risk none; touches a page data method → CLAUDE.md Vercel-preview gate at merge.
+
+---
+
+### Worktree bootstrap script (task 760db1c3; job 7)
+**Decision:** Worktree bootstrap ships as scripts/bootstrap-worktree.mjs + pure bootstrap-worktree.lib.mjs + node --test fixture; main checkout resolved via `git rev-parse --git-common-dir`, not __dirname. Reason: matches the .mjs/node --test convention (lint + tests for free, no deps); git-based resolution is correct when run from the script's own copy inside a nested .claude/worktrees/<name>. Consequence: `npm run worktree:bootstrap -- <path>` replaces the hand-typed ln -s / cp; copy is EXCL + mode 600; node_modules never overwritten; non-worktree paths refused. Follow-up: allowlist the command in .claude/settings.json (human-gated). Migration risk: none.
+
+---
+
+### ccc-schema.md summarises the status/execution_status contract; applied-migration banners (tasks 4849c0f0, 9764665c; job 6, hygiene-level)
+**Decision:** ccc-schema.md summarises the status/execution_status contract and cross-references docs/schema-reference.md as canonical rather than carrying a third verbatim copy; applied-migration banners follow the existing seed-file shape (after the original header, before first SQL) and leave stale body text in place with an explanatory note rather than rewriting it.
+**Reason:** two verbatim copies (CLAUDE.md, schema-reference.md) already exist and this task is itself a drift repair — a third copy is the next drift. Rewriting applied-migration bodies would falsify the historical record of what was actually run.
+**Consequence:** future changes to the trigger contract edit schema-reference.md and CLAUDE.md; ccc-schema.md only needs touching if the bullet summary becomes wrong. Stale line :41 remains until the post-merge follow-up above.
+**Migration risk:** none — docs and SQL comments only.
+_(Source: civitas-architect hand-back of 2026-10-07, reproduced verbatim; the line-41 follow-up it mentions was done in the 2026-10-08 brain commit.)_
+
+---
+
 ## 2026-10-06
 **Decision:** The day planner ("My day") from the "Barbizon Mobile Rethink" Claude Design board (project 7b5a0592) is adopted as a layer on the map, not as a new product model. "The map is the product" stands unchanged. The 1A board's premise that "the day is the product", with a Today tab that demotes the Atlas to a picker, is rejected. A visitor's chosen places render on the Atlas as a numbered walking route.
 **Reason:** 1A's core insight is sound: the nav was built from content types, not from what a visitor is doing. But it superseded a locked decision, and the map already has the primitives a planner needs (pins, coordinates, route rendering). Making the planner map-native keeps the product model intact and gives the feature a natural home. 1A was also built on stale data (42 places vs 107 published) and on facts the database does not hold (hours on 16 of 107, no price, no parking distances).
