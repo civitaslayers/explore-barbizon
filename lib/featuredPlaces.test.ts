@@ -137,6 +137,24 @@ test("en + no translations → French", () => {
   assert.equal(card.name, "Entrée de la forêt");
 });
 
+test("en + adapter shape for an untranslated row (null fields, status null) → French", () => {
+  // Exactly what lib/supabase.ts toLocationCard emits for a row with no
+  // translations: every en field null, _meta.status null (not undefined).
+  const adapterShape: FeaturedPlaceInput = {
+    ...noTranslations,
+    translations: {
+      en: {
+        name: null,
+        short_description: null,
+        _meta: { status: null },
+      },
+    } as unknown as FeaturedPlaceInput["translations"],
+  };
+  const [card] = buildFeaturedPlaces([adapterShape], "en");
+  assert.equal(card.description, "Porte de la forêt.");
+  assert.equal(card.name, "Entrée de la forêt");
+});
+
 test("fr + published translation → French base, never the translation", () => {
   const [card] = buildFeaturedPlaces([publishedEnWithName], "fr");
   assert.equal(card.name, "Maison Millet");

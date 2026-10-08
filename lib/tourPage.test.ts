@@ -134,6 +134,18 @@ test("en + draft translations → base values", () => {
   assert.equal(view.description, "A walking trail through the village.");
 });
 
+test("stop-level draft stop_narrative → base narrative (draft never leaks)", () => {
+  const stops = baseStops();
+  stops[0] = {
+    ...stops[0],
+    translations: {
+      en: { stop_narrative: "DRAFT narrative", _meta: { status: "draft" } },
+    },
+  };
+  const view = localizeTour({ ...tourPublishedEn, stops }, "en");
+  assert.equal(view.stops[0].stop_narrative, "Narratif FR");
+});
+
 test("fr + published translations → base values everywhere", () => {
   const view = localizeTour(tourPublishedEn, "fr");
   assert.equal(view.name, "Parcours des Mosaïques");
