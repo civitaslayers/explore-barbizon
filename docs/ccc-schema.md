@@ -39,7 +39,7 @@ Execution queue for work across product, content, map, schema, and operations.
 | related_area   | text    | YES      | One of: `product`, `content`, `map`, `database`, `design`, `engineering`, `seo`, `ops` (enforced in app code) |
 | task_type      | text    | YES      | Work class: `content`, `code`, `map`, `data`, `ops`, `design`, `research`, `other` (app-enforced on forms) |
 | execution_status | text | YES   | Execution posture: `todo`, `in_progress`, `review`, `blocked`, `done` (distinct from queue `status`) |
-| assigned_to    | text    | YES      | Assignee or tool label (free text; suggested presets in UI) |
+| assigned_to    | text    | YES      | Free text. Operator presets `human`, `claude`. Loop-agent values `civitas-architect`, `civitas-implementer`, `civitas-content-ops` are written by the lead session when dispatching (not offered as UI picks). Retired `cursor` persists on historical rows; UI renders unknown values and never blanks them. NULL = unassigned. |
 | latest_output  | text    | YES      | Latest result / draft / implementation summary |
 | last_action_note | text | YES     | Short note on last action or handoff |
 | next_step      | text    | YES      | One-line instruction for the next actor (handoff readability) |
@@ -47,7 +47,7 @@ Execution queue for work across product, content, map, schema, and operations.
 | artifact_links | text    | YES      | URLs or path-like refs; often one per line |
 | implementation_notes | text | YES   | Compact notes on what changed / was produced / decided |
 | review_note    | text    | YES      | Short reviewer note, approval, or requested-change note |
-| last_run_target | text   | YES      | Tool or person the brief was last handed to (free text; e.g. `claude`, `human`) |
+| last_run_target | text   | YES      | Free text; presets `claude`, `human`; historical rows may hold `cursor`. |
 | last_run_at    | timestamptz | YES   | When the latest handoff/run was recorded |
 | last_run_note  | text    | YES      | Short optional note about the latest handoff |
 | created_at     | timestamptz | YES  | Creation timestamp; default `now()` |
@@ -118,7 +118,7 @@ Timeline of AI or manual outputs related to tasks.
 |-----------|---------|----------|-------|
 | id        | uuid    | NO       | Primary key, assumed `uuid_generate_v4()` default |
 | task_id   | uuid    | YES      | Optional FK to `tasks.id`; can be `NULL` for orphaned outputs |
-| agent     | text    | NO       | Free text; current values are `claude` and `manual`; historical rows may still contain retired tool names, render unknown agents gracefully |
+| agent     | text    | NO       | Free text. Live values: `loop` (written by /run-loop at the gate), `review` (written by the dev-only `/api/tasks/[id]/review` endpoint), `claude`; `manual` is the preset for hand-entered outputs. Historical rows may hold `cursor`. Render unknown agents gracefully. |
 | prompt    | text    | YES      | Prompt text (if any) |
 | response  | text    | YES      | Output text (if any) |
 | version   | integer | YES      | Version counter; DB default `1` |
@@ -165,7 +165,7 @@ Prompt template library per agent for CCC.
 |------------|---------|----------|-------|
 | id         | uuid    | NO       | Primary key, assumed `uuid_generate_v4()` default |
 | name       | text    | NO       | Human-readable template name |
-| target_agent | text  | NO       | Free text; e.g. `claude`, `manual` |
+| target_agent | text  | NO       | Free text; selectable `claude`, `manual` (prompts page); historical rows may hold retired values. |
 | description | text   | YES      | Optional description |
 | template   | text    | NO       | Prompt template body |
 | created_at | timestamptz | YES | Creation timestamp; default `now()` |

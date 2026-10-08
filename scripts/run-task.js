@@ -5,7 +5,7 @@
  * Runs a CCC task through Claude Code CLI and posts the output back.
  *
  * Usage:
- *   node scripts/run-task.js <task-id> [claude|human|codex] [--base-url=http://localhost:3000]
+ *   node scripts/run-task.js <task-id> [claude|human] [--base-url=http://localhost:3000]
  *
  * Examples:
  *   node scripts/run-task.js abc-123
@@ -23,7 +23,7 @@ const { spawnSync } = require("child_process");
 // Args
 // ---------------------------------------------------------------------------
 
-const AGENT_ARGS = ["claude", "human", "codex"]; // advertised set — mirrors ASSIGNEE_PRESETS in pages/command-center/tasks/[id].tsx minus the UI-only "unassigned"
+const AGENT_ARGS = ["claude", "human"]; // mirrors ASSIGNEE_PRESETS in pages/command-center/tasks/[id].tsx
 const RETIRED_AGENT_ARGS = ["cursor", "chatgpt"]; // still recognised so historical invocations resolve <task-id> correctly; passed through as-is since `agent` is free text in dispatch.ts/outputs.ts
 const RECOGNISED_AGENT_ARGS = [...AGENT_ARGS, ...RETIRED_AGENT_ARGS];
 
@@ -34,7 +34,7 @@ const baseUrlArg = args.find((a) => a.startsWith("--base-url="));
 const baseUrl = baseUrlArg ? baseUrlArg.split("=")[1] : "http://localhost:3000";
 
 if (!taskId) {
-  console.error("Usage: node scripts/run-task.js <task-id> [claude|human|codex] [--base-url=http://localhost:3000]");
+  console.error("Usage: node scripts/run-task.js <task-id> [claude|human] [--base-url=http://localhost:3000]");
   process.exit(1);
 }
 
