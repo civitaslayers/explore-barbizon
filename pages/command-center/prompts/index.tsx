@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { CommandCenterLayout } from "@/components/CommandCenterLayout";
 import {
-  createPromptTemplate,
-  updatePromptTemplate,
-  deletePromptTemplate,
-} from "@/lib/commandCenter";
+  apiCreatePromptTemplate,
+  apiUpdatePromptTemplate,
+  apiDeletePromptTemplate,
+} from "@/lib/commandCenterClient";
 import type { PromptTemplate } from "@/lib/commandCenter";
 import { getPromptTemplatesAdmin } from "@/lib/commandCenter.server";
 
@@ -83,7 +83,7 @@ const PromptsPage: NextPageWithLayout<PromptsPageProps> = ({
     setSaving(true);
     setFormError(null);
     try {
-      await createPromptTemplate({
+      await apiCreatePromptTemplate({
         name: form.name.trim(),
         target_agent: form.target_agent,
         description: form.description.trim() || null,
@@ -102,7 +102,7 @@ const PromptsPage: NextPageWithLayout<PromptsPageProps> = ({
   async function handleUpdate(id: string) {
     setSaving(true);
     try {
-      await updatePromptTemplate(id, {
+      await apiUpdatePromptTemplate(id, {
         name: editForm.name.trim(),
         target_agent: editForm.target_agent,
         description: editForm.description.trim() || null,
@@ -120,7 +120,7 @@ const PromptsPage: NextPageWithLayout<PromptsPageProps> = ({
   async function handleDelete(id: string) {
     if (!confirm("Delete this template?")) return;
     try {
-      await deletePromptTemplate(id);
+      await apiDeletePromptTemplate(id);
       await refresh();
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Failed to delete");
@@ -363,8 +363,10 @@ PromptsPage.getLayout = (page: ReactElement) => (
 // prompt_templates has a deny-all RLS policy for public, so the previous
 // anon-client getPromptTemplates() silently returned [] — a blind read, not
 // an empty library. getPromptTemplatesAdmin() reads via supabaseAdmin
-// (service role), server-only. Write paths (create/update/delete) stay on
-// the anon client for now (follow-up task b696ede8).
+// (service role), server-only. Write paths (create/update/delete) go through
+// the Basic-Auth-protected API routes at /api/tasks/prompt-templates[/id]
+// via lib/commandCenterClient.ts (task b696ede8) — the anon client would
+// silently no-op on every write.
 // ---------------------------------------------------------------------------
 
 export const getServerSideProps: GetServerSideProps<PromptsPageProps> = async () => {

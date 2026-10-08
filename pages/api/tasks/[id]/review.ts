@@ -1,6 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { spawn } from "child_process";
-import { getTask, getOutputsForTask, createOutput } from "@/lib/commandCenter";
+import {
+  getTaskAdmin,
+  getOutputsForTaskAdmin,
+  createOutputAdmin,
+} from "@/lib/commandCenter.server";
+import { isUuid } from "@/lib/commandCenterValidation";
 
 export const config = { api: { responseLimit: false } };
 
@@ -22,13 +27,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const { id } = req.query;
-  if (typeof id !== "string") {
+  if (!isUuid(id)) {
     return res.status(400).json({ error: "Invalid task id" });
   }
 
   let task;
   try {
-    task = await getTask(id);
+    task = await getTaskAdmin(id);
   } catch (e: unknown) {
     return res.status(500).json({ error: e instanceof Error ? e.message : "Failed to fetch task" });
   }
@@ -39,7 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   let output = (task.latest_output ?? "").trim();
   if (!output) {
     try {
-      const rows = await getOutputsForTask(id);
+      const rows = await getOutputsForTaskAdmin(id);
       const latest = rows.find((r) => (r.response ?? "").trim().length > 0);
       output = (latest?.response ?? "").trim();
     } catch {
@@ -65,7 +70,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   let savedOutput;
   try {
-    savedOutput = await createOutput({
+    savedOutput = await createOutputAdmin({
       task_id: id,
       agent: "review",
       prompt,
