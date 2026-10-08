@@ -636,7 +636,11 @@ export async function getRouteByTourSlug(
     .eq("slug", tourSlug)
     .single();
 
-  if (error || !data?.geojson) return null;
+  if (error) {
+    if (error.code === "PGRST116") return null; // no route for this tour: a real answer
+    throw new Error(error.message);
+  }
+  if (!data?.geojson) return null;
 
   const line = data.geojson as unknown as GeoJSON.LineString;
   const coords: [number, number][] = (line.coordinates ?? []) as [

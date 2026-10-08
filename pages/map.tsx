@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import MyDayPanel, { type DayStop } from "@/components/MyDayPanel";
 import { SeoHead } from "@/components/SeoHead";
 import { buildCategoryLabels } from "@/lib/categoryLabel";
+import { withRetry } from "@/lib/fetchPolicy";
 import { MY_DAY_MAX_STOPS, MY_DAY_QUERY_PARAM, parseDayParam } from "@/lib/myDay";
 import { useMyDay } from "@/lib/useMyDay";
 import { useWalkingRoute } from "@/lib/useWalkingRoute";
@@ -449,8 +450,8 @@ export const getStaticProps: GetStaticProps<MapPageProps> = async ({
   locale,
 }) => {
   const [rawPins, routes, translations] = await Promise.all([
-    getMapPins(),
-    getPublishedRoutes(),
+    withRetry("map getMapPins", () => getMapPins()),
+    withRetry("map getPublishedRoutes", () => getPublishedRoutes()),
     serverSideTranslations(locale ?? "fr", ["common"], nextI18NextConfig),
   ]);
   const pins = rawPins.map((pin) => localizeMapPin(pin, locale ?? "fr"));

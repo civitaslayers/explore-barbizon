@@ -4,23 +4,25 @@ import { useRouter } from "next/router";
 import { useTranslation, type SSRConfig } from "next-i18next/pages";
 import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
 import { SeoHead } from "@/components/SeoHead";
-import { getAllStories, type Story } from "@/data/stories";
 import { getLocalized, type LocalizableRow } from "@/lib/getLocalized";
+import { withRetry } from "@/lib/fetchPolicy";
 import { heroImage800w } from "@/lib/media";
 import { supabase } from "@/lib/supabase";
 import nextI18NextConfig from "@/next-i18next.config";
 
-// dek/theme are nullable here (unlike data/stories.ts's Story type, which
-// always carries literal strings) — the Supabase-sourced rows below have no
-// subtitle/theme fallback at fetch time, so the page renders a translated
-// fallback instead of a hardcoded English string (dek ?? t("story.dekFallback")).
-// `dek` is the FALLBACK value getLocalized(story, locale, "subtitle") falls
-// back to when there's no published translation — mirroring [slug].tsx.
-// `title` stays the raw base-column value (the getLocalized fallback), not a
-// locale-resolved string, so per-locale resolution happens at render time.
-type StoriesRowStory = Omit<Story, "dek" | "theme"> & {
+// dek/theme are nullable: the Supabase-sourced rows have no subtitle/theme
+// fallback at fetch time, so the page renders a translated fallback instead
+// (dek ?? t("story.dekFallback")). `dek` is the FALLBACK value
+// getLocalized(story, locale, "subtitle") falls back to when there's no
+// published translation — mirroring [slug].tsx. `title` stays the raw base
+// column value, so per-locale resolution happens at render time.
+type StoriesRowStory = {
+  slug: string;
+  title: string;
   dek: string | null;
   theme: string | null;
+  /** `'history'` (essays) or `'guide'` (practical). */
+  type?: "history" | "guide";
   cover_image_url?: string | null;
   cover_alt?: string | null;
   translations?: LocalizableRow["translations"];
@@ -244,12 +246,10 @@ export const getStaticProps: GetStaticProps<StoriesIndexProps> = async ({
   locale,
 }) => {
   const translations = await serverSideTranslations(locale ?? "fr", ["common", "pages"], nextI18NextConfig);
-  try {
-    const stories = await getPublishedStoriesFromSupabase();
-    return { props: { stories, ...translations }, revalidate: 60 };
-  } catch {
-    return { props: { stories: getAllStories(), ...translations }, revalidate: 60 };
-  }
+  const stories = await withRetry("stories getPublishedStoriesFromSupabase", () =>
+    getPublishedStoriesFromSupabase()
+  );
+  return { props: { stories, ...translations }, revalidate: 60 };
 };
 
 export default StoriesIndexPage;

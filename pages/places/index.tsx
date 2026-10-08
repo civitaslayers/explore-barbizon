@@ -8,6 +8,7 @@ import AddToDayButton from "@/components/AddToDayButton";
 import ImagePlaceholder from "@/components/ImagePlaceholder";
 import { SeoHead } from "@/components/SeoHead";
 import { categoryLabel } from "@/lib/categoryLabel";
+import { degrade, withRetry } from "@/lib/fetchPolicy";
 import { heroImage800w } from "@/lib/media";
 import { getPublishedLocations, supabase } from "@/lib/supabase";
 import type { Place } from "@/lib/types";
@@ -362,26 +363,13 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({
 export const getStaticProps: GetStaticProps<PlacesIndexProps> = async ({
   locale,
 }) => {
-  const places = await getPublishedLocations();
-  let whereToEat: CuratedPlace[] = [];
-  let whereToStay: CuratedPlace[] = [];
-  let curatedUnavailable = false;
-  if (supabase) {
-    try {
-      const curated = await getFeaturedEatStayCurated();
-      whereToEat = curated.whereToEat;
-      whereToStay = curated.whereToStay;
-    } catch (error) {
-      // Curated sections stay empty if the query fails (e.g. column not
-      // deployed yet) — but flag it so the page can surface a note instead
-      // of silently looking like there's genuinely nothing curated.
-      console.error(
-        "[places/getStaticProps] getFeaturedEatStayCurated failed:",
-        error instanceof Error ? error.message : error
-      );
-      curatedUnavailable = true;
-    }
-  }
+  const places = await withRetry("places getPublishedLocations", () => getPublishedLocations());
+  // Curated sections stay empty if the query fails — flagged so the page can
+  // surface a note instead of silently looking like nothing is curated.
+  const curated = await degrade("places getFeaturedEatStayCurated", () => getFeaturedEatStayCurated(), null);
+  const whereToEat: CuratedPlace[] = curated?.whereToEat ?? [];
+  const whereToStay: CuratedPlace[] = curated?.whereToStay ?? [];
+  const curatedUnavailable = curated === null;
   const translations = await serverSideTranslations(locale ?? "fr", ["common"], nextI18NextConfig);
   return {
     props: { places, whereToEat, whereToStay, curatedUnavailable, ...translations },

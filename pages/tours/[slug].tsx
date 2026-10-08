@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import { useTranslation, type SSRConfig } from "next-i18next/pages";
 import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
 import { SeoHead } from "@/components/SeoHead";
+import { degrade, withRetry } from "@/lib/fetchPolicy";
 import {
   getTourBySlugFromSupabase,
   getPublishedTourSlugs,
@@ -267,7 +268,7 @@ const TourPage: NextPage<TourPageProps> = ({ tour, routeCoords }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const slugs = await getPublishedTourSlugs();
+  const slugs = await withRetry("tours/[slug] getPublishedTourSlugs", () => getPublishedTourSlugs());
   return {
     paths: slugs.map((slug) => ({ params: { slug } })),
     fallback: "blocking",
@@ -281,9 +282,9 @@ export const getStaticProps: GetStaticProps<TourPageProps> = async ({
   const slug = params?.slug;
   if (typeof slug !== "string") return { notFound: true };
 
-  const tour = await getTourBySlugFromSupabase(slug);
+  const tour = await withRetry(`tours/[slug] getTourBySlugFromSupabase:${slug}`, () => getTourBySlugFromSupabase(slug));
   if (!tour) return { notFound: true };
-  const routeCoords = await getRouteByTourSlug(slug).catch(() => null);
+  const routeCoords = await degrade(`tours/[slug] getRouteByTourSlug:${slug}`, () => getRouteByTourSlug(slug), null);
   const translations = await serverSideTranslations(locale ?? "fr", ["common"], nextI18NextConfig);
   return {
     props: {

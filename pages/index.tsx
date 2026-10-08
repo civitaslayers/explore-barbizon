@@ -7,6 +7,7 @@ import { useTranslation } from "next-i18next/pages";
 import ImagePlaceholder from "@/components/ImagePlaceholder";
 import { SeoHead } from "@/components/SeoHead";
 import { categoryLabel } from "@/lib/categoryLabel";
+import { withRetry } from "@/lib/fetchPolicy";
 import { heroImage800w } from "@/lib/media";
 import { getLocationCards, type LocationCard } from "@/lib/supabase";
 import nextI18NextConfig from "@/next-i18next.config";
@@ -334,7 +335,7 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
 export const getStaticProps: GetStaticProps<HomePageProps> = async ({
   locale,
 }) => {
-  const places = await getLocationCards();
+  const places = await withRetry("index getLocationCards", () => getLocationCards());
   const translations = await serverSideTranslations(locale ?? "fr", ["common", "pages"], nextI18NextConfig);
   return {
     props: { featuredPlaces: buildFeaturedPlaces(places), ...translations },
