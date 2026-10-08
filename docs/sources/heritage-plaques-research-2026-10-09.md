@@ -13,8 +13,12 @@ Barbizon, Musée d'Orsay), then Tier 2, per `docs/sources.md`. Tier 3 sources
 quoted for orientation only and never confirm a claim on their own. Verdicts use
 three values: **confirmed** (Tier 1, or Tier 2 with a named author/institution),
 **contradicted** (a Tier 1 or Tier 2 source says otherwise), **unsupported** (nothing
-above Tier 3 found tonight). Quotes are verbatim from the page as fetched; where a
-page could not be read, this is stated and nothing is reconstructed.
+above Tier 3 found tonight). Where Tier 3 pages agree with each other this is noted as
+"concordant", which is not a fourth verdict: concordant Tier 3 is still unsupported.
+Quotes are verbatim from the page as fetched; where a page could not be read, this is
+stated and nothing is reconstructed. Entry headers of the Mahenc transcriptions are
+copied as printed (« >> à droite, au N°… » / « << à gauche, au N°… »); the street is the
+page section's, not printed in the entry.
 
 Luigi decides what gets published. Nothing here was written into `locations`.
 
@@ -31,12 +35,13 @@ Read successfully (quoted below):
 | BnF, Les Essentiels — « La forêt de Fontainebleau et les artistes en 30 dates » | 1 | https://essentiels.bnf.fr/fr/focus/060b51a7-3261-4970-b2c0-dbaa0442c450-foret-fontainebleau-et-artistes-en-30-dates |
 | Archives départementales de Seine-et-Marne — « Exploiter et protéger une ressource "naturelle" : la forêt de Fontainebleau depuis Colbert » | 1 | https://archives.seine-et-marne.fr/en/node/1326 |
 | data.bnf.fr — author search « Maximilienne Whettnall » | 1 | https://data.bnf.fr/search?term=Maximilienne+Whettnall |
-| Mairie de Barbizon — page « Histoire » | institutional (municipal) | https://www.barbizon.fr/histoire/ |
-| Mairie de Barbizon — page « Commerces et artisans » | institutional (municipal) | https://www.barbizon.fr/commerces-et-artisans/ |
-| National Gallery, London — artist page Charles-François Daubigny | 2 | https://www.nationalgallery.org.uk/artists/charles-francois-daubigny |
-| societe.com — registry record « MANOIR DE SAINT HEREM » (SIREN 331843789) | 2 (registry data via an aggregator; verify on Infogreffe/BODACC before publishing) | https://www.societe.com/societe/manoir-de-saint-herem-331843789.html |
+| Mairie de Barbizon — page « Histoire » | municipal website: not in the `docs/sources.md` table; decision 2026-04-02 covers the mairie *map*, not the site. Treated here as Tier 2-equivalent (institutional, unsigned) pending Luigi's call | https://www.barbizon.fr/histoire/ |
+| Mairie de Barbizon — page « Commerces et artisans » | municipal website (same note) | https://www.barbizon.fr/commerces-et-artisans/ |
+| National Gallery, London — artist page Charles-François Daubigny | 2 by institution; note the page has no named author/curator, which `docs/sources.md` asks of Tier 2. The Daubigny verdict below rests on BnF (Tier 1) and uses this page only for the Auvers 1860 date | https://www.nationalgallery.org.uk/artists/charles-francois-daubigny |
+| societe.com — registry record « MANOIR DE SAINT HEREM » (SIREN 331843789), BODACC event list | 2 (official registry/BODACC data via an aggregator; verify on Infogreffe/BODACC before publishing) | https://www.societe.com/societe/manoir-de-saint-herem-331843789.html |
 | fr.wikipedia.org — « Forêt de Fontainebleau » (with its footnotes) | lead only | https://fr.wikipedia.org/wiki/For%C3%AAt_de_Fontainebleau |
 | fr.wikipedia.org — « Musée des Peintres de Barbizon » | lead only | https://fr.wikipedia.org/wiki/Mus%C3%A9e_des_Peintres_de_Barbizon |
+| fr.wikipedia.org — « Auguste Giroux » (for its footnote to a printed source) | lead only | https://fr.wikipedia.org/wiki/Auguste_Giroux |
 | Fontainebleau Tourisme — « The forest » | 3 (tourism office) | https://www.fontainebleau-tourisme.com/en/the-forest/the-forest-2/ |
 | La Radio du Goût — « L'auberge Ganne et les peintres de Barbizon » (2021, interview with Frédérique Bourdeau, régisseur des collections, Musée départemental) | 3 (press; quotes a museum staff member) | http://www.laradiodugout.fr/dossiers/2021/12/lauberge-ganne-et-les-peintres-de-barbizon/ |
 | barbizonvillagedespeintres.wordpress.com — « Barbizon pas à pas… » (2015-08-23, Jean-Michel Mahenc) | 3 | https://barbizonvillagedespeintres.wordpress.com/2015/08/23/barbizon-pas-a-pas-les-sourires-et-les-secrets-du-passe-dans-chaque-maison/ |
@@ -54,8 +59,8 @@ Could NOT be read (listed for Luigi; not routed around):
 | Inventaire général du patrimoine culturel, Île-de-France — dossier IA95000506 (maison-atelier Daubigny, Auvers) | Bot-protection page only | Would give the Auvers dates (land bought 1860, studio 1861) from a Tier 1 inventory. |
 | HAL-INRAE paper on Fontainebleau forest management (hal-02821414) | Bot-protection page only | Academic (Tier 2) treatment of the 1853/1861 reserves and the "first reserve" claim. |
 | MoMA — « Picasso in Fontainebleau » exhibition page (https://www.moma.org/calendar/exhibitions/5530) | HTTP 403 | Documents Picasso's summer 1921 at Fontainebleau (search-engine summaries say a rented villa at 33 boulevard Leclerc, July–September 1921); not read directly, so not quoted. |
-| Mairie de Barbizon village map, `carte-60X60-web.pdf` (https://www.barbizon.fr/wp-content/uploads/2022/12/carte-60X60-web.pdf) | Downloaded (2 MB) but its text layer could not be extracted with the tools available tonight (no poppler on the machine; a stdlib decode of the content streams yielded nothing) | This is the document that `brain/decisions.md` (2026-04-02) classifies as **Tier 1** for street-by-street attributions ("all Circuit des Lieux Célèbres attributions"). The Mahenc blog post reproduces, house by house, text that matches the mairie circuit entries; those transcriptions are quoted below as Tier 3 and should be checked against Luigi's copy of the map. |
-| wikimonde.com mirror of the « Auguste Giroux » article | HTTP 410 Gone | Would have listed the article's references. |
+| Mairie de Barbizon village map, `carte-60X60-web.pdf` (https://www.barbizon.fr/wp-content/uploads/2022/12/carte-60X60-web.pdf) | Downloaded (2 MB) but its text layer could not be extracted with the tools available tonight (no poppler on the machine; a stdlib decode of the content streams yielded nothing) | `brain/decisions.md` (2026-04-02) classifies a file named `carte_Barbizon_mairie.pdf` as **Tier 1** for street-by-street attributions ("all Circuit des Lieux Célèbres attributions"). It is **assumed, not established**, that the web PDF is the same document. The Mahenc blog post reproduces, house by house, text that matches the mairie circuit entries; those transcriptions are quoted below as Tier 3 and should be checked against Luigi's copy of the map. |
+| wikimonde.com mirror of the « Auguste Giroux » article | HTTP 410 Gone | The live fr.wikipedia article was read instead (see the first table). |
 | Association des Amis de la Forêt de Fontainebleau — timeline PDF | Image-only PDF, no text layer | Secondary chronology of the reserves. |
 
 Policy note for Luigi (decision needed, not taken here). Decision 2026-04-02 makes the
@@ -75,7 +80,7 @@ original studio, where he worked from 1835 to 1865."
 
 **Claim 1a — the plaque exists on Les Pléiades (21 Grande Rue).** Verdict: **confirmed** (primary object).
 - Luigi's photo (`media-staging/atelier-daubigny-plaque/atelier-daubigny-plaque.jpg`): a small rectangular plaque on the stone street façade of the Pléiades building, next to the hotel's oval sign. Zoomed crop read tonight: « CHARLES-FRANÇOIS DAUBIGNY — 1817 - 1878 — PEINTRE PAYSAGISTE — HABITA CETTE MAISON ». The plaque gives **no residence dates** and says *habita cette maison* (lived in this house), not "atelier".
-- Mairie circuit text as transcribed by the Mahenc blog (Tier 3, see §0): « Grande rue N°21 — ancien atelier du peintre François DAUBIGNY. Agrandi il devint sous la main de fer de « Mme Baratin » un hôtel restaurant réputé ». No dates.
+- Mairie circuit text as transcribed by the Mahenc blog (Tier 3, see §0), Grande Rue section (street inferred from the page's section, not printed in the entry): « >> à droite, au N°21 – Hôtel Restaurant « Les PLÉIADES» MAISON DE DAUBIGNY ancien atelier du peintre François DAUBIGNY. Agrandi il devint sous la main de fer de « Mme Baratin » un hôtel restaurant réputé où se croisait des personnalités du monde artistique, littéraire et politique. » No dates.
 
 **Claim 1b — "from 1835 to 1865".** Verdict: **contradicted** (Tier 1 + Tier 2).
 - BnF, Les Essentiels, « La forêt de Fontainebleau et les artistes en 30 dates » (Tier 1), entry 1843: « Premiers passages des peintres Charles-François Daubigny et de Constant Troyon à Barbizon. » — first visits in 1843, not 1835.
@@ -93,7 +98,7 @@ original studio, where he worked from 1835 to 1865."
 Published text: "A modest Grande Rue house where François Millet — son of the painter — and later Gustave Eiffel both lived."
 
 Verdict: **confirmed by policy** (decision 2026-04-02 explicitly lists Coz Ker, 34 Grande Rue, as a Tier 1 attribution from the mairie map); **unsupported by independent archival evidence tonight** (Gallica search blocked; no POP, Archives 77 or museum record found).
-- Mairie circuit text as transcribed by the Mahenc blog (Tier 3): « Grande rue N°34 — François MILLET un des fils de J.F MILLET habita cette maison avant Gustave EIFFEL. »
+- Mairie circuit text as transcribed by the Mahenc blog (Tier 3), Grande Rue section: « << à gauche, au N°34 – « coz KER» François MILLET un des fils de J.F MILLET habita cette maison avant Gustave EIFFEL. »
 - Web search found no other source for either occupancy; Musée Millet pages describe no. 27 only.
 - No change recommended beyond what decision 2026-04-02 already settled. If Luigi wants an archival anchor: Archives 77 cadastral/matrice records for 34 Grande Rue, or Eiffel family correspondence (Fonds Eiffel, Musée d'Orsay archives) — not searched online tonight.
 
@@ -103,17 +108,19 @@ Verdict: **confirmed by policy** (decision 2026-04-02 explicitly lists Coz Ker, 
 
 Published text: "A long-abandoned hotel on the rue Jean-François Millet, formerly the Hôtel Bellevue, where Picasso and his family once stayed."
 
-**Claim 3a — closed / "long-abandoned".** Verdict: **confirmed (closed since 2016)**, wording to soften.
-- societe.com registry record (Tier 2, aggregator): company « MANOIR DE SAINT HEREM », « 14 RUE JEAN FRANCOIS MILLET, 77630 BARBIZON », activity « Hôtels et hébergement similaire - 5510Z », created « 5 février 1985 », status « Fermée definitivement Radiée », judicial liquidation closed for insufficient assets on 14 November 2016.
+**Claim 3a — closed / "long-abandoned".** Verdict: **confirmed** that the hotel company is closed (registry); "abandoned" is editorial.
+- societe.com registry record (Tier 2, aggregator of official registry/BODACC data): company « MANOIR DE SAINT HEREM », « 14 RUE JEAN FRANCOIS MILLET, 77630 BARBIZON », activity « Hôtels et hébergement similaire - 5510Z », created « 5 février 1985 », trade name « LE JARDIN DE MILLET », status « Fermée definitivement Radiée ». Establishment line: « Ancien établissement du 5 février 1985 au 1 février 2011 ». BODACC events: 08/04/2013 « Jugement d'ouverture d'une procédure de redressement judiciaire »; 07/04/2014 « Jugement de conversion en liquidation judiciaire »; 17/12/2014 « Acte de vente au bénéfice de 805279502 - BUDGET INN au prix de 36000 euro(s) »; 14/11/2016 « Jugement de clôture pour insuffisance d'actif ».
+- So the sequence is: establishment closed in SIRENE on 1 February 2011; receivership 2013; liquidation 2014; assets sold to a company called Budget Inn in December 2014; company struck off 2016. "Closed since 2011" or "in liquidation from 2014" are the defensible dates; 2016 is the end of the liquidation, not the closure.
 - Mairie « Commerces et artisans » page (municipal, read 2026-10-08): the Manoir Saint-Hérem is **not listed** among Barbizon businesses (nor are Les Pléiades or L'Ombrage, so absence is weak evidence).
-- "Abandoned" is an editorial judgement about the building's state; the registry supports "closed since 2016". Note that several booking aggregators still list it as open — expect visitor confusion.
+- Several booking aggregators still list it as open — expect visitor confusion. The 2014 sale to Budget Inn means the current state of the building (and whether anyone operates it) should be checked on site before "abandoned" is kept.
 
-**Claim 3b — "formerly the Hôtel Bellevue".** Verdict: **confirmed by policy** (mairie map), **unsupported independently**.
+**Claim 3b — "formerly the Hôtel Bellevue".** Verdict: **confirmed by policy** (mairie map), **unsupported independently** (one concordant Tier 3 lead).
 - Mairie circuit text as transcribed by the Mahenc blog (Tier 3): « Rue Jean-François Millet N°14 — Autrefois « Hôtel Bellevue » pension de famille, tenu par une ancienne famille de Barbizon, hébergea entre autres PICASSO et sa famille. »
+- Same page, Grande Rue section, three consecutive N°31 lines: « >> à droite, au N°31 – Restaurant « L'ANGÉLUS» » (described there as the former bar of the Hôtel Bellevue at the back of the park) and « >> à droite, au N°31 au fond du parc : HÔTEL BUDGET INN' ». Together with the 2014 sale to Budget Inn in the registry, this supports a Bellevue → Saint-Hérem → Budget Inn lineage on the same plot; it does not add a Tier 1 source.
 
 **Claim 3c — "where Picasso and his family once stayed".** Verdict: **confirmed by policy**, **unsupported by independent evidence**, and in tension with the documented record.
 - Only source: the mairie circuit entry above (no date, no family name of the hosts).
-- Picasso's documented summer with Olga and the infant Paulo in this area is Fontainebleau, 1921 (MoMA exhibition « Picasso in Fontainebleau »; page returned 403, so not quoted; search-engine summaries give a rented villa at 33 boulevard Leclerc, July–September 1921). No Tier 1/2 source read tonight places the family at a Barbizon pension. A Barbizon stay is not impossible (Barbizon is 10 km from Fontainebleau) but it is unverified.
+- Picasso's documented summer with Olga and the infant Paulo in this area is Fontainebleau, 1921 (fr.wikipedia « Pablo Picasso », lead: « Durant l'été, il s'installe avec Olga et Paulo à Fontainebleau »; the MoMA « Picasso in Fontainebleau » exhibition page returned 403, so it is not quoted; search-engine summaries of it give a rented villa at 33 boulevard Leclerc, July–September 1921). No Tier 1/2 source read tonight places the family at a Barbizon pension. A Barbizon stay is not impossible (Barbizon is about 10 km by road from Fontainebleau, reference data) but it is unverified.
 - Recommendation under the d566f33e standard: move the Picasso sentence to `internal_notes` tagged unverified, keep "formerly the Hôtel Bellevue" (policy Tier 1), and replace "long-abandoned" with "closed since 2016".
 
 ---
@@ -123,15 +130,15 @@ Published text: "A long-abandoned hotel on the rue Jean-François Millet, former
 Published text: "A Grande Rue house where Arthur Rubinstein and Samson François came to prepare concerts, possibly once belonging to George Sand."
 
 **Claim 4a — Rubinstein and Samson François prepared concerts there (with the pianist Maximilienne Whettnall).** Verdict: **confirmed by policy** (mairie map), **unsupported independently**.
-- Mairie circuit text as transcribed by the Mahenc blog (Tier 3): « Villa L'OMBRAGEUX de George Sand à Maximilienne Whettnall - Arthur RUBINSTEIN, Samson François, venaient préparer leurs concerts en compagnie de Maximilienne WHETTNALL pianiste virtuose, 1er prix de conservatoire - Cette maison aurait appartenu à George SAND à la fin du 19ème siècle » (entry numbered N°18). Note the map spells the house « L'Ombrageux ».
-- musiciens77.canalblog.com (Tier 3): « la pianiste virtuose Maximilienne WHETTNALL (ancienne élève de Marguerite Long et d'Yves Nat), a accueilli plusieurs fois dans sa villa L'Ombrage 18 Grande rue à Barbizon … Arthur RUBINSTEIN et Samson FRANCOIS qui venaient y préparer leurs concerts. » The blog lists the Mahenc site among its sources, so this is not independent.
+- Mairie circuit text as transcribed by the Mahenc blog (Tier 3), Grande Rue section: « << à gauche, au N°18 – Villa L'OMBRAGEUX de George Sand à Maximilienne Whettnall - Arthur RUBINSTEIN, Samson François, venaient préparer leurs concerts en compagnie de Maximilienne WHETTNALL pianiste virtuose, t » prix de conservatoire - Cette maison aurait appartenu à George SAND à la fin du 19ème siècle ». The « t » prix » is a garble on the page (presumably « 1er prix »); reproduced as printed. The map spells the house « L'Ombrageux ».
+- musiciens77.canalblog.com (Tier 3): « la pianiste virtuose Maximilienne WHETTNALL (ancienne élève de Marguerite Long et d'Yves Nat), a accueilli plusieurs fois dans sa villa L'Ombrage 18 Grande rue à Barbizon … Arthur RUBINSTEIN et Samson FRANCOIS qui venaient y préparer leurs concerts. » The blog links to the Mahenc site in its sidebar (not in its printed-sources list); treat as concordant, not independent.
 - data.bnf.fr (Tier 1): « Pas de résultat dans data.bnf.fr pour la recherche 'Maximilienne Whettnall' ». A web search for the name returns nothing else. The hostess herself is undocumented online; a concert programme or press notice (Gallica/RetroNews) would be the Tier 1 anchor.
 
 **Claim 4b — "possibly once belonging to George Sand".** Verdict: **unsupported**, and the map's own wording makes it implausible as dated.
 - The only source is the map's conditional « aurait appartenu à George SAND à la fin du 19ème siècle ». George Sand died in 1876; "fin du 19e siècle" cannot be literally true. Nothing read tonight connects Sand to a Barbizon property (her documented links are Nohant, Gargilesse, and her 1872–73 writing on the forest — fr.wikipedia « Forêt de Fontainebleau » cites George Sand, *Impressions et souvenirs*, Michel-Lévy, 1873, pp. 315–330).
 - Recommendation: drop the Sand clause from the public text; park it in `internal_notes` as "local tradition, undated, unverified".
 
-**Address.** DB says Grande Rue; the two Tier 3 transcriptions give « 18 Grande rue » (musiciens77) and an entry « N°18 » whose street name is not clear in the Mahenc transcription. Check on site.
+**Address.** DB says Grande Rue. musiciens77 gives « 18 Grande rue »; on the Mahenc page the N°18 entry sits between « >> à droite, au N°17 – « VERTEFEUILLE » » and « >> à droite, au N°13 la Mairie » (the mairie is 13 Grande Rue), so the map's N°18 is also Grande Rue. Consistent.
 
 ---
 
@@ -151,12 +158,13 @@ Verdict: **confirmed by policy** (mairie map), **unsupported by independent arch
 
 Published text: "A Barbizon villa where André Citroën, Coco Chanel, Jean Cocteau, Diaghilev, Giraudoux, and Paul Iribe all met."
 
-Verdict: **confirmed by policy** (mairie map); **partly supported** independently (municipal history page + one unsourced biography of the owner); **unsupported** for Iribe and for "all met".
+Verdict: **confirmed by policy** (mairie map). Independently: Cocteau, Giraudoux, Chanel and Diaghilev are **confirmed at Tier 2-equivalent** (municipal history page, see the tier note in §0); Citroën **unsupported** above Tier 3; Iribe **unsupported** (map only); "all met" **unsupported**; the Diaghilev dating is **contradicted** by his death date.
 - Mairie circuit text as transcribed by the Mahenc blog (Tier 3): « Au bout de celle-ci [allée des Tilleuls, now rue Jean-Baptiste Comble] se trouve la « Villa BERNARD » ou se rencontrèrent André CITROËN, Jean COCTEAU, Jean GIRAUDOUX, DIAGUILLEV, Coco CHANEL, Paul IRIBE .. »
-- Mairie de Barbizon, « Histoire » page (municipal, read): mentions « Villa Bernard, la propriété du docteur Giroux » in connection with Jean Cocteau's visits in the 1930s. (Only Cocteau is named on this page.)
-- polmoresie.over-blog.fr, « Auguste Giroux… (2/2) » (Tier 3, no sources cited): « Quittant la proche banlieue, Auguste Giroux installe à Barbizon (Seine-et-Marne) une Maison de repos et de convalescence pour enfants de moins de quinze ans. Il loue d'abord la villa Bernard puis, devant l'extension des jeunes accueillis, la villa Serge. » and « La villa Bernard accueillit de nombreux visiteurs, dont l'industriel André Citroën, le poète Jean Cocteau, l'écrivain Jean Giraudoux, le fondateur des Ballets russes Diaghilev, la créatrice de mode Coco Chanel ou le prince Constantin Andronikoff ». Iribe is absent here; Andronikoff is added.
-- Chronology problem: Diaghilev died in August 1929 and Iribe in September 1935; Citroën died in July 1935. If Giroux's lease dates from about 1932 (search-engine summary, not verified), Diaghilev could not have visited the Giroux-era villa. "All met" (one gathering) is not claimed by any source; the map says « se rencontrèrent » loosely.
-- Recommendation: rewrite as "the villa of Dr Auguste Giroux's children's convalescent home in the 1930s, visited by Jean Cocteau (municipal history) and, by local tradition, by Citroën, Chanel, Giraudoux and Diaghilev"; park Iribe and the "all met" phrasing in `internal_notes`.
+- Mairie de Barbizon, « Histoire » page (municipal website, read 2026-10-08): « Jean Cocteau qui dans les années 30 vint à la Villa Bernard, la propriété du docteur Giroux, . Il y fréquenta le monde des lettres avec Jean Giraudoux, celui de la mode avec Coco Chanel et celui des arts avec Diaghilev. » So the municipal page names four of the six: Cocteau, Giraudoux, Chanel, Diaghilev. Not Citroën, not Iribe.
+- fr.wikipedia « Auguste Giroux » (lead): « À partir de 1932, il exploite une maison de convalescence pour enfants de moins de 15 ans, la villa Bernard, à Barbizon. », footnote 7: André Billy, *Les beaux jours de Barbizon*, Éditions du Pavois, 1947. The same article lists Citroën, Cocteau, Giraudoux, Diaghilev, Chanel and prince Constantin Andronikof as visitors. **This printed, named-author source (Billy 1947) is the best lead for the whole visitor list and was not read tonight**; it is a Tier 2 candidate if the passage checks out.
+- polmoresie.over-blog.fr, « Auguste Giroux… (2/2) » (Tier 3, no sources cited): « Quittant la proche banlieue, Auguste Giroux installe à Barbizon (Seine-et-Marne) une Maison de repos et de convalescence pour enfants de moins de quinze ans. Il loue d'abord la villa Bernard puis, devant l'extension des jeunes accueillis, la villa Serge. » and « La villa Bernard accueillit de nombreux visiteurs, dont l'industriel André Citroën, le poète Jean Cocteau, l'écrivain Jean Giraudoux, le fondateur des Ballets russes Diaghilev, la créatrice de mode Coco Chanel ou le prince Constantin Andronikoff ». Paul Iribe is absent from this visitor list, but the page notes « Les époux Giroux hébergent régulièrement, dans leur vaste pavillon, les filles de Julie Iribe » (Mme Giroux's family), a plausible reason the map lists an Iribe.
+- Chronology problem (reference dates, verified on fr.wikipedia): Diaghilev died 19 August 1929; Paul Iribe 21 September 1935; André Citroën 3 July 1935. If Giroux ran the villa from 1932 (Wikipedia citing Billy 1947), Diaghilev could not have visited the Giroux-era villa; the municipal page's own sentence ("dans les années 30 … avec Diaghilev") carries the same contradiction. "All met" (one gathering) is not claimed by any source; the map says « se rencontrèrent » loosely.
+- Recommendation: rewrite as "villa of Dr Auguste Giroux's children's convalescent home from 1932, where Jean Cocteau met Jean Giraudoux and Coco Chanel in the 1930s (municipal history)"; move Citroën, Diaghilev (dating conflict), Iribe and the "all met" phrasing to `internal_notes` pending a reading of Billy 1947.
 
 ---
 
@@ -164,11 +172,11 @@ Verdict: **confirmed by policy** (mairie map); **partly supported** independentl
 
 Published text: "Former residence of Roland Dorgelès, author of Les Croix de Bois."
 
-Verdict: **confirmed by policy** (mairie map), **supported by one independent Tier 3 source**, **unsupported at Tier 1/2** (Gallica blocked; the BnF CCFr lists Dorgelès correspondence fonds that may contain Barbizon letters — not consulted).
-- Mairie circuit text as transcribed by the Mahenc blog (Tier 3): « « Villa ELISABETH » - L'écrivain Roland DORGELÈS auteur de « Les Croix de Bois» en fit sa résidence avant que la directrice des « Pléiades» n'en fit la sienne. » (entry N°30).
+Verdict: **confirmed by policy** (mairie map); independently **unsupported at Tier 1/2** (two concordant Tier 3 sources; Gallica blocked; the BnF CCFr lists Dorgelès correspondence fonds that may contain Barbizon letters — not consulted).
+- Mairie circuit text as transcribed by the Mahenc blog (Tier 3), Grande Rue section: « << à gauche, au N°30 « Villa ELISABETH » - L'écrivain Roland DORGELÈS auteur de « Les Croix de Bois» en fit sa résidence avant que la directrice des « Pléiades» n'en fit la sienne. »
 - terresdecrivains.org (Tier 3, photo caption): « La Villa Elisabeth, 30 Grande rue à Barbizon, maison des Dorgelès. »
-- Les Croix de bois: published 1919, Prix Femina 1919 (standard reference data; not a claim under review).
-- Address discrepancy to check on site: terresdecrivains says 30 Grande Rue; one transcription of the map entry places N°30 on rue Théodore-Rousseau. The DB record carries no address in the published text.
+- Les Croix de bois: published 1919, Prix Femina 1919 (reference data, verified on fr.wikipedia; not a claim under review).
+- Address: consistent. On the Mahenc page the N°30 entry sits between « << à gauche, au N°32 , Agence "BARBIZON IMMOBILIER" » and « >> à droite, au N°27 : MAISON ET ATELIER DE JEAN-FRANÇOIS MILLET » (27 Grande Rue), so N°30 is Grande Rue, as terresdecrivains says. (An automated extraction earlier tonight attributed the entry to rue Théodore-Rousseau; the page itself does not.) The DB record carries no address in the published text.
 - Recommendation: the claim can stand under the policy standard; add the source to the record's `source` field. Leads for a Tier 1 anchor: CCFr fonds « Correspondance du peintre Serge Belloni avec Roland et Mme Dorgelès » (https://ccfr.bnf.fr/portailccfr/ark:/16871/004b1822041) — not read.
 
 ---
@@ -212,8 +220,8 @@ Current copy (`pages.json`, key `reserve1861`, FR): « un décret du 13 août 18
 **Date and area.** Verdict: **confirmed in substance, with two 1861 dates and three area figures in circulation**.
 - BnF, Les Essentiels (Tier 1), entry 1861: « La Commission d'aménagement de la forêt remet un rapport dans lequel elle propose d'épargner les futaies et les sites les plus pittoresques pour les artistes et les promeneurs ; répondant à ce vœu, un décret du 13 avril crée la Série artistique : 1100 hectares mis hors exploitation. »
 - Archives départementales de Seine-et-Marne (Tier 1): « 1861 : décret de l'Empereur Napoléon III instituant officiellement la première réserve artistique. » and « Créée en 1953, elle succède aux réserves artistiques protégées dès 1853, sous Napoléon III, à la demande des peintres de l'École de Barbizon. » (no day/month, no hectares).
-- fr.wikipedia « Forêt de Fontainebleau » (lead; its footnote 12 is ONF, « Courte histoire de la gestion forestière à Fontainebleau », May 2013 — the ONF note itself was not read): « Puis par le décret impérial du 13 août 1861, la « réserve artistique » (21e série) est portée à 1 094 ha et enfin à 1 693 ha de 1892 à 1904 ».
-- So: 13 April 1861 (creation of the série artistique, ~1 100 ha, BnF) and 13 August 1861 (imperial decree, 1 094 ha per ONF via Wikipedia). The copy's "13 août 1861" is consistent with the ONF-sourced line; "1 097 ha" matches the tourism office and the Mairie bulletin rather than BnF (1 100) or ONF (1 094). Recommendation: say "un décret impérial d'août 1861" and "près de 1 100 hectares", or cite ONF's 1 094 explicitly.
+- fr.wikipedia « Forêt de Fontainebleau » (lead; its footnote 12 is ONF, « Courte histoire de la gestion forestière à Fontainebleau », May 2013 — the ONF note itself was not read): « Puis par le décret impérial du 13 août 1861, la « réserve artistique » (21e série)[pas clair] est portée à 1 094 ha et enfin à 1 693 ha de 1892 à 1904 » (the « [pas clair] » is Wikipedia's own inline tag).
+- So: 13 April 1861 (creation of the série artistique, ~1 100 ha, BnF) and 13 August 1861 (imperial decree, 1 094 ha per ONF via Wikipedia). The copy's "13 août 1861" is consistent with the ONF-sourced line. The copy's "1 097 ha" was **not found in any source read tonight** (BnF says 1 100; ONF via Wikipedia says 1 094; Fontainebleau Tourisme says only "more than 1,000 hectares"); it appears in search-engine summaries of other pages, none read. Recommendation: say "un décret impérial d'août 1861" and "près de 1 100 hectares", or cite ONF's 1 094 explicitly.
 
 **"First nature reserve in the world".** Verdict: **unsupported at Tier 1 as read tonight; the hedge is correct**.
 - Neither Tier 1 page read tonight (BnF Essentiels, Archives 77) makes the world-first claim; Archives 77 says only « la première réserve artistique ».
@@ -228,15 +236,19 @@ Current copy (`pages.json`, key `reserve1861`, FR): « un décret du 13 août 18
 |---|---|---|
 | Daubigny plaque exists, text « habita cette maison » | confirmed | plaque photo |
 | Daubigny worked here 1835–1865 | contradicted | BnF Essentiels (1843 first visit); National Gallery (Auvers 1860) |
+| Daubigny plaque on the "west facade" | unsupported (orientation unchecked) | plaque photo (street side) |
+| Daubigny narrative — studio boat Le Botin, Seine/Marne/Oise | confirmed | National Gallery |
+| Daubigny narrative — Corot as friend and mentor | unsupported at Tier 1/2 tonight | — |
 | Coz Ker — Millet son then Eiffel | confirmed by policy (map); unsupported independently | mairie map (decision 2026-04-02) |
-| Manoir Saint-Hérem closed / abandoned | confirmed as closed since 2016 | societe.com registry |
-| … formerly Hôtel Bellevue | confirmed by policy; unsupported independently | mairie map via Mahenc |
-| … Picasso and family stayed | confirmed by policy; unsupported independently; documented 1921 stay is Fontainebleau | mairie map via Mahenc; MoMA (not read) |
+| Manoir Saint-Hérem closed / abandoned | confirmed closed (establishment 2011, liquidation 2014, struck off 2016); "abandoned" editorial | societe.com registry |
+| … formerly Hôtel Bellevue | confirmed by policy; unsupported independently (concordant Tier 3 lineage lead) | mairie map via Mahenc |
+| … Picasso and family stayed | confirmed by policy; unsupported independently; documented 1921 stay is Fontainebleau | mairie map via Mahenc; fr.wikipedia Picasso |
 | L'Ombrage — Rubinstein, Samson François | confirmed by policy; unsupported independently | mairie map via Mahenc; musiciens77 |
 | L'Ombrage — George Sand owned it | unsupported (and mis-dated by the source itself) | mairie map via Mahenc |
 | Tumble Inn — 1920, Albert I, Duke of Windsor, Chaplin, Cocteau | confirmed by policy; unsupported independently | mairie map via Mahenc |
-| Villa Bernard — six names "all met" | confirmed by policy; Cocteau supported by barbizon.fr; Iribe and "all met" unsupported; Diaghilev chronology doubtful | barbizon.fr/histoire; polmoresie |
-| Villa Élisabeth — Dorgelès residence | confirmed by policy; one independent Tier 3 | terresdecrivains |
+| Villa Bernard — Cocteau, Giraudoux, Chanel, Diaghilev | confirmed by policy; confirmed Tier 2-equivalent (municipal page); Diaghilev dating contradicted (d. 1929) | barbizon.fr/histoire |
+| Villa Bernard — Citroën, Iribe, "all met" | confirmed by policy; unsupported independently (Billy 1947 is the lead to read) | mairie map via Mahenc; fr.wikipedia Giroux |
+| Villa Élisabeth — Dorgelès residence | confirmed by policy; unsupported independently (two concordant Tier 3) | terresdecrivains; Mahenc |
 | Auberge Ganne — 1987 acquisition decision | confirmed | POP Muséofile M0370 |
 | Auberge Ganne — 1995 museum opening | confirmed | POP Muséofile M0370 |
 | Auberge Ganne — 2004 departmental | confirmed | POP Muséofile M0370 |
