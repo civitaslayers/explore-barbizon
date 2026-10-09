@@ -15,6 +15,7 @@ import {
   type LocationFunction,
 } from "@/lib/supabase";
 import { buildPlaceSchema } from "@/lib/seo";
+import { buildTitle } from "@/lib/seoText";
 import { getLocalized, hasPublishedTranslation } from "@/lib/getLocalized";
 import { SeoHead } from "@/components/SeoHead";
 import nextI18NextConfig from "@/next-i18next.config";
@@ -322,7 +323,7 @@ const PlacePage: NextPage<PlacePageProps> = ({ place }) => {
 
   const name = getLocalized(place, locale, "name") || place.name;
   const title =
-    getLocalized(place, locale, "meta_title") || `${name} — Barbizon`;
+    getLocalized(place, locale, "meta_title") || buildTitle(name, [" — Barbizon"]);
   const metaDescription =
     getLocalized(place, locale, "meta_description") ||
     getLocalized(place, locale, "short_description") ||

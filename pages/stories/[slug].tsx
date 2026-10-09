@@ -17,6 +17,7 @@ import {
   type RelatedStoryRow,
 } from "@/lib/relatedStories";
 import { buildArticleSchema } from "@/lib/seo";
+import { buildTitle } from "@/lib/seoText";
 import { supabase } from "@/lib/supabase";
 import nextI18NextConfig from "@/next-i18next.config";
 
@@ -178,7 +179,7 @@ const StoryPage: NextPage<StoryPageProps> = ({ story, related }) => {
   return (
     <>
       <SeoHead
-        title={`${title} — Stories — Visit Barbizon`}
+        title={buildTitle(title, [" — Stories — Visit Barbizon", " — Visit Barbizon", " — Barbizon"])}
         description={dek}
         path={`/stories/${story.slug}`}
         locale={locale}

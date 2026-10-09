@@ -1,4 +1,5 @@
 import Head from "next/head";
+import { truncateDescription } from "@/lib/seoText";
 
 // ---------------------------------------------------------------------------
 // components/SeoHead.tsx
@@ -6,6 +7,11 @@ import Head from "next/head";
 // Shared <Head> block for public pages: locale-aware title/description,
 // hreflang fr/en + x-default, canonical URL, Open Graph, optional JSON-LD.
 // See docs/i18n-seo-implementation-plan.md, Task 4a.
+//
+// This component is the last line of defence for the 160-char meta
+// description limit (lib/seoText.ts): callers should still pass authored
+// text within limits. The JSON-LD `description` is deliberately not
+// truncated — schema.org has no limit and Google reads it separately.
 //
 // `path` is the locale-agnostic path (no /en prefix), e.g.
 // "/places/maison-millet". Slugs are identical across locales
@@ -80,10 +86,12 @@ export function SeoHead({
   const isNonDefaultLocale = locale !== "fr";
   const suppressAlternates = isNonDefaultLocale && !hasEnglishVersion;
 
+  const metaDescription = truncateDescription(description);
+
   return (
     <Head>
       <title>{title}</title>
-      <meta name="description" content={description} />
+      <meta name="description" content={metaDescription} />
 
       <link rel="canonical" href={canonical} />
       {hasEnglishVersion ? (
@@ -99,7 +107,7 @@ export function SeoHead({
       ) : null}
 
       <meta property="og:title" content={title} />
-      <meta property="og:description" content={description} />
+      <meta property="og:description" content={metaDescription} />
       <meta property="og:url" content={canonical} />
       <meta property="og:type" content={type} />
       <meta property="og:site_name" content={SITE_NAME} />

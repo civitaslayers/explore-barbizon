@@ -11,6 +11,7 @@ import {
   type TourWithStops,
 } from "@/lib/supabase";
 import { hasMapbox } from "@/lib/mapbox";
+import { buildTitle } from "@/lib/seoText";
 import nextI18NextConfig from "@/next-i18next.config";
 
 type TourPageProps = {
@@ -43,7 +44,7 @@ const TourPage: NextPage<TourPageProps> = ({ tour, routeCoords }) => {
   return (
     <>
       <SeoHead
-        title={`${tour.name} — Visit Barbizon`}
+        title={buildTitle(tour.name, [" — Visit Barbizon", " — Barbizon"])}
         description={tour.description ?? `${tour.name} — a walking tour of Barbizon.`}
         path={`/tours/${tour.slug}`}
         locale={locale}
