@@ -134,7 +134,9 @@ an imprecise image `sizes` hint). A read-only investigation confirmed
 hostname-only extraction) for the follow-up task (`dd1a7f49`); implemented
 2026-10-09 on `feat/referrer-host` (`lib/referrerHost.ts` + 14 tests,
 release-checker SHIP), decision logged in brain/decisions.md 2026-10-09;
-at the merge gate.
+merged via PR #8 (`8a8f40e`) and deployed `dpl_BESYswkjvgba3LUmJyXrYUKVBzt8`
+(rollback `dpl_HSBsLVMn6woQMdVHne3L1rQ9Ab1y`). Confirm the column fills
+after real external visits before citing referrer data anywhere.
 
 `CLAUDE.md`'s `MAIN_BRAIN.md` hard constraint now carries an explicit
 exception line (Luigi's instruction): modification is allowed only when
