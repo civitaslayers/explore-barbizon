@@ -54,7 +54,14 @@ if ! command -v node >/dev/null 2>&1; then
   exit 1
 fi
 
-# Collect staged paths (Added, Copied, Modified, Renamed; deleted paths skipped).
+# Collect staged paths. Captured first so a failing git invocation blocks the
+# commit (set -e does not see a failure inside a heredoc's $(...)).
+# ACMR = Added, Copied, Modified, Renamed: the paths eslint can read from disk.
+# Deleted paths are listed separately: deleting a .ts/.tsx file can break types
+# in files that import it, so a delete-only commit still runs tsc.
+staged=$(git diff --cached --name-only --diff-filter=ACMR) || fail "git diff --cached failed"
+deleted=$(git diff --cached --name-only --diff-filter=D) || fail "git diff --cached failed"
+
 # The heredoc keeps the loop in the current shell so "set --" accumulates.
 set --
 need_tsc=0
@@ -67,10 +74,19 @@ while IFS= read -r f; do
     public/locales/*)         need_i18n=1 ;;
   esac
 done <<EOF
-$(git diff --cached --name-only --diff-filter=ACMR)
+$staged
 EOF
 
-if [ "$#" -eq 0 ] && [ "$need_i18n" -eq 0 ]; then
+while IFS= read -r f; do
+  [ -n "$f" ] || continue
+  case "$f" in
+    *.ts|*.tsx) need_tsc=1 ;;
+  esac
+done <<EOF
+$deleted
+EOF
+
+if [ "$#" -eq 0 ] && [ "$need_i18n" -eq 0 ] && [ "$need_tsc" -eq 0 ]; then
   printf 'pre-commit: nothing to check (no code or locale files staged) — skipped.\n'
   exit 0
 fi
@@ -85,7 +101,7 @@ fi
 
 if [ "$#" -gt 0 ]; then
   require_tool eslint
-  "$bin/eslint" "$@" || fail "eslint reported errors in staged files"
+  "$bin/eslint" -- "$@" || fail "eslint failed (errors in staged files, or a staged file is missing from disk)"
   ran="$ran eslint($# files)"
 fi
 
