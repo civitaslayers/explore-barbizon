@@ -5,7 +5,9 @@ import type { SSRConfig } from "next-i18next/pages";
 import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
 import { useTranslation } from "next-i18next/pages";
 import { SeoHead } from "@/components/SeoHead";
+import { getLocalized } from "@/lib/getLocalized";
 import { getLocationCards, getPublishedTours } from "@/lib/supabase";
+import { toTourListItem } from "@/lib/tourPage";
 import type { TourListItem } from "@/lib/types";
 import nextI18NextConfig from "@/next-i18next.config";
 
@@ -123,25 +125,20 @@ const PlanYourVisitPage: NextPage<PlanPageProps> = ({ examplePlaces, tours }) =>
 export const getStaticProps: GetStaticProps<PlanPageProps> = async ({
   locale,
 }) => {
+  const loc = locale ?? "fr";
   const [toursData, places, translations] = await Promise.all([
     getPublishedTours(),
     getLocationCards(),
-    serverSideTranslations(locale ?? "fr", ["common", "pages"], nextI18NextConfig),
+    serverSideTranslations(loc, ["common", "pages"], nextI18NextConfig),
   ]);
-  const tours = toursData.map((t) => ({
-    slug: t.slug,
-    title: t.name,
-    summary: t.description ?? "",
-    durationHours: Math.round((t.duration_minutes ?? 120) / 60),
-    stops: t.stops.map((s) => s.location_id),
-  }));
+  const tours: TourListItem[] = toursData.map((t) => toTourListItem(t, loc));
 
   const bySlug = new Map(places.map((p) => [p.slug, p]));
   const examplePlaces: ExamplePlace[] = [];
   for (const slug of EXAMPLE_PLACE_SLUGS) {
     const place = bySlug.get(slug);
     if (place) {
-      examplePlaces.push({ slug: place.slug, name: place.name });
+      examplePlaces.push({ slug: place.slug, name: getLocalized(place, loc, "name") || place.name });
     } else {
       console.warn(`[plan-your-visit] example place slug not found: ${slug}`);
     }

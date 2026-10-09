@@ -8,46 +8,9 @@ import ImagePlaceholder from "@/components/ImagePlaceholder";
 import { SeoHead } from "@/components/SeoHead";
 import { categoryLabel } from "@/lib/categoryLabel";
 import { heroImage800w } from "@/lib/media";
-import { getLocationCards, type LocationCard } from "@/lib/supabase";
+import { buildFeaturedPlaces, type FeaturedPlaceCard } from "@/lib/featuredPlaces";
+import { getLocationCards } from "@/lib/supabase";
 import nextI18NextConfig from "@/next-i18next.config";
-
-/** Prefer these slugs when present in published data (matches legacy static atlas). */
-const PREFERRED_FEATURED_SLUGS = [
-  "maison-millet",
-  "auberge-ganne",
-  "grande-rue",
-  "forest-entrance"
-] as const;
-
-type FeaturedPlaceCard = {
-  slug: string;
-  name: string;
-  description: string;
-  image: string | null;
-  category: string;
-  categorySlug: string | null;
-};
-
-function buildFeaturedPlaces(places: LocationCard[]): FeaturedPlaceCard[] {
-  const bySlug = new Map(places.map((p) => [p.slug, p]));
-  const picked: LocationCard[] = [];
-  for (const slug of PREFERRED_FEATURED_SLUGS) {
-    const p = bySlug.get(slug);
-    if (p) picked.push(p);
-  }
-  for (const p of places) {
-    if (picked.length >= 4) break;
-    if (!picked.some((x) => x.slug === p.slug)) picked.push(p);
-  }
-  return picked.slice(0, 4).map((p) => ({
-    slug: p.slug,
-    name: p.name,
-    description: p.shortDescription,
-    image: p.heroImage,
-    category: p.category,
-    categorySlug: p.categorySlug,
-  }));
-}
 
 type HomePageProps = {
   featuredPlaces: FeaturedPlaceCard[];
@@ -337,7 +300,7 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async ({
   const places = await getLocationCards();
   const translations = await serverSideTranslations(locale ?? "fr", ["common", "pages"], nextI18NextConfig);
   return {
-    props: { featuredPlaces: buildFeaturedPlaces(places), ...translations },
+    props: { featuredPlaces: buildFeaturedPlaces(places, locale ?? "fr"), ...translations },
     revalidate: 60,
   };
 };

@@ -8,14 +8,14 @@ import {
   getTourBySlugFromSupabase,
   getPublishedTourSlugs,
   getRouteByTourSlug,
-  type TourWithStops,
 } from "@/lib/supabase";
+import { localizeTour, type TourView } from "@/lib/tourPage";
 import { hasMapbox } from "@/lib/mapbox";
 import { buildTitle } from "@/lib/seoText";
 import nextI18NextConfig from "@/next-i18next.config";
 
 type TourPageProps = {
-  tour: TourWithStops;
+  tour: TourView;
   routeCoords: [number, number][] | null;
 } & SSRConfig;
 
@@ -284,11 +284,12 @@ export const getStaticProps: GetStaticProps<TourPageProps> = async ({
 
   const tour = await getTourBySlugFromSupabase(slug);
   if (!tour) return { notFound: true };
+  const tourView = localizeTour(tour, locale ?? "fr");
   const routeCoords = await getRouteByTourSlug(slug).catch(() => null);
   const translations = await serverSideTranslations(locale ?? "fr", ["common"], nextI18NextConfig);
   return {
     props: {
-      tour,
+      tour: tourView,
       routeCoords: routeCoords ?? null,
       ...translations,
     },
