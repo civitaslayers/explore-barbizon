@@ -1,13 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import crypto from "crypto";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { extractReferrerHost } from "@/lib/referrerHost";
 
 // ---------------------------------------------------------------------------
 // pages/api/track.ts
 //
 // Cookieless first-party page-view beacon. See brain/decisions.md,
 // 2026-08-13 ("Audience measurement is first-party and Supabase-native") and
-// 2026-10-04 (referrer_host deferral). Writes through the record_page_view()
+// 2026-10-04 and 2026-10-09 (referrer_host). Writes through the record_page_view()
 // RPC with the service-role client — never from the browser directly, since
 // page_views carries RLS deny-all (service_role only).
 //
@@ -136,24 +137,9 @@ export default async function handler(
       typeof countryHeader === "string" ? countryHeader.toUpperCase() : "";
     const country = /^[A-Z]{2}$/.test(rawCountry) ? rawCountry : null;
 
-    // referrerHost is derived from the Referer header, never from the body.
-    // In practice this beacon is always same-origin (navigator.sendBeacon
-    // fires from our own page), so the Referer is almost always our own host
-    // and gets discarded below — that is expected, not a bug. True external-
-    // referrer capture is deferred (brain/decisions.md, 2026-10-04).
-    let referrerHost: string | null = null;
-    const refererHeader = req.headers.referer;
-    if (typeof refererHeader === "string") {
-      try {
-        const refererUrl = new URL(refererHeader);
-        const ownHost = (req.headers.host ?? "").split(":")[0];
-        if (refererUrl.hostname !== ownHost) {
-          referrerHost = refererUrl.hostname;
-        }
-      } catch {
-        referrerHost = null;
-      }
-    }
+    // referrerHost comes from document.referrer, sent on first load only and
+    // reduced to a bare hostname server-side (brain/decisions.md, 2026-10-09).
+    const referrerHost = extractReferrerHost(body.referrer, req.headers.host);
 
     // Bot filter.
     if (userAgent && BOT_UA_RE.test(userAgent)) {
