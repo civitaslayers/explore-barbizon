@@ -1,9 +1,56 @@
 # Current State
 
-Last updated: 2026-10-08
+Last updated: 2026-10-09
 
 ## Status
 
+**2026-10-09 overnight session 4 + daytime governance — merged and deployed.**
+Seven `overnight4/*` branches (jobs 1–7 of the 2026-10-08 overnight session, ten
+task IDs) were staged on `merge/overnight4` from `35661a6` in the report's order
+(heritage-plaques-dossier → pre-commit-hook → map-h1-skip-link → html-escaping →
+seo-lengths → en-localized-text → static-props-policy), claude.ai verified the
+Vercel preview, then `merge/overnight4` (fast-forward) and
+`day/governance-2026-10-09` (merge commit) landed on `main`, pushed once as
+`3c39fbb`, deployed as `dpl_3Wd2QYGeNA1aLqCLtkZx7m3yoEC8` (READY, production).
+Rollback target: `dpl_67g8SuarFiWvKUgr7xJRATk9p2JD` (commit `35661a6`).
+Conflicts matched the report's overlap matrix exactly: the `package.json` test
+line three times (union, 17 test files), the `components/SeoHead.tsx` import
+block (both kept), `pages/sitemap.xml.tsx` (static-props-policy's file taken
+whole), and job 4's `withRetry`/`degrade` wrappers placed inside job 1's
+rewritten getStaticProps in `pages/map.tsx`, `pages/plan-your-visit.tsx` and
+`pages/tours/[slug].tsx`. Full gate on `3c39fbb`: tsc clean, lint 0 errors / 9
+pre-existing warnings, check:i18n pass, build green with zero `[fetchPolicy]`
+lines, 226/226 tests. Post-deploy on production: `scripts/seo-audit.mjs` 104
+checks, 98 pass, 6 fail — all six are story descriptions under 110 characters
+(rooms-of-light, paths-to-the-forest, how-the-forest-became-a-picture, FR and
+EN); description too-long 0, title too-long 0, title too-short 0; `/en` serves
+English featured cards; `/en/tours/circuit-des-peintres` serves English stop
+text; `/map` has the sr-only h1 and the « Aller au contenu » skip link;
+`/stories/rooms-of-light` renders with JSON-LD; `/api/tasks` returns 401 without
+Basic Auth. Landed: resolved-string localisation on every public page
+(`lib/featuredPlaces.ts`, `lib/tourPage.ts`), `serializeJsonLd` +
+`renderStoryMarkdown` (`lib/jsonLd.ts`, `lib/storyMarkdown.ts`), the
+`lib/fetchPolicy.ts` failure policy with `data/stories.ts` deleted, the `/map`
+h1 + site skip link, SeoHead length rules (`lib/seoText.ts`) with the EN
+`home.meta.description` shortened to 157 characters, the versioned
+`.githooks/pre-commit` + LFS wrappers (installed in this checkout:
+`core.hooksPath = .githooks`), the heritage-plaques research dossier
+(`docs/sources/heritage-plaques-research-2026-10-09.md`), and the governance
+cleanup (dead PreToolUse "git commit" matcher and `pre-commit-check.sh` removed,
+"not by Cursor" dropped from the implementer brief). Tasks aa55488c, 1b0ab544,
+fde4fa7c, aa74362d, d566f33e, d074fa2e, 3bb15319, 7066408c, 749c5760, 505a1b6c,
+c626cc59, 40247d92 set to done. Local branches `merge/overnight4` and
+`day/governance-2026-10-09` deleted; the remote and local `overnight4/*`
+branches are kept. Parked: a46d0dc9 (regenerate `lib/supabase.types.ts`: no
+type generator in the Supabase MCP, no CLI, no access token). Follow-ups filed
+by the session: b3accf5d, 8abfda99 (tours/routes base descriptions are
+English), 5e0eb363, 8c24fe34, e1d191cc, b27d49fb. Open for Luigi: the
+heritage-plaques dossier's Tier-1 policy tension (six celebrity plaques rest on
+the mairie circuit text only; George Sand at L'Ombrage and the Daubigny dates
+unsupported), the 32 too-short location descriptions listed in the session
+report, and the stale queue items 15d786c9, 821c021b, c7811f1a.
+
+---
 **2026-10-08 overnight session 3 — merged and deployed.** Seven `overnight3/*`
 branches (jobs 1–7 of the 2026-10-07 overnight session, ten task IDs) were
 merged locally on `main` in the reviewed order (docs-stale-sections →

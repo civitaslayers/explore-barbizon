@@ -1,5 +1,42 @@
 ---
 
+## 2026-10-09
+_Overnight session 4 (Fable 5.1), seven `overnight4/*` branches staged on `merge/overnight4` and merged to main 2026-10-09 as `3c39fbb` together with the day/governance-2026-10-09 branch. Decision texts carried verbatim from the session report (`~/overnight-report-2026-10-09.md` on Luigi's Mac, job sections and appendix); job 3 (heritage plaques dossier) and job 5 (/map h1 + skip link) made no decisions. Job 8 (a46d0dc9, regenerate `lib/supabase.types.ts`) was parked: no type generator in the Supabase MCP, no CLI, no access token._
+
+### /en localized text: pages ship resolved strings only (tasks aa55488c, 1b0ab544; job 1)
+**Decision:** Every public page that renders text from locations, stories, routes or tours resolves it through getLocalized() in getStaticProps or a pure builder and ships resolved strings only; raw `translations` live only between the query adapter and getStaticProps. Nested embeds select the full column, flat list queries use the en_* aliases.
+**Reason / consequence (from the job 1 report):** `/en` showed English featured cards and tour text only after this sweep; `tours.description` and `routes.description` base columns hold English prose (content task 8abfda99) and the `translations` column on tours, tour_stops and routes exists but is null everywhere. Builders `lib/featuredPlaces.ts` and `lib/tourPage.ts` carry the tests.
+**Migration risk:** none (app layer); page data methods touched → Vercel-preview gate applied at merge (claude.ai verified the `merge/overnight4` preview).
+
+---
+
+### JSON-LD serialisation and story markdown hardening (tasks fde4fa7c, aa74362d; job 2)
+**Decision:** JSON-LD is serialised with `serializeJsonLd` (`< > &` escapes, JSON.parse round-trips); story markdown renders through `renderStoryMarkdown` (dedicated Marked instance, raw HTML escaped to visible text, link/image URLs allowlisted, marked's `inRawBlock` passthrough neutralised with a `walkTokens` clear that must not be removed; tests M-H11 to M-H17 are the tripwire).
+**Reason (from the job 2 report):** escape, not strip (visible to the editor, zero visual cost since no live body has HTML); URL-scheme allowlisting is in scope as the same bug class; the global `marked` export is never configured. Lead amendment: protocol-relative `//host` URLs rejected.
+**Migration risk:** none; all 10 live story link destinations pass the allowlist.
+
+---
+
+### One getStaticProps failure policy (task 3bb15319; job 4)
+**Decision:** one failure policy in `lib/fetchPolicy.ts` (primary reads retry once then throw; secondary and sitemap retry once then log and fall back; `[fetchPolicy]` log prefix; `data/stories.ts` deleted; empty results stay hard errors; towns lookups and `getRouteByTourSlug` throw on transport errors).
+**Migration risk:** none; page data methods touched → Vercel-preview gate applied at merge. Stale queue items closed by this work: 15d786c9 (`data/tours.ts` no longer exists), 821c021b, c7811f1a.
+
+---
+
+### Meta description and title lengths (task 749c5760; job 6)
+**Decision:** meta-description length enforced in SeoHead (≤160 untouched, else word-boundary cut to ≤155 with "…"); detail titles via `buildTitle` with ordered suffixes, never cutting a name; too-short text never padded; the audit measures entity-decoded text.
+**Consequence:** over-long descriptions and titles in the audit go to 0; the too-short descriptions and titles are authored-text issues and stay listed in the session report for editorial work. EN `home.meta.description` shortened to 157 characters at merge (Luigi's text).
+**Migration risk:** none.
+
+---
+
+### Versioned pre-commit hook is the single commit-time gate (tasks 505a1b6c, c626cc59, 40247d92; job 7 + governance 2026-10-09)
+**Decision:** versioned `.githooks/pre-commit` plus LFS wrappers, enabled per clone with `npm run hooks:install`; `--no-verify` the only bypass; written to the shared `.git/config` (worktreeConfig is enabled but only `--worktree` writes elsewhere).
+**Governance cleanup (approved by Luigi 2026-10-09, branch day/governance-2026-10-09):** the `.claude/settings.json` PreToolUse matcher `"git commit"` never fired (PreToolUse matchers match tool names, not command text), so it and `.claude/hooks/pre-commit-check.sh` were removed with no harness-level replacement: the versioned git hook is the single commit gate. The stale "not by Cursor" clause in `.claude/agents/civitas-implementer.md` was dropped in the same branch.
+**Migration risk:** none; `npm run hooks:install` run once in the main checkout after the merge.
+
+---
+
 ## 2026-10-07
 _Overnight session 3 (Fable 5.1), merged to main 2026-10-08 as `f9a1cf8`. Decision texts drafted by civitas-architect per job and carried verbatim from the session's plan files; full report at `~/overnight-report-2026-10-07.md` on Luigi's Mac (the repo copy on branch overnight3/report-2026-10-07 was not merged; the branch was deleted after the merge)._
 
