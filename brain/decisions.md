@@ -1,5 +1,13 @@
 ---
 
+## 2026-10-09
+**Decision:** `page_views.referrer_host` is populated from `document.referrer`, accepted from the beacon body on the first page load only (option (a) of the 2026-10-04 deferral; Luigi's call, recorded in brain/current-state.md and now here). The server extracts the hostname only, discards own-domain and empty values, caps the raw input at 2048 characters, and never stores path, query or scheme. Client-side route changes send no referrer. (Task dd1a7f49, claude.ai session 2026-10-09.)
+**Reason:** The true external referrer only exists client-side; `req.headers.referer` on a same-origin beacon is always our own host (2026-10-04). Dropping the column would forfeit the only traffic-source signal the cookieless tracker can ever have. Accepting one bounded string from the body is a narrow, deliberate widening of the "derive server-side" boundary: the value is reduced to a hostname before it touches the database, so a spoofed value can at worst insert a junk hostname, never a payload.
+**Consequence:** `components/PageViewTracker.tsx` adds `referrer: document.referrer` to the initial-load payload only; `pages/api/track.ts` parses it with `new URL()`, keeps `hostname` when it differs from `req.headers.host`, else null. The existing Referer-header path is removed (it was dead by construction). Dashboard and pitch material may now cite referrer data once production has accumulated it. Body size limit stays 1kb, which already bounds the input.
+**Migration risk:** none (column exists and is nullable; app-layer only).
+
+---
+
 ## 2026-10-07
 _Overnight session 3 (Fable 5.1), merged to main 2026-10-08 as `f9a1cf8`. Decision texts drafted by civitas-architect per job and carried verbatim from the session's plan files; full report at `~/overnight-report-2026-10-07.md` on Luigi's Mac (the repo copy on branch overnight3/report-2026-10-07 was not merged; the branch was deleted after the merge)._
 
