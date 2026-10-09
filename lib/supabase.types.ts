@@ -7,8 +7,10 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.1"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -23,6 +25,7 @@ export type Database = {
           show_in_editorial: boolean
           slug: string
           town_id: string | null
+          translations: Json
         }
         Insert: {
           color?: string | null
@@ -34,6 +37,7 @@ export type Database = {
           show_in_editorial?: boolean
           slug: string
           town_id?: string | null
+          translations?: Json
         }
         Update: {
           color?: string | null
@@ -45,6 +49,7 @@ export type Database = {
           show_in_editorial?: boolean
           slug?: string
           town_id?: string | null
+          translations?: Json
         }
         Relationships: [
           {
@@ -83,14 +88,115 @@ export type Database = {
         }
         Relationships: []
       }
+      location_edits: {
+        Row: {
+          after_value: string | null
+          before_value: string | null
+          created_at: string
+          field: string
+          id: string
+          location_id: string
+          source_page: string | null
+        }
+        Insert: {
+          after_value?: string | null
+          before_value?: string | null
+          created_at?: string
+          field: string
+          id?: string
+          location_id: string
+          source_page?: string | null
+        }
+        Update: {
+          after_value?: string | null
+          before_value?: string | null
+          created_at?: string
+          field?: string
+          id?: string
+          location_id?: string
+          source_page?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "location_edits_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      location_functions: {
+        Row: {
+          category_id: string | null
+          created_at: string | null
+          description: string | null
+          display_order: number
+          id: string
+          is_primary: boolean
+          label: string
+          location_id: string
+          opening_hours: Json | null
+          phone: string | null
+          translations: Json
+          website: string | null
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_primary?: boolean
+          label: string
+          location_id: string
+          opening_hours?: Json | null
+          phone?: string | null
+          translations?: Json
+          website?: string | null
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_primary?: boolean
+          label?: string
+          location_id?: string
+          opening_hours?: Json | null
+          phone?: string | null
+          translations?: Json
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "location_functions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "location_functions_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       locations: {
         Row: {
           address: string | null
+          allow_proximity_override: boolean
+          booking_url: string | null
           category_id: string | null
           created_at: string | null
           curation_order: number | null
           full_description: string | null
           id: string
+          internal_notes: string | null
           is_featured: boolean | null
           is_premium: boolean | null
           is_published: boolean | null
@@ -100,7 +206,6 @@ export type Database = {
           narrative: string | null
           opening_hours: Json | null
           phone: string | null
-          place_id: string | null
           qr_code_url: string | null
           route_slug: string | null
           short_description: string | null
@@ -108,16 +213,20 @@ export type Database = {
           show_on_map: boolean | null
           slug: string
           town_id: string | null
+          translations: Json
           updated_at: string | null
           website: string | null
         }
         Insert: {
           address?: string | null
+          allow_proximity_override?: boolean
+          booking_url?: string | null
           category_id?: string | null
           created_at?: string | null
           curation_order?: number | null
           full_description?: string | null
           id?: string
+          internal_notes?: string | null
           is_featured?: boolean | null
           is_premium?: boolean | null
           is_published?: boolean | null
@@ -127,7 +236,6 @@ export type Database = {
           narrative?: string | null
           opening_hours?: Json | null
           phone?: string | null
-          place_id?: string | null
           qr_code_url?: string | null
           route_slug?: string | null
           short_description?: string | null
@@ -135,16 +243,20 @@ export type Database = {
           show_on_map?: boolean | null
           slug: string
           town_id?: string | null
+          translations?: Json
           updated_at?: string | null
           website?: string | null
         }
         Update: {
           address?: string | null
+          allow_proximity_override?: boolean
+          booking_url?: string | null
           category_id?: string | null
           created_at?: string | null
           curation_order?: number | null
           full_description?: string | null
           id?: string
+          internal_notes?: string | null
           is_featured?: boolean | null
           is_premium?: boolean | null
           is_published?: boolean | null
@@ -154,7 +266,6 @@ export type Database = {
           narrative?: string | null
           opening_hours?: Json | null
           phone?: string | null
-          place_id?: string | null
           qr_code_url?: string | null
           route_slug?: string | null
           short_description?: string | null
@@ -162,6 +273,7 @@ export type Database = {
           show_on_map?: boolean | null
           slug?: string
           town_id?: string | null
+          translations?: Json
           updated_at?: string | null
           website?: string | null
         }
@@ -171,13 +283,6 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "locations_place_id_fkey"
-            columns: ["place_id"]
-            isOneToOne: false
-            referencedRelation: "places"
             referencedColumns: ["id"]
           },
           {
@@ -260,6 +365,7 @@ export type Database = {
       outputs: {
         Row: {
           agent: string
+          commit_hash: string | null
           created_at: string | null
           id: string
           prompt: string | null
@@ -269,6 +375,7 @@ export type Database = {
         }
         Insert: {
           agent: string
+          commit_hash?: string | null
           created_at?: string | null
           id?: string
           prompt?: string | null
@@ -278,6 +385,7 @@ export type Database = {
         }
         Update: {
           agent?: string
+          commit_hash?: string | null
           created_at?: string | null
           id?: string
           prompt?: string | null
@@ -295,121 +403,53 @@ export type Database = {
           },
         ]
       }
-      place_functions: {
+      page_views: {
         Row: {
-          category_id: string | null
-          created_at: string | null
-          description: string | null
-          display_order: number
-          id: string
-          is_primary: boolean
-          label: string
-          opening_hours: Json | null
-          phone: string | null
-          place_id: string
-          website: string | null
-        }
-        Insert: {
-          category_id?: string | null
-          created_at?: string | null
-          description?: string | null
-          display_order?: number
-          id?: string
-          is_primary?: boolean
-          label: string
-          opening_hours?: Json | null
-          phone?: string | null
-          place_id: string
-          website?: string | null
-        }
-        Update: {
-          category_id?: string | null
-          created_at?: string | null
-          description?: string | null
-          display_order?: number
-          id?: string
-          is_primary?: boolean
-          label?: string
-          opening_hours?: Json | null
-          phone?: string | null
-          place_id?: string
-          website?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "place_functions_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "place_functions_place_id_fkey"
-            columns: ["place_id"]
-            isOneToOne: false
-            referencedRelation: "places"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      places: {
-        Row: {
-          address: string | null
-          created_at: string | null
-          historical_narrative: string | null
-          id: string
-          is_published: boolean
-          latitude: number
-          longitude: number
-          name: string
-          og_image_url: string | null
-          seo_description: string | null
-          seo_title: string | null
-          short_description: string | null
-          show_on_map: boolean
-          slug: string
+          country: string | null
+          device: string | null
+          id: number
+          locale: string
+          location_id: string | null
+          occurred_at: string
+          path: string
+          referrer_host: string | null
           town_id: string | null
-          updated_at: string | null
+          visitor_day_hash: string
         }
         Insert: {
-          address?: string | null
-          created_at?: string | null
-          historical_narrative?: string | null
-          id?: string
-          is_published?: boolean
-          latitude: number
-          longitude: number
-          name: string
-          og_image_url?: string | null
-          seo_description?: string | null
-          seo_title?: string | null
-          short_description?: string | null
-          show_on_map?: boolean
-          slug: string
+          country?: string | null
+          device?: string | null
+          id?: never
+          locale?: string
+          location_id?: string | null
+          occurred_at?: string
+          path: string
+          referrer_host?: string | null
           town_id?: string | null
-          updated_at?: string | null
+          visitor_day_hash: string
         }
         Update: {
-          address?: string | null
-          created_at?: string | null
-          historical_narrative?: string | null
-          id?: string
-          is_published?: boolean
-          latitude?: number
-          longitude?: number
-          name?: string
-          og_image_url?: string | null
-          seo_description?: string | null
-          seo_title?: string | null
-          short_description?: string | null
-          show_on_map?: boolean
-          slug?: string
+          country?: string | null
+          device?: string | null
+          id?: never
+          locale?: string
+          location_id?: string | null
+          occurred_at?: string
+          path?: string
+          referrer_host?: string | null
           town_id?: string | null
-          updated_at?: string | null
+          visitor_day_hash?: string
         }
         Relationships: [
           {
-            foreignKeyName: "places_town_id_fkey"
+            foreignKeyName: "page_views_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_views_town_id_fkey"
             columns: ["town_id"]
             isOneToOne: false
             referencedRelation: "towns"
@@ -463,6 +503,7 @@ export type Database = {
           start_lat: number | null
           start_lng: number | null
           town_id: string | null
+          translations: Json
         }
         Insert: {
           color?: string | null
@@ -479,6 +520,7 @@ export type Database = {
           start_lat?: number | null
           start_lng?: number | null
           town_id?: string | null
+          translations?: Json
         }
         Update: {
           color?: string | null
@@ -495,6 +537,7 @@ export type Database = {
           start_lat?: number | null
           start_lng?: number | null
           town_id?: string | null
+          translations?: Json
         }
         Relationships: [
           {
@@ -510,6 +553,8 @@ export type Database = {
         Row: {
           author: string | null
           body: string | null
+          cover_alt: string | null
+          cover_credit: string | null
           cover_image_url: string | null
           created_at: string
           id: string
@@ -521,12 +566,15 @@ export type Database = {
           theme: string | null
           title: string
           town_id: string | null
+          translations: Json
           type: string
           updated_at: string
         }
         Insert: {
           author?: string | null
           body?: string | null
+          cover_alt?: string | null
+          cover_credit?: string | null
           cover_image_url?: string | null
           created_at?: string
           id?: string
@@ -538,12 +586,15 @@ export type Database = {
           theme?: string | null
           title: string
           town_id?: string | null
+          translations?: Json
           type?: string
           updated_at?: string
         }
         Update: {
           author?: string | null
           body?: string | null
+          cover_alt?: string | null
+          cover_credit?: string | null
           cover_image_url?: string | null
           created_at?: string
           id?: string
@@ -555,6 +606,7 @@ export type Database = {
           theme?: string | null
           title?: string
           town_id?: string | null
+          translations?: Json
           type?: string
           updated_at?: string
         }
@@ -618,6 +670,7 @@ export type Database = {
           priority: number | null
           related_area: string | null
           review_note: string | null
+          source: string | null
           source_prompt: string | null
           status: string
           task_type: string | null
@@ -641,6 +694,7 @@ export type Database = {
           priority?: number | null
           related_area?: string | null
           review_note?: string | null
+          source?: string | null
           source_prompt?: string | null
           status?: string
           task_type?: string | null
@@ -664,6 +718,7 @@ export type Database = {
           priority?: number | null
           related_area?: string | null
           review_note?: string | null
+          source?: string | null
           source_prompt?: string | null
           status?: string
           task_type?: string | null
@@ -679,6 +734,7 @@ export type Database = {
           stop_narrative: string | null
           stop_order: number
           tour_id: string | null
+          translations: Json
         }
         Insert: {
           id?: string
@@ -686,6 +742,7 @@ export type Database = {
           stop_narrative?: string | null
           stop_order: number
           tour_id?: string | null
+          translations?: Json
         }
         Update: {
           id?: string
@@ -693,6 +750,7 @@ export type Database = {
           stop_narrative?: string | null
           stop_order?: number
           tour_id?: string | null
+          translations?: Json
         }
         Relationships: [
           {
@@ -726,6 +784,7 @@ export type Database = {
           slug: string
           tour_type: string | null
           town_id: string | null
+          translations: Json
         }
         Insert: {
           cover_image_url?: string | null
@@ -741,6 +800,7 @@ export type Database = {
           slug: string
           tour_type?: string | null
           town_id?: string | null
+          translations?: Json
         }
         Update: {
           cover_image_url?: string | null
@@ -756,6 +816,7 @@ export type Database = {
           slug?: string
           tour_type?: string | null
           town_id?: string | null
+          translations?: Json
         }
         Relationships: [
           {
@@ -823,10 +884,32 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      v_translation_health: {
+        Row: {
+          en_status: string | null
+          entity_id: string | null
+          entity_type: string | null
+          is_published: boolean | null
+          label: string | null
+          source_hash: string | null
+          translations: Json | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      record_page_view: {
+        Args: {
+          p_country?: string
+          p_device?: string
+          p_locale?: string
+          p_location_slug?: string
+          p_path: string
+          p_referrer_host?: string
+          p_visitor_day_hash: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
@@ -838,18 +921,19 @@ export type Database = {
 }
 
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
 type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -873,11 +957,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -898,11 +982,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -923,11 +1007,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -940,11 +1024,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
