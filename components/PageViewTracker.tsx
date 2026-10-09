@@ -6,7 +6,8 @@ import { useRouter } from "next/router";
 //
 // Mounts once in pages/_app.tsx. Renders nothing — fires a cookieless
 // first-party page-view beacon to /api/track on first load and on every
-// client-side route change. See brain/decisions.md, 2026-08-13.
+// client-side route change; only the first load carries document.referrer.
+// See brain/decisions.md, 2026-08-13 and 2026-10-09.
 // ---------------------------------------------------------------------------
 
 const EXCLUDED_PATH_PREFIXES = ["/command-center", "/dashboard"];
@@ -20,18 +21,23 @@ function isExcludedPath(path: string): boolean {
   return EXCLUDED_PATH_PREFIXES.some((prefix) => path.startsWith(prefix));
 }
 
-function sendBeaconSafely(path: string, locale: string | undefined) {
+function sendBeaconSafely(
+  path: string,
+  locale: string | undefined,
+  referrer?: string | null
+) {
   try {
     if (isExcludedPath(path)) return;
 
     const match = path.match(LOCATION_PATH_RE);
     const locationSlug = match ? match[1] : null;
 
-    const payload = {
+    const payload: Record<string, unknown> = {
       path,
       locale: locale ?? null,
       locationSlug,
     };
+    if (referrer !== undefined) payload.referrer = referrer;
     const json = JSON.stringify(payload);
     const blob = new Blob([json], { type: "application/json" });
 
@@ -65,7 +71,11 @@ export function PageViewTracker() {
     // Router docs) — gate the initial beacon on it.
     if (!router.isReady) return;
 
-    sendBeaconSafely(normalizePath(router.asPath), router.locale);
+    sendBeaconSafely(
+      normalizePath(router.asPath),
+      router.locale,
+      typeof document !== "undefined" ? document.referrer || null : null
+    );
   }, [router.isReady]);
 
   useEffect(() => {
