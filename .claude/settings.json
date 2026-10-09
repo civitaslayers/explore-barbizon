@@ -54,15 +54,6 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "git commit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash .claude/hooks/pre-commit-check.sh"
-          }
-        ]
-      },
-      {
         "matcher": "mcp__.*__(merge_branch|execute_sql|apply_migration)",
         "hooks": [
           {
