@@ -84,8 +84,10 @@ hygiene fixes (dead `DbLocation` type, a spent 1055-line corrective patch,
 an imprecise image `sizes` hint). A read-only investigation confirmed
 `page_views.referrer_host` is null by design, not bug — Luigi chose option
 (a) (accept `document.referrer` from the beacon body, first page load only,
-hostname-only extraction) for the follow-up task (`dd1a7f49`); not yet
-implemented.
+hostname-only extraction) for the follow-up task (`dd1a7f49`); implemented
+2026-10-09 on `feat/referrer-host` (`lib/referrerHost.ts` + 14 tests,
+release-checker SHIP), decision logged in brain/decisions.md 2026-10-09;
+at the merge gate.
 
 `CLAUDE.md`'s `MAIN_BRAIN.md` hard constraint now carries an explicit
 exception line (Luigi's instruction): modification is allowed only when
