@@ -1,0 +1,98 @@
+#!/bin/sh
+# .githooks/pre-commit — versioned pre-commit gate: eslint + tsc + i18n check.
+#
+#   Enable once per clone:   npm run hooks:install     (git config core.hooksPath .githooks)
+#   Disable:                 npm run hooks:uninstall
+#   Bypass ONE commit:       git commit --no-verify    (say so in the commit message;
+#                            the release-checker still runs the full gate)
+#
+# Why post-checkout / post-commit / post-merge / pre-push also live in this
+# directory: this repo uses Git LFS (.gitattributes: *.mp4). Setting
+# core.hooksPath makes git look ONLY here, never in .git/hooks, so the four
+# LFS hooks that `git lfs install` writes there would silently stop running
+# (the pre-push LFS upload would break the next push of an .mp4). The copies
+# in .githooks/ are byte-identical to what `git lfs install` writes, so
+# behaviour is unchanged whether or not the hooks path is set.
+#
+# Speed design — a docs-only commit must be near-instant:
+#   - eslint runs only on the staged .js/.jsx/.mjs/.cjs/.ts/.tsx files.
+#     Errors fail the commit; warnings do not (the repo carries pre-existing warnings).
+#   - tsc --noEmit runs on the whole project only when a .ts/.tsx file is staged
+#     (tsc cannot be scoped per file without losing project context).
+#   - scripts/check-i18n-strings.mjs runs only when a file under public/locales/ is staged.
+#   - nothing relevant staged -> one line, exit 0.
+#
+# Tools are resolved from <repo-root>/node_modules/.bin, never downloaded, so a
+# missing install fails loudly. Works from a linked worktree whose node_modules is
+# a symlink (scripts/bootstrap-worktree.mjs) and from a non-interactive harness.
+# Note: eslint checks the working-tree content of each staged path, not the
+# staged blob — partially staged files are checked as they sit on disk.
+
+set -eu
+
+root=$(git rev-parse --show-toplevel)
+cd "$root"
+bin="$root/node_modules/.bin"
+started=$(date +%s)
+
+fail() {
+  printf '\npre-commit: BLOCKED — %s.\n' "$1" >&2
+  printf 'pre-commit: fix it and commit again, or bypass this one commit with: git commit --no-verify\n' >&2
+  exit 1
+}
+
+require_tool() {
+  if [ ! -x "$bin/$1" ]; then
+    printf 'pre-commit: %s not found in %s\n' "$1" "$bin" >&2
+    printf 'pre-commit: run "npm install" in the main checkout, or "npm run worktree:bootstrap -- <path>" for a linked worktree.\n' >&2
+    exit 1
+  fi
+}
+
+if ! command -v node >/dev/null 2>&1; then
+  printf 'pre-commit: node is not on PATH for this git process (GUI client?). Commit from a shell where "node -v" works.\n' >&2
+  exit 1
+fi
+
+# Collect staged paths (Added, Copied, Modified, Renamed; deleted paths skipped).
+# The heredoc keeps the loop in the current shell so "set --" accumulates.
+set --
+need_tsc=0
+need_i18n=0
+while IFS= read -r f; do
+  [ -n "$f" ] || continue
+  case "$f" in
+    *.ts|*.tsx)               need_tsc=1; set -- "$@" "$f" ;;
+    *.js|*.jsx|*.mjs|*.cjs)   set -- "$@" "$f" ;;
+    public/locales/*)         need_i18n=1 ;;
+  esac
+done <<EOF
+$(git diff --cached --name-only --diff-filter=ACMR)
+EOF
+
+if [ "$#" -eq 0 ] && [ "$need_i18n" -eq 0 ]; then
+  printf 'pre-commit: nothing to check (no code or locale files staged) — skipped.\n'
+  exit 0
+fi
+
+ran=""
+
+# Cheapest first, so a failure surfaces fastest.
+if [ "$need_i18n" -eq 1 ]; then
+  node scripts/check-i18n-strings.mjs || fail "i18n string check failed (scripts/check-i18n-strings.mjs)"
+  ran="$ran i18n"
+fi
+
+if [ "$#" -gt 0 ]; then
+  require_tool eslint
+  "$bin/eslint" "$@" || fail "eslint reported errors in staged files"
+  ran="$ran eslint($# files)"
+fi
+
+if [ "$need_tsc" -eq 1 ]; then
+  require_tool tsc
+  "$bin/tsc" --noEmit -p tsconfig.json || fail "tsc --noEmit reported type errors"
+  ran="$ran tsc"
+fi
+
+printf 'pre-commit: ok —%s in %ss\n' "$ran" "$(( $(date +%s) - started ))"
