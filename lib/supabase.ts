@@ -570,7 +570,11 @@ export async function getTourBySlugFromSupabase(
     .select("id")
     .eq("slug", "barbizon")
     .single();
-  if (townRes.error || !townRes.data) return null;
+  // A transport error here must not become a 404: throw so the page's
+  // withRetry (lib/fetchPolicy.ts) can retry and log. A genuinely missing
+  // town row stays a null (not found), same as a missing tour.
+  if (townRes.error) throw new Error(townRes.error.message);
+  if (!townRes.data) return null;
 
   const { data, error } = await supabase
     .from("tours")
@@ -636,7 +640,11 @@ export async function getPublishedTourSlugs(): Promise<string[]> {
     .select("id")
     .eq("slug", "barbizon")
     .single();
-  if (townRes.error || !townRes.data) return [];
+  // Same rule as getTourBySlugFromSupabase: a transport error throws (so a
+  // build-time flake fails loudly through withRetry instead of silently
+  // prerendering zero tour pages); a missing town row is an empty list.
+  if (townRes.error) throw new Error(townRes.error.message);
+  if (!townRes.data) return [];
 
   const { data, error } = await supabase
     .from("tours")
@@ -664,7 +672,11 @@ export async function getRouteByTourSlug(
     .eq("slug", tourSlug)
     .single();
 
-  if (error || !data?.geojson) return null;
+  if (error) {
+    if (error.code === "PGRST116") return null; // no route for this tour: a real answer
+    throw new Error(error.message);
+  }
+  if (!data?.geojson) return null;
 
   const line = data.geojson as unknown as GeoJSON.LineString;
   const coords: [number, number][] = (line.coordinates ?? []) as [

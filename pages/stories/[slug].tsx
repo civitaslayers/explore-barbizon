@@ -6,8 +6,8 @@ import { serverSideTranslations } from "next-i18next/pages/serverSideTranslation
 import RelatedStories from "@/components/RelatedStories";
 import { SeoHead } from "@/components/SeoHead";
 import { RELATED_SLUGS } from "@/data/relatedStories";
-import { getAllStories } from "@/data/stories";
 import { getLocalized, type LocalizableRow } from "@/lib/getLocalized";
+import { degrade, withRetry } from "@/lib/fetchPolicy";
 import { heroImage800w } from "@/lib/media";
 import { renderStoryMarkdown } from "@/lib/storyMarkdown";
 import {
@@ -247,14 +247,10 @@ const StoryPage: NextPage<StoryPageProps> = ({ story, related }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  try {
-    const slugs = await getPublishedStorySlugs();
-    const paths = slugs.map((slug) => ({ params: { slug } }));
-    return { paths, fallback: "blocking" };
-  } catch {
-    const paths = getAllStories().map((s) => ({ params: { slug: s.slug } }));
-    return { paths, fallback: false };
-  }
+  const slugs = await withRetry("stories/[slug] getPublishedStorySlugs", () =>
+    getPublishedStorySlugs()
+  );
+  return { paths: slugs.map((slug) => ({ params: { slug } })), fallback: "blocking" };
 };
 
 export const getStaticProps: GetStaticProps<StoryPageProps> = async ({
@@ -268,44 +264,29 @@ export const getStaticProps: GetStaticProps<StoryPageProps> = async ({
 
   const translations = await serverSideTranslations(locale ?? "fr", ["common"], nextI18NextConfig);
 
-  try {
-    const story = await getPublishedStoryBySlug(slug);
-    if (!story) return { notFound: true };
+  const story = await withRetry(`stories/[slug] getPublishedStoryBySlug:${slug}`, () =>
+    getPublishedStoryBySlug(slug)
+  );
+  if (!story) return { notFound: true };
 
-    const spec = RELATED_SLUGS[slug];
-    let related: RelatedContent = { stories: [], places: [] };
-    if (spec) {
-      try {
-        const [storyRows, placeRows] = await Promise.all([
-          getRelatedStoryRows(spec.stories),
-          getRelatedPlaceRows(spec.places),
-        ]);
-        related = resolveRelated(slug, spec, storyRows, placeRows, locale ?? "fr");
-      } catch (err) {
-        // The story itself still renders; only the sidebar is empty.
-        console.error(`[stories/[slug]] related content query failed for ${slug}`, err);
-      }
-    }
+  const spec = RELATED_SLUGS[slug];
+  const empty: RelatedContent = { stories: [], places: [] };
+  // The story itself still renders if this fails; only the sidebar is empty.
+  const related = spec
+    ? await degrade(
+        `stories/[slug] related:${slug}`,
+        async () => {
+          const [storyRows, placeRows] = await Promise.all([
+            getRelatedStoryRows(spec.stories),
+            getRelatedPlaceRows(spec.places),
+          ]);
+          return resolveRelated(slug, spec, storyRows, placeRows, locale ?? "fr");
+        },
+        empty
+      )
+    : empty;
 
-    return { props: { story, related, ...translations }, revalidate: 60 };
-  } catch {
-    const s = getAllStories().find((x) => x.slug === slug);
-    if (!s) return { notFound: true };
-    const story: StoryPageStory = {
-      slug: s.slug,
-      title: s.title,
-      theme: s.theme,
-      dek: s.dek,
-      body: "",
-      author: null,
-      published_at: null,
-      cover_image_url: null,
-      cover_credit: null,
-      cover_alt: null,
-    };
-    const related: RelatedContent = { stories: [], places: [] };
-    return { props: { story, related, ...translations }, revalidate: 60 };
-  }
+  return { props: { story, related, ...translations }, revalidate: 60 };
 };
 
 export default StoryPage;

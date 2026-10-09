@@ -17,6 +17,7 @@ import {
 import { buildPlaceSchema } from "@/lib/seo";
 import { buildTitle } from "@/lib/seoText";
 import { getLocalized, hasPublishedTranslation } from "@/lib/getLocalized";
+import { withRetry } from "@/lib/fetchPolicy";
 import { SeoHead } from "@/components/SeoHead";
 import nextI18NextConfig from "@/next-i18next.config";
 import {
@@ -348,7 +349,7 @@ const PlacePage: NextPage<PlacePageProps> = ({ place }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const slugs = await getPublishedLocationSlugs();
+  const slugs = await withRetry("places/[slug] getPublishedLocationSlugs", () => getPublishedLocationSlugs());
   const paths = slugs.map((slug) => ({ params: { slug } }));
   return { paths, fallback: "blocking" };
 };
@@ -362,7 +363,7 @@ export const getStaticProps: GetStaticProps<PlacePageProps> = async ({
     return { notFound: true };
   }
 
-  const placeRecord = await getLocationFull(slug);
+  const placeRecord = await withRetry(`places/[slug] getLocationFull:${slug}`, () => getLocationFull(slug));
   if (!placeRecord) {
     return { notFound: true };
   }

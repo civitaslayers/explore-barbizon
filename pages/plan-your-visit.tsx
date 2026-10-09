@@ -5,6 +5,7 @@ import type { SSRConfig } from "next-i18next/pages";
 import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
 import { useTranslation } from "next-i18next/pages";
 import { SeoHead } from "@/components/SeoHead";
+import { withRetry } from "@/lib/fetchPolicy";
 import { getLocalized } from "@/lib/getLocalized";
 import { getLocationCards, getPublishedTours } from "@/lib/supabase";
 import { toTourListItem } from "@/lib/tourPage";
@@ -127,8 +128,8 @@ export const getStaticProps: GetStaticProps<PlanPageProps> = async ({
 }) => {
   const loc = locale ?? "fr";
   const [toursData, places, translations] = await Promise.all([
-    getPublishedTours(),
-    getLocationCards(),
+    withRetry("plan-your-visit getPublishedTours", () => getPublishedTours()),
+    withRetry("plan-your-visit getLocationCards", () => getLocationCards()),
     serverSideTranslations(loc, ["common", "pages"], nextI18NextConfig),
   ]);
   const tours: TourListItem[] = toursData.map((t) => toTourListItem(t, loc));

@@ -1,4 +1,5 @@
 import type { GetServerSideProps } from "next";
+import { degrade } from "@/lib/fetchPolicy";
 import {
   getPublishedLocationSitemapEntries,
   getPublishedStorySlugs,
@@ -20,11 +21,13 @@ import {
 // 2026-10-04): locations only emit xhtml:link alternates when
 // `getPublishedLocationSitemapEntries` (lib/supabase.ts) reports a genuinely
 // published English translation, via the same predicate as
-// getLocalized/SeoHead (`hasPublishedTranslation`). Stories and tours are
-// out of scope for this task (both tables now have a `translations` column;
-// gating them is a queued follow-up because it must flip SeoHead, the
-// switcher and the sitemap together — see brain/decisions.md 2026-10-04)
-// and keep `hasAlternates: true` unconditionally.
+// getLocalized/SeoHead (`hasPublishedTranslation`). Stories and tours keep
+// `hasAlternates: true` unconditionally: gating them on
+// hasPublishedTranslation is a queued follow-up (task b3accf5d); both tables
+// have a `translations` column, null on every tour row today.
+//
+// Failure policy: lib/fetchPolicy.ts — each block retries once, then
+// degrades with a logged error.
 // ---------------------------------------------------------------------------
 
 const BASE_URL = "https://explorebarbizon.com";
@@ -75,9 +78,17 @@ ${entries.map(renderUrl).join("\n")}
 
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
   const entries: UrlEntry[] = [...STATIC_ROUTES];
+  // Each block degrades independently (logged): an XML with fewer entries
+  // beats a 500 for crawlers. A degraded sitemap gets a short cache so the
+  // next crawl sees the full one.
+  let degraded = false;
 
-  try {
-    const locationEntries = await getPublishedLocationSitemapEntries();
+  const locationEntries = await degrade(
+    "sitemap getPublishedLocationSitemapEntries",
+    () => getPublishedLocationSitemapEntries(),
+    null
+  );
+  if (locationEntries) {
     for (const { slug, hasEnglish } of locationEntries) {
       entries.push({
         path: `/places/${slug}`,
@@ -86,44 +97,51 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
         hasAlternates: hasEnglish,
       });
     }
-  } catch {
-    // Supabase unavailable — degrade to static routes only.
+  } else {
+    degraded = true;
   }
 
-  try {
-    const storySlugs = await getPublishedStorySlugs();
+  const storySlugs = await degrade("sitemap getPublishedStorySlugs", () => getPublishedStorySlugs(), null);
+  if (storySlugs) {
     for (const slug of storySlugs) {
       entries.push({
         path: `/stories/${slug}`,
         priority: "0.6",
         changefreq: "monthly",
-        // Out of scope for this task — see header comment.
+        // hasAlternates: out of scope for this task — see header comment.
         hasAlternates: true,
       });
     }
-  } catch {
-    // Supabase unavailable, or stories table not reachable — skip.
+  } else {
+    degraded = true;
   }
 
-  try {
-    const tourSlugs = await getPublishedTourSlugsForSitemap();
+  const tourSlugs = await degrade("sitemap getPublishedTourSlugsForSitemap", () => getPublishedTourSlugsForSitemap(), null);
+  if (tourSlugs) {
     for (const slug of tourSlugs) {
       entries.push({
         path: `/tours/${slug}`,
         priority: "0.6",
         changefreq: "monthly",
-        // Out of scope — see header comment (tours do have `translations`; all null today).
+        // hasAlternates: gating tours/stories on hasPublishedTranslation is a
+        // queued follow-up (task b3accf5d); both tables have a `translations`
+        // column, null on every tour row today.
         hasAlternates: true,
       });
     }
-  } catch {
-    // Supabase unavailable — skip.
+  } else {
+    degraded = true;
   }
 
   const sitemap = buildSitemap(entries);
 
   res.setHeader("Content-Type", "application/xml");
-  res.setHeader("Cache-Control", "public, s-maxage=3600, stale-while-revalidate=600");
+  res.setHeader(
+    "Cache-Control",
+    degraded
+      ? "public, s-maxage=60, stale-while-revalidate=60"
+      : "public, s-maxage=3600, stale-while-revalidate=600"
+  );
   res.write(sitemap);
   res.end();
 
