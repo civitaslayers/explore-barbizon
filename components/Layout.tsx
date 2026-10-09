@@ -33,6 +33,16 @@ export function Layout({ children, hasEnglishVersion = true }: LayoutProps) {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-40 bg-cream">
+        {/* Skip link — first focusable element on every page. sr-only until it
+            receives keyboard focus, then pinned top-left above the sticky
+            header (z-40) and its own dashed umber ring. Plain <a>: a native
+            fragment jump is what moves focus to main#content. */}
+        <a
+          href="#content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-50 focus:rounded-full focus:bg-cream focus:px-4 focus:py-2 focus:text-[11px] focus:uppercase focus:tracking-[0.2em] focus:text-ink focus:no-underline focus:outline-dashed focus:outline-[1.5px] focus:outline-offset-2 focus:outline-umber focus:shadow-sm"
+        >
+          {t("a11y.skipToContent")}
+        </a>
         {/* Mobile: three-element bar */}
         <div className="mx-auto flex w-full max-w-screen-2xl items-center justify-between px-6 py-4 md:hidden">
           <button
@@ -131,7 +141,7 @@ export function Layout({ children, hasEnglishVersion = true }: LayoutProps) {
         <div className="h-px w-full bg-surface-container-low" />
       </header>
 
-      <main className="flex-1 pb-24 md:pb-0">
+      <main id="content" tabIndex={-1} className="flex-1 pb-24 md:pb-0 focus:outline-none">
         {pathname === "/map" ? (
           <div className="px-4 pb-6 pt-4 md:px-8 md:pt-5">{children}</div>
         ) : (

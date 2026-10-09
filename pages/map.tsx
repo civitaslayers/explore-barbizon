@@ -262,6 +262,11 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
         locale={locale}
       />
 
+      {/* Page heading — visually hidden: the map fills the viewport below the
+          nav, so a visible title would cost map height. Gives /map its single
+          h1 (heading landmark + SEO) like every other public page. */}
+      <h1 className="sr-only">{t("map.heading")}</h1>
+
       {/* Map container — fills the viewport below the nav. `isolate` keeps
           every map overlay's z-index inside this box, so the sticky site
           header (z-40) and mobile bottom nav (z-50) always paint above them.
