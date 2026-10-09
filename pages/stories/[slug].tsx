@@ -3,13 +3,13 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useTranslation, type SSRConfig } from "next-i18next/pages";
 import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
-import { marked } from "marked";
 import RelatedStories from "@/components/RelatedStories";
 import { SeoHead } from "@/components/SeoHead";
 import { RELATED_SLUGS } from "@/data/relatedStories";
 import { getAllStories } from "@/data/stories";
 import { getLocalized, type LocalizableRow } from "@/lib/getLocalized";
 import { heroImage800w } from "@/lib/media";
+import { renderStoryMarkdown } from "@/lib/storyMarkdown";
 import {
   resolveRelated,
   type RelatedContent,
@@ -171,9 +171,7 @@ const StoryPage: NextPage<StoryPageProps> = ({ story, related }) => {
   const coverAlt = getLocalized(story, locale, "cover_alt");
   const coverCredit = getLocalized(story, locale, "cover_credit");
   const localizedBody = getLocalized(story, locale, "body") || story.body;
-  const bodyHtml = localizedBody
-    ? marked(localizedBody, { breaks: true, gfm: true })
-    : "";
+  const bodyHtml = renderStoryMarkdown(localizedBody);
 
   return (
     <>
