@@ -135,9 +135,23 @@ async function enumerateEntities() {
 // server-rendered <Head> output).
 // ---------------------------------------------------------------------------
 
+// React's server renderer escapes ' " & < > inside <title> text and
+// attribute values (' becomes &#x27;). Lengths must be measured on the
+// decoded text — that is what search engines display.
+function decodeHtmlEntities(s) {
+  return s
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(Number(dec)))
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&"); // last, so "&amp;lt;" decodes once
+}
+
 function extractTitle(html) {
   const m = /<title[^>]*>([\s\S]*?)<\/title>/i.exec(html);
-  return m ? m[1].trim() : null;
+  return m ? decodeHtmlEntities(m[1].trim()) : null;
 }
 
 function extractMetaContent(html, name) {
@@ -146,14 +160,14 @@ function extractMetaContent(html, name) {
     "i"
   );
   const m = re.exec(html);
-  if (m) return m[1];
+  if (m) return decodeHtmlEntities(m[1]);
   // attribute order can be reversed (content before name)
   const re2 = new RegExp(
     `<meta[^>]*content=["']([^"']*)["'][^>]*name=["']${name}["']`,
     "i"
   );
   const m2 = re2.exec(html);
-  return m2 ? m2[1] : null;
+  return m2 ? decodeHtmlEntities(m2[1]) : null;
 }
 
 function extractHreflangLinks(html) {
