@@ -861,7 +861,7 @@ TasksPage.getLayout = (page: ReactElement) => (
 // `getTasks()` client-side fetch this page used previously is deny-all
 // under RLS and silently returned []; `getTasksAdmin()` reads via
 // supabaseAdmin (service role), server-only. This route already sits behind
-// the Basic Auth in middleware.ts (matcher includes /command-center/:path*),
+// the Basic Auth in proxy.ts (matcher includes /command-center/:path*),
 // so this getServerSideProps inherits the same protection as the existing
 // pattern in pages/command-center/index.tsx.
 // ---------------------------------------------------------------------------

@@ -8,7 +8,7 @@ import { parseTaskCreate } from "@/lib/commandCenterValidation";
  * Body: TaskInsert (title required; status defaults "backlog", priority 3,
  * other columns null). 201 { task } | 400 | 405 | 500.
  *
- * Basic-Auth-protected in production by middleware.ts' `/api/tasks/:path*`
+ * Basic-Auth-protected in production by proxy.ts' `/api/tasks/:path*`
  * matcher. Writes via the service-role admin client; the anon client is
  * deny-all on `tasks`.
  */

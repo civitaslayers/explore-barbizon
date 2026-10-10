@@ -6,7 +6,7 @@ import { parsePromptTemplateCreate } from "@/lib/commandCenterValidation";
  * POST /api/tasks/prompt-templates — create a prompt template (task b696ede8).
  *
  * Lives under /api/tasks/… because that is the only Basic-Auth-protected API
- * prefix in middleware.ts that fits, and middleware.ts could not be edited
+ * prefix in proxy.ts that fits, and proxy.ts could not be edited
  * in this change; a follow-up moves it to /api/prompt-templates with a
  * matcher entry. The static `prompt-templates` segment takes precedence
  * over the dynamic `[id]` route in Next.js routing.

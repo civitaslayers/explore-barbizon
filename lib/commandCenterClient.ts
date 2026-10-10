@@ -175,7 +175,7 @@ export async function apiDeleteTaskLink(taskId: string, linkId: string): Promise
 
 // ---------------------------------------------------------------------------
 // Prompt templates — lives under /api/tasks/prompt-templates because that is
-// the only Basic-Auth-protected API prefix available without a middleware
+// the only Basic-Auth-protected API prefix available without a proxy.ts
 // change (see brain/decisions.md, RLS-blind family).
 // ---------------------------------------------------------------------------
 
