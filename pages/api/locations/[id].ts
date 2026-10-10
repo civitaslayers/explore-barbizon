@@ -243,6 +243,35 @@ export default async function handler(
   // reported as a failed save (the UPDATE has already committed).
   const persisted = updatedRows[0];
 
+  // Pin-move audit (pin_moves): one row per coordinate PATCH. Non-fatal — a
+  // failed insert (including the table not existing yet) never changes the
+  // response. Table name cast because generated types don't know it yet.
+  if ("latitude" in payload || "longitude" in payload) {
+    try {
+      const { error: pinMoveError } = await supabaseAdmin
+        .from("pin_moves" as any)
+        .insert({
+          location_id: existing.id,
+          old_latitude: existing.latitude,
+          old_longitude: existing.longitude,
+          new_latitude: persisted.latitude,
+          new_longitude: persisted.longitude,
+          moved_by: null,
+        } as any);
+      if (pinMoveError) {
+        console.error(
+          "[pin_moves] insert failed (non-fatal, move already committed):",
+          pinMoveError.message
+        );
+      }
+    } catch (err) {
+      console.error(
+        "[pin_moves] insert threw (non-fatal, move already committed):",
+        err instanceof Error ? err.message : err
+      );
+    }
+  }
+
   const { data: verified } = await supabaseAdmin
     .from("locations")
     .select("latitude, longitude")
