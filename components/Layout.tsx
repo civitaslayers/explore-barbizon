@@ -89,7 +89,7 @@ export function Layout({ children, hasEnglishVersion = true }: LayoutProps) {
                 <li key={href}>
                   <Link
                     href={href}
-                    className={`text-[11px] uppercase tracking-[0.3em] no-underline transition-colors duration-200 ${pathname === href ? "text-ink" : "text-ink/50 hover:text-ink"}`}
+                    className={`text-[11px] uppercase tracking-[0.3em] no-underline transition-colors duration-200 ${pathname === href ? "text-ink" : "text-ink/60 hover:text-ink"}`}
                     onClick={() => setMenuOpen(false)}
                   >
                     {label}

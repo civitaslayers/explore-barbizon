@@ -434,7 +434,7 @@ export function FichePositionMap({
             <p>
               Nouveau : {dragState.lat.toFixed(6)}, {dragState.lng.toFixed(6)}
             </p>
-            <p className="text-ink/45">
+            <p className="text-ink/60">
               Déplacé de {dragState.distanceMeters.toFixed(1)} m
             </p>
           </div>

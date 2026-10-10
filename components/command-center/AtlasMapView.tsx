@@ -799,7 +799,7 @@ export function AtlasMapView({
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search by name…"
-          className="w-full rounded-full bg-ink/5 px-4 py-2 text-sm text-ink placeholder:text-ink/35 outline-none focus:bg-ink/10 transition-colors duration-200 ease-soft"
+          className="w-full rounded-full bg-ink/5 px-4 py-2 text-sm text-ink placeholder:text-ink/60 outline-none focus:bg-ink/10 transition-colors duration-200 ease-soft"
         />
         <div className="flex flex-wrap gap-2">
           {GROUP_NAMES.map((group) => (
@@ -815,7 +815,7 @@ export function AtlasMapView({
             </button>
           ))}
         </div>
-        <p className="text-[10px] uppercase tracking-[0.15em] text-ink/35">
+        <p className="text-[10px] uppercase tracking-[0.15em] text-ink/60">
           {pins.length} pins loaded — drafts show a dashed ring
         </p>
       </div>
@@ -833,7 +833,7 @@ export function AtlasMapView({
             <p>
               New: {dragState.lat.toFixed(6)}, {dragState.lng.toFixed(6)}
             </p>
-            <p className="text-ink/45">
+            <p className="text-ink/60">
               Moved {dragState.distanceMeters.toFixed(1)} m
             </p>
           </div>

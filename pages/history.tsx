@@ -72,7 +72,7 @@ const HistoryPage: NextPage<HistoryPageProps> = () => {
             <h2 className="heading-lg">{t("history.postcards.title")}</h2>
           </header>
           <div className="rounded border border-ink/10 p-8 text-center">
-            <p className="text-xs uppercase tracking-widest text-ink/40">
+            <p className="text-xs uppercase tracking-widest text-ink/60">
               {t("history.postcards.comingSoon")}
             </p>
             <p className="mt-2 text-sm text-ink/60">
@@ -93,7 +93,7 @@ const HistoryPage: NextPage<HistoryPageProps> = () => {
                 className="space-y-1 border border-ink/10 p-5"
               >
                 <p className="font-serif text-base text-ink">{artist.name}</p>
-                <p className="text-xs text-ink/50">{artist.dates}</p>
+                <p className="text-xs text-ink/60">{artist.dates}</p>
                 <p className="text-sm text-ink/70">
                   {t(`history.painters.${artist.noteKey}`)}
                 </p>

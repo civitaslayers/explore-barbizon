@@ -76,19 +76,19 @@ export function PublishBlock({
           <p className="eyebrow mb-2">Ce qui va être publié</p>
           <dl className="mb-3 space-y-1.5 text-sm text-ink/80">
             <div className="flex justify-between gap-4">
-              <dt className="text-ink/50">Nom</dt>
+              <dt className="text-ink/60">Nom</dt>
               <dd>{name}</dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt className="text-ink/50">Catégorie</dt>
+              <dt className="text-ink/60">Catégorie</dt>
               <dd>{categoryName}</dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt className="text-ink/50">Sur la carte</dt>
+              <dt className="text-ink/60">Sur la carte</dt>
               <dd>{showOnMap ? "Oui" : "Non"}</dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt className="text-ink/50">En éditorial</dt>
+              <dt className="text-ink/60">En éditorial</dt>
               <dd>{showInEditorial ? "Oui" : "Non"}</dd>
             </div>
           </dl>

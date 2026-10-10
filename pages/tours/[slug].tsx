@@ -77,7 +77,7 @@ const TourPage: NextPage<TourPageProps> = ({ tour, routeCoords }) => {
         </header>
       </div>
 
-      <p className="mt-6 mb-2 text-xs text-ink/50">
+      <p className="mt-6 mb-2 text-xs text-ink/60">
         <Link href="/plan-your-visit" className="no-underline hover:text-ink">
           ← {t("actions.backToPlan")}
         </Link>
@@ -189,7 +189,7 @@ const TourPage: NextPage<TourPageProps> = ({ tour, routeCoords }) => {
             <dl className="grid gap-5 text-xs leading-relaxed">
               {formatDuration(tour.duration_minutes) && (
                 <div>
-                  <dt className="text-[10px] uppercase tracking-[0.28em] text-ink/40">
+                  <dt className="text-[10px] uppercase tracking-[0.28em] text-ink/60">
                     {t("tour.duration")}
                   </dt>
                   <dd className="mt-1.5 font-serif text-sm text-ink/90">
@@ -199,7 +199,7 @@ const TourPage: NextPage<TourPageProps> = ({ tour, routeCoords }) => {
               )}
               {formatDistance(tour.distance_meters) && (
                 <div>
-                  <dt className="text-[10px] uppercase tracking-[0.28em] text-ink/40">
+                  <dt className="text-[10px] uppercase tracking-[0.28em] text-ink/60">
                     {t("tour.distance")}
                   </dt>
                   <dd className="mt-1.5 font-serif text-sm text-ink/90">
@@ -209,7 +209,7 @@ const TourPage: NextPage<TourPageProps> = ({ tour, routeCoords }) => {
               )}
               {stops.length > 0 && (
                 <div>
-                  <dt className="text-[10px] uppercase tracking-[0.28em] text-ink/40">
+                  <dt className="text-[10px] uppercase tracking-[0.28em] text-ink/60">
                     {t("tour.stops")}
                   </dt>
                   <dd className="mt-1.5 font-serif text-sm text-ink/90">
@@ -240,7 +240,7 @@ const TourPage: NextPage<TourPageProps> = ({ tour, routeCoords }) => {
                       </Link>
                     ) : null}
                     {stop.locations?.short_description && (
-                      <p className="text-xs uppercase tracking-[0.15em] text-ink/45">
+                      <p className="text-xs uppercase tracking-[0.15em] text-ink/60">
                         {stop.locations.short_description}
                       </p>
                     )}
@@ -252,7 +252,7 @@ const TourPage: NextPage<TourPageProps> = ({ tour, routeCoords }) => {
                     {stop.locations ? (
                       <Link
                         href={`/map?trail=${tour.slug}&location=${stop.locations.slug}`}
-                        className="mt-2 inline-block text-[11px] uppercase tracking-[0.18em] text-ink/40 hover:text-ink transition-colors"
+                        className="mt-2 inline-block text-[11px] uppercase tracking-[0.18em] text-ink/60 hover:text-ink transition-colors"
                       >
                         {t("actions.viewOnMap")} →
                       </Link>

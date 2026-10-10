@@ -148,7 +148,7 @@ export function AtlasListView({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Rechercher par nom…"
-          className="w-full max-w-xs rounded-full bg-ink/5 px-4 py-2 text-sm text-ink placeholder:text-ink/35 outline-none focus:bg-ink/10 transition-colors duration-200 ease-soft"
+          className="w-full max-w-xs rounded-full bg-ink/5 px-4 py-2 text-sm text-ink placeholder:text-ink/60 outline-none focus:bg-ink/10 transition-colors duration-200 ease-soft"
         />
         <button
           type="button"
@@ -269,7 +269,7 @@ export function AtlasListView({
               <tr>
                 <td
                   colSpan={8}
-                  className="px-3 py-8 text-center text-sm text-ink/40"
+                  className="px-3 py-8 text-center text-sm text-ink/60"
                 >
                   Aucune fiche ne correspond à ces filtres.
                 </td>
@@ -279,7 +279,7 @@ export function AtlasListView({
         </table>
       </div>
 
-      <p className="mt-3 text-[10px] uppercase tracking-[0.15em] text-ink/35">
+      <p className="mt-3 text-[10px] uppercase tracking-[0.15em] text-ink/60">
         {rows.length} / {locations.length} fiches affichées
       </p>
     </div>

@@ -167,7 +167,7 @@ function CuratedSection({
 
   return (
     <div className="space-y-4">
-      <p className="font-sans text-[10px] uppercase tracking-[0.35em] text-ink/50">
+      <p className="font-sans text-[10px] uppercase tracking-[0.35em] text-ink/60">
         {eyebrow}
       </p>
       <div className="-mx-4 flex gap-4 overflow-x-auto px-4 pb-1 scrollbar-none snap-x snap-mandatory md:mx-0 md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:px-0 md:pb-0">
@@ -274,7 +274,7 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({
 
       <section className="space-y-10 xl:space-y-12">
         <header className="space-y-5">
-          <p className="font-sans text-[10px] uppercase tracking-[0.35em] text-ink/50">
+          <p className="font-sans text-[10px] uppercase tracking-[0.35em] text-ink/60">
             {t("places.eyebrow")}
           </p>
           <h1 className="font-serif text-4xl italic leading-[1.05] tracking-tight text-ink md:text-5xl">
@@ -291,7 +291,7 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({
           <CuratedSection eyebrow={t("places.whereToEat")} items={whereToEat} />
           <CuratedSection eyebrow={t("places.whereToStay")} items={whereToStay} />
           {curatedUnavailable && whereToEat.length === 0 && whereToStay.length === 0 ? (
-            <p className="text-xs text-ink/50">{t("places.curatedUnavailable")}</p>
+            <p className="text-xs text-ink/60">{t("places.curatedUnavailable")}</p>
           ) : null}
         </div>
 
@@ -304,7 +304,7 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({
               onClick={() => setActiveCategory(value)}
               className={`-mb-px flex-shrink-0 border-b-2 px-4 pb-3 font-sans text-[10px] uppercase tracking-[0.2em] transition-all duration-300 ${activeCategory === value
                 ? "border-ink font-medium text-ink"
-                : "border-transparent text-ink/40 hover:text-ink/70"
+                : "border-transparent text-ink/60 hover:text-ink/70"
                 }`}
             >
               {label}

@@ -264,7 +264,7 @@ export default function MyDayPanel({
         ) : null}
 
         {stops.length >= 2 ? (
-          <p className="mt-4 text-[11px] leading-relaxed text-ink/50">
+          <p className="mt-4 text-[11px] leading-relaxed text-ink/60">
             {routed ? t("myDay.routeNote") : t("myDay.distanceNote")}
           </p>
         ) : null}
@@ -293,7 +293,7 @@ export default function MyDayPanel({
                 <button type="button" onClick={applySuggestion} className={textBtn}>
                   {t("myDay.suggestOrder")}
                 </button>
-                <p className="mt-1.5 text-[11px] leading-relaxed text-ink/50">
+                <p className="mt-1.5 text-[11px] leading-relaxed text-ink/60">
                   {t("myDay.suggestOrderNote")}
                 </p>
               </div>

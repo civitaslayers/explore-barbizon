@@ -33,7 +33,7 @@ const STATUS_LABELS: Record<TaskStatus, string> = {
 };
 
 const STATUS_STYLE: Record<TaskStatus, string> = {
-  backlog: "bg-ink/8 text-ink/50",
+  backlog: "bg-ink/8 text-ink/60",
   ready: "bg-umber/10 text-umber",
   in_progress: "bg-moss/15 text-moss",
   review: "bg-ink/15 text-ink/70",
@@ -63,7 +63,7 @@ const CommandCenterIndex: NextPageWithLayout<CommandCenterIndexProps> = ({
       )}
 
       {!stats && !statsError && (
-        <p className="text-sm text-ink/40">No data available.</p>
+        <p className="text-sm text-ink/60">No data available.</p>
       )}
 
       {stats && (
@@ -94,13 +94,13 @@ const CommandCenterIndex: NextPageWithLayout<CommandCenterIndexProps> = ({
             <section>
               <div className="flex items-baseline justify-between mb-3">
                 <p className="eyebrow">Recent Tasks</p>
-                <Link href="/command-center/tasks" className="text-[10px] text-ink/40 no-underline hover:text-ink uppercase tracking-[0.15em]">
+                <Link href="/command-center/tasks" className="text-[10px] text-ink/60 no-underline hover:text-ink uppercase tracking-[0.15em]">
                   All →
                 </Link>
               </div>
               <div className="border border-ink/10 rounded-lg overflow-hidden">
                 {stats.recentTasks.length === 0 ? (
-                  <p className="text-sm text-ink/35 px-4 py-6 text-center">No tasks yet</p>
+                  <p className="text-sm text-ink/60 px-4 py-6 text-center">No tasks yet</p>
                 ) : (
                   stats.recentTasks.map((t, i) => (
                     <Link
@@ -109,7 +109,7 @@ const CommandCenterIndex: NextPageWithLayout<CommandCenterIndexProps> = ({
                       className={`flex items-center justify-between px-4 py-3 no-underline hover:bg-ink/3 transition-colors ${i > 0 ? "border-t border-ink/8" : ""}`}
                     >
                       <span className="text-sm text-ink truncate pr-3">{t.title}</span>
-                      <span className={`text-[10px] uppercase tracking-[0.15em] px-2 py-0.5 rounded-full shrink-0 ${STATUS_STYLE[t.status as TaskStatus] ?? "bg-ink/10 text-ink/50"}`}>
+                      <span className={`text-[10px] uppercase tracking-[0.15em] px-2 py-0.5 rounded-full shrink-0 ${STATUS_STYLE[t.status as TaskStatus] ?? "bg-ink/10 text-ink/60"}`}>
                         {t.status.replace("_", " ")}
                       </span>
                     </Link>
@@ -125,7 +125,7 @@ const CommandCenterIndex: NextPageWithLayout<CommandCenterIndexProps> = ({
               </div>
               <div className="border border-ink/10 rounded-lg overflow-hidden">
                 {stats.recentOutputs.length === 0 ? (
-                  <p className="text-sm text-ink/35 px-4 py-6 text-center">No outputs yet</p>
+                  <p className="text-sm text-ink/60 px-4 py-6 text-center">No outputs yet</p>
                 ) : (
                   stats.recentOutputs.map((o, i) => (
                     <div
@@ -133,7 +133,7 @@ const CommandCenterIndex: NextPageWithLayout<CommandCenterIndexProps> = ({
                       className={`px-4 py-3 ${i > 0 ? "border-t border-ink/8" : ""}`}
                     >
                       <div className="flex items-center gap-2 mb-0.5">
-                        <span className="text-[10px] uppercase tracking-[0.15em] text-ink/40">{o.agent}</span>
+                        <span className="text-[10px] uppercase tracking-[0.15em] text-ink/60">{o.agent}</span>
                         {o.task_id && (
                           <Link href={`/command-center/tasks/${o.task_id}`} className="text-[10px] text-umber no-underline hover:text-moss">
                             view task →
@@ -152,7 +152,7 @@ const CommandCenterIndex: NextPageWithLayout<CommandCenterIndexProps> = ({
         </div>
       )}
 
-      <p className="mt-8 text-[11px] text-ink/40">
+      <p className="mt-8 text-[11px] text-ink/60">
         Decision log:{" "}
         <a
           href="https://github.com/civitaslayers/explore-barbizon/blob/main/brain/decisions.md"

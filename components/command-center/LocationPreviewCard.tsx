@@ -104,7 +104,7 @@ function QuickEditText({
 
   return (
     <div className="mb-2">
-      <p className="text-[9px] uppercase tracking-[0.15em] text-ink/35">{label}</p>
+      <p className="text-[9px] uppercase tracking-[0.15em] text-ink/60">{label}</p>
       {editing ? (
         <input
           autoFocus
@@ -130,12 +130,12 @@ function QuickEditText({
           {value ? (
             value
           ) : (
-            <span className="italic text-ink/35">— {emptyLabel} —</span>
+            <span className="italic text-ink/60">— {emptyLabel} —</span>
           )}
         </button>
       )}
       {state === "saving" ? (
-        <span className="text-[9px] text-ink/40">enregistrement…</span>
+        <span className="text-[9px] text-ink/60">enregistrement…</span>
       ) : null}
       {state === "error" && error ? (
         <span className="text-[9px] text-umber">{error}</span>
@@ -281,7 +281,7 @@ export function LocationPreviewCard({
 
         <div className="mb-2 flex items-center gap-2">
           <span className="chip">{location.categoryName}</span>
-          <span className="text-[10px] uppercase tracking-[0.1em] text-ink/35">
+          <span className="text-[10px] uppercase tracking-[0.1em] text-ink/60">
             {location.showOnMap ? "carte" : "hors carte"} ·{" "}
             {location.showInEditorial ? "éditorial" : "hors éditorial"}
           </span>
@@ -300,7 +300,7 @@ export function LocationPreviewCard({
           {location.shortDescription ? (
             location.shortDescription
           ) : (
-            <span className="italic text-ink/35">— sans description —</span>
+            <span className="italic text-ink/60">— sans description —</span>
           )}
         </p>
 
@@ -329,7 +329,7 @@ export function LocationPreviewCard({
             band={location.completeness.band}
             showLabel
           />
-          <p className="font-mono text-[10px] text-ink/40">
+          <p className="font-mono text-[10px] text-ink/60">
             {location.latitude.toFixed(6)}, {location.longitude.toFixed(6)}
           </p>
         </div>

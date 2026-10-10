@@ -23,7 +23,7 @@ export function CommandCenterLayout({ children }: { children: ReactNode }) {
       {/* Sidebar */}
       <aside className="w-52 shrink-0 border-r border-ink/10 flex flex-col">
         <div className="px-5 py-5 border-b border-ink/10">
-          <p className="text-[9px] uppercase tracking-[0.3em] text-ink/35 mb-1.5">
+          <p className="text-[9px] uppercase tracking-[0.3em] text-ink/60 mb-1.5">
             Civitas Layers
           </p>
           <p className="font-serif text-[1.05rem] leading-tight tracking-tight">
@@ -44,7 +44,7 @@ export function CommandCenterLayout({ children }: { children: ReactNode }) {
                 className={`block px-3 py-2 rounded text-[11px] uppercase tracking-[0.18em] no-underline transition-colors duration-200 ${
                   active
                     ? "bg-ink text-cream"
-                    : "text-ink/45 hover:text-ink hover:bg-ink/5"
+                    : "text-ink/60 hover:text-ink hover:bg-ink/5"
                 }`}
               >
                 {label}
@@ -56,7 +56,7 @@ export function CommandCenterLayout({ children }: { children: ReactNode }) {
         <div className="px-5 py-4 border-t border-ink/10">
           <Link
             href="/"
-            className="text-[10px] uppercase tracking-[0.18em] text-ink/30 no-underline hover:text-ink/50 transition-colors duration-200"
+            className="text-[10px] uppercase tracking-[0.18em] text-ink/30 no-underline hover:text-ink/60 transition-colors duration-200"
           >
             ← Public site
           </Link>
