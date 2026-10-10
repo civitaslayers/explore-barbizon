@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import { useTranslation, type SSRConfig } from "next-i18next/pages";
 import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
 import { SeoHead } from "@/components/SeoHead";
+import { hasPublishedTranslation } from "@/lib/getLocalized";
 import { degrade, withRetry } from "@/lib/fetchPolicy";
 import {
   getTourBySlugFromSupabase,
@@ -18,6 +19,7 @@ import nextI18NextConfig from "@/next-i18next.config";
 type TourPageProps = {
   tour: TourView;
   routeCoords: [number, number][] | null;
+  hasEnglishVersion: boolean;
 } & SSRConfig;
 
 function formatDuration(minutes: number | null): string {
@@ -36,7 +38,7 @@ function formatDistance(meters: number | null): string {
     : `${meters} m`;
 }
 
-const TourPage: NextPage<TourPageProps> = ({ tour, routeCoords }) => {
+const TourPage: NextPage<TourPageProps> = ({ tour, routeCoords, hasEnglishVersion }) => {
   const router = useRouter();
   const locale = router.locale ?? "fr";
   const { t } = useTranslation("common");
@@ -49,6 +51,7 @@ const TourPage: NextPage<TourPageProps> = ({ tour, routeCoords }) => {
         description={tour.description ?? `${tour.name} — a walking tour of Barbizon.`}
         path={`/tours/${tour.slug}`}
         locale={locale}
+        hasEnglishVersion={hasEnglishVersion}
       />
       <div className="-mt-12 md:-mt-20">
         <header className="overflow-hidden rounded-2xl border border-ink/10 bg-ink shadow-card md:rounded-[1.75rem]">
@@ -292,6 +295,7 @@ export const getStaticProps: GetStaticProps<TourPageProps> = async ({
     props: {
       tour: tourView,
       routeCoords: routeCoords ?? null,
+      hasEnglishVersion: hasPublishedTranslation(tour, "en", ["name", "description"]),
       ...translations,
     },
     revalidate: 60,

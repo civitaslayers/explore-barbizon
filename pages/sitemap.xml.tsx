@@ -21,10 +21,8 @@ import {
 // 2026-10-04): locations only emit xhtml:link alternates when
 // `getPublishedLocationSitemapEntries` (lib/supabase.ts) reports a genuinely
 // published English translation, via the same predicate as
-// getLocalized/SeoHead (`hasPublishedTranslation`). Stories and tours keep
-// `hasAlternates: true` unconditionally: gating them on
-// hasPublishedTranslation is a queued follow-up (task b3accf5d); both tables
-// have a `translations` column, null on every tour row today.
+// getLocalized/SeoHead (`hasPublishedTranslation`). Stories (title/body) and
+// tours (name/description) are gated the same way (task b3accf5d).
 //
 // Failure policy: lib/fetchPolicy.ts — each block retries once, then
 // degrades with a logged error.
@@ -101,32 +99,28 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
     degraded = true;
   }
 
-  const storySlugs = await degrade("sitemap getPublishedStorySlugs", () => getPublishedStorySlugs(), null);
-  if (storySlugs) {
-    for (const slug of storySlugs) {
+  const storyEntries = await degrade("sitemap getPublishedStorySlugs", () => getPublishedStorySlugs(), null);
+  if (storyEntries) {
+    for (const { slug, hasEnglish } of storyEntries) {
       entries.push({
         path: `/stories/${slug}`,
         priority: "0.6",
         changefreq: "monthly",
-        // hasAlternates: out of scope for this task — see header comment.
-        hasAlternates: true,
+        hasAlternates: hasEnglish,
       });
     }
   } else {
     degraded = true;
   }
 
-  const tourSlugs = await degrade("sitemap getPublishedTourSlugsForSitemap", () => getPublishedTourSlugsForSitemap(), null);
-  if (tourSlugs) {
-    for (const slug of tourSlugs) {
+  const tourEntries = await degrade("sitemap getPublishedTourSlugsForSitemap", () => getPublishedTourSlugsForSitemap(), null);
+  if (tourEntries) {
+    for (const { slug, hasEnglish } of tourEntries) {
       entries.push({
         path: `/tours/${slug}`,
         priority: "0.6",
         changefreq: "monthly",
-        // hasAlternates: gating tours/stories on hasPublishedTranslation is a
-        // queued follow-up (task b3accf5d); both tables have a `translations`
-        // column, null on every tour row today.
-        hasAlternates: true,
+        hasAlternates: hasEnglish,
       });
     }
   } else {

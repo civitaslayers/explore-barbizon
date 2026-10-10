@@ -6,7 +6,11 @@ import { serverSideTranslations } from "next-i18next/pages/serverSideTranslation
 import RelatedStories from "@/components/RelatedStories";
 import { SeoHead } from "@/components/SeoHead";
 import { RELATED_SLUGS } from "@/data/relatedStories";
-import { getLocalized, type LocalizableRow } from "@/lib/getLocalized";
+import {
+  getLocalized,
+  hasPublishedTranslation,
+  type LocalizableRow,
+} from "@/lib/getLocalized";
 import { degrade, withRetry } from "@/lib/fetchPolicy";
 import { heroImage800w } from "@/lib/media";
 import { renderStoryMarkdown } from "@/lib/storyMarkdown";
@@ -41,6 +45,7 @@ type StoryPageStory = {
 type StoryPageProps = {
   story: StoryPageStory;
   related: RelatedContent;
+  hasEnglishVersion: boolean;
 } & SSRConfig;
 
 function excerptFromBody(body: string | null, maxLen = 220): string {
@@ -151,7 +156,7 @@ async function getRelatedPlaceRows(slugs: string[]): Promise<RelatedPlaceRow[]> 
   return (data ?? []) as unknown as RelatedPlaceRow[];
 }
 
-const StoryPage: NextPage<StoryPageProps> = ({ story, related }) => {
+const StoryPage: NextPage<StoryPageProps> = ({ story, related, hasEnglishVersion }) => {
   const router = useRouter();
   const locale = router.locale ?? "fr";
   const { t, i18n } = useTranslation("common");
@@ -181,6 +186,7 @@ const StoryPage: NextPage<StoryPageProps> = ({ story, related }) => {
         description={dek}
         path={`/stories/${story.slug}`}
         locale={locale}
+        hasEnglishVersion={hasEnglishVersion}
         image={story.cover_image_url ?? undefined}
         type="article"
         jsonLd={buildArticleSchema(
@@ -286,7 +292,15 @@ export const getStaticProps: GetStaticProps<StoryPageProps> = async ({
       )
     : empty;
 
-  return { props: { story, related, ...translations }, revalidate: 60 };
+  return {
+    props: {
+      story,
+      related,
+      hasEnglishVersion: hasPublishedTranslation(story, "en", ["title", "body"]),
+      ...translations,
+    },
+    revalidate: 60,
+  };
 };
 
 export default StoryPage;
