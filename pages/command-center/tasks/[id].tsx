@@ -78,7 +78,7 @@ function NextActionBlock({ task }: { task: Task }) {
         Next action
       </p>
       <p className="text-[13px] text-ink/70 leading-snug">{sentence}</p>
-      <p className="text-[11px] text-ink/45 leading-snug mt-1">
+      <p className="text-[11px] text-ink/60 leading-snug mt-1">
         Suggested tool: {toolHint}
       </p>
     </div>
@@ -286,7 +286,7 @@ const CHIEF_LEVEL_LABEL: Record<ChiefSuggestionLevel, string> = {
 const CHIEF_LEVEL_STYLE: Record<ChiefSuggestionLevel, string> = {
   warning: "border-umber/25 bg-umber/[0.06] text-umber/90",
   opportunity: "border-moss/20 bg-moss/[0.06] text-moss/90",
-  note: "border-ink/12 bg-ink/[0.02] text-ink/50",
+  note: "border-ink/12 bg-ink/[0.02] text-ink/60",
 };
 
 function HandoffReviewBlock({ task, outputs }: { task: Task; outputs: Output[] }) {
@@ -304,7 +304,7 @@ function HandoffReviewBlock({ task, outputs }: { task: Task; outputs: Output[] }
       className="mb-0"
       aria-label="Work snapshot"
     >
-      <h2 className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-1">
+      <h2 className="text-[10px] uppercase tracking-[0.2em] text-ink/60 mb-1">
         Work snapshot
       </h2>
       <p className="text-[11px] text-ink/38 leading-snug mb-4">
@@ -313,17 +313,17 @@ function HandoffReviewBlock({ task, outputs }: { task: Task; outputs: Output[] }
       </p>
 
       <dl className="grid grid-cols-[6.5rem_1fr] gap-x-3 gap-y-2 text-xs text-ink/65 mb-0">
-        <dt className="text-ink/40">Queue status</dt>
+        <dt className="text-ink/60">Queue status</dt>
         <dd className="min-w-0 capitalize">{queueLabel}</dd>
-        <dt className="text-ink/40">Execution posture</dt>
+        <dt className="text-ink/60">Execution posture</dt>
         <dd className="min-w-0 capitalize">{execLabel}</dd>
-        <dt className="text-ink/40">Assignee</dt>
+        <dt className="text-ink/60">Assignee</dt>
         <dd className="min-w-0">{assigneeLabel}</dd>
-        <dt className="text-ink/40">Output</dt>
+        <dt className="text-ink/60">Output</dt>
         <dd className="min-w-0">{hasOutput ? "Yes" : "No"}</dd>
-        <dt className="text-ink/40">Last action</dt>
+        <dt className="text-ink/60">Last action</dt>
         <dd className="min-w-0">{hasLastNote ? "Yes" : "No"}</dd>
-        <dt className="text-ink/40">Next step</dt>
+        <dt className="text-ink/60">Next step</dt>
         <dd
           className={`min-w-0 leading-snug ${
             nextStepRaw
@@ -420,7 +420,7 @@ function RunHandoffBlock({
       className="pt-6 mt-6 border-t border-ink/10"
       aria-label="Manual handoff log"
     >
-      <h2 className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-1">
+      <h2 className="text-[10px] uppercase tracking-[0.2em] text-ink/60 mb-1">
         Manual handoff log
       </h2>
       <p className="text-[11px] text-ink/38 leading-snug mb-4">
@@ -429,14 +429,14 @@ function RunHandoffBlock({
       </p>
 
       {!hasRecordedRun ? (
-        <p className="text-[13px] text-ink/45 leading-snug mb-4">
+        <p className="text-[13px] text-ink/60 leading-snug mb-4">
           No run recorded yet.
         </p>
       ) : (
         <dl className="grid grid-cols-[6.5rem_1fr] gap-x-3 gap-y-2 text-xs text-ink/65 mb-4">
-          <dt className="text-ink/40">Target</dt>
+          <dt className="text-ink/60">Target</dt>
           <dd className="min-w-0 font-medium text-ink/75">{savedTarget}</dd>
-          <dt className="text-ink/40">Recorded</dt>
+          <dt className="text-ink/60">Recorded</dt>
           <dd className="min-w-0">
             {savedAt
               ? savedAt.toLocaleString(undefined, {
@@ -445,12 +445,12 @@ function RunHandoffBlock({
                 })
               : "—"}
           </dd>
-          <dt className="text-ink/40">Note</dt>
+          <dt className="text-ink/60">Note</dt>
           <dd className="min-w-0 leading-snug">
             {savedNote ? (
               <span className="whitespace-pre-wrap">{savedNote}</span>
             ) : (
-              <span className="text-ink/35">—</span>
+              <span className="text-ink/60">—</span>
             )}
           </dd>
         </dl>
@@ -461,7 +461,7 @@ function RunHandoffBlock({
           <div>
             <label
               htmlFor="ccc-run-handoff-target"
-              className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1"
+              className="text-[9px] uppercase tracking-[0.2em] text-ink/60 block mb-1"
             >
               Handoff target
             </label>
@@ -489,7 +489,7 @@ function RunHandoffBlock({
           <div>
             <label
               htmlFor="ccc-run-handoff-note"
-              className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1"
+              className="text-[9px] uppercase tracking-[0.2em] text-ink/60 block mb-1"
             >
               Note (optional)
             </label>
@@ -508,7 +508,7 @@ function RunHandoffBlock({
           <button
             type="submit"
             disabled={recording}
-            className="text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded border border-ink/25 text-ink/55 hover:text-ink hover:border-ink/40 transition-colors disabled:opacity-50"
+            className="text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded border border-ink/25 text-ink/60 hover:text-ink hover:border-ink/40 transition-colors disabled:opacity-50"
           >
             {recording ? "Recording…" : "Record handoff"}
           </button>
@@ -534,46 +534,46 @@ function LatestExecutionResultBlock({ latest }: { latest: Output | null }) {
       className="pt-6 mt-6 border-t border-ink/10"
       aria-label="Latest execution result"
     >
-      <h2 className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-1">
+      <h2 className="text-[10px] uppercase tracking-[0.2em] text-ink/60 mb-1">
         Latest execution result
       </h2>
       <p className="text-[11px] text-ink/38 leading-snug mb-4">
         Most recent row from outputs (runs, CLI, or POST /api/tasks/…/outputs). Sorted by time.
       </p>
       {!latest ? (
-        <p className="text-[13px] text-ink/45 leading-snug">
+        <p className="text-[13px] text-ink/60 leading-snug">
           No execution rows yet — run the task or add an output below.
         </p>
       ) : (
         <>
           <div className="flex flex-wrap items-center gap-2 mb-3">
             <span
-              className={`text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded ${AGENT_STYLE[latest.agent] ?? "bg-ink/8 text-ink/55"}`}
+              className={`text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded ${AGENT_STYLE[latest.agent] ?? "bg-ink/8 text-ink/60"}`}
             >
               {latest.agent}
             </span>
             <span className="text-[10px] text-ink/30">v{latest.version}</span>
           </div>
           <dl className="grid grid-cols-[6.5rem_1fr] gap-x-3 gap-y-2 text-xs text-ink/65 mb-3">
-            <dt className="text-ink/40">Recorded</dt>
+            <dt className="text-ink/60">Recorded</dt>
             <dd className="min-w-0">
               {new Date(latest.created_at).toLocaleString(undefined, {
                 dateStyle: "medium",
                 timeStyle: "short",
               })}
             </dd>
-            <dt className="text-ink/40">Status</dt>
+            <dt className="text-ink/60">Status</dt>
             <dd className="min-w-0">
               {(latest.response ?? "").trim() ? "Has output" : "No output text"}
             </dd>
-            <dt className="text-ink/40">Output</dt>
+            <dt className="text-ink/60">Output</dt>
             <dd className="min-w-0">
               {(latest.response ?? "").trim() ? (
                 <div className="text-[13px] text-ink/75 leading-relaxed whitespace-pre-wrap max-h-56 overflow-y-auto rounded-lg border border-ink/10 bg-ink/[0.02] px-3 py-2.5 font-mono">
                   {latest.response}
                 </div>
               ) : (
-                <span className="text-ink/35">—</span>
+                <span className="text-ink/60">—</span>
               )}
             </dd>
           </dl>
@@ -739,7 +739,7 @@ function AgentBriefBlock({
     >
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="min-w-0">
-          <h2 className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-1">
+          <h2 className="text-[10px] uppercase tracking-[0.2em] text-ink/60 mb-1">
             Agent brief
           </h2>
           <p className="text-[11px] text-ink/38 leading-snug">
@@ -751,7 +751,7 @@ function AgentBriefBlock({
           type="button"
           onClick={handleCopyBrief}
           disabled={runWithBusyTool !== null}
-          className="shrink-0 text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded border border-ink/20 text-ink/50 hover:text-ink hover:border-ink/40 transition-colors disabled:opacity-50"
+          className="shrink-0 text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded border border-ink/20 text-ink/60 hover:text-ink hover:border-ink/40 transition-colors disabled:opacity-50"
         >
           {copied ? "Copied" : "Copy brief"}
         </button>
@@ -775,7 +775,7 @@ function AgentBriefBlock({
               className={`text-[10px] uppercase tracking-[0.12em] px-2.5 py-1 rounded-md transition-colors disabled:opacity-50 ${
                 active
                   ? "bg-white border border-ink/18 text-ink/75 shadow-sm"
-                  : "text-ink/45 hover:text-ink/65 border border-transparent"
+                  : "text-ink/60 hover:text-ink/65 border border-transparent"
               }`}
             >
               {label}
@@ -788,11 +788,11 @@ function AgentBriefBlock({
       </p>
 
       <div className="mb-3 pt-3 border-t border-ink/10">
-        <p className="text-[9px] uppercase tracking-[0.2em] text-ink/35 mb-2">
+        <p className="text-[9px] uppercase tracking-[0.2em] text-ink/60 mb-2">
           Run with…
         </p>
         <div className="flex flex-wrap gap-x-4 gap-y-2 mb-2">
-          <label className="inline-flex items-center gap-2 text-[9px] uppercase tracking-[0.14em] text-ink/50 cursor-pointer select-none">
+          <label className="inline-flex items-center gap-2 text-[9px] uppercase tracking-[0.14em] text-ink/60 cursor-pointer select-none">
             <input
               type="checkbox"
               className="rounded border-ink/25 text-ink/70 focus:ring-ink/20 shrink-0"
@@ -802,7 +802,7 @@ function AgentBriefBlock({
             />
             Record handoff on run
           </label>
-          <label className="inline-flex items-center gap-2 text-[9px] uppercase tracking-[0.14em] text-ink/50 cursor-pointer select-none">
+          <label className="inline-flex items-center gap-2 text-[9px] uppercase tracking-[0.14em] text-ink/60 cursor-pointer select-none">
             <input
               type="checkbox"
               className="rounded border-ink/25 text-ink/70 focus:ring-ink/20 shrink-0"
@@ -839,7 +839,7 @@ function AgentBriefBlock({
             type="button"
             disabled={runWithBusyTool !== null}
             onClick={() => handleRunWithTool("claude")}
-            className="text-[9px] uppercase tracking-[0.12em] px-2 py-1 rounded border border-ink/18 text-ink/55 hover:text-ink hover:border-ink/32 transition-colors disabled:opacity-50"
+            className="text-[9px] uppercase tracking-[0.12em] px-2 py-1 rounded border border-ink/18 text-ink/60 hover:text-ink hover:border-ink/32 transition-colors disabled:opacity-50"
           >
             {runWithBusyTool === "claude"
               ? "…"
@@ -896,7 +896,7 @@ function ChiefOfStaffSuggestionsBlock({
 }) {
   return (
     <section className="mb-0" aria-label="Task guidance">
-      <h2 className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-1">
+      <h2 className="text-[10px] uppercase tracking-[0.2em] text-ink/60 mb-1">
         Task guidance
       </h2>
       <p className="text-[11px] text-ink/38 leading-snug mb-4">
@@ -904,7 +904,7 @@ function ChiefOfStaffSuggestionsBlock({
         no rules engine. Nothing here applies changes automatically.
       </p>
       {suggestions.length === 0 ? (
-        <p className="text-sm text-ink/45 leading-relaxed">
+        <p className="text-sm text-ink/60 leading-relaxed">
           No immediate suggestions. This task looks structurally sound.
         </p>
       ) : (
@@ -919,7 +919,7 @@ function ChiefOfStaffSuggestionsBlock({
                   {CHIEF_LEVEL_LABEL[s.level]}
                 </span>
                 {s.category && (
-                  <span className="text-[9px] uppercase tracking-[0.12em] text-ink/35">
+                  <span className="text-[9px] uppercase tracking-[0.12em] text-ink/60">
                     · {s.category}
                   </span>
                 )}
@@ -998,7 +998,7 @@ function ReviewBlock({ task, hasOutput }: { task: Task; hasOutput: boolean }) {
 
   return (
     <section>
-      <h2 className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-3">
+      <h2 className="text-[10px] uppercase tracking-[0.2em] text-ink/60 mb-3">
         Review output
       </h2>
       <button
@@ -1008,7 +1008,7 @@ function ReviewBlock({ task, hasOutput }: { task: Task; hasOutput: boolean }) {
         className={`text-[11px] uppercase tracking-[0.15em] px-4 py-2 rounded border transition-colors disabled:opacity-40 ${
           reviewing
             ? "border-moss/30 text-moss/70 cursor-wait"
-            : "border-ink/20 text-ink/50 hover:border-moss/40 hover:text-moss"
+            : "border-ink/20 text-ink/60 hover:border-moss/40 hover:text-moss"
         }`}
       >
         {reviewing ? "Reviewing…" : "Review with Claude"}
@@ -1028,7 +1028,7 @@ function ReviewBlock({ task, hasOutput }: { task: Task; hasOutput: boolean }) {
               >
                 {copied ? "Copied ✓" : "Copy follow-up prompt"}
               </button>
-              <span className="text-[11px] text-ink/35 italic truncate">{nextStep}</span>
+              <span className="text-[11px] text-ink/60 italic truncate">{nextStep}</span>
             </div>
           )}
         </div>
@@ -1070,7 +1070,7 @@ const ASSIGNEE_PRESETS = ["human", "claude"] as const;
 const RUN_HANDOFF_TARGET_PRESETS = ["human", "claude"] as const;
 
 const STATUS_STYLE: Record<TaskStatus, string> = {
-  backlog: "bg-ink/8 text-ink/50",
+  backlog: "bg-ink/8 text-ink/60",
   ready: "bg-umber/10 text-umber",
   in_progress: "bg-moss/15 text-moss",
   review: "bg-ink/15 text-ink/70",
@@ -1079,11 +1079,11 @@ const STATUS_STYLE: Record<TaskStatus, string> = {
 
 const AGENT_STYLE: Record<string, string> = {
   claude: "bg-moss/15 text-moss",
-  manual: "border border-ink/20 text-ink/50",
+  manual: "border border-ink/20 text-ink/60",
 };
 
 const EXECUTION_STATUS_STYLE: Record<ExecutionStatus, string> = {
-  todo: "bg-ink/6 text-ink/50",
+  todo: "bg-ink/6 text-ink/60",
   in_progress: "bg-moss/12 text-moss",
   review: "bg-ink/12 text-ink/60",
   blocked: "bg-umber/8 text-umber/90",
@@ -1108,13 +1108,13 @@ function CopyableId({ id }: { id: string }) {
   };
   return (
     <span className="inline-flex items-center gap-1.5">
-      <code className="text-xs font-mono text-ink/55 cursor-text px-1 py-0.5 rounded bg-ink/5 [user-select:all]">
+      <code className="text-xs font-mono text-ink/60 cursor-text px-1 py-0.5 rounded bg-ink/5 [user-select:all]">
         {id}
       </code>
       <button
         type="button"
         onClick={handleCopy}
-        className="text-[9px] text-ink/35 hover:text-ink/60 transition-colors"
+        className="text-[9px] text-ink/60 hover:text-ink/60 transition-colors"
       >
         {copied ? "Copied" : "Copy"}
       </button>
@@ -1598,7 +1598,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
   }
 
   if (loading) {
-    return <div className="p-8 text-sm text-ink/40">Loading...</div>;
+    return <div className="p-8 text-sm text-ink/60">Loading...</div>;
   }
 
   if (error) {
@@ -1607,7 +1607,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
         <p className="text-sm text-red-600 p-3 bg-red-50 rounded border border-red-200 mb-4">
           {error}
         </p>
-        <Link href="/command-center/tasks" className="text-sm text-ink/50 no-underline hover:text-ink">
+        <Link href="/command-center/tasks" className="text-sm text-ink/60 no-underline hover:text-ink">
           ← Back to tasks
         </Link>
       </div>
@@ -1664,7 +1664,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
               >
                 {m.name || link.entity_id}
               </Link>
-              <p className="text-[10px] text-ink/35 font-mono mt-0.5 tracking-tight">
+              <p className="text-[10px] text-ink/60 font-mono mt-0.5 tracking-tight">
                 {m.slug}
               </p>
             </>
@@ -1685,7 +1685,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
         </div>
         <button
           onClick={() => handleUnlink(link.id)}
-          className="text-[10px] text-ink/40 hover:text-ink transition-colors shrink-0 pt-0.5"
+          className="text-[10px] text-ink/60 hover:text-ink transition-colors shrink-0 pt-0.5"
           disabled={unlinkingId === link.id}
           type="button"
         >
@@ -1700,14 +1700,14 @@ const TaskDetailPage: NextPageWithLayout = () => {
       {/* Back */}
       <Link
         href="/command-center/tasks"
-        className="text-[10px] uppercase tracking-[0.2em] text-ink/35 no-underline hover:text-ink transition-colors mb-4 inline-block"
+        className="text-[10px] uppercase tracking-[0.2em] text-ink/60 no-underline hover:text-ink transition-colors mb-4 inline-block"
       >
         ← Tasks
       </Link>
 
       {/* Linked entity summary */}
       {taskLinks.length > 0 && (
-        <p className="text-[10px] text-ink/40 mb-4">
+        <p className="text-[10px] text-ink/60 mb-4">
           Linked: {locationLinks.length} location{locationLinks.length !== 1 ? "s" : ""},{" "}
           {tourLinks.length} tour{tourLinks.length !== 1 ? "s" : ""},{" "}
           {otherLinks.length} other
@@ -1740,7 +1740,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
                 </button>
                 <button
                   onClick={() => { setEditing(false); setEditForm(task); setSaveError(null); }}
-                  className="text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded border border-ink/20 text-ink/50 hover:text-ink hover:border-ink/40 transition-colors"
+                  className="text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded border border-ink/20 text-ink/60 hover:text-ink hover:border-ink/40 transition-colors"
                 >
                   Cancel
                 </button>
@@ -1748,7 +1748,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
             ) : (
               <button
                 onClick={() => setEditing(true)}
-                className="text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded border border-ink/20 text-ink/50 hover:text-ink hover:border-ink/40 transition-colors"
+                className="text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded border border-ink/20 text-ink/60 hover:text-ink hover:border-ink/40 transition-colors"
               >
                 Edit
               </button>
@@ -1777,7 +1777,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
         {/* Queue — pipeline / admin */}
         {editing ? (
           <div className="mb-0">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-2">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-ink/60 mb-2">
               Queue — pipeline / admin
             </p>
             <p className="text-[11px] text-ink/38 leading-snug mb-3">
@@ -1786,7 +1786,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
             </p>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">Queue status</label>
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/60 block mb-1">Queue status</label>
                 <select
                   value={editForm.status}
                   onChange={(e) => setEditForm({ ...editForm, status: e.target.value as TaskStatus })}
@@ -1796,7 +1796,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
                 </select>
               </div>
               <div>
-                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">Priority</label>
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/60 block mb-1">Priority</label>
                 <select
                   value={editForm.priority}
                   onChange={(e) => setEditForm({ ...editForm, priority: Number(e.target.value) })}
@@ -1806,7 +1806,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
                 </select>
               </div>
               <div className="col-span-2">
-                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">Area</label>
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/60 block mb-1">Area</label>
                 <select
                   value={editForm.related_area ?? ""}
                   onChange={(e) => setEditForm({ ...editForm, related_area: (e.target.value as RelatedArea) || null })}
@@ -1817,7 +1817,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
                 </select>
               </div>
               <div className="col-span-2">
-                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">Task type</label>
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/60 block mb-1">Task type</label>
                 <select
                   value={editForm.task_type ?? ""}
                   onChange={(e) =>
@@ -1837,7 +1837,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
           </div>
         ) : (
           <div className="mb-0">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-2">Queue — pipeline / admin</p>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-ink/60 mb-2">Queue — pipeline / admin</p>
             <p className="text-[11px] text-ink/38 leading-snug mb-3">
               Queue status is the pipeline position. Execution posture is in Work posture below.
             </p>
@@ -1845,16 +1845,16 @@ const TaskDetailPage: NextPageWithLayout = () => {
               <span className={`text-[10px] uppercase tracking-[0.15em] px-2.5 py-1 rounded-full ${STATUS_STYLE[task.status]}`}>
                 {task.status.replace("_", " ")}
               </span>
-              <span className="text-[10px] uppercase tracking-[0.15em] px-2.5 py-1 rounded-full bg-ink/6 text-ink/50">
+              <span className="text-[10px] uppercase tracking-[0.15em] px-2.5 py-1 rounded-full bg-ink/6 text-ink/60">
                 Priority {task.priority}
               </span>
               {task.related_area && (
-                <span className="text-[10px] uppercase tracking-[0.15em] px-2.5 py-1 rounded-full border border-ink/15 text-ink/45">
+                <span className="text-[10px] uppercase tracking-[0.15em] px-2.5 py-1 rounded-full border border-ink/15 text-ink/60">
                   {task.related_area}
                 </span>
               )}
               {task.task_type && (
-                <span className="text-[10px] uppercase tracking-[0.15em] px-2.5 py-1 rounded-full border border-ink/12 text-ink/45">
+                <span className="text-[10px] uppercase tracking-[0.15em] px-2.5 py-1 rounded-full border border-ink/12 text-ink/60">
                   {task.task_type}
                 </span>
               )}
@@ -1874,19 +1874,19 @@ const TaskDetailPage: NextPageWithLayout = () => {
 
       {/* Work posture — execution (queue / pipeline is in Identity above) */}
       <div className="border border-ink/12 rounded-xl p-6 mb-6">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-1">Work posture</p>
+        <p className="text-[10px] uppercase tracking-[0.2em] text-ink/60 mb-1">Work posture</p>
         <p className="text-[11px] text-ink/38 leading-snug mb-4">
           Execution posture only — how the work is going now. Queue position (backlog → done) is set
           in the Identity block above; these fields are independent and are not synced automatically.
         </p>
         {editing ? (
           <div className="mb-0">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-2">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-ink/60 mb-2">
               Execution — assignee and posture
             </p>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/60 block mb-1">
                   Execution posture
                 </label>
                 <select
@@ -1905,7 +1905,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
                 </select>
               </div>
               <div>
-                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/60 block mb-1">
                   Assignee / tool
                 </label>
                 <input
@@ -1924,7 +1924,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
                 </datalist>
               </div>
               <div className="col-span-2">
-                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">Next step</label>
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/60 block mb-1">Next step</label>
                 <input
                   type="text"
                   value={editForm.next_step ?? ""}
@@ -1937,16 +1937,16 @@ const TaskDetailPage: NextPageWithLayout = () => {
           </div>
         ) : (
           <div className="mb-0">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-2">Execution snapshot</p>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-ink/60 mb-2">Execution snapshot</p>
             <div className="rounded-lg border border-ink/10 bg-ink/[0.02] px-3 py-2.5 mb-2">
               <dl className="grid grid-cols-[7.5rem_1fr] gap-x-2 gap-y-1.5 text-xs text-ink/65">
-                <dt className="text-ink/40">Assigned to</dt>
+                <dt className="text-ink/60">Assigned to</dt>
                 <dd className="min-w-0">{task.assigned_to?.trim() || "—"}</dd>
-                <dt className="text-ink/40">Execution posture</dt>
+                <dt className="text-ink/60">Execution posture</dt>
                 <dd className="min-w-0">
                   {task.execution_status ? (
                     <span
-                      className={`inline-block text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded ${EXECUTION_STATUS_STYLE[task.execution_status] ?? "bg-ink/8 text-ink/50"}`}
+                      className={`inline-block text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded ${EXECUTION_STATUS_STYLE[task.execution_status] ?? "bg-ink/8 text-ink/60"}`}
                     >
                       {task.execution_status.replace("_", " ")}
                     </span>
@@ -1954,9 +1954,9 @@ const TaskDetailPage: NextPageWithLayout = () => {
                     "—"
                   )}
                 </dd>
-                <dt className="text-ink/40">Next step</dt>
+                <dt className="text-ink/60">Next step</dt>
                 <dd className="min-w-0 leading-snug">{task.next_step?.trim() || "—"}</dd>
-                <dt className="text-ink/40">Latest output</dt>
+                <dt className="text-ink/60">Latest output</dt>
                 <dd className="min-w-0">{task.latest_output?.trim() ? "Present" : "—"}</dd>
               </dl>
             </div>
@@ -1971,7 +1971,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
                   className={`text-[9px] uppercase tracking-[0.12em] px-2 py-1 rounded border transition-colors disabled:opacity-50 ${
                     task.execution_status === s
                       ? "border-ink/35 bg-ink/8 text-ink/70"
-                      : "border-ink/15 text-ink/50 hover:bg-ink/5 hover:border-ink/25"
+                      : "border-ink/15 text-ink/60 hover:bg-ink/5 hover:border-ink/25"
                   }`}
                 >
                   {s.replace("_", " ")}
@@ -1991,11 +1991,11 @@ const TaskDetailPage: NextPageWithLayout = () => {
         )}
 
         <div className="mt-4 pt-4 border-t border-ink/8">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-3">Work state</p>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-ink/60 mb-3">Work state</p>
           {editing ? (
             <div className="space-y-3">
               <div>
-                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/60 block mb-1">
                   Last action note
                 </label>
                 <textarea
@@ -2009,7 +2009,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
                 />
               </div>
               <div>
-                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/60 block mb-1">
                   Latest output
                 </label>
                 <textarea
@@ -2050,7 +2050,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
 
       {/* Actions */}
       <div className="mb-6">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-ink/35 mb-4">Actions</p>
+        <p className="text-[10px] uppercase tracking-[0.2em] text-ink/60 mb-4">Actions</p>
         <NextActionBlock task={task} />
         <AgentBriefBlock
           task={task}
@@ -2087,7 +2087,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
           {editing ? (
             <div className="space-y-3">
               <div>
-                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/60 block mb-1">
                   Last brief sent to tool
                 </label>
                 <textarea
@@ -2101,7 +2101,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
                 />
               </div>
               <div>
-                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/60 block mb-1">
                   Artifact links
                 </label>
                 <textarea
@@ -2115,7 +2115,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
                 />
               </div>
               <div>
-                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/60 block mb-1">
                   Implementation notes
                 </label>
                 <textarea
@@ -2129,7 +2129,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
                 />
               </div>
               <div>
-                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/35 block mb-1">
+                <label className="text-[9px] uppercase tracking-[0.2em] text-ink/60 block mb-1">
                   Review note
                 </label>
                 <textarea
@@ -2198,7 +2198,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
             </p>
             <button
               onClick={() => setShowOutputForm((v) => !v)}
-              className="text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded border border-ink/18 text-ink/55 hover:text-ink hover:border-ink/35 transition-colors"
+              className="text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded border border-ink/18 text-ink/60 hover:text-ink hover:border-ink/35 transition-colors"
             >
               {showOutputForm ? "Cancel" : "+ Add Output"}
             </button>
@@ -2264,7 +2264,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
 
           <div className="space-y-3">
             {outputs.length === 0 && (
-              <p className="text-sm text-ink/40 py-6 text-center rounded-lg bg-ink/[0.02] border border-ink/8">
+              <p className="text-sm text-ink/60 py-6 text-center rounded-lg bg-ink/[0.02] border border-ink/8">
                 No outputs recorded yet.
               </p>
             )}
@@ -2293,7 +2293,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
                 {output.prompt && (
                   <div className="mb-2">
                     <p className="text-[9px] uppercase tracking-[0.2em] text-ink/28 mb-1">Prompt</p>
-                    <p className="text-[11px] text-ink/50 leading-relaxed whitespace-pre-wrap">
+                    <p className="text-[11px] text-ink/60 leading-relaxed whitespace-pre-wrap">
                       {output.prompt}
                     </p>
                   </div>
@@ -2319,7 +2319,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
 
       {/* Attach area */}
       <div className="border border-ink/12 rounded-xl p-6 mb-6 bg-ink/[0.02]">
-        <p className="text-[10px] text-ink/35 uppercase tracking-[0.15em] mb-4">Attach entities</p>
+        <p className="text-[10px] text-ink/60 uppercase tracking-[0.15em] mb-4">Attach entities</p>
         <div className="space-y-4">
           <div>
             <p className="text-[10px] text-ink/30 mb-1.5">Attach to place</p>
@@ -2374,9 +2374,9 @@ const TaskDetailPage: NextPageWithLayout = () => {
           </div>
 
           <div className="mt-6 pt-5 border-t border-ink/8">
-            <p className="text-[10px] text-ink/35 uppercase tracking-[0.15em] mb-3">Linked entities</p>
+            <p className="text-[10px] text-ink/60 uppercase tracking-[0.15em] mb-3">Linked entities</p>
             {taskLinks.length === 0 ? (
-              <p className="text-sm text-ink/40">No entities linked to this task. Attach locations or tours above.</p>
+              <p className="text-sm text-ink/60">No entities linked to this task. Attach locations or tours above.</p>
             ) : (
             <>
               <label className="sr-only" htmlFor="linked-entities-filter">
@@ -2392,7 +2392,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
                 autoComplete="off"
               />
             {linkedFilterEmpty ? (
-              <p className="text-sm text-ink/40">No linked entities match this filter.</p>
+              <p className="text-sm text-ink/60">No linked entities match this filter.</p>
             ) : (
             <div className="space-y-4">
               {locationLinksFiltered.length > 0 && (
@@ -2422,7 +2422,7 @@ const TaskDetailPage: NextPageWithLayout = () => {
                     {otherLinksFiltered.map((link) => (
                       <li key={link.id} className="flex items-center gap-3 justify-between py-0.5">
                         <span className="flex items-center gap-2">
-                          <span className="text-[10px] uppercase tracking-[0.1em] text-ink/40 w-20 shrink-0">{link.entity_type}</span>
+                          <span className="text-[10px] uppercase tracking-[0.1em] text-ink/60 w-20 shrink-0">{link.entity_type}</span>
                           <CopyableId id={link.entity_id} />
                         </span>
                       </li>

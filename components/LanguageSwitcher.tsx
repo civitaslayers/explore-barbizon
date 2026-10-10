@@ -57,7 +57,7 @@ export function LanguageSwitcher({
         <Link
           href={target}
           locale="fr"
-          className={`${sharedTypography} text-ink/40 transition-colors duration-200 hover:text-ink`}
+          className={`${sharedTypography} text-ink/60 transition-colors duration-200 hover:text-ink`}
           title={t("locale.switchToFr")}
         >
           {t("locale.fr")}
@@ -84,7 +84,7 @@ export function LanguageSwitcher({
         <Link
           href={target}
           locale="en"
-          className={`${sharedTypography} text-ink/40 transition-colors duration-200 hover:text-ink`}
+          className={`${sharedTypography} text-ink/60 transition-colors duration-200 hover:text-ink`}
           title={t("locale.switchToEn")}
         >
           {t("locale.en")}
@@ -92,7 +92,7 @@ export function LanguageSwitcher({
       )}
 
       {showNote && enDisabled ? (
-        <span className="ml-2 text-[10px] normal-case tracking-normal text-ink/40">
+        <span className="ml-2 text-[10px] normal-case tracking-normal text-ink/60">
           {t("locale.enUnavailable")}
         </span>
       ) : null}

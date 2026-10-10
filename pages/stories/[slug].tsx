@@ -197,14 +197,14 @@ const StoryPage: NextPage<StoryPageProps> = ({ story, related }) => {
       />
 
       <article className="editorial-measure space-y-8">
-        <p className="text-xs text-ink/50">
+        <p className="text-xs text-ink/60">
           <Link href="/stories" className="hover:text-ink">
             ← {t("actions.backToStories")}
           </Link>
         </p>
 
         <header className="space-y-4">
-          <p className="text-[11px] uppercase tracking-[0.18em] text-ink/50">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-ink/60">
             {theme}
           </p>
           <h1 className="font-serif text-3xl leading-tight text-ink md:text-4xl">
@@ -227,7 +227,7 @@ const StoryPage: NextPage<StoryPageProps> = ({ story, related }) => {
               />
             </div>
             {coverCredit ? (
-              <figcaption className="mt-3 font-sans text-[11px] leading-relaxed text-ink/50">
+              <figcaption className="mt-3 font-sans text-[11px] leading-relaxed text-ink/60">
                 {coverCredit}
               </figcaption>
             ) : null}

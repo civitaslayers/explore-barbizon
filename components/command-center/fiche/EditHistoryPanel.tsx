@@ -67,9 +67,9 @@ export function EditHistoryPanel({
 
       {open ? (
         loading ? (
-          <p className="text-xs text-ink/40">Chargement…</p>
+          <p className="text-xs text-ink/60">Chargement…</p>
         ) : !edits || edits.length === 0 ? (
-          <p className="text-xs italic text-ink/40">Aucun historique.</p>
+          <p className="text-xs italic text-ink/60">Aucun historique.</p>
         ) : (
           <div className="max-h-72 space-y-2 overflow-y-auto">
             {edits.map((edit) => (
@@ -79,12 +79,12 @@ export function EditHistoryPanel({
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-medium text-ink">{edit.field}</span>
-                  <span className="text-[10px] text-ink/40">
+                  <span className="text-[10px] text-ink/60">
                     {formatDate(edit.created_at)}
                   </span>
                 </div>
                 <p className="mt-1 truncate">
-                  <span className="text-ink/40">
+                  <span className="text-ink/60">
                     {edit.before_value ?? "—"}
                   </span>{" "}
                   →{" "}
@@ -93,7 +93,7 @@ export function EditHistoryPanel({
                   </span>
                 </p>
                 {edit.source_page ? (
-                  <p className="mt-0.5 text-[10px] text-ink/35">
+                  <p className="mt-0.5 text-[10px] text-ink/60">
                     {edit.source_page}
                   </p>
                 ) : null}

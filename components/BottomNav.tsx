@@ -77,7 +77,7 @@ export default function BottomNav() {
               href={tab.href}
               className={`flex flex-col items-center gap-1 pt-2 transition-all duration-300 ${isActive
                 ? "text-ink border-t-2 border-ink -translate-y-0.5"
-                : "text-ink/35 border-t-2 border-transparent"
+                : "text-ink/60 border-t-2 border-transparent"
                 }`}
             >
               {tab.icon}

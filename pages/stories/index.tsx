@@ -129,7 +129,7 @@ const StoriesIndexPage: NextPage<StoriesIndexProps> = ({ stories }) => {
 
         {essays.length > 0 && (
           <div className="space-y-4">
-            <p className="editorial-measure text-[11px] uppercase tracking-[0.2em] text-ink/50">
+            <p className="editorial-measure text-[11px] uppercase tracking-[0.2em] text-ink/60">
               {t("story.essays")}
             </p>
             <div className="space-y-6 md:space-y-8">
@@ -165,7 +165,7 @@ const StoriesIndexPage: NextPage<StoriesIndexProps> = ({ stories }) => {
                       </div>
                     ) : null}
                     <article className="min-w-0 flex-1">
-                      <p className="text-[11px] uppercase tracking-[0.18em] text-ink/50">
+                      <p className="text-[11px] uppercase tracking-[0.18em] text-ink/60">
                         {themeLabel}
                       </p>
                       <h2 className="mt-1 font-serif text-lg text-ink">
@@ -174,7 +174,7 @@ const StoriesIndexPage: NextPage<StoriesIndexProps> = ({ stories }) => {
                       <p className="mt-2 text-sm leading-relaxed text-ink/75">
                         {dek}
                       </p>
-                      <p className="mt-3 text-[11px] uppercase tracking-[0.16em] text-ink/40">
+                      <p className="mt-3 text-[11px] uppercase tracking-[0.16em] text-ink/60">
                         {t("actions.readEssay")} →
                       </p>
                     </article>
@@ -187,7 +187,7 @@ const StoriesIndexPage: NextPage<StoriesIndexProps> = ({ stories }) => {
 
         {guides.length > 0 && (
           <div className="space-y-4">
-            <p className="editorial-measure text-[11px] uppercase tracking-[0.2em] text-ink/50">
+            <p className="editorial-measure text-[11px] uppercase tracking-[0.2em] text-ink/60">
               {t("story.inTheVillage")}
             </p>
             <div className="editorial-measure space-y-3">
@@ -226,7 +226,7 @@ const StoriesIndexPage: NextPage<StoriesIndexProps> = ({ stories }) => {
                       </p>
                     </div>
                     <span
-                      className="mt-0.5 flex-shrink-0 text-ink/35"
+                      className="mt-0.5 flex-shrink-0 text-ink/60"
                       aria-hidden
                     >
                       →

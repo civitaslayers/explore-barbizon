@@ -124,7 +124,7 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
                   {t("home.paths.map.body")}
                 </p>
               </div>
-              <span className="mt-5 text-[11px] uppercase tracking-[0.2em] text-ink/50">
+              <span className="mt-5 text-[11px] uppercase tracking-[0.2em] text-ink/60">
                 {t("home.paths.map.cta")}
               </span>
             </Link>
@@ -144,7 +144,7 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
                   {t("home.paths.trail.body")}
                 </p>
               </div>
-              <span className="mt-5 text-[11px] uppercase tracking-[0.2em] text-ink/50">
+              <span className="mt-5 text-[11px] uppercase tracking-[0.2em] text-ink/60">
                 {t("home.paths.trail.cta")}
               </span>
             </Link>
@@ -164,7 +164,7 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
                   {t("home.paths.stories.body")}
                 </p>
               </div>
-              <span className="mt-5 text-[11px] uppercase tracking-[0.2em] text-ink/50">
+              <span className="mt-5 text-[11px] uppercase tracking-[0.2em] text-ink/60">
                 {t("home.paths.stories.cta")}
               </span>
             </Link>
@@ -247,7 +247,7 @@ const HomePage: NextPage<HomePageProps> = ({ featuredPlaces }) => {
             <p className="text-sm leading-relaxed text-ink/75 md:text-[15px]">
               {t("home.history.body")}
             </p>
-            <span className="mt-5 text-[11px] uppercase tracking-[0.2em] text-ink/50">
+            <span className="mt-5 text-[11px] uppercase tracking-[0.2em] text-ink/60">
               {t("home.history.cta")}
             </span>
           </Link>

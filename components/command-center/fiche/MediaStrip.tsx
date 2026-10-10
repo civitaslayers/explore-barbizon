@@ -15,7 +15,7 @@ export function MediaStrip({
   return (
     <FicheSection title="Médias" tone="lowest">
       {ordered.length === 0 ? (
-        <p className="rounded-card bg-surface-container-low px-4 py-6 text-center text-xs italic text-ink/40">
+        <p className="rounded-card bg-surface-container-low px-4 py-6 text-center text-xs italic text-ink/60">
           Aucune image — en attente du sprint photo
         </p>
       ) : (
@@ -29,7 +29,7 @@ export function MediaStrip({
                 className="h-24 w-full rounded-lg object-cover"
               />
               {m.caption ? (
-                <p className="truncate text-[10px] text-ink/50" title={m.caption}>
+                <p className="truncate text-[10px] text-ink/60" title={m.caption}>
                   {m.caption}
                 </p>
               ) : null}

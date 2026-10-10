@@ -628,7 +628,7 @@ const FichePage: NextPageWithLayout<FicheProps> = ({
           <Link
             href={backHref}
             onClick={guardedNavClick}
-            className="shrink-0 text-xs uppercase tracking-[0.15em] text-ink/45 no-underline hover:text-ink"
+            className="shrink-0 text-xs uppercase tracking-[0.15em] text-ink/60 no-underline hover:text-ink"
           >
             ← Atlas
           </Link>

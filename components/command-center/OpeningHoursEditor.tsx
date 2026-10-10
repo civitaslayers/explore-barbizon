@@ -24,7 +24,7 @@ import {
 // ---------------------------------------------------------------------------
 
 const inputClass =
-  "w-full rounded-lg bg-ink/5 px-3 py-1.5 text-sm text-ink placeholder:text-ink/35 outline-none focus:bg-ink/10 transition-colors duration-200 ease-soft";
+  "w-full rounded-lg bg-ink/5 px-3 py-1.5 text-sm text-ink placeholder:text-ink/60 outline-none focus:bg-ink/10 transition-colors duration-200 ease-soft";
 
 export function OpeningHoursEditor({
   value,
@@ -95,7 +95,7 @@ export function OpeningHoursEditor({
                 />
               ) : (
                 <span
-                  className="flex-1 truncate rounded-lg bg-ink/[0.03] px-3 py-1.5 font-mono text-[11px] text-ink/50"
+                  className="flex-1 truncate rounded-lg bg-ink/[0.03] px-3 py-1.5 font-mono text-[11px] text-ink/60"
                   title="Valeur préservée telle quelle — non modifiable ici (voir lib/openingHours.ts)"
                 >
                   {entry.value}

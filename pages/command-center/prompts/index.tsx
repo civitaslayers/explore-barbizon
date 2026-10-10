@@ -35,7 +35,7 @@ const AGENTS = ["claude", "manual"];
 
 const AGENT_STYLE: Record<string, string> = {
   claude: "bg-moss/15 text-moss",
-  manual: "border border-ink/20 text-ink/50",
+  manual: "border border-ink/20 text-ink/60",
 };
 
 /** Keeps a legacy/retired target_agent selectable, so opening and saving a
@@ -165,7 +165,7 @@ const PromptsPage: NextPageWithLayout<PromptsPageProps> = ({
           onSubmit={handleCreate}
           className="mb-6 p-5 border border-ink/15 rounded-xl bg-white/60 space-y-3"
         >
-          <p className="text-[11px] uppercase tracking-[0.2em] text-ink/40 mb-1">New Template</p>
+          <p className="text-[11px] uppercase tracking-[0.2em] text-ink/60 mb-1">New Template</p>
           {formError && <p className="text-xs text-red-600">{formError}</p>}
           <div className="flex gap-3">
             <input
@@ -218,7 +218,7 @@ const PromptsPage: NextPageWithLayout<PromptsPageProps> = ({
       )}
 
       {!error && templates.length === 0 && (
-        <p className="text-sm text-ink/35 py-10 text-center border border-ink/8 rounded-xl">
+        <p className="text-sm text-ink/60 py-10 text-center border border-ink/8 rounded-xl">
           No prompt templates yet.
         </p>
       )}
@@ -254,7 +254,7 @@ const PromptsPage: NextPageWithLayout<PromptsPageProps> = ({
                     {t.target_agent}
                   </span>
                   {t.description && !isEditing && (
-                    <span className="text-[11px] text-ink/40 truncate hidden md:block">
+                    <span className="text-[11px] text-ink/60 truncate hidden md:block">
                       {t.description}
                     </span>
                   )}
@@ -326,7 +326,7 @@ const PromptsPage: NextPageWithLayout<PromptsPageProps> = ({
                       <div className="flex gap-2 justify-end">
                         <button
                           onClick={() => setEditingId(null)}
-                          className="text-[10px] uppercase tracking-[0.15em] px-3 py-1.5 rounded border border-ink/20 text-ink/50 hover:text-ink transition-colors"
+                          className="text-[10px] uppercase tracking-[0.15em] px-3 py-1.5 rounded border border-ink/20 text-ink/60 hover:text-ink transition-colors"
                         >
                           Cancel
                         </button>

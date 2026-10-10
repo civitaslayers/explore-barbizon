@@ -36,7 +36,7 @@ export default function RelatedStories({
                   href={`/stories/${story.slug}`}
                   className="block border-l border-ink/15 pl-4 transition-colors hover:border-ink/40"
                 >
-                  <p className="text-[11px] uppercase tracking-[0.18em] text-ink/50">
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-ink/60">
                     {themeLabel}
                   </p>
                   <h2 className="mt-1 font-serif text-base text-ink md:text-lg">
@@ -68,7 +68,7 @@ export default function RelatedStories({
                 className="border border-ink/10 p-4 transition-colors hover:border-ink/25"
               >
                 <p className="font-serif text-ink">{place.name}</p>
-                <p className="mt-1 text-xs text-ink/50">
+                <p className="mt-1 text-xs text-ink/60">
                   {categoryLabel(place.categorySlug, place.categoryName, t)}
                 </p>
               </Link>

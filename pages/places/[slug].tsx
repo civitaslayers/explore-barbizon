@@ -32,7 +32,7 @@ function functionChipClasses(layer: string | null | undefined): string {
   if (layer === "Art & History") return "bg-umber/10 text-umber";
   if (layer === "Eat, Stay & Shop") return "bg-moss/10 text-moss";
   if (layer === "Forest & Nature") return "bg-forest/10 text-forest";
-  return "bg-ink/8 text-ink/50";
+  return "bg-ink/8 text-ink/60";
 }
 
 function UnifiedPlaceArticle({
@@ -56,7 +56,7 @@ function UnifiedPlaceArticle({
 
   return (
     <article className="space-y-14 md:space-y-20 lg:space-y-24 xl:space-y-28">
-      <p className="font-sans text-[10px] uppercase tracking-[0.25em] text-ink/40">
+      <p className="font-sans text-[10px] uppercase tracking-[0.25em] text-ink/60">
         <Link
           href="/places"
           className="no-underline transition-colors duration-200 hover:text-ink"
@@ -173,7 +173,7 @@ function practicalBlock(
     <dl className="mt-8 grid gap-4 border-t border-ink/10 pt-8 text-xs leading-relaxed md:grid-cols-2 md:gap-x-8">
       {hasWebsite ? (
         <div>
-          <dt className="text-[10px] uppercase tracking-[0.28em] text-ink/40">
+          <dt className="text-[10px] uppercase tracking-[0.28em] text-ink/60">
             {t("place.website")}
           </dt>
           <dd className="mt-1.5">
@@ -190,7 +190,7 @@ function practicalBlock(
       ) : null}
       {hasPhone ? (
         <div>
-          <dt className="text-[10px] uppercase tracking-[0.28em] text-ink/40">
+          <dt className="text-[10px] uppercase tracking-[0.28em] text-ink/60">
             <span aria-hidden className="mr-1">
               ☎
             </span>
@@ -201,7 +201,7 @@ function practicalBlock(
       ) : null}
       {hasHours ? (
         <div className="md:col-span-2">
-          <dt className="text-[10px] uppercase tracking-[0.28em] text-ink/40">
+          <dt className="text-[10px] uppercase tracking-[0.28em] text-ink/60">
             {t("place.openingHours")}
           </dt>
           <dd className="mt-2">

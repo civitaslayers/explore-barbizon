@@ -38,7 +38,7 @@ function MapLoading() {
   const { t } = useTranslation("common");
   return (
     <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_top,_#f5f1e8,_#d4cec0)]">
-      <p className="text-xs uppercase tracking-[0.2em] text-ink/40">
+      <p className="text-xs uppercase tracking-[0.2em] text-ink/60">
         {t("map.loading")}
       </p>
     </div>
@@ -338,7 +338,7 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
             </button>
 
             {/* Location count badge */}
-            <div className="rounded-full border border-ink/10 bg-cream/90 px-4 py-2 text-[11px] text-ink/50 shadow-sm backdrop-blur-sm">
+            <div className="rounded-full border border-ink/10 bg-cream/90 px-4 py-2 text-[11px] text-ink/60 shadow-sm backdrop-blur-sm">
               {visibleLocations.length}{" "}
               {visibleLocations.length === 1
                 ? t("map.locationsCountSingular")
@@ -401,7 +401,7 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
                     type="button"
                     onClick={() => setSidebarOpen(false)}
                     aria-label={t("map.close")}
-                    className="text-[11px] uppercase tracking-[0.2em] text-ink/40 hover:text-ink"
+                    className="text-[11px] uppercase tracking-[0.2em] text-ink/60 hover:text-ink"
                   >
                     ✕
                   </button>
@@ -415,7 +415,7 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={t("map.searchPlaceholder")}
-                    className="w-full rounded-full border border-ink/15 bg-cream/60 px-4 py-2.5 text-xs text-ink placeholder:text-ink/35 focus:border-ink/35 focus:bg-cream focus:outline-none"
+                    className="w-full rounded-full border border-ink/15 bg-cream/60 px-4 py-2.5 text-xs text-ink placeholder:text-ink/60 focus:border-ink/35 focus:bg-cream focus:outline-none"
                   />
                 </div>
 
@@ -444,7 +444,7 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
                             <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-ink">
                               {t(`layers.${i18nKey}`)}
                             </p>
-                            <p className="mt-0.5 text-[11px] text-ink/45">
+                            <p className="mt-0.5 text-[11px] text-ink/60">
                               {t(`layers.${i18nKey}Meta`)}
                             </p>
                           </div>
@@ -454,7 +454,7 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
                   </div>
                 </div>
 
-                <p className="mt-auto text-[11px] text-ink/35">
+                <p className="mt-auto text-[11px] text-ink/60">
                   {visibleLocations.length}{" "}
                   {visibleLocations.length === 1
                     ? t("map.locationsCountSingular")

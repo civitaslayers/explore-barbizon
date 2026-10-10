@@ -41,7 +41,7 @@ const AREAS: RelatedArea[] = ["product", "content", "map", "database", "design",
 const ASSIGNEE_EDIT_PRESETS = ["human", "claude"] as const;
 
 const STATUS_STYLE: Record<TaskStatus, string> = {
-  backlog: "bg-ink/8 text-ink/50",
+  backlog: "bg-ink/8 text-ink/60",
   ready: "bg-umber/10 text-umber",
   in_progress: "bg-moss/15 text-moss",
   review: "bg-ink/15 text-ink/70",
@@ -54,7 +54,7 @@ const AGENT_STYLE: Record<string, string> = {
 };
 
 const EXECUTION_STATUS_STYLE: Record<string, string> = {
-  todo: "bg-ink/6 text-ink/50",
+  todo: "bg-ink/6 text-ink/60",
   in_progress: "bg-moss/12 text-moss",
   review: "bg-ink/12 text-ink/60",
   blocked: "bg-umber/8 text-umber/90",
@@ -105,7 +105,7 @@ type TaskRowProps = {
 function TaskRow({ task, isFirst, runningId, copiedId, onRun, onCopyBrief, onStatusChange, onAssigneeChange, onDelete }: TaskRowProps) {
   return (
     <tr className={`group ${!isFirst ? "border-t border-ink/8" : ""} hover:bg-ink/2 transition-colors`}>
-      <td className="px-4 py-3 text-[10px] text-ink/35">{task.priority}</td>
+      <td className="px-4 py-3 text-[10px] text-ink/60">{task.priority}</td>
       <td className="px-4 py-3">
         <Link
           href={`/command-center/tasks/${task.id}`}
@@ -114,7 +114,7 @@ function TaskRow({ task, isFirst, runningId, copiedId, onRun, onCopyBrief, onSta
           {task.title}
         </Link>
         {task.description && (
-          <p className="text-[11px] text-ink/40 mt-0.5 line-clamp-1">{task.description}</p>
+          <p className="text-[11px] text-ink/60 mt-0.5 line-clamp-1">{task.description}</p>
         )}
         {(task.execution_status ||
           task.source ||
@@ -123,7 +123,7 @@ function TaskRow({ task, isFirst, runningId, copiedId, onRun, onCopyBrief, onSta
           (task.last_run_at && (task.last_run_target ?? "").trim())) && (
           <div className="flex flex-wrap gap-1 mt-1.5 items-center">
             {task.execution_status && (
-              <span className={`text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded ${EXECUTION_STATUS_STYLE[task.execution_status] ?? "bg-ink/6 text-ink/45"}`}>
+              <span className={`text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded ${EXECUTION_STATUS_STYLE[task.execution_status] ?? "bg-ink/6 text-ink/60"}`}>
                 {task.execution_status.replace("_", " ")}
               </span>
             )}
@@ -138,7 +138,7 @@ function TaskRow({ task, isFirst, runningId, copiedId, onRun, onCopyBrief, onSta
               </span>
             )}
             {task.next_step?.trim() && (
-              <span className="text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded border border-ink/10 text-ink/35" title={task.next_step.trim()}>
+              <span className="text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded border border-ink/10 text-ink/60" title={task.next_step.trim()}>
                 Next step
               </span>
             )}
@@ -171,7 +171,7 @@ function TaskRow({ task, isFirst, runningId, copiedId, onRun, onCopyBrief, onSta
               onChange={(e) => onAssigneeChange(task.id, e.target.value, task.assigned_to ?? null)}
               className={`text-[10px] uppercase tracking-[0.15em] px-2 py-0.5 rounded-full border-0 cursor-pointer focus:outline-none bg-transparent ${
                 task.assigned_to?.trim()
-                  ? (AGENT_STYLE[task.assigned_to.trim().toLowerCase()] ?? "text-ink/45")
+                  ? (AGENT_STYLE[task.assigned_to.trim().toLowerCase()] ?? "text-ink/60")
                   : "text-ink/25"
               }`}
             >
@@ -192,7 +192,7 @@ function TaskRow({ task, isFirst, runningId, copiedId, onRun, onCopyBrief, onSta
       </td>
       <td className="px-4 py-3">
         {task.related_area && (
-          <span className="text-[10px] text-ink/40 uppercase tracking-[0.15em]">{task.related_area}</span>
+          <span className="text-[10px] text-ink/60 uppercase tracking-[0.15em]">{task.related_area}</span>
         )}
       </td>
       <td className="px-4 py-3">
@@ -522,9 +522,9 @@ const TasksPage: NextPageWithLayout<TasksPageProps> = ({
           onSubmit={handleCreate}
           className="mb-6 p-5 border border-ink/15 rounded-xl bg-white/60 space-y-3"
         >
-          <p className="text-[11px] uppercase tracking-[0.2em] text-ink/40 mb-1">New Task</p>
+          <p className="text-[11px] uppercase tracking-[0.2em] text-ink/60 mb-1">New Task</p>
           <div className="flex flex-wrap items-center gap-1.5 pb-1">
-            <span className="text-[10px] uppercase tracking-[0.15em] text-ink/35 mr-1">
+            <span className="text-[10px] uppercase tracking-[0.15em] text-ink/60 mr-1">
               Preset
             </span>
             <button
@@ -533,7 +533,7 @@ const TasksPage: NextPageWithLayout<TasksPageProps> = ({
               className={`text-[10px] uppercase tracking-[0.12em] px-2 py-1 rounded border transition-colors ${
                 creationTemplateId == null
                   ? "border-ink/30 bg-ink/5 text-ink"
-                  : "border-ink/12 text-ink/45 hover:border-ink/25 hover:text-ink/65"
+                  : "border-ink/12 text-ink/60 hover:border-ink/25 hover:text-ink/65"
               }`}
             >
               None
@@ -546,7 +546,7 @@ const TasksPage: NextPageWithLayout<TasksPageProps> = ({
                 className={`text-[10px] uppercase tracking-[0.12em] px-2 py-1 rounded border transition-colors ${
                   creationTemplateId === t.id
                     ? "border-umber/40 bg-umber/10 text-umber"
-                    : "border-ink/12 text-ink/45 hover:border-ink/25 hover:text-ink/65"
+                    : "border-ink/12 text-ink/60 hover:border-ink/25 hover:text-ink/65"
                 }`}
               >
                 {t.label}
@@ -671,7 +671,7 @@ const TasksPage: NextPageWithLayout<TasksPageProps> = ({
               setFilterArea("");
               router.replace("/command-center/tasks", undefined, { shallow: true });
             }}
-            className="text-[10px] uppercase tracking-[0.15em] text-ink/35 hover:text-ink transition-colors px-2"
+            className="text-[10px] uppercase tracking-[0.15em] text-ink/60 hover:text-ink transition-colors px-2"
           >
             Clear
           </button>
@@ -688,7 +688,7 @@ const TasksPage: NextPageWithLayout<TasksPageProps> = ({
           {runError && (
             <span className="text-[10px] text-red-500">{runError}</span>
           )}
-          <span className="text-[11px] text-ink/35">
+          <span className="text-[11px] text-ink/60">
             {activeTasks.length} task{activeTasks.length !== 1 ? "s" : ""}
             {doneTasks.length > 0 && ` · ${doneTasks.length} done`}
           </span>
@@ -708,14 +708,14 @@ const TasksPage: NextPageWithLayout<TasksPageProps> = ({
               <p className="text-[10px] uppercase tracking-[0.18em] text-moss/80 font-medium">
                 Task suggestions
               </p>
-              <p className="text-[11px] text-ink/40 mt-0.5">
+              <p className="text-[11px] text-ink/60 mt-0.5">
                 {acceptedIndexes.size} of {suggestions.length} selected — uncheck any you want to skip
               </p>
             </div>
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setSuggestions(null)}
-                className="text-[10px] text-ink/35 hover:text-ink/60 transition-colors"
+                className="text-[10px] text-ink/60 hover:text-ink/60 transition-colors"
               >
                 Dismiss
               </button>
@@ -745,14 +745,14 @@ const TasksPage: NextPageWithLayout<TasksPageProps> = ({
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap mb-0.5">
                     <span className="text-[13px] font-medium text-ink leading-snug">{s.title}</span>
-                    <span className={`text-[9px] uppercase tracking-[0.15em] px-1.5 py-0.5 rounded-full ${AGENT_STYLE[s.assigned_to] ?? "bg-ink/8 text-ink/50"}`}>
+                    <span className={`text-[9px] uppercase tracking-[0.15em] px-1.5 py-0.5 rounded-full ${AGENT_STYLE[s.assigned_to] ?? "bg-ink/8 text-ink/60"}`}>
                       {s.assigned_to}
                     </span>
                     <span className="text-[9px] text-ink/30 uppercase tracking-[0.12em]">
                       p{s.priority} · {s.task_type}
                     </span>
                   </div>
-                  <p className="text-[12px] text-ink/55 leading-snug">{s.description}</p>
+                  <p className="text-[12px] text-ink/60 leading-snug">{s.description}</p>
                   {s.rationale && (
                     <p className="text-[11px] text-moss/60 mt-1 italic">{s.rationale}</p>
                   )}
@@ -774,22 +774,22 @@ const TasksPage: NextPageWithLayout<TasksPageProps> = ({
       <>
           <div className="border border-ink/10 rounded-xl overflow-hidden">
             {activeTasks.length === 0 && doneTasks.length === 0 ? (
-              <p className="text-sm text-ink/35 px-6 py-10 text-center">
+              <p className="text-sm text-ink/60 px-6 py-10 text-center">
                 No tasks match the current filters.
               </p>
             ) : activeTasks.length === 0 ? (
-              <p className="text-sm text-ink/35 px-6 py-10 text-center">
+              <p className="text-sm text-ink/60 px-6 py-10 text-center">
                 All matching tasks are done.
               </p>
             ) : (
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-ink/10 bg-ink/2">
-                    <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-ink/40 font-normal w-8">P</th>
-                    <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-ink/40 font-normal">Title</th>
-                    <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-ink/40 font-normal">Queue</th>
-                    <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-ink/40 font-normal">Assignee</th>
-                    <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-ink/40 font-normal">Area</th>
+                    <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-ink/60 font-normal w-8">P</th>
+                    <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-ink/60 font-normal">Title</th>
+                    <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-ink/60 font-normal">Queue</th>
+                    <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-ink/60 font-normal">Assignee</th>
+                    <th className="text-left px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-ink/60 font-normal">Area</th>
                     <th className="px-4 py-2.5 w-16"></th>
                   </tr>
                 </thead>
@@ -818,7 +818,7 @@ const TasksPage: NextPageWithLayout<TasksPageProps> = ({
             <div className="mt-3">
               <button
                 onClick={() => setShowDone((v) => !v)}
-                className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-ink/30 hover:text-ink/55 transition-colors py-1"
+                className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-ink/30 hover:text-ink/60 transition-colors py-1"
               >
                 <span>{showDone ? "▾" : "▸"}</span>
                 <span>{doneTasks.length} done task{doneTasks.length !== 1 ? "s" : ""}</span>

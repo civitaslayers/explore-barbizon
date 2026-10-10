@@ -56,13 +56,13 @@ export function TranslationHealthPanel({
     <section>
       <div className="flex items-baseline justify-between mb-3">
         <p className="eyebrow">Traductions</p>
-        <p className="text-[11px] text-ink/40">
+        <p className="text-[11px] text-ink/60">
           Anglais — {grandMissing} manquantes sur {grandTotal}
         </p>
       </div>
       <div className="border border-ink/10 rounded-lg overflow-hidden">
         {summaries.length === 0 ? (
-          <p className="text-sm text-ink/35 px-4 py-6 text-center">
+          <p className="text-sm text-ink/60 px-4 py-6 text-center">
             Aucune entité publiée trouvée.
           </p>
         ) : (
@@ -74,7 +74,7 @@ export function TranslationHealthPanel({
                 className={`px-4 py-3 ${i > 0 ? "border-t border-ink/8" : ""}`}
               >
                 <p className="text-sm text-ink">{label}</p>
-                <p className="mt-0.5 text-[11px] text-ink/50">
+                <p className="mt-0.5 text-[11px] text-ink/60">
                   {(Object.keys(STATUS_LABEL_FR) as EnStatus[])
                     .map(
                       (status) =>
