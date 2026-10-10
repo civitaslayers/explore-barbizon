@@ -328,21 +328,29 @@ export async function getPublishedLocationSitemapEntries(): Promise<
 }
 
 /**
- * Published story slugs — for the sitemap (docs/i18n-seo-implementation-plan.md,
- * Task 4d). Mirrors getPublishedSlugs; throws if Supabase is not configured or
- * the query fails (the sitemap wraps the call in try/catch and degrades to
- * static routes only).
+ * Published story slugs + per-record hreflang-alternate eligibility, for
+ * pages/sitemap.xml.tsx (docs/i18n-seo-implementation-plan.md, Task 4d).
+ * Gated on `hasPublishedTranslation` over the fields the story page renders
+ * (title, body); never on mere translations-key presence. Throws if Supabase
+ * is not configured or the query fails (the sitemap wraps the call in
+ * try/catch and degrades).
  */
-export async function getPublishedStorySlugs(): Promise<string[]> {
+export async function getPublishedStorySlugs(): Promise<SitemapLocationEntry[]> {
   if (!supabase) throw new Error("Supabase not configured");
 
   const { data, error } = await supabase
     .from("stories")
-    .select("slug")
+    .select("slug, translations")
     .eq("is_published", true);
 
   if (error) throw new Error(error.message);
-  return (data ?? []).map((row: { slug: string }) => row.slug);
+  return (data ?? []).map((row) => {
+    const typedRow = row as unknown as LocalizableRow & { slug: string };
+    return {
+      slug: typedRow.slug,
+      hasEnglish: hasPublishedTranslation(typedRow, "en", ["title", "body"]),
+    };
+  });
 }
 
 /**
@@ -617,16 +625,27 @@ export async function getTourBySlugFromSupabase(
  * true` — so the two functions are now aligned in what they return, just
  * with different call sites (sitemap vs. static paths).
  */
-export async function getPublishedTourSlugsForSitemap(): Promise<string[]> {
+export async function getPublishedTourSlugsForSitemap(): Promise<
+  SitemapLocationEntry[]
+> {
   if (!supabase) throw new Error("Supabase not configured");
 
   const { data, error } = await supabase
     .from("tours")
-    .select("slug")
+    .select("slug, translations")
     .eq("is_published", true);
 
   if (error) throw new Error(error.message);
-  return (data ?? []).map((t: { slug: string }) => t.slug);
+  return (data ?? []).map((row) => {
+    const typedRow = row as unknown as LocalizableRow & { slug: string };
+    return {
+      slug: typedRow.slug,
+      hasEnglish: hasPublishedTranslation(typedRow, "en", [
+        "name",
+        "description",
+      ]),
+    };
+  });
 }
 
 /**

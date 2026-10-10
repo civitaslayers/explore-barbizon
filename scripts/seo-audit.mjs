@@ -86,10 +86,9 @@ async function sampleSlugs(table, extraSelect = "") {
 // script and cannot import the TS helper. The canonical definition lives in
 // lib/getLocalized.ts; if that predicate ever changes, this must change
 // with it.
-function expectAlternatesForLocation(translations) {
+function expectAlternatesFor(translations, fields) {
   const entry = translations?.en;
   if (!entry || entry._meta?.status !== "published") return false;
-  const fields = ["name", "short_description"];
   return fields.some(
     (field) => typeof entry[field] === "string" && entry[field].length > 0
   );
@@ -105,26 +104,29 @@ async function enumerateEntities() {
     hasOpeningHours: Boolean(
       row.opening_hours && Object.keys(row.opening_hours).length > 0
     ),
-    expectAlternates: expectAlternatesForLocation(row.translations),
+    expectAlternates: expectAlternatesFor(row.translations, [
+      "name",
+      "short_description",
+    ]),
   }));
 
-  const stories = (await sampleSlugs("stories")).map((row) => ({
+  const stories = (await sampleSlugs("stories", ", translations")).map((row) => ({
     type: "stories",
     slug: row.slug,
     path: `/stories/${row.slug}`,
     hasOpeningHours: false,
-    // Out of scope for this task — stories carry the same `translations`
-    // contract but per-record gating for them is a queued follow-up.
-    expectAlternates: true,
+    expectAlternates: expectAlternatesFor(row.translations, ["title", "body"]),
   }));
 
-  const tours = (await sampleSlugs("tours")).map((row) => ({
+  const tours = (await sampleSlugs("tours", ", translations")).map((row) => ({
     type: "tours",
     slug: row.slug,
     path: `/tours/${row.slug}`,
     hasOpeningHours: false,
-    // Out of scope for this task — tours have no translations column.
-    expectAlternates: true,
+    expectAlternates: expectAlternatesFor(row.translations, [
+      "name",
+      "description",
+    ]),
   }));
 
   return [...locations, ...stories, ...tours];
