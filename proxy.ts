@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 //
 // Production only: HTTP Basic Auth; username ignored; password from COMMAND_CENTER_PASSWORD.
 // No effect when NODE_ENV !== "production".
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   if (process.env.NODE_ENV !== "production") return NextResponse.next();
 
   const password = process.env.COMMAND_CENTER_PASSWORD;
@@ -18,7 +18,7 @@ export function middleware(req: NextRequest) {
 
   const auth = req.headers.get("authorization");
   if (auth?.startsWith("Basic ")) {
-    const decoded = atob(auth.slice(6)); // atob available in Edge runtime
+    const decoded = atob(auth.slice(6)); // atob is a global on Node
     const colonIndex = decoded.indexOf(":");
     const supplied = decoded.slice(colonIndex + 1);
     if (supplied === password) return NextResponse.next();

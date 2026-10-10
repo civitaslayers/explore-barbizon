@@ -10,7 +10,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 // human-gated, not yet run) — any query error returns `200 { edits: [] }`,
 // never a 500, so the fiche stays fully usable pre-migration and simply shows
 // "aucun historique". Same auth posture as the write route: this path is
-// covered by middleware.ts's matcher (`/api/locations/:path*`).
+// covered by proxy.ts's matcher (`/api/locations/:path*`).
 // ---------------------------------------------------------------------------
 
 const DEFAULT_LIMIT = 50;

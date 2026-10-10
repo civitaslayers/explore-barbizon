@@ -15,7 +15,7 @@ import { isUuid, parseTaskPatch } from "@/lib/commandCenterValidation";
  * PATCH  → body TaskPatch → 200 { task } (fresh row) | 400 | 404
  * DELETE → 204 (task_links removed first, outputs cascade) | 404
  *
- * Non-UUID ids → 400. Basic-Auth-protected in production by middleware.ts'
+ * Non-UUID ids → 400. Basic-Auth-protected in production by proxy.ts'
  * `/api/tasks/:path*` matcher; all data access via the service-role admin
  * client (the anon client is deny-all on these tables).
  */
