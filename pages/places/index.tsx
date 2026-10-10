@@ -278,7 +278,7 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({
             {t("places.eyebrow")}
           </p>
           <h1 className="font-serif text-4xl italic leading-[1.05] tracking-tight text-ink md:text-5xl">
-            Places of Barbizon
+            {t("places.heading")}
           </h1>
           <p className="max-w-xl text-sm leading-relaxed text-on-surface-variant md:text-base">
             Discover the historic ateliers, quiet inns, and forest clearings that
