@@ -1,8 +1,56 @@
 # Current State
 
-Last updated: 2026-10-09
+Last updated: 2026-10-10
 
 ## Status
+
+**2026-10-10 night 5 — merged and deployed.** Eight `night5/*` branches (PRs
+#11–#18, briefs in `docs/briefs/2026-10-09-night.md`) were staged on
+`merge/night5` from `b68317d` in the order supabase-types → remove-types-marked
+→ pin-moves-audit → places-fr-h1 → tour-seohead-i18n → muted-text-contrast →
+hreflang-gate → middleware-to-proxy; git auto-resolved every overlap (locale
+`common.json` key additions, `text-ink/60` class swaps vs `t()` lines in
+`pages/places/index.tsx` and `pages/tours/[slug].tsx`, one comment line in the
+CCC tasks page). Full gate on the combined head: tsc clean, lint 0 errors / 9
+pre-existing warnings, 240/240 tests, `check:i18n` pass. Preview gate on the
+`merge/night5` Vercel preview: `/en/tours/circuit-des-peintres` 200 with the
+gate correctly off (self-canonical, `noindex,follow`, no hreflang),
+`/en/stories/rooms-of-light` 200 with hreflang fr/en/x-default, `/sitemap.xml`
+200 (tour entry without alternates, story entry with), `/api/tasks` and
+`/command-center` 401 unauthenticated through the new `proxy.ts`. Luigi
+approved; `main` fast-forwarded to `6f4710e`, deployed as
+`dpl_FXRqRvpTXZk7oHbUKNwFbpmS4Fya` (READY, production). Rollback target:
+`dpl_HbVJJCsXu5tHkdapPZDSngPRzmsS` (commit `b68317d`). Post-deploy spot-checks
+on production: `/places` FR h1 "Lieux de Barbizon", `/en/tours/circuit-des-peintres`
+200 + noindex, `/api/tasks` 401. `scripts/seo-audit.mjs` was NOT run — the
+nightly sandbox's egress blocks `explorebarbizon.com` and `supabase.co`; run it
+from claude.ai or locally. What landed: `/places` FR h1 localized (e1d191cc);
+`lib/supabase.types.ts` regenerated — `translations` on stories/locations/tours,
+`record_page_view` in `Functions`, `places`/`place_functions` gone (a46d0dc9; no
+cast was a pure deletion, follow-up candidate: `pages/api/track.ts` nulls →
+undefined then drop the RPC cast); tour SeoHead suffix/fallback via `tour.*`
+keys (5e0eb363); `@types/marked` removed (8c24fe34); `pin_moves` audit insert
+on the coordinate PATCH + `migrations/create_pin_moves.sql` (669795ee);
+`text-ink/{35..55}` → `/60` for WCAG AA 4.75:1 on cream, `.eyebrow`/`.nav-link`
+included (fe8ecbb1; `/30`, `/38` etc. still below AA, out of scope; two CCC
+links now have dead hover); hreflang/switcher/sitemap gating for stories and
+tours on `hasPublishedTranslation` — tours have `translations` after all, gate
+evaluates false until EN content exists (b3accf5d); `middleware.ts` →
+`proxy.ts` on Next 16.1.6, Node runtime (56029c79). All eight tasks `done` in
+`tasks`; `outputs` rows on `6f4710e`.
+
+**Open from night 5:** `migrations/create_pin_moves.sql` is merged but NOT
+applied to production — the nightly session's permission layer refuses
+production DDL (and there is no Supabase dev branch on the project). Until
+Luigi applies it (claude.ai Supabase MCP or SQL editor), every CCC pin move
+succeeds and logs a `[pin_moves]` console.error. After applying, regenerate
+types to drop the `as any` cast in `pages/api/locations/[id].ts`. Ops proposal
+filed (task 3afc344b, P8): the nightly sandbox cannot run `next build` (Google
+Fonts fetch blocked), so night-5 branches shipped on tsc/lint/test only and the
+Vercel preview was the first build. Also observed: `execute_sql` UPDATEs that
+set `tasks.last_action_note` hang (>180 s) through the Supabase MCP while
+status-only updates and `outputs` inserts succeed — notes for the eight tasks
+live in `outputs` instead.
 
 **2026-10-09 overnight session 4 + daytime governance — merged and deployed.**
 Seven `overnight4/*` branches (jobs 1–7 of the 2026-10-08 overnight session, ten
@@ -386,13 +434,14 @@ as the human-readable window onto it.
 
 ## Blockers
 - Heritage Plaque batch (7 records) blocked pending a dedicated verification session
+- `pin_moves` migration awaiting Luigi's production apply (see night 5 above)
 
 ## Next Tasks
 1. Editorial prose French translation — homepage, about, history, plan-your-visit, HistoryTimeline (split off cc6e5703; needs native authorship, not a mechanical pass)
 2. Remaining French migration records (93 of 107 now have published English; ~14 still need translation + status stamp)
 3. Map popups render French short_description on /en/map — same bug class as 8ec7a8fb, different fix shape (imperative Mapbox rendering)
 4. suggest.ts anon blind-read follow-up (task 08309b0b) — swap getTasks() for getTasksAdmin(); small
-5. Stories hreflang gating — same `translations`/`_meta.status` contract as locations, currently unconditional; queued follow-up from the eb5f1e3e branch
+5. Apply `migrations/create_pin_moves.sql` to production, then regenerate types and drop the `as any` cast (night 5 follow-up)
 6. page_views retention/purge job (25-month cap per 2026-08-13 decision) — outstanding since the schema shipped
 7. Replace silent catch around /places curated-cards query with logged error + visible empty state (release-check finding)
 8. Remove dead getLocationBySlug() (uses forbidden select("*")) (release-check finding, P5)
