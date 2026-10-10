@@ -120,7 +120,10 @@
     "duration": "Durée",
     "distance": "Distance",
     "stops": "Étapes",
-    "stopsHeading": "Les lieux du parcours"
+    "stopsHeading": "Les lieux du parcours",
+    "titleSuffix": " — Visit Barbizon",
+    "titleSuffixShort": " — Barbizon",
+    "descriptionFallback": "{{name}} — une promenade à pied à Barbizon."
   },
   "story": {
     "essays": "Récits",

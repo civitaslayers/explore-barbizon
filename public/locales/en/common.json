@@ -120,7 +120,10 @@
     "duration": "Duration",
     "distance": "Distance",
     "stops": "Stops",
-    "stopsHeading": "Places along the route"
+    "stopsHeading": "Places along the route",
+    "titleSuffix": " — Visit Barbizon",
+    "titleSuffixShort": " — Barbizon",
+    "descriptionFallback": "{{name}} — a walking tour of Barbizon."
   },
   "story": {
     "essays": "Essays",

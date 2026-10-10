@@ -45,8 +45,12 @@ const TourPage: NextPage<TourPageProps> = ({ tour, routeCoords }) => {
   return (
     <>
       <SeoHead
-        title={buildTitle(tour.name, [" — Visit Barbizon", " — Barbizon"])}
-        description={tour.description ?? `${tour.name} — a walking tour of Barbizon.`}
+        title={buildTitle(tour.name, [t("tour.titleSuffix"), t("tour.titleSuffixShort")])}
+        description={tour.description ??
+          t("tour.descriptionFallback", {
+            name: tour.name,
+            interpolation: { escapeValue: false },
+          })}
         path={`/tours/${tour.slug}`}
         locale={locale}
       />
