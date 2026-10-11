@@ -128,13 +128,9 @@ async function recordLocationEdits(
   }));
 
   try {
-    // `location_edits` is absent from the generated types until the
-    // human-gated migration runs — cast the table name (same discipline the
-    // rest of this file already uses for stale-type columns, e.g.
-    // `.update(payload as any)` below).
     const { error } = await supabaseAdmin
-      .from("location_edits" as any)
-      .insert(rows as any);
+      .from("location_edits")
+      .insert(rows);
     if (error) {
       // Expected pre-migration (relation does not exist) — never fatal.
       console.error(
@@ -245,11 +241,11 @@ export default async function handler(
 
   // Pin-move audit (pin_moves): one row per coordinate PATCH. Non-fatal — a
   // failed insert (including the table not existing yet) never changes the
-  // response. Table name cast because generated types don't know it yet.
+  // response.
   if ("latitude" in payload || "longitude" in payload) {
     try {
       const { error: pinMoveError } = await supabaseAdmin
-        .from("pin_moves" as any)
+        .from("pin_moves")
         .insert({
           location_id: existing.id,
           old_latitude: existing.latitude,
@@ -257,7 +253,7 @@ export default async function handler(
           new_latitude: persisted.latitude,
           new_longitude: persisted.longitude,
           moved_by: null,
-        } as any);
+        });
       if (pinMoveError) {
         console.error(
           "[pin_moves] insert failed (non-fatal, move already committed):",

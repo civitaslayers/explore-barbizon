@@ -457,6 +457,47 @@ export type Database = {
           },
         ]
       }
+      pin_moves: {
+        Row: {
+          id: string
+          location_id: string
+          moved_at: string
+          moved_by: string | null
+          new_latitude: number | null
+          new_longitude: number | null
+          old_latitude: number | null
+          old_longitude: number | null
+        }
+        Insert: {
+          id?: string
+          location_id: string
+          moved_at?: string
+          moved_by?: string | null
+          new_latitude?: number | null
+          new_longitude?: number | null
+          old_latitude?: number | null
+          old_longitude?: number | null
+        }
+        Update: {
+          id?: string
+          location_id?: string
+          moved_at?: string
+          moved_by?: string | null
+          new_latitude?: number | null
+          new_longitude?: number | null
+          old_latitude?: number | null
+          old_longitude?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pin_moves_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prompt_templates: {
         Row: {
           created_at: string | null
