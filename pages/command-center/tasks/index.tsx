@@ -7,6 +7,7 @@ import { CommandCenterLayout } from "@/components/CommandCenterLayout";
 import { apiCreateTask, apiUpdateTask, apiDeleteTask } from "@/lib/commandCenterClient";
 import type { Task, TaskStatus, RelatedArea } from "@/lib/commandCenter";
 import { getTasksAdmin } from "@/lib/commandCenter.server";
+import { ASSIGNEE_EDIT_PRESETS } from "@/lib/assignees";
 import {
   TASK_TEMPLATES,
   executionFieldsForCreate,
@@ -32,13 +33,6 @@ type TasksPageProps = {
 
 const STATUSES: TaskStatus[] = ["backlog", "ready", "in_progress", "review", "done"];
 const AREAS: RelatedArea[] = ["product", "content", "map", "database", "design", "engineering", "seo", "ops"];
-
-// Operator-settable presets, same set as tasks/[id].tsx ASSIGNEE_PRESETS and
-// lib/taskTemplates.ts. `cursor`/`chatgpt` are retired and `civitas-*` values
-// are written by /run-loop, not picked here; any row holding one still renders
-// (TaskRow own-value injection) and the FILTER unions presets with values
-// present in loaded tasks.
-const ASSIGNEE_EDIT_PRESETS = ["human", "claude"] as const;
 
 const STATUS_STYLE: Record<TaskStatus, string> = {
   backlog: "bg-ink/8 text-ink/60",
