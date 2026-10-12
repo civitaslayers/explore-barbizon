@@ -9,17 +9,14 @@ French is canonical; English goes in `translations.en`.
 What changes, in one line each:
 - Essay (new story): the Landerer affair, now ending with Duhamel's 1895
   purchase, the 1896 hotel and the Schallers.
-- `besharat-gallery-barbizon`: narrative rewritten. Bodmer did not build or
-  name the Charmettes and the Schallers did not follow him; the house was
-  Landerer's, the hotel Duhamel's, then the Schallers' from 1897. Hunt and
-  Bodmer are left out of the public text (see Option B).
+- `besharat-gallery-barbizon`: narrative rewritten. Hunt and Bodmer stay on the plot (Luigi, 12 Oct); removed only what the sources contradict (Bodmer building and naming the Charmettes, the 1884 sale, Schallers directly after Bodmer).
 - `where-to-stay-barbizon` and `a-day-in-barbizon` (stories): one paragraph
-  each, same correction.
+  each, same approach.
 - `atelier-berangere`, `dame-aux-coquelicots`: "ancienne Villa Les
   Charmettes" becomes "ancien Hôtel des Charmettes" (it was never called a
   villa in the period sources).
-- SEO description of the Besharat record: drop "Home of Karl Bodmer
-  (1856-1884)".
+- SEO description of the Besharat record: "Home of Karl Bodmer (1856-1884)"
+  becomes "where Karl Bodmer and Albert Landerer lived and painted".
 
 ---
 
@@ -81,54 +78,54 @@ In the spring of 1897 a Swiss, Emile Schaller, took the business over. His famil
 
 ## 2. Besharat Gallery & Suites (`besharat-gallery-barbizon`)
 
+Editorial decision (Luigi, 2026-10-12 13:41): Hunt and Bodmer stay on the
+gallery page. Luigi holds that both lived on this plot; which building, and
+who built the main building, is still being established (AD77). The text
+below keeps them on the property and drops only the points the sources
+contradict: Bodmer building and naming "Les Charmettes" (the name dates from
+1896), the 1884 sale, and the Schallers succeeding Bodmer directly.
+
 ### short_description
 - FR: Galerie d'art contemporain international, jardins de sculptures et suites d'artistes dans l'ancien Hôtel des Charmettes, sur la Grande Rue.
 - EN: International contemporary art gallery, sculpture gardens and art suites in the former Hôtel des Charmettes on the Grande Rue.
 
 ### narrative, FR
-Avant d'être une galerie, cette adresse fut une maison de peintre, puis l'un des grands hôtels du village. Vers 1876, le peintre suisse Albert Landerer s'installe ici, dans une maison entourée de murs, avec son atelier à l'étage. Il y peint des mousquetaires et des batailles jusqu'à sa mort en 1893 : il est assassiné dans son lit, un fait divers qui passionne toute la région.
+Bien avant l'hôtel, ce terrain de la Grande Rue appartenait déjà à l'histoire des peintres. Au début des années 1850, le jeune Américain William Morris Hunt y garde ses chevaux pendant qu'il apprend auprès de Millet. De retour à Boston, il fera connaître l'école de Barbizon à toute une génération de collectionneurs et de peintres américains ; les toiles qu'il avait rapportées, dont Le Semeur de Millet, brûleront dans le grand incendie de Boston en 1872. Le peintre suisse Karl Bodmer, célèbre pour ses images de l'Ouest américain, acquiert ensuite la propriété, en 1856. Il peint la forêt, devient l'une des figures de l'auberge Ganne, et meurt à Paris en 1893 ; il repose à Chailly-en-Bière, auprès de ses confrères de Barbizon.
 
-En 1895, la maison est vendue par autorité de justice. Théodore Duhamel l'emporte et la transforme en hôtel, qu'il baptise les Charmettes, en souvenir du hameau de Savoie où vécut Jean-Jacques Rousseau. Dès 1897, un Suisse, Emile Schaller, en reprend l'exploitation ; son fils Georges, puis la veuve de celui-ci, Hélène, lui succèdent, à travers les deux guerres. Le premier téléphone public du village y est installé en 1902 ; en 1915, l'hôtel accueille des soldats convalescents ; en mai 1948, la princesse Elizabeth y déjeune lors de sa visite à Barbizon. Au fil des années, l'hôtel s'agrandit des terrains voisins, jusqu'au bâtiment de l'autre côté de la cour, aujourd'hui le 38 bis.
+Vers 1876, la maison est celle d'un autre peintre suisse, Albert Landerer, qui y installe son atelier à l'étage et peint des mousquetaires et des batailles. Il y est assassiné dans son lit en 1893, un fait divers qui passionne toute la région.
 
-Aujourd'hui, Besharat Gallery & Suites prolonge ce lien entre l'art et l'accueil : une collection d'art contemporain international, des jardins de sculptures et des suites où séjourner, derrière les murs de l'ancien Hôtel des Charmettes.
+En 1895, la maison est vendue par autorité de justice. Théodore Duhamel l'emporte et la transforme en hôtel, qu'il baptise les Charmettes, en souvenir du hameau de Savoie où vécut Jean-Jacques Rousseau. Dès 1897, un Suisse, Emile Schaller, en reprend l'exploitation ; son fils Georges, puis la veuve de celui-ci, Hélène, lui succèdent, à travers les deux guerres. Le premier téléphone public du village y est installé en 1902 ; en 1915, l'hôtel accueille des soldats convalescents ; en mai 1948, la princesse Elizabeth y déjeune lors de sa visite à Barbizon. Au fil des années, l'hôtel s'étend sur les terrains voisins, jusqu'au bâtiment de l'autre côté de la cour, aujourd'hui le 38 bis.
+
+Aujourd'hui, Besharat Gallery & Suites prolonge ce lien entre l'art et l'accueil : une collection d'art contemporain international, des jardins de sculptures et des suites où séjourner, dans les jardins clos où travaillèrent Bodmer et Landerer.
 
 ### narrative, EN
-Before it was a gallery, this address was a painter's house, then one of the village's great hotels. Around 1876 the Swiss painter Albert Landerer settled here, in a walled house with his studio upstairs. He painted musketeers and battles until his death in 1893: he was murdered in his bed, a crime that gripped the whole region.
+Long before the hotel, this plot on the Grande Rue already belonged to the painters' story. In the early 1850s the young American William Morris Hunt kept his horses here while he studied with Millet. Back in Boston he would carry the Barbizon School to a whole generation of American collectors and painters; the canvases he had brought home, among them Millet's The Sower, burned in the Great Boston Fire of 1872. The Swiss painter Karl Bodmer, famous for his images of the American West, then acquired the property, in 1856. He painted the forest, became one of the figures of the Auberge Ganne, and died in Paris in 1893; he is buried at Chailly-en-Bière, alongside his fellow Barbizon painters.
 
-In 1895 the house was sold by order of the court. Théodore Duhamel acquired it and turned it into a hotel, which he named Les Charmettes, after the hamlet in Savoy where Jean-Jacques Rousseau once lived. From 1897 a Swiss, Emile Schaller, ran the business; his son Georges, then Georges' widow Hélène, followed him through both world wars. The village's first public telephone was installed here in 1902; in 1915 the hotel took in convalescent soldiers; in May 1948 Princess Elizabeth lunched here during her visit to Barbizon. Over the years the hotel took in neighbouring land, as far as the building across the courtyard, today no. 38 bis.
+Around 1876 the house belonged to another Swiss painter, Albert Landerer, who set up his studio upstairs and painted musketeers and battles. He was murdered in his bed here in 1893, a crime that gripped the whole region.
 
-Today Besharat Gallery & Suites carries on that bond between art and hospitality: a collection of international contemporary art, sculpture gardens and suites to stay in, behind the walls of the former Hôtel des Charmettes.
+In 1895 the house was sold by order of the court. Théodore Duhamel acquired it and turned it into a hotel, which he named Les Charmettes, after the hamlet in Savoy where Jean-Jacques Rousseau once lived. From 1897 a Swiss, Emile Schaller, ran the business; his son Georges, then Georges' widow Hélène, followed him through both world wars. The village's first public telephone was installed here in 1902; in 1915 the hotel took in convalescent soldiers; in May 1948 Princess Elizabeth lunched here during her visit to Barbizon. Over the years the hotel spread onto neighbouring land, as far as the building across the courtyard, today no. 38 bis.
 
-### Option B (Luigi's call): one line on Bodmer
-The 1927 golf guide, read on the page image, already calls the Charmettes
-"la maison où vécut le beau graveur K. Bodmer", and the Karampournis family
-places Bodmer in today's 38 bis. The censuses put Bodmer's own house
-elsewhere on the Grande Rue, so the link is a tradition, not a fact. If you
-want it on the page anyway, the honest form is:
-- FR: Dès les années 1920, la mémoire du village rattachait aussi ces murs au graveur Karl Bodmer, contemporain de Landerer à Barbizon.
-- EN: By the 1920s, village memory also linked these walls to the engraver Karl Bodmer, Landerer's contemporary in Barbizon.
-Recommendation: leave it out until the AD77 records come back.
+Today Besharat Gallery & Suites carries on that bond between art and hospitality: a collection of international contemporary art, sculpture gardens and suites to stay in, in the walled gardens where Bodmer and Landerer worked.
 
 ### internal_notes, to append
-2026-10-12 rewrite. Removed: Hunt kept his horses here, Bodmer bought the address in 1856, built and named the villa, lived here ~30 years, sold 1884, Schaller family after Bodmer. Contradicted or unsupported: census order 1872-1886 and the 1887 sale notice place Bodmer's house elsewhere; the Charmettes name dates from 1896 (Abeille 10 Sept 1896); Schaller from April 1897 (Archives commerciales 17 Apr 1897). Hunt/Bodmer chain stays OPEN pending AD77 (see docs/sources/barbizon-research-2026-10-11.md). Sources for new text: census 1876 (Landerer); Rép. S.-et-M. 25 June 1895 (sale notice, studio upstairs); Nouvelliste de la Brie 11 Aug 1895 (Marqueste, Duhamel surenchère); Abeille 10 Sept 1896; Bulletin vinicole 29 June 1898 (Schaller at the Charmettes); Abeille 21 Mar 1902 (telephone); Rép. S.-et-M. 13 May 1915 (convalescents); Le Figaro 18 May 1948 (royal lunch); Rép. 21 Dec 1922, 24 Apr 1924, Le Briard 19 June 1935 (Schaller succession). SEO description updated: Bodmer 1856-1884 removed.
+2026-10-12 rewrite (Luigi). Kept on Luigi's instruction: Hunt kept his horses on the plot (early 1850s), Bodmer acquired the property in 1856. Both rest on local tradition (Cercle des Amis de Barbizon; German Wikipedia; 1927 Le Golf "la maison où vécut le beau graveur K. Bodmer", read on image; Karampournis family: Bodmer in today's 38 bis); census order 1872-1886 and the 1887 sale notice put Bodmer's residence elsewhere on the Grande Rue, so the precise building is OPEN pending AD77 (see docs/sources/barbizon-research-2026-10-11.md). Removed as contradicted: Bodmer built and named "Les Charmettes" (name dates from 1896, Abeille 10 Sept 1896), sale in 1884 (his house was seized 1885 and auctioned 1887), "nearly thirty years", Schaller family directly after Bodmer (Schaller from April 1897, Archives commerciales 17 Apr 1897). Sources for new text: census 1876 (Landerer); Rép. S.-et-M. 25 June 1895 (sale notice, studio upstairs); Nouvelliste de la Brie 11 Aug 1895 (Marqueste, Duhamel surenchère); Abeille 10 Sept 1896; Bulletin vinicole 29 June 1898 (Schaller at the Charmettes); Abeille 21 Mar 1902 (telephone); Rép. S.-et-M. 13 May 1915 (convalescents); Le Figaro 18 May 1948 (royal lunch); Rép. 21 Dec 1922, 24 Apr 1924, Le Briard 19 June 1935 (Schaller succession).
 
 ### SEO description (internal_notes line)
-Contemporary art gallery, sculpture gardens and art suites in the former Hôtel des Charmettes on Barbizon's Grande Rue.
+Contemporary art gallery, sculpture gardens and art suites in the former Hôtel des Charmettes on Barbizon's Grande Rue, where Karl Bodmer and Albert Landerer lived and painted.
 
 ---
 
 ## 3. Stories: the Besharat paragraph
 
 ### `where-to-stay-barbizon`
-- FR: **Besharat Gallery & Suites** (40 Grande Rue) propose des suites à l'intérieur même de la galerie : on y dort entouré d'œuvres d'art contemporain international, avec les jardins de sculptures sous les fenêtres. Le bâtiment est l'ancien Hôtel des Charmettes, ouvert en 1896 dans la maison du peintre suisse Albert Landerer et tenu pendant plus d'un demi-siècle par la famille Schaller : l'adresse est liée à l'art et à l'accueil depuis le XIXe siècle.
-- EN: **Besharat Gallery & Suites** (40 Grande Rue) has suites within the gallery itself: you sleep surrounded by international contemporary art, with the sculpture gardens outside your window. The building is the former Hôtel des Charmettes, opened in 1896 in the house of the Swiss painter Albert Landerer and run for more than half a century by the Schaller family: the address has been tied to art and hospitality since the nineteenth century.
+- FR: **Besharat Gallery & Suites** (40 Grande Rue) propose des suites à l'intérieur même de la galerie : on y dort entouré d'œuvres d'art contemporain international, avec les jardins de sculptures sous les fenêtres. Sur ce terrain, l'Américain William Morris Hunt gardait ses chevaux pendant qu'il apprenait auprès de Millet, et le peintre suisse Karl Bodmer s'y établit en 1856. La maison du peintre Albert Landerer y devint en 1896 l'Hôtel des Charmettes, que la famille Schaller tint pendant plus d'un demi-siècle : l'adresse est liée à l'art et à l'accueil depuis le XIXe siècle.
+- EN: **Besharat Gallery & Suites** (40 Grande Rue) has suites within the gallery itself: you sleep surrounded by international contemporary art, with the sculpture gardens outside your window. On this plot the American William Morris Hunt kept his horses while studying with Millet, and the Swiss painter Karl Bodmer settled here in 1856. The painter Albert Landerer's house became the Hôtel des Charmettes in 1896, run for more than half a century by the Schaller family: the address has been tied to art and hospitality since the nineteenth century.
 
 ### `a-day-in-barbizon`
-- FR: Au 40, **Besharat Gallery & Suites** occupe l'ancien Hôtel des Charmettes, ouvert en 1896 dans la maison du peintre Albert Landerer. La collection d'art contemporain et les jardins de sculptures se visitent.
-- EN: At no. 40, **Besharat Gallery & Suites** occupies the former Hôtel des Charmettes, opened in 1896 in the house of the painter Albert Landerer. The contemporary art collection and sculpture gardens are open to visitors.
+- FR: Au 40, **Besharat Gallery & Suites** occupe l'ancien Hôtel des Charmettes, sur le terrain où vécurent les peintres Karl Bodmer puis Albert Landerer. La collection d'art contemporain et les jardins de sculptures se visitent.
+- EN: At no. 40, **Besharat Gallery & Suites** occupies the former Hôtel des Charmettes, on the plot where the painters Karl Bodmer and later Albert Landerer lived. The contemporary art collection and sculpture gardens are open to visitors.
 
 ---
-
 ## 4. Courtyard neighbours (38 bis)
 
 - `atelier-berangere` narrative is fine. Its `full_description` (FR column) has no accents and says "dans la cour de l'ancienne Villa Les Charmettes". Proposed FR replacement:
