@@ -172,6 +172,137 @@ Note: the acte d'accusation says "fixé depuis quelques années à Barbizon";
 the 1893 press said eighteen years; Bénézit says ten. Public text gives no
 duration.
 
+### Landerer affair: more passages verified on the page image (2026-10-12, part 3)
+
+L'Abeille de Fontainebleau, 15 September 1893, p. 1 (bpt6k45260509/f1):
+> Mme Landerer était au mieux avec M. Lacampagne. Elle allait souvent chez
+> lui à Fontainebleau ; elle y était même depuis plusieurs jours quand le
+> crime a été découvert. Quant au cafetier, un cycliste déterminé, il avait
+> été vu souvent la nuit, filant rapidement et silencieusement vers
+> Barbizon, au milieu de la forêt.
+> Le cadavre de l'artiste avait été découvert par Hélène Lacampagne, la
+> fille de l'inculpé, qui était bonne chez les Landerer, et le fils
+
+Same issue, p. 2 (f2), continuing:
+> Lacampagne était venu justement ce matin-là de Fontainebleau prendre des
+> nouvelles du vieillard. En apprenant la mort, il était reparti en aviser
+> son père. Ce dernier était accouru à Barbizon en cabriolet avec
+> Mme Landerer, puis il était aussitôt reparti seul pour Fontainebleau et
+> s'était rendu chez un notaire de la ville. Il était ensuite revenu à
+> Barbizon. Ces nombreuses allées et venues, ces coïncidences parurent
+> suspectes aux magistrats. D'autant plus suspectes que Mme Landerer
+> obligeait fréquemment son mari à faire son testament en sa faveur.
+
+L'Abeille de Fontainebleau, 1 June 1894, p. 2 (bpt6k4526086x/f2), the
+revolver:
+> Il résulte de la déposition du témoin Hurel que entre onze heures et
+> minuit on entendait la voix de Lacampagne dans son café et qu'une voiture
+> attelée stationnait devant la porte. [...] On n'a pas retrouvé le revolver
+> qui a servi à donner la mort à Landerer, mais Lacampagne était allé à
+> Paris le 2 septembre, et quoique possédant déjà un revolver calibre 8, il
+> en avait acheté un autre calibre 7 (de même calibre que celui tout rouillé,
+> trouvé chez Landerer), dans la maison Royer et Rouger, 10, rue de Turenne,
+> mais ne l'avait pas payé. Le 6 septembre, au matin, quelques heures après
+> l'assassinat, il écrivait à l'employé de la maison Royer et Rougier, une
+> lettre [...] dans laquelle il demande à titre de service qu'on ne porte
+> pas sur sa note l'achat de ce revolver, parce qu'il ne veut pas que sa
+> femme sache qui l'a acheté. [...] l'accusé a-t-il cherché à y revenir
+> dans ses derniers interrogatoires, prétendant avoir jeté ce revolver dans
+> l'étang des carpes de Fontainebleau. Il soutient d'ailleurs qu'il avait
+> acheté cette arme pour le compte de Landerer lui-même.
+
+L'Abeille de Fontainebleau, 2 November 1894, p. 2 (bpt6k45261082/f2), the
+furniture sale:
+> On vient de procéder, à Barbizon, à la vente du mobilier de feu
+> M. Landerer, le vieil artiste peintre, assassiné par Lacampagne. On a été
+> fort surpris de faire une trouvaille assez importante.
+> Dans une sacoche, étaient enfermés six billets de banque : deux de 1,000
+> francs, deux de 500 francs, deux de 50 francs, soit une somme ronde de
+> 3,100 francs, plus une tabatière en or, contenant une bague.
+> Voilà une cachette qui était certainement ignorée de la femme Landerer et
+> de Lacampagne [...]
+> Si Lacampagne apprend cela à « La Nouvelle », où il est arrivé, combien
+> grand va être son désespoir...
+Same issue, p. 4 (snippet only): notice of the "Continuation de la Vente
+mobilière Après décès de M. LANDERER artiste peintre, à Barbizon", Sunday
+4 November 1894, by M. Bouché, greffier at Melun: "Meubles anciens,
+Gravures, Faïences, Argenterie". Le Nouvelliste de la Brie, 14 October 1894
+(bd6t51629048s, snippet): the sale included "grande quantité de peintures
+sur toile, bois et métal, comprenant paysages, portraits, scènes militaires
+(signatures de Condamy, J.-N. Rauch, Landerer".
+
+Albert Bataille, *Causes criminelles et mondaines de 1894*, ch. IX "Le
+mystère de Barbizon" (Melun, 25 May), pp. 285-289 (views 299-303),
+bpt6k202932h. Read on the page images:
+- p. 285: "Lorsqu'il avait pris sa retraite à Barbizon, il y a quinze ans, le
+  vieux peintre Landerer [...] s'était cantonné dans la peinture légendaire,
+  les tableaux de batailles, les souvenirs guerriers de la Suisse, des
+  anciens combats entre Bâle-campagne et Bâle-ville, dans l'un desquels son
+  père, vers 1835, avait péri héroïquement." Lacampagne: "un plombier
+  infatigable de Fontainebleau, que la nouvelle Mme Landerer avait distingué
+  parmi ses fournisseurs".
+- p. 287: she was "fille d'auberge à Bâle, quand un officier suisse, le
+  colonel Urserer, l'adressa comme domestique, au mois de janvier 1892, à son
+  compatriote et ami, le peintre Landerer, retiré à Barbizon." "Le vieil
+  artiste, qui jusque-là avait vécu en pension dans les auberges de
+  Barbizon". His friends kept away, so that "ce pauvre vieillard de
+  soixante-dix-sept ans ne trouva pas parmi eux un seul témoin pour son
+  mariage". First will: everything to her, "ne réservant qu'une somme de 150
+  francs pour son fils et 5.000 francs pour sa fille". "Enfin le 14 octobre
+  1892, l'artiste se décida à épouser [...] celle qu'il appelait « son
+  excellente et fidèle gouvernante »."
+- p. 289: "C'est comme plombier que vous aviez été appelé chez le vieil
+  artiste de Barbizon [...] Vous vous rendiez en bicyclette presque toutes
+  les nuits de Fontainebleau à Barbizon. [...] Vous laissiez votre
+  bicyclette à la porte de la propriété du peintre et vous pénétriez dans le
+  jardin." "M. Landerer était extrêmement sourd et extrêmement confiant ; sa
+  femme et lui faisaient chambre à part." "vous aviez donné à Landerer votre
+  propre fille comme servante. Cette jeune fille, âgée de quinze ans,
+  couchait à proximité de la chambre du peintre." Both deny being lovers.
+- Bataille's portrait of the accused is florid and openly contemptuous; use
+  his facts, not his tone.
+
+Conflicts in the Landerer record:
+- Her arrival: "dans le courant de l'année 1891" (acte d'accusation, Abeille
+  1894) vs "janvier 1892" (Bataille, from the presiding judge). Marriage
+  14 October 1892 (Bataille only).
+- His age at marriage: 76 (acte) vs 77 (Bataille). Victim's age 78 in
+  September 1893 (Abeille 1893).
+- Her birthplace: Baldingen, Switzerland (Abeille 1894) vs "née en
+  Allemagne" (Bataille). Both agree she came to him from Basel.
+- Years in Barbizon: 18 (Abeille 1893), 15 (Bataille), "quelques années"
+  (acte), 10 (Bénézit). Public text gives no figure.
+
+### The hotel after 1896: Schaller from 1897 (verified on the page image)
+- Archives commerciales de la France, 17 April 1897, p. 15 (view 15),
+  table of business transfers, bpt6k5664414r/f15: "Barbizon (Seine-et-Marne)
+  | Schaller | Restaurant | [prédécesseur] Gerveix". The 8 May 1897 issue
+  (bpt6k5664434h, snippet) lists the same as "Hôtel, restaurant". The entry
+  does not name the Charmettes; the 1898 passage below does.
+  "Gerveix" as a Barbizon name is not found elsewhere (Gallica fuzzy-matches
+  it to the painter Gervex).
+- Le Bulletin vinicole, 29 June 1898, p. 2, an outing of the Paris wine
+  trade: "M. Schaller a fait peindre par Blache de la rue Saint-Antoine,
+  l'écusson de la corporation [...] avec en exergue la devise : Equatis
+  Ibunt Rostris, traduction libre : Les marchands de vins vont toujours de
+  l'avant. L'écusson orne la grande porte de l'hôtel des Charmettes, que
+  nous recommandons à tous nos amis allant à Barbizon."
+  https://gallica.bnf.fr/ark:/12148/bpt6k51106062/f2
+- Reading: Schaller took over the business in spring 1897 and ran the
+  Charmettes from then; with the 1910 and 1920 trade listings, a Schaller
+  tenure of at least 1897-1920. Consistent with Gilles Schaller's account.
+- Fontainebleau et la forêt (guide), 1903, view 47 (OCR): "Barbizon possède
+  de nombreux hôtels : l'hôtel et pension des Charmettes (arrêt du tram),
+  très confortable, avec installation hygiénique et moderne permettant de
+  recevoir la clientèle toute l'année (ch. chauffées l'hiver ...)". Listed
+  first, before the Forêt, Siron, Exposition and Clef d'Or.
+  https://gallica.bnf.fr/ark:/12148/bpt6k54701964/f47
+- Touring-Club de France, Revue mensuelle, 1 September 1896 (OCR): the Hôtel
+  des Charmettes listed as a TCF "délégué" address (M. le commandant
+  Servas). 15 June 1898: "Hôtel des Charmettes. (Très recommandé.)"
+- Still unknown: who bought the house after the 1894 sale and opened the
+  hotel in 1896.
+
 ### Landerer affair, further details (OCR read, not yet on the image)
 - L'Abeille de Fontainebleau, 15 September 1893, pp. 1-2
   (bpt6k45260509): victim aged 78, a painter, married to a Swiss woman of
