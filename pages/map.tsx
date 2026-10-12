@@ -9,6 +9,7 @@ import { SeoHead } from "@/components/SeoHead";
 import { buildCategoryLabels } from "@/lib/categoryLabel";
 import { withRetry } from "@/lib/fetchPolicy";
 import { MY_DAY_MAX_STOPS, MY_DAY_QUERY_PARAM, parseDayParam } from "@/lib/myDay";
+import { sendProductEvent } from "@/lib/productEvents";
 import { useMyDay } from "@/lib/useMyDay";
 import { useWalkingRoute } from "@/lib/useWalkingRoute";
 import type { Place, PlaceCategory } from "@/lib/types";
@@ -232,7 +233,17 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
   const reorderOwn = (ordered: string[]) =>
     myDay.replaceAll([...ordered, ...myDay.slugs.filter((s) => !ordered.includes(s))]);
 
+  // Count each shared-link visit once per page load (effect, not render phase).
+  const sharedOpenedSent = useRef(false);
+  useEffect(() => {
+    if (shared && !sharedOpenedSent.current) {
+      sharedOpenedSent.current = true;
+      sendProductEvent("myday_shared_opened");
+    }
+  }, [shared]);
+
   const saveShared = () => {
+    sendProductEvent("myday_shared_saved");
     myDay.replaceAll(dayStops.map((s) => s.slug));
     clearDayParam();
   };

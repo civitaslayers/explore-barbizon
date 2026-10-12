@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import crypto from "crypto";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { extractReferrerHost } from "@/lib/referrerHost";
+import { isProductEvent } from "@/lib/productEvents";
 
 // ---------------------------------------------------------------------------
 // pages/api/track.ts
@@ -95,6 +96,46 @@ export default async function handler(
 
     const body = parseBody(req.body);
     if (!body) {
+      return res.status(204).end();
+    }
+
+    // Second body shape: { event, locale? } — anonymous My day counters
+    // (product_events). No path, slug or identifier is accepted or stored.
+    if (body.event !== undefined) {
+      if (!isProductEvent(body.event)) {
+        return res.status(204).end();
+      }
+      const eventLocale =
+        typeof body.locale === "string" &&
+        (ALLOWED_LOCALES as readonly string[]).includes(body.locale)
+          ? body.locale
+          : null;
+      const eventUa = req.headers["user-agent"];
+      const eventUserAgent = typeof eventUa === "string" ? eventUa : null;
+      if (eventUserAgent && BOT_UA_RE.test(eventUserAgent)) {
+        return res.status(204).end();
+      }
+      try {
+        // Table name cast because generated types don't know product_events yet.
+        const { error: eventError } = await supabaseAdmin
+          .from("product_events" as any)
+          .insert({
+            event: body.event,
+            locale: eventLocale,
+            device: deriveDevice(eventUserAgent),
+          } as any);
+        if (eventError) {
+          console.error(
+            "[product_events] insert failed (non-fatal):",
+            eventError.message
+          );
+        }
+      } catch (err) {
+        console.error(
+          "[product_events] insert threw (non-fatal):",
+          err instanceof Error ? err.message : err
+        );
+      }
       return res.status(204).end();
     }
 

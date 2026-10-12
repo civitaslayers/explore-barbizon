@@ -10,6 +10,7 @@ import {
   totalMeters,
 } from "@/lib/myDay";
 import { formatDuration, type WalkingRoute } from "@/lib/walkingRoute";
+import { sendProductEvent } from "@/lib/productEvents";
 
 export type DayStop = {
   slug: string;
@@ -124,6 +125,7 @@ export default function MyDayPanel({
     const url = `${window.location.origin}${prefix}/map?${MY_DAY_QUERY_PARAM}=${buildDayParam(slugs)}`;
     try {
       await navigator.clipboard.writeText(url);
+      sendProductEvent("myday_share_created");
       setCopyFailedUrl(null);
       setCopied(true);
     } catch {
