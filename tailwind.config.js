@@ -33,7 +33,7 @@ module.exports = {
         "on-primary": "#ffffff"
       },
       fontFamily: {
-        serif: ["Newsreader", ...defaultTheme.fontFamily.serif],
+        serif: ["var(--font-newsreader)", ...defaultTheme.fontFamily.serif],
         sans: ["var(--font-inter)", ...defaultTheme.fontFamily.sans]
       },
       maxWidth: {

@@ -18,6 +18,8 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1021.0",
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource-variable/newsreader": "^5.3.0",
     "@supabase/supabase-js": "^2.99.1",
     "dotenv": "^17.3.1",
     "i18next": "^26.3.6",
