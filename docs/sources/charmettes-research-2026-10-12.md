@@ -389,3 +389,40 @@ AD77 online, Barbizon 1921, listes nominatives (cote 10M482), viewer pages 3-4
 - 1906 census (cote 10M?, 13 pages) skimmed pages 3-5 at low zoom: no Bodmer
   seen; the reading was too faint to be conclusive. Not checked: 1901, 1911,
   1926.
+
+## Checks on the extension's census report (claude.ai, read on the image, 2026-10-12 afternoon)
+
+1. Schaller wife, 1921 (10M482, viewer page 4, left page, lines 144-148):
+   - 144 SCHALLER Emile, 1860, Paris, Suisse, chef de ménage, hôtelier,
+     employer column "Hôtel des Charmettes".
+   - 145 SCHALLER Adrienne, 1867, Paris, Suisse, femme, hôtelière, "M. Schaller".
+   - 146 SCHALLER Georges, 1891, Paris, F, fils, hôtelier.
+   - 147-148 GUIDON Pierre, 1861, Bergün (Suisse), ami, gérant; GUIDON
+     Antoinette, 1868, amie.
+   Reading confirmed: the 1921 wife is ADRIENNE (b. 1867), while 1901-1911
+   list MARGUERITE Cailleret (b. 1865/1870). Either Emile remarried between
+   1911 and 1921 or the names differ for another reason; unresolved. Public
+   text names no wife of Emile.
+   Same page, right: 162 MILLET Mary Géraldine, 1873, Rhode Island (États-Unis),
+   F, chef de ménage (maison 38, ménage 52); 163 DUHAMEL Jean Théodore, 1856,
+   Bordeaux, F, chef de ménage; 164 DUHAMEL Anna, 1880, [Gruyères?] (Suisse),
+   femme (maison 39, ménage 53).
+2. Landerer's "Berthe", 1876 (Chailly-en-Bière 1876, viewer 937206, page 15,
+   right page, maison 234, ménage 279):
+   - 838 LANDERER Albert, artiste peintre, married column, 60, Suisse.
+   - 839 GASSION [?] Berthe, "sa femme", married column, 41, Suisse.
+   - 840 BERTRAND Pierre Joseph, maison 235.
+   So in 1876 Berthe is his WIFE (surname read as Gassion [?]). The Berthe of
+   1891 is a servant with a different surname (Heyzel [?]): probably a
+   different woman. By 1886 no wife is listed, and in 1892 he married
+   Nothburgia Binder, so the first wife had died or left by then.
+3. Millet household next to the hotel: 1911 François Millet (b. 1849, artiste
+   peintre) with Géraldine Millet (b. 1869 Rhode Island) at maison 44, three
+   households before the Schaller hotel (47); 1921 Mary Géraldine Millet
+   (b. 1873 [?], Rhode Island) at maison 38, between the hotel (37) and
+   Théodore Duhamel (39). Luigi: this is Coz Ker (34 Grande Rue), where
+   Eiffel is said to have stayed later (mairie map). Note the Karampournis
+   1990 footnote placing "villa Coz Ker 34" next to Duhamel's Villa
+   Marguerite passage: Millet and Duhamel were next-door neighbours in 1921.
+4. Marie Bodmer (b. c.1880, Chailly): Luigi recalls meeting descendants still
+   living in Chailly; unconfirmed, private, not for the site.
