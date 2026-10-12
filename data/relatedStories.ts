@@ -35,4 +35,8 @@ export const RELATED_SLUGS: Record<string, RelatedSlugs> = {
     stories: ["paths-to-the-forest", "the-gleaners"],
     places: ["sentier-des-peintres"],
   },
+  "the-house-of-the-crime": {
+    stories: ["inn-paintings-dinner"],
+    places: ["besharat-gallery-barbizon"],
+  },
 };
