@@ -363,3 +363,29 @@ the 1893 murder of the painter Landerer in the house. The full story of the
 Landerer affair (crime, May 1894 assizes, the 1896 conversion into a hotel)
 becomes a separate essay in `stories`, written from the period press above,
 as a curiosity piece.
+
+## 1921 census: Rodolphe Bodmer and the Schaller hotel (read on the image, 2026-10-12)
+
+AD77 online, Barbizon 1921, listes nominatives (cote 10M482), viewer pages 3-4
+(image files frad077_10m482_00xx). Read by claude.ai in the AD77 viewer.
+
+- Page 3, Grande Rue, maison 22, ménage 26: line 80 BODMER Rodolphe, born
+  1856, Chailly-en-Bière, French, chef de ménage, artiste peintre; line 81
+  DUFOUR Alice [?], born 1869 [?], Paris, French, dame de compagnie, artiste.
+  Neighbours before: Ribouillard (maison 21); after: Bloy (maison 23), Billon.
+- Page 3, right: Gastelier household at about maison 29-30 (the 1901
+  neighbour of the hotel).
+- Page 4, Grande Rue: Bertrand Félicie, maison 36 (the Bertrand family is the
+  east neighbour named in the 1895 Landerer sale notice); maison 37: Laurent
+  household (servants, employer "M. Schaller"), Wagner, then SCHALLER Emile,
+  born 1860, Paris, Swiss, chef de ménage, hôtelier; Schaller Adrienne, 1867,
+  Paris, Swiss, wife, hôtelière; Schaller Georges, 1892, son, hôtelier;
+  followed by Guidon (gérant) and Delmontin households. Right page: Duhamel
+  household at maison 39.
+- Reading: in 1921 Rodolphe Bodmer lived in his own household about fifteen
+  houses from the Schaller hotel, not on the hotel plot. Consistent with the
+  1872-1886 censuses for Karl Bodmer's house. Does not touch the question of
+  who owned the plot before Landerer (1856-1876).
+- 1906 census (cote 10M?, 13 pages) skimmed pages 3-5 at low zoom: no Bodmer
+  seen; the reading was too faint to be conclusive. Not checked: 1901, 1911,
+  1926.
