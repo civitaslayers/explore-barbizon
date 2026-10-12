@@ -19,6 +19,9 @@
 //   SEO_AUDIT_BASE_URL          default http://localhost:3000
 //   SEO_AUDIT_SAMPLE_SIZE       per-entity-type sample size, default 5
 //   NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY  (required)
+//   VERCEL_AUTOMATION_BYPASS_SECRET  optional; sent as x-vercel-protection-bypass
+//     on every fetch (Luigi creates it in Vercel: Deployment Protection,
+//     Protection Bypass for Automation)
 
 import { createClient } from "@supabase/supabase-js";
 import { config as loadEnv } from "dotenv";
@@ -193,9 +196,16 @@ function extractJsonLd(html) {
   }
 }
 
+// Sends the Vercel protection-bypass header only when the secret is set.
+// The value is never logged.
+function fetchOpts() {
+  const secret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
+  return secret ? { headers: { "x-vercel-protection-bypass": secret } } : {};
+}
+
 async function fetchHtml(path) {
   const url = `${BASE_URL}${path}`;
-  const res = await fetch(url);
+  const res = await fetch(url, fetchOpts());
   if (!res.ok) {
     throw new Error(`HTTP ${res.status} for ${url}`);
   }
@@ -345,7 +355,7 @@ async function main() {
 
   let sitemapXml = "";
   try {
-    const res = await fetch(`${BASE_URL}/sitemap.xml`);
+    const res = await fetch(`${BASE_URL}/sitemap.xml`, fetchOpts());
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     sitemapXml = await res.text();
   } catch (err) {
