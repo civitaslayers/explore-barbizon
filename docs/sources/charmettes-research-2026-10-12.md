@@ -110,6 +110,68 @@ Karampournis account that Bodmer's house (38bis) belonged to the hotel.
   Gaulois, Journal des débats). The 1896 article gives the sentence: the widow
   and her accomplice Lacampagne condemned to hard labour for life.
 
+### Landerer affair: the 1894 trial report, verified on the page image
+L'Abeille de Fontainebleau, 1 June 1894, p. 2, "Audiences des 25 et 26 mai.
+Affaire Lacampagne, femme Landerer. Assassinat à Barbizon ; faux et vol."
+https://gallica.bnf.fr/ark:/12148/bpt6k4526086x/f2 (crops read: identities,
+start of the acte d'accusation, the morning of 6 September, the mourning
+dress, the verdict).
+
+> Jean LACAMPAGNE, 45 ans, né à Villaudraut (Gironde), limonadier et ancien
+> entrepreneur de couverture, à Fontainebleau ;
+> Veuve LANDERER, née Nothburgia BINDER, agée de 31 ans, née à Baldingen
+> (Suisse), demeurant à Barbizon ;
+> Dans le courant de l'année 1891, le sieur Landerer, artiste peintre fixé
+> depuis quelques années à Barbizon, prit à son service la nommée Nothburgia
+> Binder, veuve Landivar.
+> Cette femme avait mené jusque-là une vie d'aventures et avait été mariée à
+> Buenos-Ayres avec un nommé Landivar qui lui avait légué sa fortune et était
+> mort peu après ; elle prit bientôt sur Landerer un tel empire, que malgré
+> les conseils de ses amis, il ne tarda pas à l'épouser. Il avait 76 ans,
+> elle en avait 29. Elle lui fit faire en sa faveur des dispositions
+> testamentaires qui, pour plus de sûreté, furent confirmées par une donation
+> passée devant notaire.
+> Il était de notoriété publique qu'elle trompait indignement son mari avec
+> le nommé Lacampagne, cafetier à Fontainebleau, qui, à toute heure de jour
+> et de nuit, venait lui rendre visite à Barbizon. Il était devenu l'ami de
+> Landerer, qui l'avait même institué son exécuteur testamentaire.
+
+> Le six septembre 1893 au matin, Landerer était trouvé mort dans son lit.
+> Il avait reçu trois balles de revolver dans la tête, toutes les trois du
+> côté gauche. Au pied de son lit, à droite, se trouvait un revolver. Malgré
+> la mise en scène maladroite organisée par les assassins, les premières
+> constatations écartèrent l'hypothèse d'un suicide, Landerer n'était pas
+> gaucher [...]
+
+> [...] le cinq septembre, à 8 heures et demie du soir, alors que son mari
+> devait être assassiné quelques heures plus tard, elle se présente en
+> compagnie de Lacampagne dans le magasin de nouveautés de M. Lamy, 3, rue
+> Grande, à Fontainebleau, et demande à acheter un costume de deuil complet.
+> On lui répond qu'il n'y en a pas de tout fait, qu'on lui en fera un dans
+> les quarante-huit heures : elle insiste, elle veut l'avoir tout de suite.
+> Aujourd'hui elle nie avoir voulu faire cet achat, mais le témoignage de la
+> demoiselle de magasin est formel.
+
+> Malgré ces deux défenses habiles, présentées avec talent, après une
+> demi-heure de délibération, le jury a rendu un verdict admettant la
+> culpabilité sur toutes les questions mais avec les circonstances
+> atténuantes.
+> La cour condamne donc Lacampagne et la femme Landerer aux travaux forcés à
+> perpétuité. Les applaudissements de l'auditoire accueillent ce verdict.
+
+OCR only, same page (not read on the image): Lacampagne in debt; the widow
+had moved to Fontainebleau; the gun found by the bed was rusty and unusable;
+no break-in, the killers had keys; both denied the crime throughout; on
+2 September Lacampagne bought a revolver in Paris (Royer et Rougier, 10 rue
+de Turenne) and on the morning of 6 September wrote asking that it be left
+off his account; a witness heard his voice in his café between 11 pm and
+midnight with a carriage waiting at the door. The killing is put between
+midnight and 1 am.
+
+Note: the acte d'accusation says "fixé depuis quelques années à Barbizon";
+the 1893 press said eighteen years; Bénézit says ten. Public text gives no
+duration.
+
 ### Landerer affair, further details (OCR read, not yet on the image)
 - L'Abeille de Fontainebleau, 15 September 1893, pp. 1-2
   (bpt6k45260509): victim aged 78, a painter, married to a Swiss woman of
@@ -119,14 +181,8 @@ Karampournis account that Bodmer's house (38bis) belonged to the hotel.
   the wife's favour found; "M. Landerer était domicilié depuis dix-huit ans"
   at Barbizon; the paper's angle, "La bicyclette rouge" (Lacampagne was a
   known cyclist).
-- L'Abeille de Fontainebleau, 1 June 1894, p. 2 (bpt6k4526086x), "Affaire
-  Lacampagne, femme Landerer. Assassinat à Barbizon ; faux et vol": Jean
-  Lacampagne, 45, born at Villandraut (Gironde), limonadier at
-  Fontainebleau; the widow, née Nothburgia Binder, 31, born at Baldingen
-  (Switzerland), whose first husband, an Argentine official, had left her
-  his estate; counsel Me Crémieux (Lacampagne) and Me Letavernier; verdict
-  after half an hour, guilty with mitigating circumstances, both sentenced to
-  hard labour for life; applause in court.
+- Same 1894 report, OCR only: counsel Me Crémieux (Lacampagne) and
+  Me Letavernier.
 - Bénézit (bd6t5397332d, view 44): "LANDERER (Albert), peintre, né à Bâle,
   mort assassiné à Paris en 1893 (Ec. Suis.). Elève de Hieronymus Hess ...
   passa les dix dernières années de sa vie à Barbizon. Le musée de Bâle
