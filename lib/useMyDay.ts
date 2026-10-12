@@ -8,6 +8,7 @@
 // ---------------------------------------------------------------------------
 
 import { useCallback, useMemo, useSyncExternalStore } from "react";
+import { sendProductEvent } from "./productEvents";
 import {
   MY_DAY_MAX_STOPS,
   MY_DAY_STORAGE_KEY,
@@ -107,6 +108,7 @@ export function useMyDay() {
     if (current.includes(slug)) return "exists";
     if (current.length >= MY_DAY_MAX_STOPS) return "full";
     commit([...current, slug]);
+    sendProductEvent("myday_add");
     return "added";
   }, []);
 
