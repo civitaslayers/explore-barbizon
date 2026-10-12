@@ -201,8 +201,12 @@ duration.
   combined the main house (Landerer) and the house across the courtyard
   (Bodmer, today 38bis), which matches the Karampournis account. Not proven by
   a single source; needs the cadastre or a guidebook entry naming both.
-- The painter's first name: Albert, per Bénézit (OCR only). Not yet
-  confirmed by a second source (Salon catalogue).
+- The painter's first name: Albert. Bénézit gives it, and Luigi confirms it
+  from the 2026-10-11 research session.
+- Who found the body: the maid (1893 press). Nothburgia Binder had entered
+  the household as a servant in 1891 and married Landerer; the maid of 1893
+  was someone else (per the 1893 press, Lacampagne's daughter Hélène; OCR
+  only).
 - "M. Comble" (1902) is presumably the mayor or a councillor (the rue
   Jean-Baptiste Comble); not checked.
 - Who opened the hotel in 1896, and when the Schaller tenure began and ended,
