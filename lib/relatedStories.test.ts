@@ -9,6 +9,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  pickPlaceSlugs,
   resolveRelated,
   type RelatedPlaceRow,
   type RelatedStoryRow,
@@ -240,4 +241,38 @@ test("11. RELATED_SLUGS data integrity: slug shapes, no self-reference, no dupli
       `${key} has duplicate places`
     );
   }
+});
+
+test("12. pickPlaceSlugs: table rows win over the map", () => {
+  const out = pickPlaceSlugs(
+    [{ slug: "auberge-ganne", display_order: 0, is_published: true }],
+    ["maison-millet"]
+  );
+  assert.deepEqual(out, ["auberge-ganne"]);
+});
+
+test("13. pickPlaceSlugs: empty table falls back to the map (errored table is passed as empty)", () => {
+  assert.deepEqual(pickPlaceSlugs([], ["maison-millet"]), ["maison-millet"]);
+});
+
+test("14. pickPlaceSlugs: unpublished locations are dropped; all dropped falls back to the map", () => {
+  const rows = [
+    { slug: "a", display_order: 0, is_published: false },
+    { slug: "b", display_order: 1, is_published: true },
+  ];
+  assert.deepEqual(pickPlaceSlugs(rows, ["m"]), ["b"]);
+  assert.deepEqual(pickPlaceSlugs([rows[0]], ["m"]), ["m"]);
+});
+
+test("15. pickPlaceSlugs: display_order is kept, ties keep input order", () => {
+  const out = pickPlaceSlugs(
+    [
+      { slug: "c", display_order: 2, is_published: true },
+      { slug: "a", display_order: 0, is_published: true },
+      { slug: "b1", display_order: 1, is_published: true },
+      { slug: "b2", display_order: 1, is_published: true },
+    ],
+    ["m"]
+  );
+  assert.deepEqual(out, ["a", "b1", "b2", "c"]);
 });

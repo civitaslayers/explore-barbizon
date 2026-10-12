@@ -197,6 +197,20 @@ Note: `cover_credit`/`cover_alt` added 2026-10-05 — `cover_credit` is the arti
 
 ---
 
+### `story_locations` (pending apply: migrations/create_story_locations.sql)
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| id | uuid | NO | gen_random_uuid() |
+| story_id | uuid | NO | — |
+| location_id | uuid | NO | — |
+| display_order | integer | NO | 0 |
+| created_at | timestamptz | YES | now() |
+
+FKs: `story_id` → `stories.id` ON DELETE CASCADE, `location_id` → `locations.id` ON DELETE CASCADE. UNIQUE (`story_id`, `location_id`); index on `story_id`. RLS on; policy "Public read story_locations" (select, anon + authenticated). Read in `pages/stories/[slug].tsx`; published locations only, ordered by `display_order`; falls back to `RELATED_SLUGS` when empty or missing.
+
+---
+
 ### `routes`
 
 | Column | Type | Nullable | Default |
@@ -355,7 +369,7 @@ These override any default assumptions in queries, migrations, or AI-assisted se
 - `media` is location-scoped only — cannot attach images to tours, stories, or artists
 - `tours` now HAS an `is_published` flag (added 2026-07-13 with the i18n groundwork)
 - No unique constraints visible on most slug columns (may exist as indexes, not visible through information_schema) — `stories.slug` and `routes.slug` are the exception: both are explicitly UNIQUE (`stories_slug_unique`, and a unique constraint on `routes.slug`)
-- No `story_locations` join table — no stories↔locations relationship exists in the schema
+- `story_locations` join table is written but **pending apply** (`migrations/create_story_locations.sql`); until applied and seeded, story-page places fall back to `data/relatedStories.ts`
 
 ---
 

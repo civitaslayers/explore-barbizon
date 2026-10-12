@@ -94,3 +94,30 @@ export function resolveRelated(
 
   return { stories, places };
 }
+
+export type StoryLocationRow = {
+  slug: string;
+  display_order: number;
+  is_published: boolean;
+};
+
+/**
+ * Place slugs for a story. Rows from the story_locations table win (published
+ * only, sorted by display_order, duplicates collapsed); with no usable rows
+ * (table empty, missing or errored) the hand-kept map is used unchanged.
+ */
+export function pickPlaceSlugs(
+  tableRows: StoryLocationRow[],
+  mapSlugs: string[]
+): string[] {
+  const fromTable = tableRows
+    .filter((row) => row.is_published)
+    .map((row, index) => ({ row, index }))
+    .sort(
+      (a, b) =>
+        a.row.display_order - b.row.display_order || a.index - b.index
+    )
+    .map(({ row }) => row.slug);
+  const unique = [...new Set(fromTable)];
+  return unique.length > 0 ? unique : mapSlugs;
+}
