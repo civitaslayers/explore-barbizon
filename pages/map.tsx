@@ -216,7 +216,26 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
     setSidebarOpen(false);
     setFitDayToken((n) => n + 1);
   };
-  const closeDay = useCallback(() => setDayOpen(false), []);
+  const closeDay = useCallback(() => {
+    setDayOpen(false);
+    // The chip remounts when the panel closes, so restore focus after paint.
+    requestAnimationFrame(() => dayChipRef.current?.focus());
+  }, []);
+
+  // Keyboard path to a pin: drive the existing ?location= focus-popup path.
+  // Re-picking the slug already in the URL would be a no-op, so clear it first.
+  const openPinFromList = async (slug: string) => {
+    setSidebarOpen(false);
+    const { location: current, ...rest } = router.query;
+    if (current === slug) {
+      await router.replace({ pathname: "/map", query: rest }, undefined, { shallow: true });
+    }
+    await router.replace(
+      { pathname: "/map", query: { ...rest, location: slug } },
+      undefined,
+      { shallow: true }
+    );
+  };
 
   // A shared day opens the panel once and fits the camera to it.
   if (shared && !sharedAutoOpened) {
@@ -429,6 +448,23 @@ const MapPage: NextPage<MapPageProps> = ({ pins, routes }) => {
                     className="w-full rounded-full border border-ink/15 bg-cream/60 px-4 py-2.5 text-xs text-ink placeholder:text-ink/60 focus:border-ink/35 focus:bg-cream focus:outline-none"
                   />
                 </div>
+
+                {searchQuery.trim() && (
+                  <ul className="-mt-3 max-h-48 overflow-y-auto" aria-label={t("map.search")}>
+                    {visibleLocations.map((l) => (
+                      <li key={l.slug}>
+                        <button
+                          type="button"
+                          onClick={() => void openPinFromList(l.slug)}
+                          className="w-full rounded-lg px-3 py-2 text-left text-xs text-ink hover:bg-ink/5 focus-visible:bg-ink/5"
+                        >
+                          {l.name}
+                          <span className="ml-2 text-[11px] text-ink/60">{l.category}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
 
                 {/* Layer toggles */}
                 <div>

@@ -68,6 +68,17 @@ export default function MyDayPanel({
   const [copyFailedUrl, setCopyFailedUrl] = useState<string | null>(null);
   const [confirmClear, setConfirmClear] = useState(false);
   const failedInputRef = useRef<HTMLInputElement>(null);
+  const rootRef = useRef<HTMLElement>(null);
+
+  // Move focus into the panel on open: heading, else first focusable control.
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const target =
+      root.querySelector<HTMLElement>("#my-day-title") ??
+      root.querySelector<HTMLElement>("button, [href], input, select, textarea");
+    target?.focus();
+  }, []);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -145,6 +156,7 @@ export default function MyDayPanel({
 
   return (
     <aside
+      ref={rootRef}
       aria-labelledby="my-day-title"
       className="absolute inset-x-0 bottom-12 z-30 flex max-h-[65%] flex-col overflow-hidden rounded-[30px] shadow-card md:inset-x-auto md:bottom-10 md:right-4 md:max-h-[calc(100%-7rem)] md:w-96 md:rounded-card"
     >
@@ -164,7 +176,8 @@ export default function MyDayPanel({
         </div>
         <h2
           id="my-day-title"
-          className="mt-2 font-serif text-[1.65rem] font-light italic leading-tight tracking-tight"
+          tabIndex={-1}
+          className="mt-2 font-serif text-[1.65rem] font-light italic leading-tight tracking-tight focus:outline-none"
         >
           {stops.length > 0
             ? t("myDay.title", { count: stops.length })
