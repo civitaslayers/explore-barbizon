@@ -136,3 +136,11 @@ Karampournis account that Bodmer's house (38bis) belonged to the hotel.
 - SRU, press, "Landerer" AND Barbizon, Sept 1893 to Dec 1894: 283 issues.
 - Not yet run: books and guidebooks (Joanne, Baedeker), "Schaller" Barbizon,
   "Citroën" Barbizon 1940-1945, Bodmer's house and the Chêne Bodmer.
+
+## Editorial decision (Luigi, 2026-10-12)
+
+The Charmettes page keeps one plain sentence on the hotel's origin, including
+the 1893 murder of the painter Landerer in the house. The full story of the
+Landerer affair (crime, May 1894 assizes, the 1896 conversion into a hotel)
+becomes a separate essay in `stories`, written from the period press above,
+as a curiosity piece.
