@@ -23,6 +23,11 @@ import type {
 } from "@/lib/commandCenter";
 import { supabase } from "@/lib/supabase";
 import {
+  ASSIGNEE_PRESETS,
+  RUN_HANDOFF_TARGET_PRESETS,
+  OUTPUT_AGENT_PRESETS,
+} from "@/lib/assignees";
+import {
   AGENT_BRIEF_MODE_OPTIONS,
   buildAgentTaskBrief,
   copyTextToClipboard,
@@ -1042,8 +1047,6 @@ type NextPageWithLayout = NextPage & {
 };
 
 const STATUSES: TaskStatus[] = ["backlog", "ready", "in_progress", "review", "done"];
-/** Quick-pick labels for `outputs.agent` (free-text in DB; presets only). */
-const OUTPUT_AGENT_PRESETS: readonly string[] = ["claude", "manual"];
 const AREAS: RelatedArea[] = ["product", "content", "map", "database", "design", "engineering", "seo", "ops"];
 const TASK_TYPES: TaskType[] = [
   "content",
@@ -1058,17 +1061,6 @@ const TASK_TYPES: TaskType[] = [
 const EXECUTION_STATUSES: ExecutionStatus[] = ["todo", "in_progress", "review", "blocked", "done"];
 /** Quick actions only cycle through active handoff postures (not `todo`). */
 const EXECUTION_QUICK_ACTIONS: ExecutionStatus[] = ["in_progress", "review", "blocked", "done"];
-/**
- * Operator presets only. Rows may hold machine-written values
- * (civitas-architect/implementer/content-ops from /run-loop) or retired ones
- * (cursor); the field is a free-text input + datalist so they render and
- * re-save unchanged.
- */
-const ASSIGNEE_PRESETS = ["human", "claude"] as const;
-
-/** Presets for recording where a brief was handed (datalist); free text allowed. */
-const RUN_HANDOFF_TARGET_PRESETS = ["human", "claude"] as const;
-
 const STATUS_STYLE: Record<TaskStatus, string> = {
   backlog: "bg-ink/8 text-ink/60",
   ready: "bg-umber/10 text-umber",
