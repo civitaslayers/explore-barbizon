@@ -64,3 +64,17 @@ https://gallica.bnf.fr/ark:/12148/bpt6k1911936n/f166
   10 Nov 1893 (obituaries).
 - SRU, all types, Bodmer AND chêne AND Barbizon, from 1894: 436; from 1910:
   294. Too broad; only the 1907 Gassies and 1898 hits read so far.
+
+## Part 2 (2026-10-12, later)
+
+- Lead, not read on a source: Claude Monet painted the oak in 1865, a
+  canvas known in English as "The Bodmer Oak, Fontainebleau Forest",
+  generally given as in the Metropolitan Museum of Art, New York. Confirm the
+  title, date and holding on the museum's own collection page before any
+  public use.
+- The oak's fate (when it died or fell) is still not found. The Gallica
+  searches above returned only the 1893 obituaries and the 1907 Gassies
+  passage; the forest guides (Denecourt, Colinet) and the bulletins of the
+  Amis de la forêt de Fontainebleau remain the next step.
+- Place of death unchanged: Paris in the 1893 press, Barbizon in later
+  accounts. Still "1893" without a place in public text.

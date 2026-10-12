@@ -110,6 +110,34 @@ Karampournis account that Bodmer's house (38bis) belonged to the hotel.
   Gaulois, Journal des débats). The 1896 article gives the sentence: the widow
   and her accomplice Lacampagne condemned to hard labour for life.
 
+### Landerer affair, further details (OCR read, not yet on the image)
+- L'Abeille de Fontainebleau, 15 September 1893, pp. 1-2
+  (bpt6k45260509): victim aged 78, a painter, married to a Swiss woman of
+  30; found in bed with three revolver wounds to the head, a revolver lying
+  in the middle of the room; the body discovered by Hélène Lacampagne,
+  daughter of the accused and the Landerers' maid; about a dozen wills in
+  the wife's favour found; "M. Landerer était domicilié depuis dix-huit ans"
+  at Barbizon; the paper's angle, "La bicyclette rouge" (Lacampagne was a
+  known cyclist).
+- L'Abeille de Fontainebleau, 1 June 1894, p. 2 (bpt6k4526086x), "Affaire
+  Lacampagne, femme Landerer. Assassinat à Barbizon ; faux et vol": Jean
+  Lacampagne, 45, born at Villandraut (Gironde), limonadier at
+  Fontainebleau; the widow, née Nothburgia Binder, 31, born at Baldingen
+  (Switzerland), whose first husband, an Argentine official, had left her
+  his estate; counsel Me Crémieux (Lacampagne) and Me Letavernier; verdict
+  after half an hour, guilty with mitigating circumstances, both sentenced to
+  hard labour for life; applause in court.
+- Bénézit (bd6t5397332d, view 44): "LANDERER (Albert), peintre, né à Bâle,
+  mort assassiné à Paris en 1893 (Ec. Suis.). Elève de Hieronymus Hess ...
+  passa les dix dernières années de sa vie à Barbizon. Le musée de Bâle
+  conserve de lui : Entrée à Bâle des envoyés de la Confédération en 1501."
+  Gives the first name (Albert) and the Basel origin; conflicts with the
+  press on the place of death (Barbizon) and on the length of residence (18
+  years in the 1893 press, 10 in Bénézit).
+- L'Abeille de Fontainebleau, 10 September 1896: besides the hotel
+  conversion, repeats a rumour that Lacampagne had died in New Caledonia.
+  Rumour only.
+
 ## Conflicts and open points
 
 - The 1896 article gives the hotel's origin as the Landerer house; the 1927
@@ -117,8 +145,8 @@ Karampournis account that Bodmer's house (38bis) belonged to the hotel.
   combined the main house (Landerer) and the house across the courtyard
   (Bodmer, today 38bis), which matches the Karampournis account. Not proven by
   a single source; needs the cadastre or a guidebook entry naming both.
-- The painter's first name is not yet confirmed (search "Landerer" with
-  "Mousquetaires" or "Salon" for the catalogue entry).
+- The painter's first name: Albert, per Bénézit (OCR only). Not yet
+  confirmed by a second source (Salon catalogue).
 - "M. Comble" (1902) is presumably the mayor or a councillor (the rue
   Jean-Baptiste Comble); not checked.
 - Who opened the hotel in 1896, and when the Schaller tenure began and ended,
