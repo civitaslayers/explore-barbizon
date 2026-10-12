@@ -69,21 +69,6 @@ function deriveDevice(userAgent: string | null): Device {
   return "desktop";
 }
 
-// The generated lib/supabase.types.ts has no Functions entry for
-// record_page_view (confirmed — see Functions: { [_ in never]: never }), so
-// the RPC call is typed locally and cast, following the same stale-types
-// workaround already used in pages/api/locations/[id].ts (e.g.
-// `.update(payload as any)`, `.from("location_edits" as any)`).
-type RecordPageViewArgs = {
-  p_path: string;
-  p_visitor_day_hash: string;
-  p_locale: AllowedLocale | null;
-  p_location_slug: string | null;
-  p_referrer_host: string | null;
-  p_device: Device;
-  p_country: string | null;
-};
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -161,21 +146,15 @@ export default async function handler(
       .digest("hex");
 
     try {
-      const args: RecordPageViewArgs = {
+      const { error } = await supabaseAdmin.rpc("record_page_view", {
         p_path: path,
         p_visitor_day_hash: visitorDayHash,
-        p_locale: locale,
-        p_location_slug: locationSlug,
-        p_referrer_host: referrerHost,
-        p_device: device,
-        p_country: country,
-      };
-      const { error } = await (
-        supabaseAdmin.rpc as unknown as (
-          fn: string,
-          args: RecordPageViewArgs
-        ) => Promise<{ error: { message: string } | null }>
-      )("record_page_view", args);
+        p_locale: locale ?? undefined,
+        p_location_slug: locationSlug ?? undefined,
+        p_referrer_host: referrerHost ?? undefined,
+        p_device: device ?? undefined,
+        p_country: country ?? undefined,
+      });
 
       if (error) {
         // Safe to log — only the hash appears here, never the raw ip/UA.
