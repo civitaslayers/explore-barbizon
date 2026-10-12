@@ -1,5 +1,32 @@
 ---
 
+## 2026-10-12
+_Night 6 (nightly loop, Fable 5.1), seven `night6/*` branches (PRs #21–#27) staged on `merge/night6` and fast-forwarded to main as `aba9df7`. Decision texts summarised from the PR bodies and `docs/briefs/2026-10-11-night.md`._
+
+### Fonts are self-hosted; no Google Fonts request from the site (task 3afc344b)
+**Decision:** Inter and Newsreader load through `next/font/local` from the `@fontsource-variable/inter` and `@fontsource-variable/newsreader` packages (the only new dependencies), exposed as `--font-inter` / `--font-newsreader`; the Google Fonts `<link>` tags are gone from `_document.tsx`.
+**Reason:** The nightly sandbox could not run `next build` because the Google Fonts fetch is blocked, and every visitor page load was making a request to Google. Option (b) of the ops proposal, chosen by Luigi 2026-10-11.
+**Consequence:** `next build` now passes the fonts step everywhere; the remaining sandbox build blocker is Supabase egress at page-data collection. Fontsource's latin Newsreader has `wght` only, not `opsz`; if large italics look off, the fix is the `opsz`-bearing file, not a return to Google.
+**Migration risk:** none
+
+### My day usage is counted as four anonymous events in `product_events` (task 068cfc3d)
+**Decision:** `myday_add`, `myday_share_created`, `myday_shared_opened`, `myday_shared_saved`, sent as `{event, locale}` to `/api/track` (second body shape), stored in `public.product_events` (event, locale, device, occurred_at; RLS deny-all, service_role only). No slugs, identifiers or query strings. Insert failures are non-fatal and logged.
+**Reason:** The 2026-10-06 decision defers the 1A mobile shell until v0 usage is observed; `page_views` drops query strings and My day lives in localStorage, so usage was invisible.
+**Consequence:** Migration applied to production by claude.ai 2026-10-12 after the merge. Reading the counts is a service-role query; nothing public.
+**Migration risk:** low (new table only)
+
+### Map tips: static GeoJSON in the repo until there are three or more tips (task 5e8e23cf, plan only)
+**Decision:** The Allée John Constable shortcut will be drawn from a static GeoJSON file with its own `map-tips` source and a dashed `tip-line` layer following the `my-day` pattern; a `map_tips` table only once three or more tips exist; the `routes` table is never reused for tips. Mosaics in the allée become ordinary `locations` pins.
+**Reason:** Lightest option for one tip; `routes` is the walking-tour model.
+**Consequence:** No code yet. `docs/plans/map-tips-layer.md` lists the six coordinates/facts Luigi must supply or confirm on site; the mosaic category needs a `CATEGORY_ICON` entry in `MapGL.tsx` or falls back to the museum icon.
+**Migration risk:** none
+
+### Image remote patterns are only the hosts in use (task eb69de89)
+**Decision:** `next.config.mjs` `images.remotePatterns` keeps `api.mapbox.com` and `media.explorebarbizon.com` only; `**.supabase.co` and `images.unsplash.com` removed after a production query showed every `media.url` (97) and `stories.cover_image_url` (9) on the R2 host and no code reference to either removed host.
+**Reason:** Unused allow-listed image hosts are a silent dependency; the file has already caused one serverless regression, so it stays minimal and hardcoded.
+**Consequence:** Any new image host needs an explicit pattern. `scripts/seo-audit.mjs` gained the Vercel protection-bypass header (env `VERCEL_AUTOMATION_BYPASS_SECRET`) in the same change.
+**Migration risk:** none
+
 ## 2026-10-09
 _Overnight session 4 (Fable 5.1), seven `overnight4/*` branches staged on `merge/overnight4` and merged to main 2026-10-09 as `3c39fbb` together with the day/governance-2026-10-09 branch. Decision texts carried verbatim from the session report (`~/overnight-report-2026-10-09.md` on Luigi's Mac, job sections and appendix); job 3 (heritage plaques dossier) and job 5 (/map h1 + skip link) made no decisions. Job 8 (a46d0dc9, regenerate `lib/supabase.types.ts`) was parked: no type generator in the Supabase MCP, no CLI, no access token._
 

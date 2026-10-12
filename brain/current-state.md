@@ -1,9 +1,51 @@
 # Current State
 
-Last updated: 2026-10-10
+Last updated: 2026-10-12
 
 ## Status
 
+**2026-10-12 night 6 — merged and deployed.** Seven `night6/*` branches (PRs
+#21–#27, briefs in `docs/briefs/2026-10-11-night.md`, loop run 01:50–02:15)
+were staged on `merge/night6` from `7395bc8` in the order map-tips-plan →
+supabase-types-casts → assignee-presets → deployed-runtime-verification →
+myday-events → myday-focus-keyboard → self-host-fonts; one conflict
+(`package.json` test line, resolved as a union), `pages/api/track.ts`
+auto-merged. Full gate on the combined head: tsc clean, lint 0 errors / 9
+pre-existing warnings, `check:i18n` pass, 246/246 tests. Preview gate on the
+`merge/night6` Vercel preview: `/en` and `/map` 200, three self-hosted woff2
+preloads, zero `fonts.googleapis.com` links, skip link present; `/api/tasks`
+still 401 unauthenticated. Luigi approved; `main` fast-forwarded to `aba9df7`,
+deployed as `dpl_E3FFRZZGY73iW5Q93r7Wj8H2Csrj` (READY, production). Rollback
+target: `dpl_517DC6xcvbAeU3cbi8e5BpaVNG9Z` (commit `0d8b58b`). Post-deploy
+spot-check on production: `/en/stories` 200 with self-hosted fonts and skip
+link. `scripts/seo-audit.mjs` could NOT run from the cloud session (egress to
+explorebarbizon.com and supabase.co blocked); run it locally. What landed:
+`lib/supabase.types.ts` regenerated with `pin_moves`, `as any` casts dropped in
+`pages/api/locations/[id].ts` except the locations `.update(payload as any)`,
+RPC cast dropped in `pages/api/track.ts` (a46d0dc9); CCC assignee presets in
+`lib/assignees.ts` + test (d9f5e4c3); `scripts/seo-audit.mjs` sends
+`x-vercel-protection-bypass` when `VERCEL_AUTOMATION_BYPASS_SECRET` is set, and
+`next.config.mjs` `images.remotePatterns` pruned to `api.mapbox.com` + the R2
+host (eb69de89); Inter and Newsreader self-hosted via `next/font/local` from
+`@fontsource-variable/*`, Google Fonts links removed (3afc344b); My day panel
+focus-on-open / return-to-chip, keyboard path to pins via sidebar search
+results (bc8e61e7); four cookieless `product_events` (`myday_add`,
+`myday_share_created`, `myday_shared_opened`, `myday_shared_saved`) through
+`/api/track`, migration `create_product_events` APPLIED to production by
+claude.ai 2026-10-12 (068cfc3d); `docs/plans/map-tips-layer.md` plan-only for
+the Allée John Constable shortcut (5e8e23cf). Seven tasks `done`.
+
+**Open from night 6:** `VERCEL_AUTOMATION_BYPASS_SECRET` not yet created in
+Vercel (Deployment Protection → Protection Bypass for Automation), so the
+preview gate is still manual. Fontsource's Newsreader latin file carries the
+weight axis only (no `opsz`), large italic headings may differ fractionally
+from the Google-served version; check on a phone. The map-tips plan needs six
+coordinates/facts from Luigi before any code. Search Console (09/10): 111
+indexed, 174 not indexed across 6 reasons; `/places/allee-john-constable` now
+404s by design (unpublished 2026-10-11) and will show as "Introuvable" until
+recrawled.
+
+**Previous status (2026-10-10 night 5), kept for one cycle:**
 **2026-10-10 night 5 — merged and deployed.** Eight `night5/*` branches (PRs
 #11–#18, briefs in `docs/briefs/2026-10-09-night.md`) were staged on
 `merge/night5` from `b68317d` in the order supabase-types → remove-types-marked
@@ -420,6 +462,7 @@ as the human-readable window onto it.
 ---
 
 ## Last Completed
+- [ops] Night 6 (2026-10-12): self-hosted fonts, My day focus/keyboard + cookieless events (`product_events` applied), types regen + cast cleanup, assignee presets module, seo-audit bypass header, remotePatterns pruned, map-tips plan doc. Main `aba9df7`, prod `dpl_E3FFRZZGY73iW5Q93r7Wj8H2Csrj`.
 - [perf+i18n] `/places` payload trim + EN fallback fix shipped (task 8ec7a8fb; branch feat/places-payload-trim; merge 511c2e2, fast-forward to main; deployed 2026-10-04). `getPublishedLocations()` in `lib/supabase.ts` now has its own dedicated row type/mapper (`toLocalizedPlace`, not the shared `toPlace()`) selecting only the fields `pages/places/index.tsx` renders, plus two PostgREST JSON-path-aliased columns (`translations->en->>short_description`, `translations->en->_meta->>status`) resolved through the shared `getLocalized()` helper — fr/en page-data dropped from ~142-145 kB to ~85-88 kB. Same treatment applied to `getFeaturedEatStayCurated()` (the curated cards on the same page). Verified on production: `auberge-ganne` (published) shows English, `chene-sully` (draft) correctly falls back to French. `/map`'s equivalent popup bug filed separately (imperative Mapbox rendering, different fix shape). Two cleanup tasks filed from release-check findings: dead `getLocationBySlug()`/`select("*")` removal, silent-catch-to-logged-error on the curated query.
 - [ops+i18n] UI-chrome strings + FR/EN language switcher shipped (tasks cc6e5703, ea615bf5; branch feat/i18n-strings-switcher; three commits — e1543ae strings, e6e6690 switcher, 25d300a+5a86b67 Luigi's copy review; fast-forward merge 5a86b67; deployed 2026-10-04). `components/LanguageSwitcher.tsx` new; `components/Layout.tsx` gained `hasEnglishVersion?: boolean` (default `true`); `pages/places/[slug].tsx` computes it via `hasPublishedTranslation()`. Found and fixed in passing: a duplicate top-level `"map"` key in both `common.json` files that was silently clobbering keys; a `MapGL.tsx` bug where `/en/map` pin popups linked to the French `/places/...` page; dead legacy code in `places/[slug].tsx` (~21 untranslated strings removed with it). Editorial prose (homepage/about/history/plan-your-visit/HistoryTimeline body copy) deliberately split out — new queued task for native French authorship, not a mechanical pass.
 - [ops+seo] Tracker + hreflang gating shipped (tasks 66deb8a9, eb5f1e3e; branch feat/tracker-hreflang; merge a11360d, fast-forward to main; deployed 2026-10-04). `pages/api/track.ts` + `components/PageViewTracker.tsx` write to the existing `page_views` schema via `record_page_view()` RPC (service-role client, bot-filtered, sha256 visitor-day hash, no raw IP/UA stored); mounted in `_app.tsx`, no-ops outside `NODE_ENV=production` (fires on Vercel Preview too). `lib/getLocalized.ts` gained `hasPublishedTranslation()`, consumed by both `SeoHead` (new `hasEnglishVersion` prop, default `true` so the ~9 i18n-catalogue pages are unaffected) and `pages/sitemap.xml.tsx` — one predicate, no duplication. Ran through the full loop (architect → implementer → release-checker SHIP) plus two rounds of live preview verification (before and after claude.ai's 93-row translation-status stamp); release-checker, unit tests (6 new `hasPublishedTranslation` cases), and a full local `seo-audit.mjs` run against production data all green. Stories/tours deliberately out of scope (same `translations` contract, queued as follow-ups).
@@ -434,14 +477,14 @@ as the human-readable window onto it.
 
 ## Blockers
 - Heritage Plaque batch (7 records) blocked pending a dedicated verification session
-- `pin_moves` migration awaiting Luigi's production apply (see night 5 above)
+- `pin_moves` and `product_events` both applied to production; no DB blocker
 
 ## Next Tasks
 1. Editorial prose French translation — homepage, about, history, plan-your-visit, HistoryTimeline (split off cc6e5703; needs native authorship, not a mechanical pass)
 2. Remaining French migration records (93 of 107 now have published English; ~14 still need translation + status stamp)
 3. Map popups render French short_description on /en/map — same bug class as 8ec7a8fb, different fix shape (imperative Mapbox rendering)
 4. suggest.ts anon blind-read follow-up (task 08309b0b) — swap getTasks() for getTasksAdmin(); small
-5. Apply `migrations/create_pin_moves.sql` to production, then regenerate types and drop the `as any` cast (night 5 follow-up)
+5. Create `VERCEL_AUTOMATION_BYPASS_SECRET` in Vercel and run `seo-audit.mjs` against a preview (night 6 follow-up); supply the six map-tips coordinates from `docs/plans/map-tips-layer.md`
 6. page_views retention/purge job (25-month cap per 2026-08-13 decision) — outstanding since the schema shipped
 7. Replace silent catch around /places curated-cards query with logged error + visible empty state (release-check finding)
 8. Remove dead getLocationBySlug() (uses forbidden select("*")) (release-check finding, P5)
