@@ -15,10 +15,12 @@ import { degrade, withRetry } from "@/lib/fetchPolicy";
 import { heroImage800w } from "@/lib/media";
 import { renderStoryMarkdown } from "@/lib/storyMarkdown";
 import {
+  pickPlaceSlugs,
   resolveRelated,
   type RelatedContent,
   type RelatedPlaceRow,
   type RelatedStoryRow,
+  type StoryLocationRow,
 } from "@/lib/relatedStories";
 import { buildArticleSchema } from "@/lib/seo";
 import { buildTitle } from "@/lib/seoText";
@@ -156,6 +158,35 @@ async function getRelatedPlaceRows(slugs: string[]): Promise<RelatedPlaceRow[]> 
   return (data ?? []) as unknown as RelatedPlaceRow[];
 }
 
+// Places for a story from the story_locations join table, joined to the
+// story by slug (inner) and to locations (is_published filtered in
+// pickPlaceSlugs). An error (e.g. table not yet migrated) is treated as no
+// rows so the caller falls back to RELATED_SLUGS.
+async function getStoryLocationRows(
+  storySlug: string
+): Promise<StoryLocationRow[]> {
+  if (!supabase) throw new Error("Supabase not configured");
+
+  const { data, error } = await supabase
+    .from("story_locations")
+    .select("display_order, stories!inner(slug), locations(slug, is_published)")
+    .eq("stories.slug", storySlug)
+    .order("display_order", { ascending: true });
+
+  if (error || !data) return [];
+  const rows: StoryLocationRow[] = [];
+  for (const r of data) {
+    const loc = Array.isArray(r.locations) ? r.locations[0] : r.locations;
+    if (!loc) continue;
+    rows.push({
+      slug: loc.slug,
+      display_order: r.display_order,
+      is_published: loc.is_published,
+    });
+  }
+  return rows;
+}
+
 const StoryPage: NextPage<StoryPageProps> = ({ story, related, hasEnglishVersion }) => {
   const router = useRouter();
   const locale = router.locale ?? "fr";
@@ -278,19 +309,28 @@ export const getStaticProps: GetStaticProps<StoryPageProps> = async ({
   const spec = RELATED_SLUGS[slug];
   const empty: RelatedContent = { stories: [], places: [] };
   // The story itself still renders if this fails; only the sidebar is empty.
-  const related = spec
-    ? await degrade(
-        `stories/[slug] related:${slug}`,
-        async () => {
-          const [storyRows, placeRows] = await Promise.all([
-            getRelatedStoryRows(spec.stories),
-            getRelatedPlaceRows(spec.places),
-          ]);
-          return resolveRelated(slug, spec, storyRows, placeRows, locale ?? "fr");
-        },
-        empty
-      )
-    : empty;
+  // Places come from story_locations when it has rows, else from the map.
+  const related = await degrade(
+    `stories/[slug] related:${slug}`,
+    async () => {
+      const tableRows = await getStoryLocationRows(slug);
+      const placeSlugs = pickPlaceSlugs(tableRows, spec?.places ?? []);
+      const storySlugs = spec?.stories ?? [];
+      if (placeSlugs.length === 0 && storySlugs.length === 0) return empty;
+      const [storyRows, placeRows] = await Promise.all([
+        getRelatedStoryRows(storySlugs),
+        getRelatedPlaceRows(placeSlugs),
+      ]);
+      return resolveRelated(
+        slug,
+        { stories: storySlugs, places: placeSlugs },
+        storyRows,
+        placeRows,
+        locale ?? "fr"
+      );
+    },
+    empty
+  );
 
   return {
     props: {

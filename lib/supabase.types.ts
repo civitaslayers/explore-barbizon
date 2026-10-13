@@ -661,6 +661,47 @@ export type Database = {
           },
         ]
       }
+      // Hand-added (night 2026-10-12, task 41f46d02): regenerate this file
+      // after migrations/create_story_locations.sql is applied.
+      story_locations: {
+        Row: {
+          created_at: string | null
+          display_order: number
+          id: string
+          location_id: string
+          story_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          display_order?: number
+          id?: string
+          location_id: string
+          story_id: string
+        }
+        Update: {
+          created_at?: string | null
+          display_order?: number
+          id?: string
+          location_id?: string
+          story_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_locations_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_locations_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       task_links: {
         Row: {
           created_at: string
