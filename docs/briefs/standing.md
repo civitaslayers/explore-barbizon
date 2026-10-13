@@ -1,8 +1,11 @@
 # Standing night jobs
 
 These run every night after the briefed queue is empty, while the run's time
-cap allows, in the order S1, S2, S3. They also appear in a dated night brief
-when queued as tasks. Read only the section you are running.
+cap allows, in the order S1, S2, S3. Task ids: S1 = 0a40e644, S2 = 7820f08f,
+S3 = 19af6859. They are standing rows: after each run the loop puts them back
+to `queued` with an `outputs` row pointing at the PR, so they never close.
+S1 and S3 run at most once per night; S2 repeats until the cap.
+Read only the section you are running.
 
 Rules for all standing jobs:
 - Read-only on code: commit only new files under `docs/audits/` or
