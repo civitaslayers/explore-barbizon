@@ -1,5 +1,15 @@
 ---
 
+## 2026-10-13
+
+### Research findings live in `research_findings`; search it before any new research (Luigi, 2026-10-13)
+**Decision:** Every historical finding, lead, open question and refuted claim is stored as one row in `public.research_findings` (subject, optional `location_id` / `story_id`, claim, status, method, source title/date/page/ref/url, verbatim quote, notes, dossier path). Status values: `confirmed` (period source read), `lead` (OCR, snippet, secondary, single source), `oral` (testimony), `open` (unanswered or pending check), `refuted` (shown wrong or unsupported). The narrative dossiers in `docs/sources/*.md` stay as the long-form record; the table is the searchable index. Any session (claude.ai, Claude Code, nightly loop) researching a subject first queries the table (full-text index on subject, claim, quote, source title, notes), and writes its new findings to it in the same session, with the dossier path.
+**Reason:** Luigi asked that research never be done twice. Facts were scattered across eight dossiers and `internal_notes`, and the same searches were being repeated.
+**Consequence:** Table created by claude.ai via MCP on 2026-10-13 (`migrations/create_research_findings.sql`), RLS deny-all, service role only, never exposed publicly. Backfilled with 290 rows from the eight dossiers dated 2026-10-09 to 2026-10-12 (107 confirmed, 121 lead, 35 open, 20 refuted, 7 oral). `internal_notes` keeps a short summary per location and points to the table or dossier.
+**Migration risk:** low (new table only)
+
+---
+
 ## 2026-10-12
 _Night 6 (nightly loop, Fable 5.1), seven `night6/*` branches (PRs #21–#27) staged on `merge/night6` and fast-forwarded to main as `aba9df7`. Decision texts summarised from the PR bodies and `docs/briefs/2026-10-11-night.md`._
 
