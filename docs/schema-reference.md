@@ -238,6 +238,38 @@ Note: `id` has no default — it is expected to mirror `auth.users.id` from Supa
 
 ---
 
+### `research_findings` (added 2026-10-13)
+
+Internal research index: one row per finding, lead, open question or refuted claim, with its source. RLS deny-all (service role only); never exposed publicly. Migration: `migrations/create_research_findings.sql`. Narrative dossiers stay in `docs/sources/*.md`.
+
+| column | type | nullable | notes |
+|---|---|---|---|
+| id | uuid | NO | `uuid_generate_v4()` |
+| subject | text | NO | consistent label, e.g. `Les Charmettes (40 Grande Rue)`, `Karl Bodmer` |
+| location_id | uuid | YES | → `locations.id`, on delete set null |
+| story_id | uuid | YES | → `stories.id`, on delete set null |
+| claim | text | NO | the finding in one or two sentences |
+| status | text | NO | `confirmed` · `lead` · `oral` · `open` · `refuted` |
+| method | text | YES | `page_image` · `ocr` · `snippet` · `census` · `secondary` · `oral` · `archive` |
+| source_title, source_date, source_page, source_ref, source_url | text | YES | source as written; `source_ref` = archive call number |
+| quote | text | YES | verbatim, original language |
+| notes | text | YES | conflicts, caveats, editorial decisions |
+| dossier | text | YES | repo path of the narrative dossier |
+| found_on | date | NO | date of the research session |
+| created_at, updated_at | timestamptz | NO | |
+
+Search before researching (full-text index on subject, claim, quote, source title, notes):
+
+```sql
+select subject, status, claim, source_title, source_date, source_page, source_url
+from research_findings
+where to_tsvector('simple', coalesce(subject,'')||' '||coalesce(claim,'')||' '||coalesce(quote,'')||' '||coalesce(source_title,'')||' '||coalesce(notes,''))
+      @@ websearch_to_tsquery('simple', 'Charmettes Schaller')
+order by status, found_on;
+```
+
+Everything known about one place: `where location_id = (select id from locations where slug = '<slug>')`.
+
 ### Internationalization — `translations` JSONB (added 2026-07-13)
 
 French is the canonical source language (see `brain/decisions.md`, 2026-07-13,
