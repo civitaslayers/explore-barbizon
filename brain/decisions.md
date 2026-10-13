@@ -2,6 +2,12 @@
 
 ## 2026-10-13
 
+### Published claims get a source check before they are cut (Luigi, 2026-10-13)
+**Decision:** Text already on the site was written from something an earlier session read, even when the source was not noted. Before a rewrite removes or changes any published claim, run a targeted search for that claim in at least two source families (period press, books, archives, heritage databases). If a source supports it, keep it and record the source in `research_findings`. If the check finds nothing, the claim may leave the public text, but it is never simply deleted: it is recorded in `research_findings` as `open` (with the searches tried) and noted in `internal_notes`. A claim contradicted by a stronger source is recorded as `refuted`. The approval draft shown to Luigi lists, for each removed claim, which of these three cases applies.
+**Reason:** The Diaz rewrite of 2026-10-13 proposed dropping four details that a second look then supported (viper bite, generosity to Rousseau and Millet, collectors competing for his work). Cutting unchecked content loses research and sends the next session round in circles.
+**Consequence:** Rewrites take one extra search pass per removed claim. Earlier AI-written text without any source (e.g. the Bas-Bréau « hunting lodge ») still goes, but only after the check and with an `open` or `refuted` row.
+**Migration risk:** none
+
 ### Research findings live in `research_findings`; search it before any new research (Luigi, 2026-10-13)
 **Decision:** Every historical finding, lead, open question and refuted claim is stored as one row in `public.research_findings` (subject, optional `location_id` / `story_id`, claim, status, method, source title/date/page/ref/url, verbatim quote, notes, dossier path). Status values: `confirmed` (period source read), `lead` (OCR, snippet, secondary, single source), `oral` (testimony), `open` (unanswered or pending check), `refuted` (shown wrong or unsupported). The narrative dossiers in `docs/sources/*.md` stay as the long-form record; the table is the searchable index. Any session (claude.ai, Claude Code, nightly loop) researching a subject first queries the table (full-text index on subject, claim, quote, source title, notes), and writes its new findings to it in the same session, with the dossier path.
 **Reason:** Luigi asked that research never be done twice. Facts were scattered across eight dossiers and `internal_notes`, and the same searches were being repeated.
