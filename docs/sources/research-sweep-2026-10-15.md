@@ -624,10 +624,15 @@ open. No row changed.
 - Not filed (already covered): Picasso at Bellevue (44fc7fb6), Eiffel / Coz
   Ker and Villa Bernard names (029cccbf), plaques (dc8011f4).
 
-## Writes that timed out (for claude.ai to apply)
+## Writes that timed out (applied by the loop lead at 04:36 Paris)
 
 Both statements timed out after 180 s and a re-select showed them not
-applied. Not retried beyond one attempt each, per the standing rules.
+applied. Root cause found by the loop lead: a `;` inside a string literal
+makes the Supabase MCP `execute_sql` call hang until its 180 s timeout
+(the same thing stalled the S1 and S3 status writes tonight). The lead
+re-ran both statements with the in-literal semicolons replaced by periods
+and both applied (`32a3b742` now `confirmed`, `ca881ef4` note appended).
+Kept below for the record; nothing left for claude.ai to apply.
 
 ```sql
 update research_findings
