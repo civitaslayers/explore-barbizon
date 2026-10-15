@@ -211,6 +211,22 @@ FKs: `story_id` → `stories.id` ON DELETE CASCADE, `location_id` → `locations
 
 ---
 
+### `location_parking_distances` (pending apply: migrations/create_location_parking_distances.sql)
+
+| Column | Type | Nullable | Default |
+|---|---|---|---|
+| id | uuid | NO | gen_random_uuid() |
+| location_id | uuid | NO | — |
+| parking_location_id | uuid | NO | — |
+| walking_seconds | integer | NO | — |
+| distance_meters | integer | NO | — |
+| method | text | NO | 'mapbox_walking' |
+| computed_at | timestamptz | NO | now() |
+
+FKs: `location_id` → `locations.id` ON DELETE CASCADE, `parking_location_id` → `locations.id` ON DELETE CASCADE (a published location whose category slug is `parking`). UNIQUE (`location_id`, `parking_location_id`); index on `location_id`. CHECKs: `walking_seconds >= 0`, `distance_meters >= 0`, `method in ('mapbox_walking')`. RLS on; policy "Public read location_parking_distances" (select, anon + authenticated). Filled by `scripts/compute-parking-distances.mjs` (Mapbox Matrix API, `mapbox/walking` profile; pairs Mapbox cannot route are skipped, never estimated as a straight line). Read through `lib/parkingDistance.ts` (`fetchNearestParking`, null on any error or missing table). Minutes shown to visitors are `ceil(walking_seconds / 60)`. Use `distance_meters`, never `distance_km`.
+
+---
+
 ### `routes`
 
 | Column | Type | Nullable | Default |
@@ -402,6 +418,7 @@ These override any default assumptions in queries, migrations, or AI-assisted se
 - `tours` now HAS an `is_published` flag (added 2026-07-13 with the i18n groundwork)
 - No unique constraints visible on most slug columns (may exist as indexes, not visible through information_schema) — `stories.slug` and `routes.slug` are the exception: both are explicitly UNIQUE (`stories_slug_unique`, and a unique constraint on `routes.slug`)
 - `story_locations` join table is written but **pending apply** (`migrations/create_story_locations.sql`); until applied and seeded, story-page places fall back to `data/relatedStories.ts`
+- `location_parking_distances` is written but **pending apply** (`migrations/create_location_parking_distances.sql`); until applied and filled by `scripts/compute-parking-distances.mjs --execute` (Luigi's action), `fetchNearestParking` returns null and no "minutes from the car park" fact can render
 
 ---
 
