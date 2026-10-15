@@ -386,13 +386,283 @@ plaque and panel photographs, ce8efd66 / 103eb640 the Bodmer archives.
 
 ## Not reached (after pass 2)
 
+Worked in pass 3 below: Villa Élisabeth, Villa Bernard, L'Ombrage, Coz Ker,
+Auberge Diaz, Manoir Saint-Hérem, Landerer, Rouveyre, Hôtel de la Forêt. The
+list of what remains is at the end of pass 3.
+
+---
+
+# Pass 3 (same night, 01:58 to 02:35 UTC; all listed subjects reached)
+
+Reachability: Supabase MCP fine for reads, inserts and short updates, but two
+longer `update` statements timed out after 180 s without applying (checked by
+re-select); per the standing rules they were not retried further and the exact
+SQL is in the fenced block at the end of this pass. WebSearch and WebFetch as
+before. Blocked this pass (noted once, not retried): the 1978 BnF Dorgelès
+exhibition catalogue on Gallica (`bpt6k65346721.texteBrut`, server error), the
+CCFr Belloni-Dorgelès record (provenance), fr.wikipedia « Auguste Giroux »
+(provenance, page not returned by a search), polmoresie.over-blog.fr (robots),
+fontainebleau-photo.fr (http/https redirect loop). Sources that did work:
+universalis.fr, horizon14-18.eu, wikitimbres.fr (La Poste 1985 notice),
+fr.wikipedia « Le Château des brouillards », audetourdunlivre.com,
+musee-picasso-paris press kit (PDF), asllinea.org (MoMA 2023 review),
+fontainebleau-tourisme.com, yonder.fr, abcsalles.com, gralon.net, pop.culture.gouv.fr
+(Joconde), nli.org.il authority file, en.wikipedia, sik-isea.ch (1893 Basel
+exhibition catalogue PDF), edoc.unibas.ch, lehmanns.ch (book preview),
+helveticarchives.ch.
+
+Database writes this pass: 3 inserts (`b32b5a52` Auberge Diaz, `ca881ef4`
+Albert Landerer, `9856404a` Villa Élisabeth), 3 row updates applied
+(`bab04c7d`, `e7c6b02f`, `0414d53f`), 2 updates timed out (`32a3b742`,
+`ca881ef4`, SQL below), 1 task filed (`41b522df`). Heartbeats at 01:58, 02:18,
+02:27 and 02:33 UTC.
+
+## 15. Villa Élisabeth (30 Grande Rue), 6 rows, linked to `villa-elisabeth` (published)
+
+**Checked.** universalis.fr Dorgelès entry; horizon14-18.eu biography; La
+Poste 1985 stamp notice (wikitimbres PDF); fr.wikipedia *Le Château des
+brouillards*; audetourdunlivre.com (2015); searches for Billy 1947 p.160 and
+Champigneulle 1965 p.257 on Google Books (records only, no text returned by
+search); the 1978 BnF exhibition catalogue *Roland Dorgelès : de Montmartre à
+l'Académie Goncourt* on Gallica (server error, not retried); CCFr Belloni
+record (provenance-blocked, not retried).
+
+**Outcome.**
+- No reference work read (Universalis, horizon14-18, La Poste notice,
+  Wikipedia) mentions Barbizon at all; they give Montmartre, Amiens, Cassis
+  (1940), Montsaunès (from 1942), and the 1923 marriage to Hania Routchine.
+  Wikipedia places the novel's *setting* in Montmartre, which is not in
+  tension with its having been *written* at Barbizon.
+- The only new Barbizon mention is a Tier 3 book blog: « Il louera à Barbizon,
+  la maison "la villa d'Elizabeth" qui appartenait au peintre, Diaz de la
+  Penà ». The rental agrees with Billy; the Diaz ownership is unsupported
+  anywhere and sits oddly with Diaz's documented house at 28 Grande Rue.
+  **Inserted** as `lead` (`9856404a`) with a « do not use » note, so it is not
+  researched twice.
+- The six existing rows stay as they were: the Billy and Champigneulle
+  snippets remain the two Tier 2 anchors for the rental and the writing of
+  *Le Château des brouillards*; neither could be read in page view this pass,
+  so no status change (the rule is Tier 1 or two *read* Tier 2 sources).
+- The 1978 BnF catalogue is the best next source: an exhibition chronology
+  from the Arsenal's Dorgelès papers would be Tier 1 for dates and addresses.
+
+**Implication for published text.** None. The live text (« loua la villa
+Élisabeth … y écrivit Le Château des brouillards … sa femme, Hania ») matches
+the Billy lead and claims nothing more. Do not add the Diaz ownership.
+
+## 16. Villa Bernard (rue Jean-Baptiste Comble), 6 rows, linked to `villa-bernard` (published)
+
+**Checked.** Searches for Giroux / villa Bernard / Cocteau / Giraudoux in
+general web, Google Books, Gallica, RetroNews and archive.org domains; the
+polmoresie.over-blog.fr article (robots-blocked); fr.wikipedia « Auguste
+Giroux » (provenance-blocked); barbizon.fr/histoire (not returned by search).
+
+**Outcome.** Nothing new reachable. The visitor list (Citroën, Cocteau,
+Giraudoux, Diaghilev, Chanel, Iribe) still rests on the circuit text plus
+two Tier 3 pages that both point to Billy 1947 for their substance. The 1932
+classified (L'Informateur de Fontainebleau, Gallica) remains the one period
+anchor for the children's rest home, unread on the image. No row changed.
+
+**Implication for published text.** Unchanged from pass 2: « se croisèrent »
+is the right hedge; Citroën and Iribe remain the two unsupported names, and
+the Diaghilev / 1930s tension is already handled in the text. Covered by
+029cccbf; no new task.
+
+## 17. L'Ombrage (18 Grande Rue), 5 rows, linked to `l-ombrage` (published)
+
+**Checked.** Searches for « Maximilienne Whettnall », « Whettnall » +
+conservatoire / Marguerite Long / Yves Nat, « Maximilienne Ruffin »,
+« Whettnall-Ruffin », and the musiciens77 blog.
+
+**Outcome.** Zero hits for the pianist under any spelling outside the two
+Tier 3 pages already on file; the name also returns nothing in library
+authority files reached through search. The data.bnf.fr negative (row
+61131132) stands. No row changed. Next realistic anchors are offline: the
+Conservatoire prize lists (AN AJ/37) and the Barbizon census 1931-1936.
+
+**Implication for published text.** None new; the page already omits the
+George Sand line and keeps the Rubinstein / Samson François sentence at the
+level of the mairie circuit (Tier 1 by policy).
+
+## 18. Coz Ker (34 Grande Rue), 6 rows, linked to `coz-ker` (published)
+
+**Checked.** Searches for Gustave Eiffel + Barbizon / Grande Rue / Coz Ker;
+« Coz Ker » Barbizon; François Millet fils + Géraldine (Rhode Island);
+Théodore Duhamel + Villa Marguerite + Sensier. Two POP/Joconde notices
+returned by the Duhamel search were read (Louvre, Millet letters to Sensier,
+3 March 1872 and 12 March 1869, Moreau-Nélaton bequest): they concern Sensier
+only, not Duhamel or the villa.
+
+**Outcome.** Still no source of any tier for Eiffel at Barbizon beyond the
+circuit text; the web returns only the Crozon « villa Eiffel » and the
+Aiguilles « maison Eiffel ». No row changed. The Karampournis footnote
+(« Actuellement villa Coz Ker 34, Grande rue ») still needs the physical
+book, and the Eiffel question needs AD77 matrices cadastrales for no. 34
+(or the Fonds Eiffel at Orsay), both offline.
+
+**Implication for published text.** Unchanged: the Eiffel sentence should be
+attributed to the commune circuit (« selon le parcours de la mairie ») or
+moved to `internal_notes` until a document surfaces. Covered by 029cccbf.
+
+## 19. Auberge Diaz (11 Grande Rue), 5 rows, linked to `la-folie-barbizon-hotel` (published)
+
+**Checked.** The number check flagged in pass 2 (booklet « N°11 » vs the
+linked location at 5 Grande Rue). fontainebleau-tourisme.com and yonder.fr
+pages on La Folie Barbizon (address, no building history); three directory
+listings for the Hostellerie de la Dague (abcsalles.com, gralon.net, yelp.com
+title); searches for « Auberge Diaz » on Google Books, archive.org, Gallica,
+Commons (nothing new).
+
+**Outcome.**
+- All three directories give the Hostellerie de la Dague at **5 Grande Rue,
+  77630 Barbizon**, the address of today's La Folie. So the chain Auberge
+  Diaz → Hostellerie de la Dague → La Folie sits on one plot, and the
+  booklet's « N°11 » is a numbering error or an older numbering, not a
+  different house. **Inserted** `b32b5a52` (lead, three concordant Tier 3
+  listings) and **updated** the notes of `bab04c7d` and `e7c6b02f` to close
+  the number check.
+- The 1949 press placing the Auberge Diaz « rue du Bas-Bréau, à l'entrée de
+  la forêt » is consistent: nos. 1-11 are the forest end of the Grande Rue.
+- No source read links La Folie's own presentation to Diaz or the Dague; the
+  1954-55 « ancien atelier Diaz » claim remains a business claim.
+
+**Implication for published text.** None required: `la-folie-barbizon-hotel`
+says nothing about Diaz or the Dague. If Luigi wants a heritage line, the
+safe one is « à l'emplacement de l'ancienne Auberge Diaz, devenue Hostellerie
+de la Dague » (Karampournis 1990 + booklet + directories), without the
+« atelier de Diaz » claim.
+
+## 20. Manoir Saint-Hérem (ex Hôtel Bellevue), 9 rows, linked to `manoir-saint-herem` and `l-angelo` (published)
+
+**Checked.** Musée national Picasso-Paris press kit *Olga Picasso* (PDF, read
+in full for Fontainebleau / Barbizon / 1921); asllinea.org review of MoMA's
+*Picasso in Fontainebleau* (2023); searches for Picasso + Barbizon + Bellevue
+/ pension (nothing).
+
+**Outcome.**
+- The museum press kit confirms the 1921 summer at Fontainebleau three times
+  (« Été 1921 : Séjour à Fontainebleau », p. 6; also pp. 3 and 12) and never
+  names Barbizon; the MoMA review gives the lease as 1 July to 1 October 1921
+  with a garage converted into a studio. This is Tier 1 for the Fontainebleau
+  stay. Row `32a3b742` (L'Œil 2007) qualifies for `confirmed` with the press
+  kit as second, independent source: the update **timed out twice** and is in
+  the fenced block below for claude.ai to apply.
+- Nothing new for Picasso at Barbizon. The negative stands, now against a
+  museum chronology too.
+
+**Implication for published text.** Unchanged: move the Picasso sentence to
+`internal_notes` or attribute it explicitly to the commune circuit. Task
+44fc7fb6 (« Review Picasso claim on Manoir Saint-Hérem ») already covers it;
+no new task.
+
+## 21. Landerer affair (12 rows) and Albert Landerer (2 rows), linked to `besharat-gallery-barbizon` (published)
+
+**Checked.** Searches for Landerer / Länderer + Basel / Barbizon / 1893;
+SIK-ISEA digitised *Catalog der Schweizerischen Kunst-Ausstellung in Basel*
+1893 (PDF, no Landerer entry); edoc.unibas.ch record 56401; lehmanns.ch
+preview of the same book (table of contents only); a HelveticArchives hit
+(unrelated, Albrecht Mayer).
+
+**Outcome.**
+- **New Tier 2 source found:** Martin Gaier, *Bilder Basler Bändelherren. Der
+  Historienmaler Albert Länderer (1816-1893) und seine Auftraggeber*, Schwabe,
+  Basel, 2017 (DNB 113189040X). Chapter 3 (by Laura Catania, pp. 86-105) has
+  sections « Der junge Länderer » (p. 90), « Zwischen Basel und Paris »
+  (p. 97) and **« Ein Basler Historienmaler in Barbizon » (p. 102)**; the
+  appendix holds his correspondence 1857-1889, his **testament of 1891**
+  (p. 175), an oeuvre list and a Länderer-Wieland-Bischoff family tree. It
+  gives the birth year 1816, which fits the press ages (76-78 in 1892-93) and
+  narrows the age conflict (row 72582044) without settling it.
+- **Inserted** `ca881ef4` (lead; record and table of contents seen, body not
+  read). A follow-up note correcting the spelling (« Länderer ») and the
+  chapter author **timed out**; SQL below.
+- **Task filed** `41b522df` (backlog, p5, source loop): obtain and read the
+  book, then update the residence-length, age and house rows. Duplicate check
+  done: ce8efd66 is the AD77 property chain, not this book.
+- The twelve affair rows (Abeille, Nouvelliste, Bataille, Bénézit) are all
+  Gallica-anchored and could not be re-read; unchanged.
+
+**Implication for published text.** None yet. If the book's Barbizon chapter
+confirms the house, it will be the citation to put behind the Landerer
+paragraph on the Les Charmettes page, replacing OCR press snippets.
+
+## 22. André Rouveyre, 11 rows, linked to `besharat-gallery-barbizon` (published)
+
+**Checked.** National Library of Israel authority record (Rouveyre, André,
+1879-1962); en.wikipedia; data.bnf.fr (1962 deaths list returned without
+content; his person page not returned by search); searches for « Ma
+Coquille » / Charmettes.
+
+**Outcome.** The NLI authority file gives death on 18 December 1962 at
+Barbizon, citing Gide, *Correspondance (1909-1951)*, 1967 and Wikipedia; it
+is built on the same Gide edition as the existing row, so one Tier 2 source,
+not two. **Updated** `0414d53f` (source_url + note), status stays `lead`. The
+nine letter-heading and chronology snippets (Charmettes 1919-1928, settled
+1933) are unchanged; they need page view of the Gide-Rouveyre and Brandes
+editions.
+
+**Implication for published text.** None.
+
+## 23. Hôtel de la Forêt, 10 rows, linked to `bobo-club` and `mairie-barbizon` (published)
+
+**Checked.** Searches for the hotel + Masson + postcards; Darlington 1898 on
+Google Books / archive.org / HathiTrust (not returned); the Office de
+Tourisme's *circuit des peintres* English text (PDF: no Hôtel de la Forêt,
+Masson or mairie entry).
+
+**Outcome.** Nothing reachable improves the ten rows; the 1898 advertisement,
+*La Nature* 1892 and the two Plancke books remain snippet leads. The « Louis »
+Masson question (booklet) vs Jean-Baptiste Masson (1891 census) is still
+open. No row changed.
+
+**Implication for published text.** None new.
+
+## Tasks (pass 3)
+
+- **Filed** `41b522df` « Read Gaier 2017 (Schwabe) on Albert Landerer:
+  chapter “Ein Basler Historienmaler in Barbizon” » (backlog, p5, research).
+- Not filed (already covered): Picasso at Bellevue (44fc7fb6), Eiffel / Coz
+  Ker and Villa Bernard names (029cccbf), plaques (dc8011f4).
+
+## Writes that timed out (for claude.ai to apply)
+
+Both statements timed out after 180 s and a re-select showed them not
+applied. Not retried beyond one attempt each, per the standing rules.
+
+```sql
+update research_findings
+set status = 'confirmed',
+    source_title = 'Musée national Picasso-Paris, dossier de presse « Olga Picasso » (PDF); L''Œil, April 2007',
+    source_page = 'press kit p. 6 (repères chronologiques), also pp. 3 and 12; L''Œil p.47',
+    source_url = 'https://www.museepicassoparis.fr/sites/default/files/2020-05/DP_Olga_web_FR.pdf',
+    quote = 'Été 1921 : Séjour à Fontainebleau.',
+    notes = coalesce(notes, '') || ' 2026-10-15 pass 3: Musée Picasso-Paris press kit (museum document, Tier 1) read in full: three mentions of the 1921 summer at Fontainebleau, none of Barbizon, no street address. With L''Œil 2007 this settles the Fontainebleau stay. It does not by itself exclude a visit to Barbizon.',
+    updated_at = now()
+where id = '32a3b742-4edd-44ac-b2a9-fcb4542654af'
+```
+
+```sql
+update research_findings
+set notes = notes || ' Correction from the full table of contents: the book spells the name « Länderer »; chapter 3 (pp. 86-105, incl. « Ein Basler Historienmaler in Barbizon », p. 102) is by Laura Catania; the oeuvre list (pp. 182-195) and a Länderer-Wieland-Bischoff family tree (p. 199) are in the appendix.',
+    updated_at = now()
+where id = 'ca881ef4-fbd6-4402-b99d-8e867f854e94'
+```
+
+## Not reached (after pass 3)
+
 For the next pass, in this order:
-- Villa Élisabeth (6 rows: Dorgelès; CCFr Belloni correspondence record)
-- Villa Bernard (6 rows: Billy 1947 for the visitor list; L'Informateur de
-  Fontainebleau 1932 image)
-- L'Ombrage (5 rows: Whettnall concert programmes, RetroNews)
-- Coz Ker (6 rows: Eiffel claim, Karampournis footnote; needs the book)
-- Auberge Diaz, 11 Grande Rue (5 rows: La Dague vs La Folie, number check)
+- Villa Élisabeth: 1978 BnF Arsenal exhibition catalogue (Gallica
+  `bpt6k65346721`, retry when reachable), Billy 1947 p.160 and Champigneulle
+  1965 p.257 in page view
+- Villa Bernard: Billy 1947 for the visitor list; L'Informateur de
+  Fontainebleau 19 July 1932 p.8 on the image; other years of the classified
+- L'Ombrage: Conservatoire prize lists, census 1931-1936 (offline)
+- Coz Ker: AD77 matrices cadastrales for 34 Grande Rue; Karampournis 1990
+  physical copy (p. 136-137 footnote)
+- Landerer: Gaier / Catania 2017 (task 41b522df); Abeille rows on the images
+- Rouveyre: Gide-Rouveyre 1967 p.62, Brandes 1952 p.395, Coquio 1995 p.31 in
+  page view
+- Hôtel de la Forêt: Darlington 1898 full view; Louis vs Jean-Baptiste Masson
 - Maison Diaz / Narcisse Diaz / Renoir and Diaz (many rows, mostly snippet
   leads needing full view on Internet Archive or Gallica)
 - Tumble Inn (festival PDF, Bottin 1925-1935)
