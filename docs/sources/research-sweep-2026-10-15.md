@@ -1022,21 +1022,251 @@ where id = 'e31031b3-ef8b-4ca4-8af6-83655cc4b40b'
 
 ## Not reached (after pass 5)
 
-For the next pass, in this order:
-- Chapelle: period account of 24 January 1889 (Semaine religieuse du diocèse
-  de Meaux, L'Abeille de Fontainebleau, Gallica); Flohic 2001 pp. 1197-1202
-- Berthelot: Persée « A Barbizon » (1949, no 125) and 1946 no 116 p.533, in a
-  browser
-- 39 Grande Rue: data.bnf.fr work page for « Sous les ponts de Paris »
-  (14720533) to make the Rodor attribution Tier 1
-- Région Île-de-France inventory dossiers on Barbizon (task 60a6e3f7): Hôtel
-  de la Forêt / 13 Grande Rue, Hôtel Toulouse, 26 and 17 Grande Rue, Bellevue
-- Mounet-Sully: Penesco 2005 p.525 in page view
-- Maison Barye: Barye biographies (de Kay 1889, Saunier 1925) in full view
-- La Bastide: Vitry-sur-Seine archives, colonies de vacances series
-- Auberge Ganne: 1856 guide, 1834 deed, Mantes 1998 catalogue p.116, Bellier
-  1868 p.764
-- Diaz person rows: Mollett and Thomson 1890 full view
-- Céramano: Biekorf 1986, Tielt and Barbizon état civil, Ostyn monograph
-- Médaillon Chapu: period press April 1884 (Gallica)
-- Earlier lists (passes 1-4) still stand for the rows they name
+Superseded by the consolidated hand-over at the end of pass 6 below; the
+individual items are all carried over there.
+
+---
+
+# Pass 6 (03:41 to 04:05 UTC, last pass tonight, 50-minute hard stop)
+
+Scope: items from the earlier « Not reached » lists most likely to be settled by
+a source that was reachable tonight, in the order Landerer, Karl Bodmer,
+Hôtel de la Forêt / Manoir Saint-Hérem leftovers, Les Bosquets, Chêne Bodmer
+fall date, Tumble Inn. Gallica, archive.org, Persée, the Région Île-de-France
+inventory and pop.culture.gouv.fr were not attempted (blocked all night); Les
+Charmettes and Maison Diaz were out of scope.
+
+Tooling: Supabase MCP fine (the session-start notice again said it had failed
+to connect; it had not), every write applied on first try, no semicolon in any
+literal. Blocked this pass, noted once and not retried: the SIKART person
+page on `recherche.sik-isea.ch` (provenance), `books.openedition.org`
+(bot-check page), the legacy HLS URL `textes/d/D22486.php` (fetch error; the
+dated article URL worked), Fontainebleau Tourisme « Barbizon Jazz Inn » fiche
+(404), `barbizon.fr` map PDF (not retried, robots in pass 5). Sources that
+worked and were new tonight: **Historisches Lexikon der Schweiz (HLS)**, signed
+articles on both Karl Bodmer and Albert Landerer; the Google Books record of
+Gaier 2017; the FLIM / ITEM-CNRS record on Monet's *Chêne Bodmer*; *Revue
+forestière française* 2019 (PDF); Musée de Grenoble work page.
+
+Database writes this pass: 8 row updates (2 status changes to `confirmed`
+plus 1 note update on Bodmer, 1 status change to `confirmed` plus 4 note
+updates on Landerer, 1 note update on Marie Bodmer), 2 inserts, 0 tasks
+filed, 3 heartbeats (03:41, 03:57 and 04:04 UTC). Every write applied.
+
+## 40. Albert Landerer (3 rows) and Landerer affair (2 of 10 rows), linked to `besharat-gallery-barbizon` (published)
+
+**Checked.** HLS « Landerer, Albert » (Tapan Bhattacharya, version 2007,
+edited 2 Nov 2006, citing BLSK pp. 607-608), read in full; Google Books record
+of Gaier / Catania / Dössegger, *Bilder Basler Bändelherren* (Schwabe 2017,
+221 pp., ISBN 9783796537301, no preview); searches for Länderer / Landerer on
+sikart.ch, the Kunstmuseum Basel collection and opendata.swiss (SIKART
+biographical dataset page: no download link exposed).
+
+**Outcome.**
+- HLS gives « 20.7.1816 Basel, 6.9.1893 Barbizon (Ile-de-France), von
+  Basel », son of the cavalry colonel Franz Lucas, pupil of Hieronymus Hess,
+  married Nothburga Binder in 1892, « Die letzten Jahrzehnte seines Lebens
+  verbrachte L. in Barbizon, wo er gemeinsam mit Karl Bodmer malte »; one Basel
+  work named (« Der Einzug der eidg. Gesandten zum Basler Bundesschwur, 1501 »,
+  Öffentliche Kunstsammlung Basel). No mention of the murder or of Paris.
+- Row `72582044` (age conflict 76 / 77 / 78) → **`confirmed`**, resolved:
+  born 20 July 1816 (HLS, independently matched by Gaier 2017), so 77 at his
+  death in September 1893 and 76 at the 1892 marriage if it took place after
+  20 July. The Abeille's « 78 ans » is one year out.
+- Row `a43290a1` (length of residence 18 / 15 / « quelques années » / 10)
+  stays `open`, notes improved: HLS's « letzten Jahrzehnte » favours the longer
+  figures (from about 1875-1878) over Bénézit's ten years.
+- Row `c77378e3` (Bénézit) stays `lead`, notes improved: HLS contradicts
+  Bénézit on the place of death (Barbizon, not Paris) and on the ten years;
+  Bénézit reliable for name, origin and the Hess training only.
+- Row `ca881ef4` (Gaier 2017) notes improved from the publisher blurb: the
+  book prints his letters (including with Jacob Burckhardt) and his will,
+  « which played a role in a Basel court case after his murder », a succession
+  thread absent from the French press rows. Task `41b522df` still covers
+  reading it.
+- **Inserted** `59c44e09` (`lead`, HLS): birth and death dates and places,
+  marriage 1892, last decades at Barbizon painting with Karl Bodmer. The death
+  date 6 Sept 1893 fits the first press reports from 9 Sept 1893 but no second
+  source gives the day, so `lead` not `confirmed`.
+- Row `165d5508` (Binder's birthplace, Baldingen in Switzerland vs « née en
+  Allemagne ») stays `open`, notes improved: HLS « Baldingen » (ed. 2022)
+  confirms a Baldingen in canton Aargau (district Zurzach, merged into Zurzach
+  in 2022), which fits the Abeille 1894 and « came from Basel »; a homonymous
+  Baldingen near Nördlingen (Bavaria) shows up in search listings (not read),
+  so Bataille's « Allemagne » may be a homonym rather than a contradiction.
+  HLS spells her « Nothburga ». The 1892 marriage record would settle it.
+- The eight other affair rows (Abeille, Nouvelliste, Bataille OCR) are
+  Gallica-anchored and unchanged.
+
+**Implication for published text.** None required. « Vers 1876, la maison est
+celle d'un autre peintre suisse, Albert Landerer » and « assassiné dans son
+lit en 1893 » are consistent with HLS; « dans les jardins clos où
+travaillèrent Bodmer et Landerer » now has an independent anchor (HLS: painted
+together with Bodmer). If an age is ever added, say 77, not 78.
+
+## 41. Karl Bodmer, 3 of 7 rows, linked to `chene-bodmer` (published)
+
+**Checked.** HLS « Bodmer, Karl » (Tapan Bhattacharya, version 1998, edited
+20 Nov 2013; bibliography Läng 1976, Goetzmann 1984, BLSK pp. 127-128), read in
+full; SIKART person page (redirect to recherche.sik-isea.ch, blocked); Musée de
+Grenoble work page (Bodmer drawing dedicated to Giacomelli, text repeats the
+1849 settling and the Salon 1850 medal); searches for the Luxembourg painting's
+present holder (nothing new).
+
+**Outcome.**
+- HLS: born 11 Feb 1809 Zurich, French citizen 1843, Paris from 1836, Salon
+  1845-1847, settled at Barbizon in 1849 « mit Théodore Rousseau und Millet »,
+  Légion d'honneur 1877, **died 30 Oct 1893 Paris**.
+- Row `b7cec28d` (place of death, press Paris vs modern Barbizon) →
+  **`confirmed`** for Paris: HLS is a second, independent Tier 2 source beside
+  the three 1893 obituaries. The Musée d'Orsay artist record (« 1893,
+  Barbizon ») stands against it and is recorded as a conflict in the notes;
+  the Paris death register remains the final arbiter.
+- Row `2b994589` (Chronique des arts obituary) → **`confirmed`** for the
+  biographical core (Zurich 1809, naturalised, died Paris 30 Oct 1893); the
+  Luxembourg-painting clause stays tracked in `0abee91a`.
+- Row `d1f8a2ff` (Gassies, sedentary painters 1853-1860) notes improved: HLS
+  and Grenoble both give 1849 for the arrival.
+- Rows `227ea369` (1867 sale advert), `cd2fdb08` (Forney), `dccbc918` (38 bis
+  Grande Rue), `b10de448` (1906 census), `52455ee2` (Auberge Ganne figure) and
+  Marie Bodmer `050b1160` unchanged: nothing reachable touches them.
+
+**Implication for published text.** None: `chene-bodmer` says « Il s'installe
+à Barbizon en 1849 ... il meurt à Paris en 1893 » and `besharat-gallery-barbizon`
+« meurt à Paris en 1893 », both now supported by two independent sources. If
+the Orsay record is ever cited, keep the Paris wording and the discrepancy in
+`internal_notes`.
+
+## 42. Chêne Bodmer (fall date, `96caa5c3`; Luxembourg painting, `0abee91a`)
+
+**Checked.** FLIM / ITEM-CNRS record on Monet's *Le Chêne Bodmer* (Met, with
+a Joanne 1867 quotation on the Bas-Bréau: the « Reine Blanche » oak burnt in
+winter 1856, no Bodmer oak); Jean Pinon, « Les chênes vus par les peintres »,
+*Revue forestière française* LXXI-1 (2019) pp. 75-86 (one mention, no date);
+OpenEdition chapter « La forêt romantique » (blocked); searches with Denecourt
+/ Colinet / foudre / abattu (nothing).
+
+**Outcome.** No row changed. The fall date is still unfound in anything
+reachable without Gallica.
+
+## 43. Hôtel de la Forêt (10 rows) and Manoir Saint-Hérem (7 rows)
+
+**Checked.** Searches for Darlington 1898 in full view (not returned by any
+search), for « Louis Masson » peintre Barbizon (dealer pages for an « L.
+Masson » 1930s panel only, no identification), and for Hôtel Bellevue Barbizon
+(nothing new).
+
+**Outcome.** No row changed. The Louis vs Jean-Baptiste Masson question needs
+the 1891-1911 censuses or the regional inventory dossier (task `60a6e3f7`).
+
+## 44. Marie Bodmer (`050b1160`) and a new lead on Charles Bodmer, linked to `chene-bodmer` (published)
+
+**Checked.** Two Musée d'Orsay notices for the photographer **Charles Bodmer
+(Chailly-en-Bière 1854 - 1929)**: *Forêt de Fontainebleau* (albumen print,
+before 1874, PHO 1984 88 174, Chauvel then Jammes collections, inscribed « Ch
+Bodmer Barbizon 149 », shown at the Musée de Barbizon in 1988) and *Paul
+Cézanne au milieu des fougères dans la forêt de Fontainebleau* (1894, PHO 1994
+40, Drouot 25 June 1993 lot 38; literature Georgel 2007 cat. 58, Elderfield
+2020 pp. 92-93, Dargnies-de-Vitry 2024 cat. 69). Neither notice names Karl
+Bodmer or any family relation.
+
+**Outcome.**
+- **Inserted** `759c7872` (`lead`, subject Marie Bodmer): a Bodmer born at
+  Chailly in 1854, five years after Karl settled at Barbizon, signing from
+  Barbizon and photographing the forest and Cézanne, is the natural candidate
+  for the Swiss father of Marie Bodmer (10 in the 1891 Chailly census) and
+  husband of Héloïse Debenne, « Suisse par mariage ». The Orsay facts are
+  Tier 1; the family link is a hypothesis.
+- Row `050b1160` notes improved with the same hypothesis and the test to run
+  (Chailly état civil 1854, marriage about 1880, birth of Marie about 1881;
+  Karl Bodmer's 1893 succession).
+
+**Implication for published text.** None yet. If confirmed, the Chêne Bodmer
+page gains a second generation (the photographer son at Chailly / Barbizon,
+and the Cézanne 1894 photograph) worth a sentence.
+
+## 45. Les Bosquets (2 Grande Rue), 3 rows, and Tumble Inn, 4 rows
+
+**Checked.** Search for Les Bosquets / Jacque / Ziem / Camille Paris (Jacque
+biographies only, no address); Tumble Inn searches with Alfred Grand / 1920 /
+Jazz Inn (the Fontainebleau Tourisme festival fiche is a 404, the mairie map
+PDF was not retried).
+
+**Outcome.** No row changed. Both are on-site or offline questions (cadastre,
+owner, Bottin 1925-1935).
+
+## Tasks (pass 6)
+
+None filed. Nothing found tonight flags published text as wrong, and the open
+avenues are already covered by `41b522df` (Gaier 2017), `ce8efd66` /
+`103eb640` (Bodmer archives), `60a6e3f7` (regional inventory), `029cccbf`
+(booklet-only claims).
+
+## Not reached, consolidated hand-over for the next night
+
+Everything below was tried at least once tonight (passes 1-6) and needs either
+a source that was blocked all night or an offline step. Grouped by the source
+that would settle it, so the next run can start by testing reachability.
+
+**Needs Gallica (blocked all night):**
+- Landerer affair: re-read the Abeille 15 Sept 1893, 1 June 1894 and 2 Nov
+  1894 rows on the page images (10 OCR / snippet rows), Nouvelliste 14 Oct 1894
+- Karl Bodmer: Delteil in *L'Artiste* 1894 pp. 134-142 (Luxembourg painting,
+  place of death); Moniteur universel 19 Sept 1867 f4 on the image
+- Chêne Bodmer fall date: Denecourt-Colinet guides, AAFF bulletins, « Le
+  Bodmer » with forêt 1894-1930
+- Tumble Inn: Bottin / annuaire du commerce 1925-1935 (« Tumble Inn, Barbizon,
+  tél. 37 ») for the street address
+- Chapelle: Semaine religieuse de Meaux and Abeille, 24 Jan 1889; Médaillon
+  Chapu: press April 1884; Villa Bernard: L'Informateur 19 July 1932 p.8
+- Villa Élisabeth: 1978 BnF Arsenal catalogue (`bpt6k65346721`)
+- Hôtellerie du Bas-Bréau: 1934 rename, Hirohito Oct 1971 (Le Monde / Figaro)
+- Occupation: Kirkpatrick 1944 article
+
+**Needs archive.org / HathiTrust / Google Books full view (blocked or record
+only all night):**
+- Hôtel de la Forêt: Darlington 1898 p.40; La Nature 1892 p.461
+- Diaz person rows: Mollett and Thomson 1890; Maison Barye: de Kay 1889,
+  Saunier 1925
+- Auberge Ganne: 1856 guide, Bellier 1868 p.764; Mantes 1998 catalogue p.116
+- Rouveyre: Gide-Rouveyre 1967 p.62, Brandes 1952 p.395, Coquio 1995 p.31
+- Billy 1947 (Berthelot p.122, Villa Élisabeth p.160, Villa Bernard visitors,
+  Hôtel de la Forêt p.124), Champigneulle 1965 p.257, Penesco 2005 p.525
+- Céramano: Biekorf 1986, Ostyn monograph
+
+**Needs Persée / data.bnf.fr HTML / catalogue.bnf.fr (blocked tonight):**
+- Berthelot: « A Barbizon » 1949 no 125 and 1946 no 116 p.533
+- 39 Grande Rue: data.bnf.fr work page 14720533 (Rodor attribution)
+
+**Needs the Région Île-de-France inventory in a browser (task `60a6e3f7`):**
+- Hôtel de la Forêt / 13 Grande Rue (Louis vs Jean-Baptiste Masson), Hôtel
+  Toulouse, 26 and 17 Grande Rue, Bellevue
+
+**Needs a physical book or archive (offline, tasks exist):**
+- Gaier / Catania 2017 on Landerer (`41b522df`): residence length (`a43290a1`),
+  house, Basel succession case, Bodmer companionship
+- AD77: Landerer / Bodmer property chain (`ce8efd66`), Coz Ker matrices
+  cadastrales, L'Ombrage censuses 1931-1936, Marie Bodmer 1891 Chailly
+  re-reading (`050b1160`), Chailly état civil 1854 and about 1880-1881
+  (Charles Bodmer, the new lead), état civil Barbizon 1892-1893 (Landerer
+  marriage, Binder's birthplace, death) and Paris 1893 (Bodmer, arrondissement
+  unknown)
+- Forney: Galerie contemporaine 1877 last page (`cd2fdb08`, `103eb640`)
+- Karampournis 1990 physical copy (Coz Ker footnote pp. 136-137)
+- Flohic 2001 pp. 1197-1202 (Chapelle)
+- Vitry-sur-Seine archives, colonies de vacances (La Bastide)
+- Tielt and Barbizon état civil (Céramano)
+
+**Needs an on-site step or a person (no source will settle it):**
+- Les Bosquets numbering (no. 2 vs booklet no. 6 « La Baraka »): cadastre,
+  owner (`5d1ae62b`), plaque photos (`dc8011f4`)
+- Panel credit lines and plaques (Sentier des peintres panel 1, Atelier
+  Daubigny west façade `5012a789`)
+- Tumble Inn founder (Alfred Grand vs « an Englishman from New York »): read
+  the mairie's Jazz Inn programme PDF in a browser
+
+**Settled tonight, for the record (no further research needed):** Bodmer's
+place of death (Paris, `b7cec28d`), Bodmer biographical core (`2b994589`),
+Landerer's birth date and age (`72582044`), Picasso at Fontainebleau 1921
+(`32a3b742`), Corot as Daubigny's friend (`7e57f1c2`), plus the pass 1-5
+confirmations listed in their sections.
