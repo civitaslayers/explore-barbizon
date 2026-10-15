@@ -1282,7 +1282,12 @@ None filed: nothing new was found that is not already covered by existing
 offline tasks (Céramano registers, Rouveyre état civil), and no published text
 was flagged wrong.
 
-## Write that timed out (pass 7, for claude.ai to apply)
+## Write that timed out (pass 7, applied by the loop lead at 06:16 Paris)
+
+Semicolon-in-literal case again. The lead re-ran it with the two `;`
+replaced by periods and it applied. Nothing left for claude.ai to apply.
+Rule for future passes (now in every S2 prompt): never put `;` inside a SQL
+string literal sent through the Supabase MCP.
 
 ```sql
 update research_findings set notes = coalesce(notes,'') || ' 2026-10-15 pass 7: two further reference works checked: nobelprize.org biographical note (from Nobel Lectures, Literature 1901-1967, Elsevier 1969) does not mention Barbizon or Devenir; Larousse (Dictionnaire mondial des litteratures, unsigned, larousse.fr) says « il publie Devenir ! (1909), le roman d un rate », i.e. 1909 not 1908, and no Barbizon. Deutsche Biographie has only an index entry. The Barbizon claim therefore still rests on Universalis plus the Sicard and Brenner snippets.', updated_at = now() where id::text like 'f64fb0ea%'
