@@ -1440,3 +1440,82 @@ the same searches are not repeated.
 None filed: no published text carries the claims checked, and the remaining
 steps (Gallica 1937 press, Région inventory, état civil) are already covered
 by the hand-over list above and existing offline tasks.
+
+## Pass 9 (06:23-06:40 Paris, short pass)
+
+Angle: subjects that no earlier pass reached (none of them appears above):
+Forest reserve 1861, Ernest Révillon, Ferdinand Chaigneau, Henri Matisse,
+Pierre Thorel. WebSearch worked. Supabase reads worked. One write applied,
+three timed out (listed below for the loop lead). No row changed status.
+
+## 54. Forest reserve 1861 (`bef0f0cb`), no location
+
+- AAFF, « frise de l'histoire de la forêt » (PDF, Dec 2023): « 1861. Création
+  des réserves artistiques sur 1097ha », no day given.
+- Fondation Napoléon, napoleon.org (K. Huguenaud, 2012, updated 2024): decree
+  of April 1861, 1,097 ha, « au plaisir exclusif du promeneur et de l'artiste ».
+- herodote.net (unsigned, 2024): « décret impérial en date du 13 août 1861 »,
+  « plus de mille hectares », and 624 ha for 1853.
+- The ONF/INRAE PDF on HAL (`hal-02821414`) was behind a bot wall.
+- Outcome: lead. Two sources give 1,097 ha, not the row's 1,094 ha. The day is
+  still in conflict (April vs 13 August). Needs the Bulletin des lois 1861 or
+  the ONF note itself. Proposal for any published text: « in 1861 », about
+  1,100 ha, no day.
+
+## 55. Ernest Révillon (`83a2eb7b`, `e6b5173a`), no location linked
+
+- Geneawiki « 77022 - Barbizon - Morts aux guerres » (Tier 3): the war
+  memorial near the church is by « Jean-Baptiste REVILLON », cast by Jaboeuf et
+  Rouard, « élevé par souscription franco-américaine ». No date given, and no
+  Gaulois described.
+- The commune has a rue Ernest Revillon (published `galerie-alfart-lbk` text
+  gives its address there). That fits the booklet's name but is not evidence of
+  who made the memorial.
+- Outcome: lead, first-name conflict (Ernest vs Jean-Baptiste). Needs the
+  monumentsmorts.univ-lille.fr record (not found by search), POP, or the
+  commune's deliberation (AD77). No published text names the sculptor of the
+  memorial (checked), so no task.
+
+## 56. Ferdinand Chaigneau (`11dcd010`), no location linked
+
+- artnet biography (Tier 3): born Bordeaux 6 March 1830, « In 1858 he moved to
+  the village of Barbizon ».
+- besharatgallery.com biography (Tier 3, and this project's own gallery, so
+  not independent): died at Barbizon 23 Oct 1906, buried there with his
+  daughter Suzanne.
+- Dates agree with the 1985 poster cited in the row. The house name
+  « La Bergerie », the nickname « le peintre des moutons » and the Préverts'
+  visits are not corroborated by anything online.
+- A Heidelberg arthistoricum book page came up in search but was bot-walled.
+- Outcome: lead, note added (applied). No published location mentions
+  Chaigneau (checked).
+
+## 57. Tried, nothing found (rows not changed)
+
+- Henri Matisse « several months in Barbizon » after Dorgelès (`285ca00b`,
+  Champigneulle): two searches, nothing that places Matisse at Barbizon.
+  Needs Champigneulle 1965 itself, or a Matisse chronology (Pompidou 2020 PDF
+  not opened).
+- Pierre Thorel at « Le Monastère », 5 rue Félix Herbet (`8a2eacef`): no web
+  footprint.
+- Not reached: Michel Lacoste (`b187d60c`), Maison Diaz (28 rows) and Les
+  Charmettes (42 rows) in bulk; the booklet street rows.
+
+## Writes that timed out (pass 9, for the loop lead)
+
+Append to `notes` (do not change status):
+- `bef0f0cb`: « Pass 9 (2026-10-15): AAFF frise (2023) gives 1861, 1097 ha, no
+  day; Fondation Napoléon (Huguenaud, 2012/2024) gives April 1861, 1,097 ha;
+  herodote.net (2024) gives 13 August 1861, more than 1,000 ha. Two sources
+  say 1,097 ha, not 1,094. Day unsettled; needs Bulletin des lois 1861 or the
+  ONF note (HAL PDF bot-walled). »
+- `83a2eb7b` and `e6b5173a`: « Pass 9 (2026-10-15): Geneawiki 77022 Barbizon
+  Morts aux guerres (Tier 3) names the war-memorial sculptor Jean-Baptiste
+  REVILLON, foundry Jaboeuf et Rouard, Franco-American subscription, near the
+  church; no Gaulois described. First-name conflict with the booklet (Ernest).
+  The commune has a rue Ernest Revillon. Needs POP/monumentsmorts record or
+  AD77 deliberation. »
+
+## Tasks (pass 9)
+
+None filed: no published text carries the claims checked.
