@@ -1202,9 +1202,95 @@ avenues are already covered by `41b522df` (Gaier 2017), `ce8efd66` /
 `103eb640` (Bodmer archives), `60a6e3f7` (regional inventory), `029cccbf`
 (booklet-only claims).
 
+## Pass 7 (06:05-06:20 Paris, short pass, ended early: shared WebSearch budget exhausted)
+
+Angle: after pass 6 showed that signed national reference works settle rows
+nobody else could, the same was tried on the remaining person rows via
+authority files, museum databases and national dictionaries (Nobel, Larousse,
+Deutsche Biographie, museum-digital / ULAN / RKD / GND pointers, KIK-IRPA BALaT,
+MSK Gent library catalogue, dbnl). Gallica, archive.org, Persée, the Région
+inventory and POP were not tried (blocked all night); Les Charmettes and Maison
+Diaz were skipped as instructed. Supabase MCP connected despite a start-up
+warning; one of three writes timed out (SQL below).
+
+## 46. André Rouveyre, death at Barbizon 18 Dec 1962 (`0414d53f`), linked to `besharat-gallery-barbizon` (published)
+
+Checked: Maitron / Dictionnaire des anarchistes (no Rouveyre entry surfaced by
+search); museum-digital person record 15260 (29 Mar 1879 - 18 Dec 1962, no
+places, with ULAN 500124884, RKD 68581, GND 120305771, BnF 121521848 pointers);
+NLI mirror of the LC authority n86812350 re-read; Centre Pompidou resource page
+(turned out to be Marquet's 1904 *Portrait d'André Rouveyre*, AM 2227 P, no
+biography). Outcome: the death date is now triple-sourced (Gide-Rouveyre
+Correspondance 1967 p. 43 as cited by LC, museum-digital, Wikipedia) but no
+authority record reached states the place; the "Barbizon" in the NLI record
+comes from its embedded Wikipedia text, not from Gide. Pass 3's note is
+corrected accordingly. Row stays `lead`; notes updated. Implied change: none to
+published text; the Besharat page may keep "mort à Barbizon en 1962" as it is
+sourced to Tier 3 only, Luigi to decide whether to soften to "mort en 1962".
+
+## 47. Céramano, pseudonym and biography (`a5533690`, `99015944`, `c2fc4278`), two rows linked to `maison-sermain-plaque` (unpublished)
+
+Checked: RKD (no Ceramano record surfaced), BALaT / Dictionnaire des Peintres
+belges 1994 (four actor records opened by search, none Ceramano), dbnl Biekorf
+86 (1986) again (title and dates only, copyright), MSK Gent library catalogue.
+Outcome: the Ostyn monograph named as best lead in pass 4 is now fully
+identified: Ronny Ostyn, Peter De Smet, Jan Vandermeulen, Michiel Van Daele,
+*Ceramano: Tielt 1831-Barbizon 1909* (exhibition Tielt, Stadhuis, 17 April -
+2 May 1999), Tielt, Stadsbestuur Tielt, 1999, 109 p., ill. (MSK Gent call no.
+I.CERAMANO CH.-F.1, record msk01:000016672). Dealer pages give "Thielt 1829",
+a variant birth year to watch. Row `a5533690` notes updated, status unchanged.
+Implied change: none (location unpublished). Offline step: borrow the 1999
+catalogue (MSK Gent or Tielt library) for the pseudonym, parents, Vertefeuille
+purchase and death date.
+
+## 48. Roger Martin du Gard at Barbizon 1908 (`f64fb0ea`, `7c2b69b2`, `872c3cab`), linked to `besharat-gallery-barbizon` (published)
+
+Checked: nobelprize.org biographical note (from *Nobel Lectures, Literature
+1901-1967*, Elsevier 1969): no Barbizon, no *Devenir!*; Larousse *Dictionnaire
+mondial des littératures* (unsigned): « il publie *Devenir !* (1909), le roman
+d'un raté », no Barbizon; Deutsche Biographie: index entry only (Neuilly 1881 -
+Bellême 1958). Outcome: no second reference work confirms Barbizon, and Larousse
+introduces a 1909 publication date against Universalis' 1908 (Brenner has
+Ollendorff, autumn 1908). Rows stay `lead`. Write of the note timed out, SQL
+below. Implied change: none; if the Besharat page gives a publication year for
+*Devenir!*, keep 1908 (Brenner, Sicard, Universalis agree) and treat Larousse
+as the outlier.
+
+## 49. Not improved in pass 7
+
+- Tumble Inn founder (`67c4f9ff`, `c378c983`): web search for « Alfred Grand »
+  with Tumble Inn returns only the New York Barbizon hotel; no American or
+  British biographical dictionary entry exists for an Alfred Grand of Barbizon.
+  Still needs the mairie's Jazz Inn programme PDF in a browser.
+- Hôtel de la Forêt: no foreign-painter guest rows are open, so the Swedish /
+  Norwegian / American dictionaries angle had nothing to settle; Louis Masson
+  (painter-owner, `f68d75a2`, `83cf365e`) is too common a name for Bénézit
+  snippets without a first-name/date anchor.
+- Diaz leg amputation (`d50f5b1f`): searches aimed at Orsay / Met notices
+  returned dealer biographies only (Tier 3); the National Gallery (London)
+  artist page was opened and says nothing about the leg, Millet or his
+  generosity (only "frequently stayed in the Forest of Fontainebleau" from the
+  mid-1830s); not changed.
+- Berthelot, Mounet-Sully: anecdotal rows, no reference-work angle.
+- The pass stopped at about 06:20 Paris because the WebSearch budget shared by
+  all agents in the run was used up (WebFetch only opens URLs a search
+  returned, so no further sources could be reached). Not a site block.
+
+## Tasks (pass 7)
+
+None filed: nothing new was found that is not already covered by existing
+offline tasks (Céramano registers, Rouveyre état civil), and no published text
+was flagged wrong.
+
+## Write that timed out (pass 7, for claude.ai to apply)
+
+```sql
+update research_findings set notes = coalesce(notes,'') || ' 2026-10-15 pass 7: two further reference works checked: nobelprize.org biographical note (from Nobel Lectures, Literature 1901-1967, Elsevier 1969) does not mention Barbizon or Devenir; Larousse (Dictionnaire mondial des litteratures, unsigned, larousse.fr) says « il publie Devenir ! (1909), le roman d un rate », i.e. 1909 not 1908, and no Barbizon. Deutsche Biographie has only an index entry. The Barbizon claim therefore still rests on Universalis plus the Sicard and Brenner snippets.', updated_at = now() where id::text like 'f64fb0ea%'
+```
+
 ## Not reached, consolidated hand-over for the next night
 
-Everything below was tried at least once tonight (passes 1-6) and needs either
+Everything below was tried at least once tonight (passes 1-7) and needs either
 a source that was blocked all night or an offline step. Grouped by the source
 that would settle it, so the next run can start by testing reachability.
 
@@ -1237,6 +1323,8 @@ only all night):**
 **Needs Persée / data.bnf.fr HTML / catalogue.bnf.fr (blocked tonight):**
 - Berthelot: « A Barbizon » 1949 no 125 and 1946 no 116 p.533
 - 39 Grande Rue: data.bnf.fr work page 14720533 (Rodor attribution)
+- Rouveyre: BnF authority notice (ark 12152184, via GND/ULAN pointers) for the
+  place of death, the only authority file not yet opened (`0414d53f`)
 
 **Needs the Région Île-de-France inventory in a browser (task `60a6e3f7`):**
 - Hôtel de la Forêt / 13 Grande Rue (Louis vs Jean-Baptiste Masson), Hôtel
@@ -1255,7 +1343,13 @@ only all night):**
 - Karampournis 1990 physical copy (Coz Ker footnote pp. 136-137)
 - Flohic 2001 pp. 1197-1202 (Chapelle)
 - Vitry-sur-Seine archives, colonies de vacances (La Bastide)
-- Tielt and Barbizon état civil (Céramano)
+- Tielt and Barbizon état civil (Céramano); Ostyn et al., *Ceramano: Tielt
+  1831-Barbizon 1909*, Tielt 1999, 109 p. (MSK Gent I.CERAMANO CH.-F.1), now
+  fully identified (pass 7), for the pseudonym (`a5533690`)
+- Reference works that do NOT help (checked pass 7, do not retry): Nobel
+  biography and Larousse for Martin du Gard at Barbizon; Deutsche Biographie
+  (index only); National Gallery London for Diaz's leg; BALaT / Dictionnaire des
+  Peintres belges for Ceramano (no record found by search); Maitron for Rouveyre
 
 **Needs an on-site step or a person (no source will settle it):**
 - Les Bosquets numbering (no. 2 vs booklet no. 6 « La Baraka »): cadastre,
