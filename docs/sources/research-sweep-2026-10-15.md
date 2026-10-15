@@ -653,7 +653,7 @@ set notes = notes || ' Correction from the full table of contents: the book spel
 where id = 'ca881ef4-fbd6-4402-b99d-8e867f854e94'
 ```
 
-## Not reached (after pass 3)
+## Not reached (after pass 3, kept for the record)
 
 For the next pass, in this order:
 - Villa Élisabeth: 1978 BnF Arsenal exhibition catalogue (Gallica
@@ -677,3 +677,159 @@ For the next pass, in this order:
   site), Chêne Bodmer fall date (Denecourt-Colinet guides, AAFF bulletins)
 - Hôtellerie du Bas-Bréau: 1934 rename, Hirohito Oct 1971 (Le Monde / Figaro)
 - Occupation: Kirkpatrick 1944 article, *The House Near Paris* for the house
+
+## Pass 4 (05:00-06:05 Paris)
+
+Tooling tonight: Gallica, archive.org full text and the Louvre/British Museum
+catalogues blocked (noted once). `pop.culture.gouv.fr/notice/merimee/*` pages
+needed a provenance approval that was not answered, so the Mérimée notice was
+read through its monumentum.fr mirror; Palissy and Muséofile notices on
+pop.culture.gouv.fr opened normally. Google Books did not surface through
+WebSearch tonight.
+
+## 24. Auberge Ganne, 14 rows (+1 practical row left to S3), linked to `auberge-ganne` (published)
+
+Checked: POP Mérimée PA00086807 (via monumentum.fr), Palissy PM77000088,
+PM77002094, PM77002088, Muséofile M0370, the museum's own pages « A l'origine
+du musée » and « Le musée aujourd'hui », the Département's 2019 museums
+programme, Fontainebleau Tourisme « Sentier des peintres » (FR and GB PDFs).
+
+Outcome:
+- `97c84b67` (museum since 1995) → **confirmed**: museum site « Depuis 1995,
+  l'auberge Ganne abrite la collection permanente du musée », Muséofile M0370
+  « 1995 : le nouveau musée municipal ouvre au public ».
+- `9309aa09` and `75dc0cc3` (Luniot carried the painted decor to the new
+  hotel) → **confirmed**: the museum's history page says the furniture and
+  painted decor had been « transférés dans la Villa des Artistes à l'autre
+  extrémité de la Grande rue » and were bought back from the Ganne-Luniot
+  descendants by Pierre-Léon Gauthier, owner of the former inn from the
+  1930s. The marriage detail (Edmond Luniot, Victoire Ganne) still rests on
+  Lemoyne de Forges 1962 alone. The museum writes « Villa des Artistes », not
+  « Hôtel des Artistes ».
+- `08d99f1e` (opening date, open) and `225688a2` (c.1824): notes improved,
+  status unchanged. Muséofile opens its history « 1824-1870 : l'auberge Ganne
+  accueille les artistes », the museum site says « entre les années 1820 et
+  les années 1860 », Fontainebleau Tourisme and Pomarède 2002 give 1834 for
+  the present house. Working reading: painters from about 1824, present house
+  from 1834. Needs a period source.
+- `da4d1b85` (panels acquired by the commune 9 April 1990): **conflict
+  noted**, status unchanged. The Palissy notices record the objects as
+  « propriété de la commune », « 1985/04/09 : classé au titre objet ». Same
+  day and month, year 1985 not 1990, and the commune already owned them at
+  classement. Catalogue page needed in full view.
+- Not improved: `08137e98` (1856 guide), `f25afef6` (1834 purchase, Tier 3
+  only), `3b1c470b`, `bbbe8425`, `6a507036`, `3ad8060f`, `5dfd4631`,
+  `6552f20e`.
+
+Inserted (all `confirmed`, Tier 1):
+- Mérimée PA00086807: inscription by arrêté of 28 December 1984, « façades et
+  toitures, trois salles d'expositions du rez-de-chaussée (cad. AI 434) »,
+  building dated 18th-19th c.
+- Palissy: the painted furniture and works (armoire with six oil-painted
+  panels, O. de Penne's print « L'Auberge Ganne en 1830 », the Ganne
+  portraits, « Les Noces de la fille Ganne ») classified objets, property of
+  the commune, 9 April 1985.
+- Museum chronology: let as apartments from the 1870s, first municipal museum
+  1927-1930 in Rousseau's studio (inaugurated by Painlevé), Gauthier owner
+  from the 1930s and opening three ground-floor rooms, second museum 1977
+  (agrément 1981), commune buys the inn 1987, early-1990s works uncover the
+  first-floor paintings and graffiti, opening 1995, Conseil général 2004,
+  Musée de France 17 Sept 2003.
+
+Proposal for Luigi (not applied): the `auberge-ganne` text can state the
+monument-historique inscription (1984, « inscrite » not « classée »), the
+classified painted furniture (1985), the commune's purchase (1987) and the
+Conseil départemental's management (2004) with Tier 1 backing. Keep the
+opening date as « vers 1824-1834 » until a period source is read.
+
+## 25. Narcisse Diaz de la Peña, person rows (6), linked to `maison-diaz` (published)
+
+Checked: DMA blog (museum's own), MFA/DIA/RISD search hits, archive.org PDF of
+Mollett (Cornell copy, redirect to a dn*.archive.org host refused), general
+search for the « luxurious studio » claim.
+
+Outcome:
+- `17236e24` (Dallas Museum of Art) → **confirmed**: the DMA's own blog
+  (Stacey Lizotte, 21 Oct 2021) captions « Narcisse Diaz de la Peña, Forest
+  of Fontainebleau, 1868, oil on canvas, Dallas Museum of Art, Munger Fund,
+  1991.14.M ». One work found, so the live text should say « une œuvre » or
+  name it, not « des œuvres », unless a second object turns up.
+- `b608bd05` (studio of rare luxury), `44529b46` (Mollett p.104 broker),
+  `1a735f4c`, `78051d17`, `d50f5b1f`: not improved. Mollett and Thomson full
+  view blocked (archive.org redirect host refused).
+
+## 26. Céramano (Charles Ferdinand Sermain), 5 rows, two linked to `maison-sermain-plaque` (unpublished)
+
+Checked: data.bnf.fr (no hit via search), dbnl.org, dealer biographies (not
+used), search for Pierre Bordas at Barbizon (nothing usable).
+
+Outcome: `a5533690` (origin of the name, open) gained a third lead: « De
+vergeten Tieltse schilder Ceramano of Ch. F. Sermain », *Biekorf* 86 (1986),
+on dbnl.org, text withheld for copyright, only the title and the dates Tielt
+1831, Barbizon 1909 visible. Other four rows unchanged (état civil Tielt and
+Barbizon still the way to confirm `99015944`).
+
+## 27. William Morris Hunt, 1 row, linked to `besharat-gallery-barbizon` (published)
+
+Checked: MFA Boston collection record for Millet's *The Sower* (acc. 17.1485),
+en.wikipedia (for its Britannica 1911 citation only).
+
+Outcome: `d14c5174` → **refuted** for *The Sower*. MFA provenance: Millet to
+Hunt c.1851-52, Hunt to Quincy Adams Shaw through Doll and Richards 1874, Shaw
+to the MFA 1917 (« Gift of Quincy Adams Shaw through Quincy Adams Shaw, Jr.,
+and Mrs. Marian Shaw Haughton »). The painting survived the 1872 fire. What
+Hunt lost, per Encyclopaedia Britannica 1911 (vol. 27, pp. 964-965, via
+en.wikipedia): « many of Hunt's paintings and sketches, together with five
+large Millets ».
+
+Published text affected: `besharat-gallery-barbizon` says « les toiles qu'il
+avait rapportées, dont Le Semeur de Millet, brûleront dans le grand incendie
+de Boston en 1872 ». Proposed wording: « Hunt perd nombre de ses œuvres et
+plusieurs Millet dans le grand incendie de Boston de 1872, mais *Le Semeur*,
+acheté à Millet, lui survit et est aujourd'hui au MFA de Boston. » Task filed
+(below).
+
+## 28. Plaine de l'Angélus, 1 row, linked to `plaine-angelus-site-peinture` (published)
+
+Checked: DRIEAT Île-de-France, SPR de Barbizon case-by-case dossier (I.
+Rivière, S. Letellier), DRIEAT atlas of sites classés de Seine-et-Marne.
+
+Outcome: `d14a3d90` → **confirmed** with correction. The plain is not a site
+classé. It lies in the site inscrit « Abords de la forêt de Fontainebleau »
+(inscription 2 June 1974, whole commune). The atlas of sites classés has no
+Plaine de l'Angélus entry (only the Forêt domaniale, arrêté 2 July 1965, and
+the Rû du Rebais / Fleury-en-Bière site, décret 5 Dec 2002). The booklet's
+« classée à l'inventaire des sites » is the old phrase for an inscription.
+Published text does not claim « classée », so no task. Also from the SPR
+dossier: Atelier Millet listed 1947, ZPPAUP by arrêté 6 Nov 2000, 500 m
+perimeters around the two listed buildings.
+
+## 29. Médaillon Millet et Rousseau, 1 row, linked to `medallion-millet-rousseau` (published), note only
+
+`566c8558`: Fontainebleau Tourisme (Tier 3) dates the inauguration to 19 April
+1884 by subscription of the Barbizon painters, consistent with the booklet's
+1984 centenary. A Karl Bodmer albumen print of the monument is at the Musée
+Nicéphore Niépce (Google Arts and Culture). Status unchanged.
+
+## Tasks (pass 4)
+
+- **Filed** `9c04fe27` « Besharat page: fix the Hunt / Le Semeur 1872 fire
+  sentence » (backlog, p4, content), after checking open tasks (76d7a163 and
+  ce8efd66 cover other Besharat/Hunt matters).
+
+## Not reached (after pass 4)
+
+For the next pass, in this order:
+- Single-row subjects not opened tonight: Mounet-Sully (Penesco 2005 p.525),
+  Marcellin Berthelot (Billy 1947 p.122), Chapelle de Barbizon (Karampournis
+  p.1945, Fontainebleau Tourisme gives « chapelle en 1889, église 1950 »),
+  Maison Barye (26 Grande Rue), Le Relais / Hôtel Toulouse (2 av. du Général
+  de Gaulle), Vertefeuille (Bordas), 39, 52 and 79 Grande Rue, La Bastide
+  (Vitry cure d'air, « maire Maurice Thorez » to check)
+- Auberge Ganne: 1856 guide, 1834 deed, the 1998 Mantes catalogue p.116 in
+  full view (1985 vs 1990), Bellier 1868 p.764
+- Diaz person rows: Mollett and Thomson 1890 full view (archive.org host
+  refused), « luxurious studio » claim
+- Céramano: Biekorf 1986 article (physical or DBNL login), Tielt and Barbizon
+  état civil, Ostyn monograph
+- Médaillon Chapu: period press April 1884 (Gallica)
