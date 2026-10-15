@@ -817,7 +817,7 @@ Nicéphore Niépce (Google Arts and Culture). Status unchanged.
   sentence » (backlog, p4, content), after checking open tasks (76d7a163 and
   ce8efd66 cover other Besharat/Hunt matters).
 
-## Not reached (after pass 4)
+## Not reached (after pass 4, kept for the record)
 
 For the next pass, in this order:
 - Single-row subjects not opened tonight: Mounet-Sully (Penesco 2005 p.525),
@@ -833,3 +833,208 @@ For the next pass, in this order:
 - Céramano: Biekorf 1986 article (physical or DBNL login), Tielt and Barbizon
   état civil, Ostyn monograph
 - Médaillon Chapu: period press April 1884 (Gallica)
+
+## Pass 5 (05:04-06:00 Paris)
+
+Tooling: Supabase MCP fine (one `update` on `e31031b3` timed out after 180 s
+with no semicolon in the literal and was not applied, see the fenced block).
+Blocked tonight, noted once: Gallica (`texteBrut`), Google Books feeds
+(provenance), Persée (robots), data.bnf.fr HTML pages and catalogue.bnf.fr
+(robots / server error, the data.bnf.fr PDF export did open), the Région
+Île-de-France inventory (`inventaire.iledefrance.fr`, JavaScript gate),
+`barbizon.fr` PDF (robots), Drouot PDF (robots), Observatoire du patrimoine
+religieux (robots), fr.wikipedia on a URL that was not returned by search.
+Sources that worked: PNR du Gâtinais français heritage fiche (PDF), Pôle
+missionnaire de Fontainebleau parish page, Cercle des amis de Barbizon
+(Tier 3), data.bnf.fr PDF export, Vitry-sur-Seine municipal archives finding
+aid (PDF), Office de tourisme *Sentier des peintres* PDF, en.wikipedia.
+
+Database writes this pass: 4 inserts (2 confirmed, 2 lead), 3 note updates
+applied, 1 note update deferred, 2 tasks filed.
+
+## 30. Mounet-Sully, 1 row (`de8cab8e`), linked to `besharat-gallery-barbizon` (published)
+
+**Checked.** Searches for Mounet-Sully + Barbizon / Charmettes; the only
+Penesco text reachable is her 2011 Opéra Comique colloquium paper (Bruzane
+PDF, read: no Barbizon). The 2005 biography p.525 is not in view anywhere
+reachable; a Gallica *Figaro* hit and a Drouot autograph catalogue were
+returned by search but would not open.
+
+**Outcome.** No change.
+
+## 31. Marcellin Berthelot, 1 row (`d9cda705`), linked to `besharat-gallery-barbizon` (published)
+
+**Checked.** Persée search: the *Revue d'histoire de la pharmacie* is fully
+hosted there, including an article titled « A Barbizon » (1949, vol. 37,
+no 125) and the 1946 volume where the row says the anecdote is repeated
+(p.533). Persée refused the fetch (robots), so neither was read.
+
+**Outcome.** Note added with the Persée references for the next pass. Status
+unchanged (`lead`).
+
+## 32. Chapelle de Barbizon, 1 row (`96feec81`) + 3 new, linked to `chapelle-barbizon` (published)
+
+**Checked.** PNR du Gâtinais français, *Objectif Patrimoine*, « Églises et
+chapelles, analyse et diagnostic », fiche chapelle St Paul (architect Alice
+Lejeune, 6 Nov 2000, PDF revised 2016); Pôle missionnaire catholique de
+Fontainebleau, page « Chapelle Saint Paul, Barbizon »; Cercle des amis de
+Barbizon, « Fête du Patrimoine » article (2018); fr.wikipedia (two references:
+the PNR fiche and Flohic 2001 pp. 1197-1202); Office de tourisme *Sentier des
+peintres* panel 2; the mairie map entry no 55.
+
+**Outcome.**
+- **Confirmed** (new row): the chapel was fitted out in 1889 in the former
+  barn of Rousseau's studio-house. Two independent institutional sources
+  (regional park inventory, diocesan parish page) agree; the fiche adds
+  commune ownership, no MH protection, stained glass dated 1887 / 1920 / 1965,
+  enlargements 1920 (rear concrete bay) and 1965 (four laminated-timber bays).
+  The Cercle gives 1925 and 1966 for the same works. The parish page attributes
+  the bell tower to Charles-Louis Millet.
+- **Lead** (new row): the Cercle's account of the inauguration, 24 January
+  1889 by abbé Fageon, curé of Chailly, in the presence of abbé Séroin,
+  curé-doyen of Melun, after a 3,000-franc Verdier bequest, the Henry sisters
+  reportedly giving the barn (« dit-on »). Tier 3, no period source.
+- **Lead** (new row): the mairie map says the chapel « fut consacré en 1904 »,
+  against 1889 everywhere else. 1904 is the year the commune was created, so
+  a second ceremony is possible, a slip is likelier. Kept as lead despite the
+  map's Tier 1 policy status.
+- `96feec81` (Karampournis, Fageon 1889): note added, status unchanged. The
+  barn half is now confirmed elsewhere, the Fageon half rests on Karampournis
+  and the Cercle.
+- fr.wikipedia's « consacrée en 1899 » is a typo for 1889.
+
+**Implication for published text (proposal).** The narrative says « béni le
+24 janvier 1889 par l'abbé Séroin, curé-doyen de Notre-Dame de Melun; l'abbé
+Fageon en fut le premier curé ». The Cercle inverts the roles (Fageon
+officiated, Séroin present) and Barbizon was not a parish in 1889, so « premier
+curé » is doubtful either way. Proposed neutral wording until a period source
+is read: « bénie le 24 janvier 1889 en présence de l'abbé Fageon, curé de
+Chailly-en-Bière, et de l'abbé Séroin, doyen de Melun ». The short description
+(« aménagée en chapelle en 1889 », clocher by Charles-Louis Millet) is fine.
+**Task filed** `d92ee679`.
+
+## 33. Maison Barye (26 Grande Rue), 1 row (`45fa4b92`), linked to `la-juxtaposition` (published)
+
+**Checked.** Searches for Barye + Barbizon + maison; the mairie map (project
+file) repeats the booklet (« aménagé dans l'ancienne maison du peintre et
+sculpteur Antoine BARYE »), same mairie lineage, not independent. No period
+source reachable (Barye biographies are on archive.org / Google Books, both
+blocked).
+
+**Outcome.** No change.
+
+## 34. Le Relais (2 avenue du Général de Gaulle), 1 row (`ba13a59d`), linked to `le-relais-barbizon` (published)
+
+**Checked.** Searches for « Hôtel Toulouse » Barbizon and « Bon Coin »
+Barbizon postcards: nothing relevant (Toulouse the city swamps the results).
+A Région Île-de-France inventory illustration sheet (IVR11 2001 7700080) came
+up for the rue de Fleury query but the site is JavaScript-gated.
+
+**Outcome.** No change. The inventory is the best next source, see task
+`60a6e3f7`.
+
+## 35. Vertefeuille (17 Grande Rue), 1 row (`1a893819`), linked to `maison-sermain-plaque` (unpublished)
+
+**Checked.** Searches for Pierre Bordas + Barbizon (only publisher catalogues)
+and Céramano + Vertefeuille (nothing beyond the booklet lineage). The 2019
+regional inventory sheets IVR11 2019 7701237-7701245 surfaced here too.
+
+**Outcome.** No change.
+
+## 36. 39 Grande Rue, 1 row (`e31031b3`) + 1 new, linked to `galerie-39` (published)
+
+**Checked.** data.bnf.fr for Lucien Carol and for « Sous les ponts de Paris »;
+en.wikipedia for the song.
+
+**Outcome.**
+- **Confirmed** (new row, Tier 1 registry): Lucien Carol (18..-1951) is a
+  lyricist for Vincent Scotto, « Le triomphe des ailes » (1927), « Paroles
+  d'André Decaye et Lucien Carol » (data.bnf.fr PDF export, catalogue ark
+  cb39683576n, author ark cb14827966m).
+- The booklet's « auteur de Sous les ponts de Paris » looks wrong: the 1913
+  lyrics are credited to Jean Rodor (1881-1967, BnF authority cb148279507).
+  Tonight only en.wikipedia (Tier 3) could be read for this, the data.bnf.fr
+  work page (14720533) would not open, so the booklet row stays `lead` with a
+  note. **The note update timed out and is in the fenced block below.**
+- Nothing ties Carol or « Mama » Wagner-Carol to Barbizon independently.
+
+**Implication for published text.** None: the `galerie-39` page does not
+mention Carol. If the shop history is ever used, write « parolier de Vincent
+Scotto », not « auteur de Sous les ponts de Paris ».
+
+## 37. 52 Grande Rue (`78382097`) and 79 Grande Rue (`203008d3`), 1 row each, linked to `valet-des-fromages` and `galerie-atelier-drochon` (published)
+
+**Checked.** Nothing online addresses a grocery closing in 1985 or a laundry
+and farrier at no 79. These are oral-memory booklet items, settled only by
+the Bottin / commercial registers or the 1931-1936 census (offline).
+
+**Outcome.** No change, nothing to propose (neither page uses the claims).
+
+## 38. La Bastide (52 rue du 23 Août), 1 row (`f6d5399e`), linked to `la-bastide-de-barbizon` (published)
+
+**Checked.** Searches for the Vitry-sur-Seine « cure d'air » at Barbizon;
+the Vitry municipal archives finding aid for the Hazemann fonds (4Z, hygiene
+bureau from 1925, open-air schools, préventorium material) read in full for
+Barbizon: nothing. Maurice Thorez was never mayor of Vitry (PCF
+secretary-general, deputy for the Seine), so the booklet's « le Maire Maurice
+Thorez » is wrong as a title whoever is meant.
+
+**Outcome.** Note added (negative check, Thorez title, next sources: Vitry
+colonies de vacances series, AD77 matrices). Status unchanged.
+
+**Implication for published text.** None: the page does not use the story.
+
+## 39. Hôtel de la Forêt (10 rows) and Manoir Saint-Hérem (7 open/lead rows), remaining rows
+
+**Checked.** Searches for Hôtel de la Forêt + Masson postcards and Hôtel
+Bellevue Barbizon postcards (Swiss Bellevues only); Office de tourisme
+*Sentier des peintres* PDF (no Hôtel de la Forêt, Masson, mairie, Bellevue or
+Picasso). The mairie map (project file) repeats the booklet entries for
+nos 13 and 31 and 14 rue J.-F. Millet verbatim.
+
+**Outcome.** No row changed. The Louis vs Jean-Baptiste Masson question and
+the Picasso negative stand as after pass 3 (`32a3b742` already confirmed for
+Fontainebleau 1921). The regional inventory (task `60a6e3f7`) is the one new
+avenue.
+
+## Tasks (pass 5)
+
+- **Filed** `d92ee679` « Chapelle page: check who blessed the chapel on
+  24 Jan 1889 (Séroin vs Fageon) and the 1904 date on the mairie map »
+  (backlog, p5, content). Not covered by 029cccbf (booklet claims only).
+- **Filed** `60a6e3f7` « Read the Région Île-de-France heritage inventory
+  dossiers on Barbizon (2019 campaign) in a browser » (backlog, p5,
+  research).
+
+## Write that timed out (pass 5, for claude.ai to apply)
+
+`update` on `e31031b3` hung 180 s with no `;` in the literal and a re-select
+showed it not applied. Not retried, per the standing rule.
+
+```sql
+update research_findings
+set notes = coalesce(notes, '') || ' 2026-10-15 pass 5: Lucien Carol (18..-1951) confirmed as a Scotto lyricist by data.bnf.fr (1927 song with André Decaye, see the new confirmed row). The booklet''s « auteur de Sous les ponts de Paris » looks wrong: the 1913 lyrics are credited to Jean Rodor (1881-1967) in the standard references (en.wikipedia tonight, Tier 3. The data.bnf.fr work page 14720533 and the Rodor authority cb148279507 exist but would not open). If repeated in site text, say « parolier de Vincent Scotto » only. The shop, « Mama » Wagner-Carol and the Barbizon link remain booklet-only.',
+    updated_at = now()
+where id = 'e31031b3-ef8b-4ca4-8af6-83655cc4b40b'
+```
+
+## Not reached (after pass 5)
+
+For the next pass, in this order:
+- Chapelle: period account of 24 January 1889 (Semaine religieuse du diocèse
+  de Meaux, L'Abeille de Fontainebleau, Gallica); Flohic 2001 pp. 1197-1202
+- Berthelot: Persée « A Barbizon » (1949, no 125) and 1946 no 116 p.533, in a
+  browser
+- 39 Grande Rue: data.bnf.fr work page for « Sous les ponts de Paris »
+  (14720533) to make the Rodor attribution Tier 1
+- Région Île-de-France inventory dossiers on Barbizon (task 60a6e3f7): Hôtel
+  de la Forêt / 13 Grande Rue, Hôtel Toulouse, 26 and 17 Grande Rue, Bellevue
+- Mounet-Sully: Penesco 2005 p.525 in page view
+- Maison Barye: Barye biographies (de Kay 1889, Saunier 1925) in full view
+- La Bastide: Vitry-sur-Seine archives, colonies de vacances series
+- Auberge Ganne: 1856 guide, 1834 deed, Mantes 1998 catalogue p.116, Bellier
+  1868 p.764
+- Diaz person rows: Mollett and Thomson 1890 full view
+- Céramano: Biekorf 1986, Tielt and Barbizon état civil, Ostyn monograph
+- Médaillon Chapu: period press April 1884 (Gallica)
+- Earlier lists (passes 1-4) still stand for the rows they name
