@@ -1369,3 +1369,74 @@ place of death (Paris, `b7cec28d`), Bodmer biographical core (`2b994589`),
 Landerer's birth date and age (`72582044`), Picasso at Fontainebleau 1921
 (`32a3b742`), Corot as Daubigny's friend (`7e57f1c2`), plus the pass 1-5
 confirmations listed in their sections.
+
+## Pass 8 (06:18-06:22 Paris, short pass)
+
+Angle: the sixteen single-row subjects that come from the commune booklet
+*Parcours de mémoire* (created 2026-10-14) and that no earlier pass reached,
+all linked to published locations. WebSearch worked again (budget restored);
+Supabase MCP connected. Rows with a booklet claim but no web footprint were
+tried with one targeted search each. No row changed status: nothing reached
+Tier 1 or two independent Tier 2 sources. Three rows got notes (below), so
+the same searches are not repeated.
+
+## 50. Tramway TSM / le tacot (`4eb2b8fe`), linked to `la-folie-barbizon-hotel` (published)
+
+- techno-science.net Barbizon page (a Wikipedia mirror, Tier 3) captions the
+  line « Tramway Sud de Seine-et-Marne (TSSM) de 1899 à 1938 » and the
+  terminus « devant l'Hôtel de la Forêt ». Supports the 1899 and 1938 dates and
+  the index rows' terminus at no. 1, not the booklet's no. 5. Company initials
+  are TSSM there, not TSM.
+- en.wikipedia « Trams in Fontainebleau » does not cover the line.
+- Three Région inventory PDFs on the tram (`ivr1120017700080x`, `116x`,
+  `109x`) returned a bot wall (the inventory is blocked, as all night).
+- Outcome: lead, notes added. Still needs a Tier 1 record (Région inventory in a
+  browser, or the 1946 rail removal in AD77 / Gallica).
+
+## 51. Caverne des Brigands / Weidmann (`b3c608a7`), linked to `caverne-des-brigands` (published)
+
+- en.wikipedia « Eugen Weidmann » (Tier 3, citing Flanner, *Paris was
+  Yesterday*, 1972): Keller killed 3 Sept 1937, lured « into a cave in the
+  forest of Fontainebleau », no cave named.
+- Execution 17 June 1939 before the Versailles prison: Wikipedia and
+  actu-juridique.fr (H. Molinari, « Les grands procès des Yvelines : l'affaire
+  Weidmann », Dec 2024).
+- *Détective* special issue, about Dec 1937 (criminocorpus,
+  `bilipo_p_dev_1937_0477`): spells her « Janine Keller », « Strasbourgeoise »,
+  gives no forest site.
+- Spelunca 173 (Bigot, 2024) p. 22: Denecourt invented the name and legend of
+  the Caverne des Brigands, no Weidmann mention.
+- Outcome: lead, notes added. Forest of Fontainebleau and 1937 are
+  corroborated, the exact cave is not. Name spelling for any future text:
+  Janine Keller (the row has « Jeannine »). Published `caverne-des-brigands`
+  text does not mention the murder (checked), so no task. Keep the editorial
+  sensitivity flag.
+
+## 52. La petite maison, 19 Grande Rue (`65f5eb63`), linked to `galerie-frederic-got` (published)
+
+- Dealer pages (proantic.com, leightonfineart.co.uk, Tier 3) give the painter
+  Victor Lecomte as 1856-1920. If he is the same man, « residence until 1929 »
+  cannot be his own (widow, household, or another Lecomte).
+- Outcome: lead, conflict noted. Needs Bénézit or Barbizon état civil. Published
+  text does not mention Lecomte (checked), so no task.
+
+## 53. Tried, nothing found (rows not changed)
+
+- Gorges d'Apremont fires to 1959, 1960 tornado, « la Cathédrale »
+  (`f6713669`): en.wikipedia page has nothing; the AAFF fires Q&A (2026) covers
+  only the July 2026 fires. Needs ONF / AAFF bulletins or 1959-1960 press.
+- La Clé d'Or as former relais de poste (`644db394`): the Région page on the
+  2022 hotel-renovation grant (deliberation CP2022-153) gives no history.
+- Laure and Clarisse Henry (`cd23587a`), Roland Arribas at 51 (`b1d7f7ff`),
+  Jeanne Gassies at 24 (`9fb3c614`): no web footprint. Fontainebleau Tourisme
+  leaflets name only « George Gassies [1829-1919] » as a museum artist, nothing
+  on the house.
+- Not searched (commercial-history rows, no source outside the booklet
+  expected): 61, 64, 68, 81, 96 Grande Rue, Le Royal, La Bohème, Farms of
+  Barbizon.
+
+## Tasks (pass 8)
+
+None filed: no published text carries the claims checked, and the remaining
+steps (Gallica 1937 press, Région inventory, état civil) are already covered
+by the hand-over list above and existing offline tasks.
