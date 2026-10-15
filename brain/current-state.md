@@ -1,8 +1,32 @@
 # Current State
 
-Last updated: 2026-10-12
+Last updated: 2026-10-15
 
 ## Status
+
+**2026-10-15: night loop rebuilt for long runs; night of 14-15 Oct merged.**
+Night loop (scheduled task, 01:50 Paris, Fable) now runs until 07:45: the
+briefed queue first (newest `docs/briefs/*-night.md`), then the standing jobs
+in `docs/briefs/standing.md` (S1 health audit 0a40e644, S3 practical facts
+19af6859, S2 research sweep 7820f08f repeating). Standing rows go back to
+`queued` after each run. Subagent model falls back Fable to Opus on usage
+limits; a second scheduled task, "Night loop fallback (Opus)", checks hourly
+03:17-07:17 and resumes a dead run (liveness via `outputs` agent `loop-run`
+rows and task heartbeats). New "Morning local checks" task (06:23, Luigi's
+iMac, standing S4, task e791b48c): SEO audit, crawl and image checks against
+production, Gallica lookups tagged `[needs-local:` by the cloud, parking
+dry-run. Branches are `night/<date>-<slug>`. Lesson from 13-14 Oct: the run
+found nothing because the brief PR was unmerged at 01:50; claude.ai now
+merges docs-only brief PRs the same day.
+Night of 14-15 Oct (PRs #37-#40, all merged 2026-10-15): `location_parking_distances`
+table + `scripts/compute-parking-distances.mjs` + `lib/parkingDistance.ts`
+(migration applied and verified by claude.ai; 0 rows until Luigi runs the
+script with `--execute`); health audit `docs/audits/2026-10-15-health.md`
+(critical Next.js advisory, English location_functions on FR pages, English
+tours/routes, advisor search_path warning); practical facts for 26 places as
+research_findings leads (7 source conflicts); research sweep, 9 passes,
+44 new and 45 updated research_findings rows. Queued for 15-16 Oct (PR #41):
+Next 16.1.6 to 16.3.8 (248023d7, preview gate) and sharp 0.35.5 (7a97ab91).
 
 **2026-10-12 night 6 — merged and deployed.** Seven `night6/*` branches (PRs
 #21–#27, briefs in `docs/briefs/2026-10-11-night.md`, loop run 01:50–02:15)
