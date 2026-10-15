@@ -5,6 +5,9 @@ cap allows, in the order S1, S2, S3. Task ids: S1 = 0a40e644, S2 = 7820f08f,
 S3 = 19af6859. They are standing rows: after each run the loop puts them back
 to `queued` with an `outputs` row pointing at the PR, so they never close.
 S1 and S3 run at most once per night; S2 repeats until the cap.
+S4 (task e791b48c) is not run by the cloud loop: the "Morning local checks"
+scheduled task runs it on Luigi's computer, which has the network access and
+keys the cloud sandbox lacks.
 Read only the section you are running.
 
 Rules for all standing jobs:
@@ -32,6 +35,10 @@ Rules for all standing jobs:
   task you are running, so the fallback run can tell you are alive.
 - If a site is unreachable from the session (Gallica often is), note it once
   in the report and move to the next source. No curl/proxy workarounds.
+  Research rows that need an unreachable source get `notes` ending in
+  `[needs-local: <url or query>]` so S4 can pick them up.
+- SQL hygiene: one write statement per `execute_sql` call, and no semicolon
+  inside a string literal (the connector splits on it and times out).
 
 ## S1, health audit
 
@@ -43,7 +50,8 @@ open / fixed.
 1. Repo: `npx tsc --noEmit`, `npm run lint`, `npm test`; `npm audit
    --omit=dev` (report only, never `npm audit fix`); `npm outdated` (report
    majors only). `next build` may fail on sandbox egress: report, do not chase.
-2. Production crawl: fetch `https://explorebarbizon.com/sitemap.xml`
+2. Production crawl (cloud runs: skip this step and step 3 and say "covered
+   by S4"; the sandbox cannot reach production). Fetch `https://explorebarbizon.com/sitemap.xml`
    (follow the canonical-host redirect if any),
    then every URL in it plus `/` and `/en`. Record non-200s, redirect chains
    longer than one hop, pages whose `<title>` or meta description is missing,
@@ -109,3 +117,38 @@ fields a sourced head start. Proposals only.
 4. Write `docs/sources/practical-facts-<date>.md` summarising coverage
    (found / conflicting / nothing found) and listing the ready-to-review rows,
    so Luigi can confirm them in one pass.
+
+## S4, morning local checks (Luigi's computer)
+
+Runs from the repo at `~/Documents/Projects/explore-barbizon`, never in
+Luigi's own working tree: `git fetch origin main`, then
+`git worktree add .claude/worktrees/morning-<date> origin/main` (detached)
+and `node scripts/bootstrap-worktree.mjs .claude/worktrees/morning-<date>`
+from the main checkout, so node_modules and `.env.local` are shared. Never
+print, copy out or commit a secret. Never `git checkout`, `reset`, `stash`
+or `pull` in the main checkout, and never touch its uncommitted files.
+1. SEO audit: `SEO_AUDIT_BASE_URL=https://explorebarbizon.com node
+   scripts/seo-audit.mjs` (follow the canonical host if it redirects).
+2. Crawl: S1 step 2 against production (sitemap, every URL, `/`, `/en`,
+   non-200s, redirect chains, missing title or meta description, internal
+   links that 404). Polite: one request at a time, a short pause between.
+3. Images: S1 step 3 (HEAD every published `media.url`; list non-200s).
+4. Research the cloud could not reach: `research_findings` rows whose
+   `notes` contain `[needs-local:` plus open/lead rows whose notes say
+   Gallica was unreachable, at most 10 rows, oldest first. Use Gallica's SRU
+   and IIIF/ALTO endpoints with plain HTTP requests (no browser), under the
+   S2 rules. Replace the `[needs-local: ...]` marker with the outcome.
+5. One-off while `location_parking_distances` is empty: run
+   `node scripts/compute-parking-distances.mjs` (dry run only, never
+   `--execute`) and put its summary in the report: pairs computed, pairs
+   skipped, and the five longest and five shortest walks by name.
+6. Report `docs/audits/<date>-morning.md` (findings table as in S1, new /
+   still open / fixed against the previous morning report), commit on
+   branch `night/<date>-morning` in the worktree, push, open one PR via the
+   GitHub REST API (`gh api`, not GraphQL). File follow-up tasks for high and
+   medium findings under the shared rules. Then `git worktree remove` it.
+7. Status: on start `update tasks set execution_status = 'in_progress',
+   updated_at = now()` on e791b48c; at the end set it back to `todo` and
+   insert an `outputs` row (agent 'morning-local', one line: PR, counts,
+   highs). If the computer is asleep at the scheduled time the run simply
+   does not happen; nothing needs recovering.
