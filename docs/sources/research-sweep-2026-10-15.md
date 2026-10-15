@@ -1006,10 +1006,12 @@ avenue.
   dossiers on Barbizon (2019 campaign) in a browser » (backlog, p5,
   research).
 
-## Write that timed out (pass 5, for claude.ai to apply)
+## Write that timed out (pass 5, applied by the loop lead at 05:39 Paris)
 
 `update` on `e31031b3` hung 180 s with no `;` in the literal and a re-select
-showed it not applied. Not retried, per the standing rule.
+showed it not applied. The loop lead re-ran the identical statement once and
+it applied immediately, so this one was a transient MCP stall, not the
+semicolon case. Kept below for the record; nothing left for claude.ai to apply.
 
 ```sql
 update research_findings
