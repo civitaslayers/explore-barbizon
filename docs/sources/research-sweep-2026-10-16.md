@@ -1,7 +1,7 @@
 # Research sweep, 2026-10-16
 
 Standing job S2 (task 7820f08f). Branch `night/2026-10-16-research-sweep`.
-Pass 1, 03:38 to about 04:50 Paris (hard stop 05:05). Scope: `research_findings`
+Pass 1, 03:38 to about 04:25 Paris (hard stop 05:05). Scope: `research_findings`
 rows in `open` / `lead`, published-linked first, one subject at a time, starting
 with the two large subjects never swept before (Les Charmettes, 42 rows; Maison
 Diaz, 28 rows) and then the published-linked leftovers of 2026-10-15. Tier
@@ -37,16 +37,24 @@ confirm; Tier 3 alone stays `lead`.
 - WebSearch returns titles and URLs only; WebFetch opens only URLs a search
   returned. Restricting a search to `fr.wikipedia.org` / `en.wikipedia.org`
   with `allowed_domains` is the reliable way to get a Wikipedia page into a
-  result list so that it can be fetched (worked for the tramway, Chailly and
-  Karl Bodmer pages; did not surface « Auguste Giroux »).
+  result list so that it can be fetched (worked for the tramway, Chailly,
+  Musée des peintres and Karl Bodmer pages; did not surface « Auguste
+  Giroux »). Caveat: Wikipedia and Commons URLs containing percent-encoded
+  accents (« Roland_Lecavel%C3%A9 », « Cat%C3%A9gorie:Barbizon », the Commons
+  Charmettes postcard) came back `URL_NOT_FOUND`, and the unencoded form
+  needs a provenance approval, so accented page titles are effectively out of
+  reach from this sandbox.
 
-Database writes this pass: 1 insert (`a0a5acda`, Occupation, `confirmed`),
-7 note updates (`3c1094cf`, `cf9399d4`, `28cb6e58`, `759c7872`, `90b48832`,
-`d59a3f6f`, `4eb2b8fe`), 0 other status changes, 0 tasks filed. One insert was
-refused once by the `method` check constraint (allowed values: `page_image`,
-`ocr`, `snippet`, `census`, `secondary`, `oral`, `archive`) and re-sent with
-`secondary`; no write timed out. Heartbeats at 03:40, 03:58, 04:08 and 04:40
-Paris.
+Database writes this pass: 2 inserts, both `confirmed` (`a0a5acda`
+Occupation, `cce38ca8` Trotsky), 12 note updates (`3c1094cf`, `cf9399d4`,
+`28cb6e58`, `759c7872`, `90b48832`, `d59a3f6f`, `4eb2b8fe`, `e45891ee`,
+`4f6bf982`, `07d151aa`, `f6713669`, plus the second note on `d59a3f6f`),
+0 other status changes, 0 tasks filed. One insert was refused once by the
+`method` check constraint (allowed values: `page_image`, `ocr`, `snippet`,
+`census`, `secondary`, `oral`, `archive`) and re-sent with `secondary`; no
+write timed out. Heartbeats at 03:40, 03:58, 04:08, 04:12 and 04:20 Paris.
+Pass ended about 04:25 Paris, well before the 05:05 hard stop, with the
+reachable-source angles exhausted for the subjects in scope.
 
 ---
 
@@ -313,8 +321,61 @@ Hania at Barbizon: only estate-agent pages and two Région inventory sheets
   outside the booklet expected online; not searched (as on 10-15).
 - **Parcours des mosaïques** (`7cb77f8b`): already carries the negative on
   « Murano »; the mairie site is robots-blocked. Unchanged.
+- **Auberge Ganne, aside** (no row changed): fr.wikipedia « Musée des
+  Peintres de Barbizon » (Tier 3, two references: Mérimée PA00086807 and a
+  2016 Courbet catalogue) says the house « en 1834 fut transformée en épicerie
+  par François et Edme Ganne » and dates the commune's purchase to 1995, against
+  the museum's own 1987 (confirmed row of 10-15). Noted so the discrepancy is
+  not rediscovered; the museum and Muséofile outrank it.
+- **Ernest Révillon** (`83a2eb7b`, `e6b5173a`, unlinked): the Geneanet
+  « Monuments aux morts » listing for Barbizon has photo records only (behind
+  the chapelle Notre-Dame de la Persévérance, in front of the church), no
+  sculptor. Unchanged.
 
 ---
+
+## 12. Unlinked booklet rows settled or improved on the way (second half of the pass)
+
+Tried because the same reachable sources (signed reference works, scholarly
+editions, Wikipedia pages reached through domain-restricted search) kept
+working. None of these rows is linked to a location.
+
+- **Trotsky in Barbizon** (`4f6bf982`, booklet: villa « La Haute Futaie »,
+  ex « Ker Monique », 17 chemin du Bornage, 1935, fled to Mexico).
+  **Inserted `cce38ca8`, `confirmed`** on two independent Tier 2 sources:
+  the Surrealist tract *Planète sans visa* (24 April 1934, signed Breton,
+  Char, Crevel, Éluard, Péret, Tanguy and others; marxists.org transcription),
+  which protests the sudden « arrêt d'expulsion » and names « l'épisode de la
+  "villa de Barbizon" » with its four German shepherds « dressés contre la
+  grille du parc » as reported by the press; and the editorial note to
+  Trotsky's letter of 2 March 1934 in *Œuvres*, vol. 3 (nov. 1933 - avril
+  1934), Institut Léon Trotsky, 1978, pp. 248-251: « Trotsky se trouvait à
+  cette époque à Barbizon », going to Paris about once a week. So the stay is
+  1933-34 and the expulsion April 1934; the booklet's « 1935 » and « fled to
+  Mexico » are wrong (Norway 1935, Mexico 1937). Villa name and address remain
+  booklet-only; `4f6bf982` notes updated, stays `lead`. No location exists for
+  the chemin du Bornage, so nothing to propose for published text.
+- **Louis Renault (jurist)** (`e45891ee`): the Nobel biographical note (from
+  *Nobel Lectures, Peace 1901-1925*, Elsevier 1972, nobelprize.org) read in
+  full: he « went to his villa in Barbizon for a brief holiday, was taken ill,
+  and died on the morning of February 8 » 1918. He therefore owned a villa at
+  Barbizon, which strengthens the 13 rue Théodore Rousseau identification.
+  Quote and note added; still one Tier 2 plus Wikipedia, `lead`.
+- **Eugène Freyssinet** (`07d151aa`, « La Boulinière », 7 chemin du Bornage):
+  Britannica (Objat 1879 - Saint-Martin-Vésubie 1962) and Structurae have no
+  Barbizon residence; Structurae lists his prestressing factory at
+  Dammarie-lès-Lys, 10 km away, which makes a Barbizon house plausible. Note
+  added. Next: *Un amour sans limite* (Linteau 1993) or the electoral rolls.
+- **Gorges d'Apremont** (`f6713669`, fires to 1959, 1960 tornado,
+  « la Cathédrale »; linked to `point-de-vue-apremont`, published): the AAFF
+  « nouvelle frise » (Dec 2023) has no 1959-1960 entry (large fires
+  1876-1911, RBI 1953, site classé 1965) and the AAFF 30 June 2023
+  Apremont / Bas-Bréau walk report mentions fires only generically. Negative
+  noted on the row, not to be retried.
+- **Chailly-en-Bière** (fr.wikipedia, read for the Bodmer rows): says
+  Barbizon separated from Chailly in **1903** (no citation) against the index's
+  January 1904 first election; Karl Bodmer « est inhumé à Chailly-en-Bière »
+  (reference not shown). Nothing written to a row (Tier 3, no new fact).
 
 ## Tasks
 
