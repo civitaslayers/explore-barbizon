@@ -130,13 +130,16 @@ Row notes updated, `[needs-local: Gallica Bulletin des lois 1861]`.
 Proposed text: wherever the site dates the decree, write « décret impérial
 de 1861 » without the day until the Bulletin des lois is read.
 
-### Films shot in Barbizon (lead, unchanged) and Les Glaneuses (94 Grande Rue)
+### Films shot in Barbizon (lead) and Les Glaneuses (94 Grande Rue)
 
-Checked: en.wikipedia The Benefactor (1942 film).
+Checked: en.wikipedia The Benefactor (1942 film), data.bnf.fr 16461795.
 Outcome: « Le Bienfaiteur », dir. Henri Decoin, released 11 Dec 1942, Raimu
 as Monsieur Moulinet, shot at the Cité Elgé studios, Paris; Barbizon exteriors
-not mentioned. Lucien Gallas (see 63 Grande Rue) is in the cast. Row 8d35b651
-notes updated; the films list row unchanged.
+not mentioned. Lucien Gallas (see 63 Grande Rue) is in the cast. data.bnf.fr
+(Tier 1 record) has « La tentation de Barbizon », fiction feature, 1945,
+contributor Jean Stelli (1894-1975): the poster in the booklet is a real
+film. Rows 8d35b651 and 123beebd notes updated. The other titles were not
+checked for Barbizon locations.
 
 ### Farms of Barbizon (lead, unchanged)
 
@@ -159,11 +162,19 @@ dans la forêt », i.e. the whole forest in the 19th century, not the Dormoir.
 The published circuit-des-peintres stop says the Dormoir rested « jusqu'à
 20 000 bêtes selon la tradition »: misattributed figure. Neither source says
 Lantara slept under the rocks. Caverne « sheltered outlaws » is already
-handled on the Caverne page (Denecourt's invention). Bas-Bréau 4-star /
-2 ha not checked tonight.
+handled on the Caverne page (Denecourt's invention).
 New row 6777c3f8 (`lead`). Task filed: 4e848f3e.
 Proposed text: « un dormoir, lieu de repos des troupeaux, dans une forêt qui
 comptait jusqu'à 20 000 animaux domestiques au XIXe siècle ».
+
+Bas-Bréau: the published hotellerie-bas-breau text says « 4 étoiles ... parc
+ombragé de deux hectares ». Fontainebleau Tourisme listing 724797 says the
+property « extends over one hectare », privateaser.com « parc fleuri de
+1ha »; Pudlowski (2017) names the Fava family and the Stevenson « Forest
+Notes » tradition, no area. No source states the star classification.
+New row 8311b70c (`lead`, linked to the location). Task filed: d16ec0a9.
+Proposed text: « parc d'environ un hectare » (or drop the figure); keep
+« 4 étoiles » only if the Atout France register confirms it.
 
 ### Gassies, Le vieux Barbizon (open, unchanged)
 
@@ -268,13 +279,40 @@ Same dealer pages as pass 8 (Victor Lecomte 1856-1920). Not improved.
 
 WebSearch Carco / Colette Barbizon: nothing. Not improved.
 
+### L'Écureuil (71 Grande Rue), lead, plus new confirmed row
+
+data.bnf.fr 11913224 (Tier 1 authority record): « Marc Logé » is the
+pseudonym of Mary Cécile Logé, born London 24 Sept 1887, died Barbizon
+2 April 1949, « Femme de lettres et traductrice », translator of Agatha
+Christie's first novel (1920) and of Thompson Seton (1928). This supports
+« la traductrice Marc Logé y séjourna » (she lived and died in the village),
+not the house number. proantic.com (Tier 3): the portraitist Claude Chéreau
+1883-1974. The painter « Journaux » not found.
+New row 8f1c1fe1 (`confirmed`, linked to galerie-erika-gage, unpublished);
+row e95c02df notes updated.
+Proposed text: if no. 71 is ever drafted, « Marc Logé (Mary Cécile Logé,
+1887-1949), première traductrice d'Agatha Christie, mourut à Barbizon » is
+safe; the house link stays « selon le livret de la mairie ».
+
+### La Clé d'Or (73 Grande Rue), lead, unchanged
+
+Checked: Fontainebleau Tourisme listing 6827200, romantikhotels.com.
+Outcome: nine rooms, no building history, no « relais de poste ». Not
+improved. The published L'Esquisse page dates the hotel use to the 1890s;
+the booklet's relais-de-poste claim stays booklet-only.
+
+### Le Royal (50) and 96 Grande Rue, lead, unchanged
+
+Checked: WebSearch for postcards « Épicerie Centrale » / « Delouche »
+Barbizon (Geneanet). Outcome: the only hit is a Fontainebleau card published
+by A. Siron, Barbizon. Not improved.
+
 ### Not searched tonight (booklet-only commercial history, no online
 corroboration expected)
 
-La Belle-Idée (14), La Bohème (35), Le Royal (50), La Clé d'Or (73),
-L'Écureuil (71), Le Hameau (7 rue Félix Herbet), 4, 33, 61, 64, 67, 68, 72,
-81, 96 Grande Rue. These need the mairie, the Barbizon état civil or the
-cadastre; nothing reachable tonight could settle them.
+La Belle-Idée (14), La Bohème (35), Le Hameau (7 rue Félix Herbet), 4, 33,
+61, 64, 67, 68, 72, 81 Grande Rue. These need the mairie, the Barbizon état
+civil or the cadastre; nothing reachable tonight could settle them.
 
 ## Rows written tonight
 
@@ -282,13 +320,17 @@ cadastre; nothing reachable tonight could settle them.
   0316a08c (Roger), 2b30fe67 (sultan), 9414db75 (47 GR), fde0fbe3 (Tilleuls),
   0cbbe219 (Baraka), 9ccf60c8 (Alouettes), ac3d2b0f (Chaperon Rouge),
   8d35b651 (Glaneuses), a6248bef (63 GR), bef0f0cb (reserve 1861),
-  11dcd010 (Chaigneau).
+  11dcd010 (Chaigneau), 123beebd (films), e95c02df (L'Écureuil).
 - Inserted: 7110c114 (Chaigneau La Bergerie, confirmed, Orsay PHO 1984 34 7),
-  6777c3f8 (Dormoir 20,000 animals, lead).
+  8f1c1fe1 (Marc Logé, confirmed, data.bnf.fr), 6777c3f8 (Dormoir 20,000
+  animals, lead), 8311b70c (Bas-Bréau park one hectare, lead).
 - Tasks filed: 4e848f3e (Circuit des Peintres Dormoir wording),
-  27ab32d1 (Parcours des Mosaïques exact-spot claim and count).
+  27ab32d1 (Parcours des Mosaïques exact-spot claim and count),
+  d16ec0a9 (Bas-Bréau hectares and star rating).
 
 ## Not reached
 
-Bas-Bréau 4-star / 2 ha check, the house rows listed under « Not searched
-tonight », Gassies texteBrut indexing (Gallica blocked).
+The house rows listed under « Not searched tonight », Gassies texteBrut
+indexing (Gallica blocked), the Barbizon locations of the other films in the
+booklet list, data.bnf.fr HTML author pages (server errors tonight, only the
+PDF endpoint answered).
