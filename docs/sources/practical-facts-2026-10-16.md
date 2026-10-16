@@ -17,18 +17,19 @@ order by subject;
 Eligible after the 30-day `practical:` exclusion: 72 published locations with
 `opening_hours` null or website/phone missing. Most are open-air sites (bus
 stops, parkings, trails, viewpoints, plaques, climbing areas) with no business
-hours, so the run worked the 16 remaining businesses, starting with the 14
-slugs yesterday's file listed as not reached.
+hours, so the run worked the 18 remaining businesses and public services,
+starting with the 14 slugs yesterday's file listed as not reached, then the
+mairie and the post office.
 
 | Outcome | Count | Slugs |
 |---|---|---|
-| Found, rows inserted | 12 | see table below |
-| of which hours found with times | 4 | librairie-cyrano, nunchi, maison-millet, epicerie-de-barbizon |
-| of which with a source conflict | 5 | maison-millet, muse-galerie, epicerie-de-barbizon, atelier-berangere, les-pleiades (closure vs. live listing) |
-| Nothing found (no row) | 4 | mon-oeil (own site blocks the fetch tool, no other listing), l-imaginarium (only the gîte fiche at the same address, which gives the Gîtes de France line 01 60 39 60 54, not the shop), dame-aux-coquelicots (Facebook page only), le-chic-barbizon (Airbnb only, as yesterday) |
-| Skipped, nothing new since yesterday | 4 | tabac-barbizon, galerie-39, galerie-41, cercle-laure-henry (searches again return nothing) |
+| Found, rows inserted | 17 | see table below |
+| of which hours found with times | 8 | librairie-cyrano, nunchi, maison-millet, epicerie-de-barbizon, mon-oeil, tabac-barbizon, la-poste-barbizon, mairie-barbizon |
+| of which with a source conflict | 7 | maison-millet, muse-galerie, epicerie-de-barbizon, atelier-berangere, tabac-barbizon, les-pleiades (closure vs. live listing), l-imaginarium (phone) |
+| Nothing found (no row) | 2 | dame-aux-coquelicots (Facebook page only), le-chic-barbizon (Airbnb only, as yesterday) |
+| Not a business with regular hours (no row) | 3 | galerie-39 (artistescontemporains.org and jds.fr describe an event space, hours only per exhibition, last listed 2024), galerie-41 (nothing found), cercle-laure-henry (association, amislh.fr blocks the fetch tool) |
 
-Rows inserted: 12. Tasks filed: 1 (`6e11010d`, Les Pléiades closure, p4).
+Rows inserted: 17. Tasks filed: 1 (`6e11010d`, Les Pléiades closure, p4).
 
 ## Headline finding
 
@@ -48,12 +49,16 @@ on the ground and decide between a closure note and unpublishing.
   Bérengère, Muse Galerie, P'tit Angélus and Les Pléiades.
 - Fontainebleau Tourisme fiches (Apidae) for the butcher and as a cross-check
   for Musée Millet and Atelier de Bérengère.
-- Pages Jaunes loaded this time (one fiche) and is Tier 3; trouver-ouvert.fr
-  and locale.online are Tier 3 aggregators, flagged as such in `notes`.
-- Unreachable: `monoeil-barbizon.fr` (robots), `barbizon.fr` mairie site
-  including its commerces directory (robots), Tavily (403 all night). The
-  mairie directory is the one source likely to have Rose, L'Imaginarium,
-  La Dame aux Coquelicots and the tabac in one place:
+- La Poste's own locator (`localiser.laposte.fr`) is Tier 1 for the post
+  office. Pages Jaunes loaded once (épicerie) and failed once (Mon Oeil);
+  Mappy, trouver-ouvert.fr, locale.online, bureautabac.fr, au-magasin.fr and
+  annuaire-administration.com are Tier 3 aggregators, flagged in `notes`.
+- Unreachable: `monoeil-barbizon.fr` (robots), `limaginariumboutique.fr`
+  (robots, has a /horaires/ page), `barbizon.fr` mairie site including its
+  commerces directory and the 2022 village map PDF (robots), `amislh.fr`
+  (robots), `weboptic.fr` (robots), Tavily (403 all night). The mairie
+  directory is the one source likely to have Rose, L'Imaginarium, La Dame aux
+  Coquelicots and the tabac in one place:
   `[needs-local: https://www.barbizon.fr/commerces-et-artisans/]`.
 - Claim shape as yesterday: `{"hours":{"mon":[["10:00","18:00"]],...},
   "website":..., "phone":...}`; `"hours": null` plus `"hours_text"` when the
@@ -79,15 +84,23 @@ current `locations` row.
 | maison-45 | none published | = DB | = DB | email only |
 | atelier-berangere | none published | = DB | = DB | OT lists 5 Résidence Les Charbonnières as address |
 | rose-barbizon | none published | = DB | none | Tier 3 aggregator only |
+| mon-oeil | Mon, Tue, Thu 9:30-12:30 / 14:30-19; Fri to 19:30; Sat to 18 (Mappy) | = DB | = DB | Tier 3; own site blocked |
+| tabac-barbizon | Tue-Sat 07:30-19:30 (bureautabac.fr) | 01 64 38 65 26 | maisondelapresse.com shop page | Tier 3; au-magasin.fr gives Mon + Sun open, Tue closed, and contradicts itself on Sunday |
+| l-imaginarium | Wed-Sun per gîte listing, no times | = DB (unverified) | limaginariumboutique.fr | website new; hours page blocked |
+| la-poste-barbizon | Tue-Sat 09:00-12:00 | none shown | laposte.fr locator | Tier 1, outside S3 category list |
+| mairie-barbizon | Mon 14-18; Tue-Sat 09-12 | 01 60 66 41 92 | barbizon.fr | Tier 3 directory, official site blocked, outside S3 category list |
 
 ## Follow-ups
 
 - Task `6e11010d` (backlog, p4): Les Pléiades closure, confirm locally and
   decide closure note vs. unpublish.
-- S4 (local): read `https://www.barbizon.fr/commerces-et-artisans/` and
-  `https://www.monoeil-barbizon.fr/contact/` for Rose, L'Imaginarium, La Dame
-  aux Coquelicots, Tabac, Mon Oeil hours.
-- Next S3 run: the remaining eligible rows are open-air sites without business
-  hours, plus mairie-barbizon and la-poste-barbizon (public services, outside
-  the S3 category list, but both have null phone and hours). Consider widening
-  S3 to public services once the mairie site is readable locally.
+- S4 (local): read `https://www.barbizon.fr/commerces-et-artisans/`,
+  `https://www.barbizon.fr/contact/`, `https://www.monoeil-barbizon.fr/contact/`
+  and `https://limaginariumboutique.fr/horaires/` to confirm Rose,
+  L'Imaginarium, La Dame aux Coquelicots, Tabac, Mon Oeil and mairie hours
+  (rows carry `[needs-local: ...]` markers).
+- Next S3 run: every remaining eligible row is an open-air site without
+  business hours (bus stops, parkings, trails, viewpoints, plaques, climbing
+  areas), so S3 has nothing to work until the 30-day exclusion on yesterday's
+  26 slugs lapses (2026-11-14) or the brief widens to public services and
+  practical sites (toilets, EV charger, cemetery) with Tier 1 sources.
