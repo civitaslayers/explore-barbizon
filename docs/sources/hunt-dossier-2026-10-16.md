@@ -121,12 +121,16 @@ tradition stays a lead pending AD77 (task ce8efd66). Nothing new tonight.
     artist by William Morris Hunt » (this is Hurll's *Sheep Shearer*).
   - 17.1490 *Shepherd and Flock at the Edge of the Forest, Evening*, 1853,
     same wording (this is Hurll's *The Shepherd*).
+  - 17.1488 *Man Turning over the Soil*, about 1847-50, same wording.
   - 17.1485 *The Sower*: settled 15 Oct.
   - 17.1486 *Forest with Shepherdess and Sheep* did **not** pass through
-    Hunt (Sensier sale, Drouot, 10 Dec 1877, lot 53, to Legrand for Shaw).
-  - Correction to the 15 Oct list: 17.1482 belongs in the Hunt-Shaw group,
-    17.1484 and 17.1488 were not opened tonight. `[needs-local: MFA Boston
-    records 17.1484 and 17.1488 provenance paragraphs]`.
+    Hunt (Sensier sale, Drouot, 10 Dec 1877, lot 53, to Legrand for Shaw);
+    17.1481 and 17.1495 did not either.
+  - So the Hunt-Shaw group documented tonight is five oils: 17.1482,
+    17.1485, 17.1488, 17.1489, 17.1490, matching Knowlton's « five »
+    kept at Beacon Street and sold to Shaw (p. 184). Correction to the
+    15 Oct list: 17.1482 replaces 17.1484, which was not opened tonight.
+    `[needs-local: MFA Boston record 17.1484 provenance paragraph]`.
   - Kept by the family, not sold to Shaw: 2000.1221 *Three Men Shearing
     Sheep in a Barn*, « About 1853, sold by the artist to William Morris
     Hunt », to his widow Louisa (lent to the MFA 1890), then to William
