@@ -270,7 +270,10 @@ the civil record itself not seen.
    expected further commissions did not come in 1879; a rumour that the
    state had not paid him, denied by the Capitol's Stuart Lehman.
 6. Met catalogue entry, SAAM, Vose, Hurll: « drowned », no cause given.
-7. AAA blog (2010): « committed suicide in 1879 ». Brockett: « reportedly
+7. Archives of American Art finding aid AAA.huntwill (Hunt letters and
+   photographs, ca. 1873-1898): « Hunt drowned in the Isle of Shoals,
+   N.H., possibly a suicide » (Tier 1 repository, cataloguer's wording,
+   no source given). AAA blog (2010): « committed suicide in 1879 ». Brockett: « reportedly
    suicide ». eclecticlight: « thought to have been suicide ».
    en.wikipedia: the murals' decay « is believed to have led to his
    depression and presumed suicide », citing an archived Pierce
