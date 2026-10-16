@@ -33,6 +33,12 @@ frick.org, jphs.org, empirestateplaza.ny.gov, newcriterion.com,
 antiquesandfineart.com, vosegalleries.com, eclecticlight.co, the
 HathiTrust catalogue record (not the viewer).
 
+Catalogue records located for the local job: Angell 1881, HathiTrust
+000369151; *Letters of Celia Thaxter* 1895, HathiTrust 000119944 (full
+view ids mdp.39015013757813, hvd.hwk6lr); MFA memorial exhibition
+catalogue 1879, HathiTrust 100440768; Knowlton 1899, archive.org
+`william00know` and `bub_gb_F3oVAAAAYAAJ`, Google Books F3oVAAAAYAAJ.
+
 Consequence: most of what follows rests on reachable secondary sources
 that themselves cite Knowlton, Hoppin and Webster. Where only Tier 3 or a
 single Tier 2 was reachable, status is `lead`. The primary texts to read
