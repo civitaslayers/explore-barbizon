@@ -6,6 +6,10 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import sharp from "sharp";
 import {
   parseDisplayOrder,
   computeFolderOrders,
@@ -14,6 +18,7 @@ import {
   parseArgs,
   UsageError,
   validateOnlyTarget,
+  renderVariant,
 } from "./upload-media.mjs";
 
 // ---------------------------------------------------------------------------
@@ -186,4 +191,60 @@ test("validateOnlyTarget: unknown non-underscore slug is rejected with a does-no
   const err = validateOnlyTarget("some-fake-slug-xyz", ["auberge-ganne"], ["_general"]);
   assert.match(err, /does not match any folder/);
   assert.doesNotMatch(err, /general\/site-asset folder/);
+});
+
+// ---------------------------------------------------------------------------
+// renderVariant (task 7a97ab91) — the real sharp pipeline, run against the
+// installed sharp version, on a tiny generated JPEG carrying EXIF (device +
+// GPS tags), a non-default Orientation and an embedded ICC profile. Guards
+// the EXIF-strip / sRGB guarantee from brain/decisions.md (2026-07-17) and
+// the autoOrient-before-resize ordering.
+// ---------------------------------------------------------------------------
+
+test("renderVariant: output has no EXIF, no ICC, is sRGB, and is auto-oriented", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "upload-media-test-"));
+  try {
+    const srcPath = join(dir, "sample.jpg");
+    const srcBuffer = await sharp({
+      create: { width: 64, height: 48, channels: 3, background: "#c0ffee" },
+    })
+      // withMetadata() writes an sRGB ICC profile and the Orientation tag;
+      // withExifMerge() adds device + GPS tags on top — the kind of payload
+      // the strip exists to remove.
+      .withMetadata({ orientation: 6 })
+      .withExifMerge({
+        IFD0: { Make: "Civitas", Model: "Test" },
+        IFD3: { GPSLatitudeRef: "N" },
+      })
+      .jpeg()
+      .toBuffer();
+    writeFileSync(srcPath, srcBuffer);
+
+    // Sanity: the source really carries what we expect to be stripped.
+    const srcMeta = await sharp(srcBuffer).metadata();
+    assert.equal(srcMeta.orientation, 6);
+    assert.ok(srcMeta.exif && srcMeta.exif.length > 0, "source must carry EXIF");
+    assert.ok(srcMeta.exif.includes("Civitas"), "source EXIF must carry the Make tag");
+    assert.ok(srcMeta.icc && srcMeta.icc.length > 0, "source must carry an ICC profile");
+
+    const variant = await renderVariant(srcPath, 1600);
+    const outMeta = await sharp(variant.buffer).metadata();
+
+    assert.equal(outMeta.format, "webp");
+    assert.equal(outMeta.exif, undefined, "output must carry no EXIF");
+    assert.equal(outMeta.icc, undefined, "output must carry no embedded ICC profile");
+    assert.equal(outMeta.space, "srgb");
+    assert.equal(outMeta.hasProfile, false);
+    // Orientation 6 = rotate 90° CW: 64x48 source becomes 48x64 output, and
+    // the Orientation tag itself is gone (not re-emitted as EXIF).
+    assert.equal(outMeta.orientation, undefined);
+    assert.equal(variant.width, 48);
+    assert.equal(variant.height, 64);
+    // withoutEnlargement: a 48px-wide source is never upscaled to 1600.
+    assert.equal(outMeta.width, 48);
+    assert.equal(outMeta.height, 64);
+    assert.equal(variant.bytes, variant.buffer.length);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
