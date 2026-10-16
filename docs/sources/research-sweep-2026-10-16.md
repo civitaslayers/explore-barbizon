@@ -21,18 +21,32 @@ confirm; Tier 3 alone stays `lead`.
   in-book search `books?id=...&q=` (robots), the Région Île-de-France
   inventory PDFs (`inventaire.iledefrance.fr`, JavaScript bot wall « haphash »,
   as on 10-15), Persée (article not surfaced by search, so not fetchable),
-  Getty ULAN full record (client error), maryevans.com (empty page).
+  Getty ULAN full record (client error), maryevans.com (empty page), the
+  Gutenberg plain-text file `18854.txt.utf-8` (provenance approval not
+  answered; the HTML version did open but the fetch truncates it),
+  `419squadron.com/Evaders-4.html` (https to http redirect loop), the CIA
+  reading-room PDF returned by search (landing page only).
 - Worked: Google Books *record* pages (`books/about/...`, bibliographic data
-  and word cloud only, no snippets), Project Gutenberg, musee-orsay.fr artist
-  catalogue, nationalgallery.org.uk artist page, learningonscreen.ac.uk (BUFVC
-  newsreel database), en.wikipedia.
+  and word cloud only, no snippets), Project Gutenberg HTML, musee-orsay.fr
+  artist catalogue, nationalgallery.org.uk artist page, nga.gov object page,
+  learningonscreen.ac.uk (BUFVC newsreel database), en.wikipedia and
+  fr.wikipedia (only when a domain-restricted search returned the page),
+  thecanadianencyclopedia.ca (Memory Project veteran testimonies),
+  aircrewremembered.com, 419squadron.com (Drue page), njmastro.com,
+  journaldespalaces.com.
 - WebSearch returns titles and URLs only; WebFetch opens only URLs a search
-  returned. fr.wikipedia pages did not surface for any query tonight, so none
-  could be opened.
+  returned. Restricting a search to `fr.wikipedia.org` / `en.wikipedia.org`
+  with `allowed_domains` is the reliable way to get a Wikipedia page into a
+  result list so that it can be fetched (worked for the tramway, Chailly and
+  Karl Bodmer pages; did not surface « Auguste Giroux »).
 
-Database writes this pass: 3 note updates (`3c1094cf`, `cf9399d4`, `28cb6e58`),
-0 status changes, 0 inserts, 0 tasks filed. Heartbeats at 03:40, 03:58 and
-04:25 Paris.
+Database writes this pass: 1 insert (`a0a5acda`, Occupation, `confirmed`),
+7 note updates (`3c1094cf`, `cf9399d4`, `28cb6e58`, `759c7872`, `90b48832`,
+`d59a3f6f`, `4eb2b8fe`), 0 other status changes, 0 tasks filed. One insert was
+refused once by the `method` check constraint (allowed values: `page_image`,
+`ocr`, `snippet`, `census`, `secondary`, `oral`, `archive`) and re-sent with
+`secondary`; no write timed out. Heartbeats at 03:40, 03:58, 04:08 and 04:40
+Paris.
 
 ---
 
@@ -149,7 +163,101 @@ possédait à Barbizon » is as far as the sources go, and which house it was
 Forges and the Région inventory versus the 1903 plaque and the 1911
 advertisement).
 
-## 3. Hôtel de la Forêt, 10 rows, linked to `bobo-club` and `mairie-barbizon` (published)
+## 3. Occupation 1940-1944, 4 rows (1 worked) + 1 new row, linked to `galerie-erika-gage` (unpublished) and `besharat-gallery-barbizon` (published)
+
+**Checked.** The RCAF side of the Drue Tartière story, which no earlier pass
+had opened: The Memory Project (Canadian Encyclopedia) veteran testimony of
+Fg Off Lorne « Red » Frame, 419 Sqn; aircrewremembered.com pages « Frame,
+Lorne » (crew of Lancaster X KB718, crashed at Fay near Chailly-en-Bière at
+01:45 on 5 July 1944) and « Steepe, Charles » (which transcribes Flt Sgt Daniel
+Murphy's Escape and Evasion Report); 419squadron.com « Drue Tartiere and 419
+Squadron »; njmastro.com (2020s blog post relaying the 419squadron « Evaders-4 »
+page, itself unreachable tonight); the 429 Sqn evaders list (nothing); the
+American Scholar piece on Helen Kirkpatrick (no Barbizon). A search for
+*The House Near Paris* in full text found library records only.
+
+**Outcome.**
+- **Inserted `a0a5acda`, `confirmed`**: three concordant first-hand accounts
+  now place the sheltering of the KB718 crew at Drue Tartière's Barbizon
+  property in July-August 1944. Frame (Memory Project, Tier 2): « I stayed at
+  Drue's small house in Barbizon, six houses away from the local French
+  Commander » for seven weeks, until the American liberation late in August.
+  Murphy (E&E report as transcribed on aircrewremembered.com): « They then took
+  us into Barbizon to an American woman », « She moved to Barbizon where she
+  purchased a small farm », a week « in the house of a friend of the Mme.
+  Tartiére », then « on 12th July we went over to the farm of the Mme.
+  Tartiére where we stayed until 26th August ». Tartière's own memoir is
+  already `confirmed` on `6aefbec8`. Both airmen's accounts are independent of
+  the booklet and of each other.
+- Row `d59a3f6f` (booklet: « Mme Parson-Tartière » sheltered airmen at no. 71,
+  « L'Écureuil ») stays `lead`, **notes improved twice**: (a) the house name
+  « Villa L'Ecureuil, home of Drue Tartiere » also appears on the 419 Squadron
+  association's Evaders page (as quoted by njmastro.com; the page itself
+  redirect-looped), a second Tier 3 witness independent of the commune; (b)
+  Murphy describes the property as « a small farm » she had bought, and says the
+  airmen spent their first week in a friend's house before moving to the farm,
+  so if no. 71 Grande Rue is a village house the booklet may be naming the
+  friend's house or merging two addresses. No source but the booklet gives a
+  street number.
+- Rows `3df2075e`, `9e1ced17`, `5455f332` untouched.
+
+**Implication for published text.** None: no published page names Tartière's
+house or no. 71 (checked by text search on `locations`). For the future
+`galerie-erika-gage` draft: the sheltering is now solid (three first-hand
+accounts); say « Drue Tartière (the actress Drue Leyton) », « sa petite
+maison / sa ferme de Barbizon », and keep « L'Écureuil » and « no 71 » as
+« selon la commune » until the friend's-house question is settled. Frame's
+« six houses away from the local French Commander » is a lead for placing the
+house once the 1944 Kommandantur or FFI post is located.
+
+## 4. Tramway TSM (`4eb2b8fe`), linked to `la-folie-barbizon-hotel` (published)
+
+**Checked.** fr.wikipedia « Tramway Sud de Seine-et-Marne » (surfaced by a
+domain-restricted search, read in full) and « Chailly-en-Bière ».
+
+**Outcome.** Notes improved, status unchanged (Tier 3 read, Tier 1-2 cited but
+not read). The article settles the initials in the booklet's favour: Société
+anonyme des **Tramways sud de Seine-et-Marne, TSM** (the techno-science mirror's
+« TSSM » is wrong), nickname « Tacot de Barbizon », metre gauge, concession to
+M. Nabias, Melun to Barbizon along the CGC 64 (today's RD 64), terminus « Gare
+de Barbizon » with a « Barbizon-Centre » stop, service 1899-1938, Baert et
+Verney 1921, SCFE 1927. It cites the concession decree (Duvergier, *Collection
+des lois*, vol. 98, 1898, p. 471), the déclassement decree (JO 8 March 1952,
+p. 2818) and the monograph René Housson, *Histoire du Tramway Sud de
+Seine-et-Marne : Melun, Barbizon, Milly, 1899-1938*, Amatteis, 1985, 111 p.,
+which is the book to read for the exact dates and the Barbizon terminus
+layout (no. 1 vs no. 5 Grande Rue, turntable, goods station).
+
+**Implication for published text.** `la-folie-barbizon-hotel` does not mention
+the tram. If a tram line is ever written, « TSM » and « 1899-1938 » are safe;
+the station's street number is not.
+
+## 5. Karl Bodmer's sons: Marie Bodmer (`759c7872`) and Les Charmettes (`90b48832`)
+
+**Checked.** en.wikipedia « Karl Bodmer » (fetched after a search returned it).
+
+**Outcome.** The article states that « his three sons, Charles, Rodolphe and
+Henri » were figures of the Barbizon community of artists and poachers, citing
+Didier Lévêque, *Peindre les Indiens : l'art de Karl Bodmer, Rosa Bonheur,
+Antoine Tzapoff* (Barbizon exhibition, 2021), p. 12 (Tier 2, not read). It also
+says he was registered as Jean-Charles Bodmer and went by « Charles », which is
+why a « Charles Bodmer » signature needs care. Two rows gain a pointer, no
+status change:
+- `759c7872` (the Orsay photographer Charles Bodmer, born Chailly 1854, as
+  candidate father of Marie): a son Charles is now attested, so the hypothesis
+  is strengthened; Lévêque p. 12 or the Chailly état civil would settle it.
+- `90b48832` (Charmettes tradition: « Rodolphe Bodmer » left an aperitif debt
+  at the Schallers'): Rodolphe is corroborated as a real son; the Hunt and 1856
+  clauses remain unsourced.
+- Aside, for the Chêne Bodmer rows: the National Gallery of Art, Washington,
+  holds a Karl Bodmer lithograph *Au Bas Breau. Foret de Fontainebleau*
+  (1975.34.22, Ailsa Mellon Bruce Fund, no date, not on view). Not recorded as
+  a row (no new fact about the oak).
+
+**Implication for published text.** None yet; if Lévêque 2021 is read, the
+Chêne Bodmer page can gain the sons.
+
+## 6. Hôtel de la Forêt, 10 rows, linked to `bobo-club` and `mairie-barbizon` (published)
 
 **Checked.** Search for *La Nature* 1892 p.461 on the CNAM's Conservatoire
 numérique (cnum.cnam.fr, which hosts the full run of *La Nature*): the search
@@ -158,7 +266,7 @@ Wikipedia and unrelated PDFs. Not fetchable without a returned URL. Unchanged.
 Darlington 1898, Billy 1947, Plancke 1991-92 and the Louis-versus-Jean-Baptiste
 Masson question unchanged (same blockers as 10-15).
 
-## 4. Villa Bernard, 6 rows, linked to `villa-bernard` (published)
+## 7. Villa Bernard, 6 rows, linked to `villa-bernard` (published)
 
 **Checked.** Searches for Dr Auguste Giroux and the Villa Bernard restricted to
 Wikipedia domains (to get the « Auguste Giroux » article into a result list so
@@ -167,7 +275,7 @@ it could be fetched): the French article did not surface; the English
 Giroux, Tumble Inn, Charmettes, Hôtel de la Forêt, the chapel, Hunt or Bodmer
 (only « Leon Trotsky also lived here for a short time »). Unchanged.
 
-## 5. Tumble Inn, 4 rows, linked to `tumble-inn` (published)
+## 8. Tumble Inn, 4 rows, linked to `tumble-inn` (published)
 
 **Checked.** Search for period postcards or advertisements with an address
 (delcampe-type hits): nothing for Barbizon; results are the Croton (NY) Tumble
@@ -175,20 +283,20 @@ Inn and the New York Barbizon hotel. Unchanged. The founder question (Alfred
 Grand vs « an Englishman from New York ») still needs the mairie's Jazz Inn
 programme PDF in a browser.
 
-## 6. Hôtellerie du Bas-Bréau, 3 rows, linked to `hotellerie-bas-breau` (published)
+## 9. Hôtellerie du Bas-Bréau, 3 rows, linked to `hotellerie-bas-breau` (published)
 
 **Checked.** Search for Hirohito at Barbizon in October 1971: only the British
 leg of the 1971 tour (BFI, Royal Collection, Reuters) and ICRC material; the
 CIA reading-room PDF that the search returned is the FOIA landing page, not a
 document. Unchanged; « 1971 » stays « selon la commune ».
 
-## 7. Villa Élisabeth, 7 rows, linked to `villa-elisabeth` (published)
+## 10. Villa Élisabeth, 7 rows, linked to `villa-elisabeth` (published)
 
 **Checked.** Search for a Dorgelès chronology naming the Villa Élisabeth or
 Hania at Barbizon: only estate-agent pages and two Région inventory sheets
 (bot-walled). Unchanged.
 
-## 8. Single-row subjects
+## 11. Single-row subjects
 
 - **Charles Jacque / 24 Grande Rue** (`9fb3c614`, Jeanne Gassies lived there
   until 2003, died on the eve of her 100th birthday): search returned only the
@@ -210,7 +318,10 @@ Hania at Barbizon: only estate-agent pages and two Région inventory sheets
 
 ## Tasks
 
-None filed. Nothing read tonight flags published text as wrong. Duplicate check
+None filed. Nothing read tonight flags published text as wrong (the one
+`confirmed` insert, Tartière's airmen, concerns an unpublished location; the
+Besharat page cites Tartière's memoir only in its internal notes, not in
+published text). Duplicate check
 done against open tasks: `029cccbf` (booklet-only claims), `60a6e3f7` (Région
 inventory in a browser, which now also covers the Diaz house notice
 IA77000938), `dc8011f4` (plaques), `41b522df` (Gaier 2017), `ce8efd66` /
@@ -232,11 +343,25 @@ Everything in the 10-15 consolidated hand-over still stands. Added tonight:
   URL from a search result or a browser).
 - Chapelle: the 1904 date on the mairie map (`f60e4f65`) is unexplained; a
   Semaine religieuse de Meaux item would settle 1889 vs 1904.
-- Subjects not opened tonight: Karl Bodmer archival rows, Marie Bodmer, Chêne
-  Bodmer fall date, Landerer affair OCR rows, Rouveyre page views, Occupation,
-  L'Ombrage, Coz Ker, Auberge Diaz, Auberge Ganne (1856 guide, 1834 deed,
-  Mantes 1998), Manoir Saint-Hérem, Atelier Daubigny plaque, Ziem plaque, La
-  Poste, Monument Farman, Villa des Artistes, Les Bosquets, Céramano,
-  Vertefeuille, Le Relais, 39/52/79 Grande Rue, La Bastide, Tramway TSM,
-  Médaillon Chapu, and the unlinked William Morris Hunt rows (9, created
-  tonight by another job).
+- Occupation: 419squadron.com « Evaders-4 » page in a browser (names « Villa
+  L'Ecureuil »); *The House Near Paris* (1946) for the house and the friend's
+  house; which plot at 71 Grande Rue had farm buildings in the 1940s.
+- Tramway: Housson 1985 (Amatteis) for the Barbizon terminus layout; Duvergier
+  1898 p. 471 for the concession decree.
+- Karl Bodmer's sons: Lévêque, *Peindre les Indiens* (Barbizon 2021), p. 12;
+  Chailly état civil 1854 (Charles) for the Marie Bodmer link.
+- Subjects opened tonight with no change (same blockers as 10-15): Hôtel de
+  la Forêt, Villa Bernard, Tumble Inn, Hôtellerie du Bas-Bréau (Hirohito),
+  Villa Élisabeth, Charles Jacque / 24 Grande Rue, Ermitage Saint-Antoine,
+  Marcellin Berthelot, Monument Farman (Maurice Farman's Wikipedia biography
+  has no Barbizon property), Landerer (Schwabe sample PDF returned by search was
+  another book), Atelier Daubigny / Les Pléiades (the 2012 five-star article
+  has no history), La Poste (no Krier hit).
+- Subjects not opened tonight: Karl Bodmer archival rows, Chêne Bodmer fall
+  date, Landerer affair OCR rows, Rouveyre page views, L'Ombrage, Coz Ker,
+  Auberge Diaz, Auberge Ganne (1856 guide, 1834 deed, Mantes 1998), Manoir
+  Saint-Hérem (Picasso rows re-read, nothing new to try without the MoMA 2023
+  catalogue), Ziem plaque, Villa des Artistes, Les Bosquets, Céramano,
+  Vertefeuille, Le Relais, 39/52/79 Grande Rue, La Bastide, Médaillon Chapu,
+  Parcours des mosaïques, and the unlinked William Morris Hunt rows (created
+  tonight by the Hunt dossier job, 2f8efdc5, left to it).
