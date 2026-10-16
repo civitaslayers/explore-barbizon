@@ -149,8 +149,8 @@ advanced. What was reachable and read:
   source_url added**, status stays `lead` because the « bought a fine house »
   clause is still Karampournis-only.
 - **National Gallery, London, artist page** (Tier 2 museum text): « From the
-  mid-1830s he frequently stayed in the Forest of Fontainebleau, and was
-  greatly influenced by Théodore Rousseau »; Barbizon is not named (the
+  mid-1830s he frequently stayed in the Forest of Fontainebleau », and was
+  greatly influenced by Rousseau; Barbizon is not named (the
   *Common with Stormy Sunset* caption says « almost certainly near the village
   of Barbizon »). Row `cf9399d4` (Lyon 2002: from 1836 every summer): **notes
   added**; « mid-1830s » is compatible with both 1836 (Lyon) and 1837 (Salon
@@ -188,13 +188,13 @@ American Scholar piece on Helen Kirkpatrick (no Barbizon). A search for
 - **Inserted `a0a5acda`, `confirmed`**: three concordant first-hand accounts
   now place the sheltering of the KB718 crew at Drue Tartière's Barbizon
   property in July-August 1944. Frame (Memory Project, Tier 2): « I stayed at
-  Drue's small house in Barbizon, six houses away from the local French
-  Commander » for seven weeks, until the American liberation late in August.
+  Drue's small house in Barbizon », « six houses away from the local French
+  Commander », for seven weeks, until the American liberation late in August.
   Murphy (E&E report as transcribed on aircrewremembered.com): « They then took
   us into Barbizon to an American woman », « She moved to Barbizon where she
   purchased a small farm », a week « in the house of a friend of the Mme.
   Tartiére », then « on 12th July we went over to the farm of the Mme.
-  Tartiére where we stayed until 26th August ». Tartière's own memoir is
+  Tartiére », where they stayed until 26 August. Tartière's own memoir is
   already `confirmed` on `6aefbec8`. Both airmen's accounts are independent of
   the booklet and of each other.
 - Row `d59a3f6f` (booklet: « Mme Parson-Tartière » sheltered airmen at no. 71,
@@ -357,8 +357,8 @@ working. None of these rows is linked to a location.
   the chemin du Bornage, so nothing to propose for published text.
 - **Louis Renault (jurist)** (`e45891ee`): the Nobel biographical note (from
   *Nobel Lectures, Peace 1901-1925*, Elsevier 1972, nobelprize.org) read in
-  full: he « went to his villa in Barbizon for a brief holiday, was taken ill,
-  and died on the morning of February 8 » 1918. He therefore owned a villa at
+  full: he « went to his villa in Barbizon for a brief holiday », was taken ill
+  and died on the morning of 8 February 1918. He therefore owned a villa at
   Barbizon, which strengthens the 13 rue Théodore Rousseau identification.
   Quote and note added; still one Tier 2 plus Wikipedia, `lead`.
 - **Eugène Freyssinet** (`07d151aa`, « La Boulinière », 7 chemin du Bornage):
