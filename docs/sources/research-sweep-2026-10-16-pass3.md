@@ -307,12 +307,23 @@ Checked: WebSearch for postcards « Épicerie Centrale » / « Delouche »
 Barbizon (Geneanet). Outcome: the only hit is a Fontainebleau card published
 by A. Siron, Barbizon. Not improved.
 
+### 64 Grande Rue (Marcel Jacque), lead
+
+Auction and dealer pages (kunstveiling.nl, proantic, Tier 3): the etcher
+Marcel Jacque, 1906-1981, author of Barbizon views (Rousseau's house, the
+chapel). A gallery « jusqu'en 1990 » outlived him by nine years, so the
+booklet probably means a gallery run on by his family; no link to Charles
+Jacque found. Row aaed6416 notes updated. The published Boucherie de
+l'Angélus text does not use the claim.
+
 ### Not searched tonight (booklet-only commercial history, no online
 corroboration expected)
 
 La Belle-Idée (14), La Bohème (35), Le Hameau (7 rue Félix Herbet), 4, 33,
-61, 64, 67, 68, 72, 81 Grande Rue. These need the mairie, the Barbizon état
-civil or the cadastre; nothing reachable tonight could settle them.
+61, 67, 68, 72, 81 Grande Rue, and no. 36 rue du Général de Gaulle
+(« aspirateur Birum »). These need the mairie, the Barbizon état civil or
+the cadastre. The session's WebSearch budget ran out at 05:05 after the
+Marcel Jacque query, so the last few names were not searched.
 
 ## Rows written tonight
 
@@ -320,7 +331,8 @@ civil or the cadastre; nothing reachable tonight could settle them.
   0316a08c (Roger), 2b30fe67 (sultan), 9414db75 (47 GR), fde0fbe3 (Tilleuls),
   0cbbe219 (Baraka), 9ccf60c8 (Alouettes), ac3d2b0f (Chaperon Rouge),
   8d35b651 (Glaneuses), a6248bef (63 GR), bef0f0cb (reserve 1861),
-  11dcd010 (Chaigneau), 123beebd (films), e95c02df (L'Écureuil).
+  11dcd010 (Chaigneau), 123beebd (films), e95c02df (L'Écureuil),
+  aaed6416 (64 GR).
 - Inserted: 7110c114 (Chaigneau La Bergerie, confirmed, Orsay PHO 1984 34 7),
   8f1c1fe1 (Marc Logé, confirmed, data.bnf.fr), 6777c3f8 (Dormoir 20,000
   animals, lead), 8311b70c (Bas-Bréau park one hectare, lead).
