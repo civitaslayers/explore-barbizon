@@ -91,6 +91,10 @@ tradition stays a lead pending AD77 (task ce8efd66). Nothing new tonight.
   Morris Hunt »; list of « Friends at Barbizon » includes « William
   Morris Hunt, American painter »; Boston appreciation « owing to the
   enthusiasm of William Morris Hunt ». Tier 2.
+- Millet drew Hunt's portrait in black crayon, ca. 1853-55 (Princeton
+  x1986-105, from the sale of Millet's widow, 1894, lot 191): the one
+  object reached tonight that shows the two men's closeness directly.
+  Tier 1, confirmed (see section 6).
 - Two independent Tier 2 sources agree on the two 1853 Salon purchases:
   **confirmed** as a claim of the early literature; the MFA accession
   numbers for these two could not be checked tonight (MFA blocked).
@@ -281,6 +285,14 @@ the civil record itself not seen.
 
 ## 6. Public-domain images
 
+- **Millet's portrait of Hunt**: Jean-François Millet, *Portrait of
+  William Morris Hunt*, ca. 1853-1855, black crayon on laid paper, 17.1 x
+  14.9 cm, Princeton University Art Museum x1986-105, stamp « JFM », from
+  the sale of Millet's widow (24-25 April 1894, lot 191), then Keppel,
+  Armour, Shellman. The museum « supports free access to images of works
+  in the Public Domain » and invites download. Tier 1, confirmed. The
+  best single image for the essay: Millet drawing his American friend at
+  Barbizon. URL: https://artmuseum.princeton.edu/art/collections/objects/16134
 - Met 08.88, *Girl at the Fountain*, 1852-54, oil, bequest of Jane Hunt
   1907: « Public Domain », Open Access, free for any use. Tier 1,
   confirmed. URL: https://www.metmuseum.org/art/collection/search/11177
