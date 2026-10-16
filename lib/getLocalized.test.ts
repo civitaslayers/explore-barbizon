@@ -156,3 +156,55 @@ test("17. hasPublishedTranslation: row null/undefined returns false (no throw)",
   assert.equal(hasPublishedTranslation(null, "en"), false);
   assert.equal(hasPublishedTranslation(undefined, "en"), false);
 });
+
+// location_functions rows (label/description) — same contract, consumed by
+// pages/places/[slug].tsx (task 1a2205a7).
+function functionRow(overrides: Partial<LocalizableRow> = {}): LocalizableRow {
+  return {
+    label: "Hôtel et bar",
+    description: "Neuf chambres et suites.",
+    ...overrides,
+  };
+}
+
+test("18. function row: en + published translation shows the English label and description", () => {
+  const r = functionRow({
+    translations: {
+      en: {
+        label: "Hotel and bar",
+        description: "Nine rooms and suites.",
+        _meta: { status: "published" },
+      },
+    },
+  });
+  assert.equal(getLocalized(r, "en", "label"), "Hotel and bar");
+  assert.equal(getLocalized(r, "en", "description"), "Nine rooms and suites.");
+});
+
+test("19. function row: en without a published translation falls back to the base", () => {
+  assert.equal(getLocalized(functionRow(), "en", "label"), "Hôtel et bar");
+  const draft = functionRow({
+    translations: {
+      en: { label: "Hotel and bar", _meta: { status: "draft" } },
+    },
+  });
+  assert.equal(getLocalized(draft, "en", "label"), "Hôtel et bar");
+  assert.equal(
+    getLocalized(draft, "en", "description"),
+    "Neuf chambres et suites."
+  );
+});
+
+test("20. function row: fr always shows the base even with a published en translation", () => {
+  const r = functionRow({
+    translations: {
+      en: {
+        label: "Hotel and bar",
+        description: "Nine rooms and suites.",
+        _meta: { status: "published" },
+      },
+    },
+  });
+  assert.equal(getLocalized(r, "fr", "label"), "Hôtel et bar");
+  assert.equal(getLocalized(r, "fr", "description"), "Neuf chambres et suites.");
+});

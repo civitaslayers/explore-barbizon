@@ -1,6 +1,7 @@
 import type { LocationFull } from "@/lib/supabase";
 import { getCategoryGroup, type GroupName } from "@/lib/categoryGroups";
 import { getLocalized } from "@/lib/getLocalized";
+import { schemaTypeForEatStay } from "@/lib/eatStayType";
 import { toOpeningHoursSpecification } from "@/lib/openingHours";
 import { SITE_BASE_URL } from "@/components/SeoHead";
 
@@ -23,21 +24,10 @@ const GROUP_TO_SCHEMA_TYPE: Record<GroupName, string> = {
   Practical: "Place",
 };
 
-function schemaTypeForEatStay(primaryLabel: string | undefined): string {
-  const label = (primaryLabel ?? "").toLowerCase();
-  if (label.includes("hotel") || label.includes("suite")) {
-    return "LodgingBusiness";
-  }
-  if (
-    label.includes("restaurant") ||
-    label.includes("café") ||
-    label.includes("cafe") ||
-    label.includes("salon")
-  ) {
-    return "FoodEstablishment";
-  }
-  return "LocalBusiness";
-}
+// Pure, locale-agnostic (fr/en) subtype refinement — lives in
+// lib/eatStayType.ts so it is testable under node:test; re-exported here so
+// existing imports keep working.
+export { schemaTypeForEatStay };
 
 /**
  * Builds the JSON-LD schema for a location detail page. `locale` drives
