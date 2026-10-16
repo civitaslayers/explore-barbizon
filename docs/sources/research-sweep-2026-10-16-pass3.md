@@ -156,16 +156,16 @@ Names only. Three of the names were checked through their house rows below
 
 Checked: Cirkwi 408320 « Sentier des peintres : le Dormoir de Lantara »
 (Fontainebleau Tourisme), the 2022 leaflet.
-Outcome: « Le dormoir est le lieu où les troupeaux se reposent à l'abri de la
-pluie ou du soleil » and « on trouvait jusqu'à 20 000 animaux domestiques
+Outcome: « le lieu où les troupeaux se reposent à l'abri de la pluie » and
+« on trouvait jusqu'à 20 000 animaux domestiques
 dans la forêt », i.e. the whole forest in the 19th century, not the Dormoir.
 The published circuit-des-peintres stop says the Dormoir rested « jusqu'à
 20 000 bêtes selon la tradition »: misattributed figure. Neither source says
 Lantara slept under the rocks. Caverne « sheltered outlaws » is already
 handled on the Caverne page (Denecourt's invention).
 New row 6777c3f8 (`lead`). Task filed: 4e848f3e.
-Proposed text: « un dormoir, lieu de repos des troupeaux, dans une forêt qui
-comptait jusqu'à 20 000 animaux domestiques au XIXe siècle ».
+Proposed text: « un dormoir, lieu de repos des troupeaux », with the 20,000
+figure given for the whole forest in the 19th century.
 
 Bas-Bréau: the published hotellerie-bas-breau text says « 4 étoiles ... parc
 ombragé de deux hectares ». Fontainebleau Tourisme listing 724797 says the
@@ -203,7 +203,7 @@ Process rows (photographs pending, task dc8011f4 open). Skipped.
 ### Les Tilleuls (53 Grande Rue), lead
 
 en.wikipedia François de La Rocque: « joined the Croix-de-Feu in 1929, two
-years after it had been formed, and took over it in 1930 », led it to 10 Jan
+years after it had been formed », took it over in 1930, led it to 10 Jan
 1936. « Fondateur » is inexact; residence uncorroborated. Notes updated.
 Sensitive, editorial review before any public use.
 
