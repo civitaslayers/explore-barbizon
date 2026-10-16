@@ -24,9 +24,10 @@ Blocked or failing from the session, so not read: archive.org full texts
 Google Books text view, HathiTrust page viewer, loc.gov / Chronicling
 America, NYT archive, Gallica (Sensier 1881, Moreau-Nélaton 1921),
 Wikisource (one page of Rolland 1902 came through, the 1911 Britannica
-page did not), Wikimedia Commons file pages, MFA Boston collection pages
-(`mfa.org`, `collections.mfa.org`, `mfaboston6.emuseum.com`), AAA item
-pages, Tavily (403). Reachable: en.wikipedia, metmuseum.org, si.edu (AAA
+page did not), Wikimedia Commons file pages, MFA Boston `mfa.org` and
+`collections.mfa.org` (the `mfaboston6.emuseum.com` object pages opened
+only when the exact URL came from a search result), AAA item pages,
+Tavily (403). Reachable: en.wikipedia, metmuseum.org, si.edu (AAA
 blog, SAAM, finding aids), gutenberg.org, findagrave, seacoastnh.com,
 frick.org, jphs.org, empirestateplaza.ny.gov, newcriterion.com,
 antiquesandfineart.com, vosegalleries.com, eclecticlight.co, the
@@ -64,13 +65,20 @@ month. What they say:
 p. 62), then « a comfortable home » (Shannon 1923). The 40 Grande Rue
 tradition stays a lead pending AD77 (task ce8efd66). Nothing new tonight.
 
-**What he painted there. Lead only.** *Girl at the Fountain* (Met 08.88,
-1852-54, begun 1852) is the one securely dated work of the period reached
-tonight; the Met entry ties its subject to Millet's influence and its
-handling to Couture, not to a Barbizon site. The Boston memorial
-exhibition of 1879 registered it as begun in 1852. No reachable source
-lists Barbizon-subject canvases with titles and dates. Not found: a list
-of works painted at Barbizon.
+**What he painted there.**
+- *Sheep Shearing at Barbizon*, MFA Boston 13.455, about 1852, bequest of
+  Mrs. Edward Wheelwright 1913 (owned by Wheelwright by 1879). The MFA
+  entry: Hunt « copied the composition » of Millet's unfinished study
+  *Three Men Shearing Sheep in a Barn* (MFA 2000.1221, about 1852, sold by
+  Millet to Hunt about 1853) « to understand the poses of men working »
+  and « the technique of rendering light streaming through the doorway ».
+  Tier 1: **confirmed**. The MFA calls Hunt, in the early 1850s, Millet's
+  « friend, patron, and student » and says he bought many Millets
+  « appalled by Millet's modest economic circumstances ».
+- *Girl at the Fountain* (Met 08.88, 1852-54, begun 1852): the Met ties
+  its subject to Millet and its handling to Couture, not to a Barbizon
+  site. Tier 1 for the dating.
+- Not found: any fuller list of works painted at Barbizon.
 
 **Daily relationship with Millet.**
 - Rolland, *Millet* (1902, Wikisource): Hunt « bought the Woman shearing
@@ -103,10 +111,27 @@ of works painted at Barbizon.
   the Shaw collection in 1900; whether either passed through Hunt is not
   stated. Not found: a dated, priced list of Hunt's « dozen or more »
   Millets (Knowlton p. 184) or titles of the five that burned.
-- The five MFA oils from Hunt via Shaw (17.1484, 17.1485, 17.1488,
-  17.1489, 17.1490, per the 15 Oct fact check) could not be re-opened
-  tonight to attach titles and dates: `[needs-local: MFA Boston records
-  17.1484, 17.1488, 17.1489, 17.1490 provenance paragraphs]`.
+- MFA Boston provenance paragraphs reached tonight (Tier 1, the
+  `mfaboston6.emuseum.com` pages opened when their URL came from a search
+  result), all « 1874, sold by Hunt to Doll and Richards, Boston, for
+  Quincy Adams Shaw », MFA gift 1917:
+  - 17.1482 *Two Reclining Figures*, about 1848, « About 1853, sold by the
+    artist to William Morris Hunt ».
+  - 17.1489 *Shearing Sheep*, 1852-53, « About 1853, purchased from the
+    artist by William Morris Hunt » (this is Hurll's *Sheep Shearer*).
+  - 17.1490 *Shepherd and Flock at the Edge of the Forest, Evening*, 1853,
+    same wording (this is Hurll's *The Shepherd*).
+  - 17.1485 *The Sower*: settled 15 Oct.
+  - 17.1486 *Forest with Shepherdess and Sheep* did **not** pass through
+    Hunt (Sensier sale, Drouot, 10 Dec 1877, lot 53, to Legrand for Shaw).
+  - Correction to the 15 Oct list: 17.1482 belongs in the Hunt-Shaw group,
+    17.1484 and 17.1488 were not opened tonight. `[needs-local: MFA Boston
+    records 17.1484 and 17.1488 provenance paragraphs]`.
+  - Kept by the family, not sold to Shaw: 2000.1221 *Three Men Shearing
+    Sheep in a Barn*, « About 1853, sold by the artist to William Morris
+    Hunt », to his widow Louisa (lent to the MFA 1890), then to William
+    Morris Hunt II, partial gift 2000. So at least five Millets bought
+    about 1853 are documented, none with a price.
 
 **Money or advances to Millet. Not found** in any reachable source.
 
@@ -153,8 +178,18 @@ of works painted at Barbizon.
   Wheelwright, Bostonian, studied with Millet at Barbizon (1855-56 per the
   standard dating, not verified tonight) and wrote the *Atlantic Monthly*
   sketch of Sept. 1876 (Hofstadter, New Criterion 1984). Hunt's portrait
-  of Wheelwright is dated 1857. Boston Athenaeum 1850s French exhibitions:
-  not found tonight. Scholarly statements on priority (Bermingham 1975,
+  of Wheelwright is dated 1857. The MFA (13.455 entry) calls Wheelwright
+  « Hunt's Harvard classmate and also a student of Millet's in the late
+  1850s », who « helped shape the taste for Millet's work in Boston ».
+  **Brimmer was buying at the same time as Hunt**: MFA 06.2421
+  *Harvesters Resting (Ruth and Boaz)*, « 1853, sold by the artist to
+  Martin Brimmer », bought at the Salon of 1853; and MFA 06.2423
+  *Knitting Lesson*, Brimmer by 1855, which « he lent ... to the 28th
+  exhibition of the Boston Athenaeum (1855), no. 78, as "An Interior" ».
+  Tier 1, confirmed. So a Millet hung at the Athenaeum in 1855, the year
+  Hunt came home, lent by Brimmer, not Hunt. Whether Hunt steered Brimmer
+  to Millet in 1853 is not stated by the MFA. Scholarly statements on
+  priority (Bermingham 1975,
   Hoppin, Webster 1991, Murphy 1984): not reached. The safe wording is
   « the first American painter to live beside Millet and bring his work to
   Boston », not « the first American to collect Barbizon painting ».
@@ -262,7 +297,11 @@ the civil record itself not seen.
 - Self-portraits: an 1866 self-portrait is reproduced on aggregator
   sites; holder and record not verified tonight. Not found: a museum
   record for a Hunt self-portrait.
-- Barbizon-subject works by Hunt with a museum record: not found tonight.
+- Barbizon-subject work by Hunt with a museum record: MFA 13.455 *Sheep
+  Shearing at Barbizon*, about 1852 (no rights statement shown on the
+  page; the artist died 1879, so the work is public domain; the MFA's own
+  photograph terms to check). URL:
+  https://mfaboston6.emuseum.com/objects/31460/sheep-shearing-at-barbizon
 
 ## Follow-ups filed
 
