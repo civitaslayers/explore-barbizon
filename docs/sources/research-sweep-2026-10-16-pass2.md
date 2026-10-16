@@ -171,3 +171,90 @@ Universalis, Larousse, Wikipedia and shop pages, none naming the hotel.
 Outcome: « Hôtel des Charmettes » still rests on Sicard alone; rows
 unchanged. The Correspondance générale vol. 1 (Gallimard 1980) remains the
 place to look.
+
+## Chêne Bodmer, second look
+
+Checked: Musée de Grenoble page for the Bodmer drawing « Le Bouvier »
+(Giacomelli sale; the page repeats the 1850 Salon medal for « Intérieur
+d'une forêt en hiver »); FLIM / eman-archives notice on Monet's Bodmer oak
+(Bas-Bréau, no fate); Met entry 437131 (named after Bodmer, « exhibited a
+painting of the tree at the Salon of 1850 », no title, no fate).
+Outcome: no source reached says when the tree fell. Row 96caa5c3 unchanged.
+
+## Céramano (Charles Ferdinand Sermain) and Vertefeuille (17 Grande Rue)
+
+Rows: 5 Céramano + 1 Vertefeuille.
+
+Checked: DBNL record of Biekorf 86 (1986), « De vergeten Tieltse schilder
+Ceramano of Ch. F. Sermain » (text withheld for copyright); Geneawiki
+« 77022 - Barbizon » (Décès section); search « Pierre Bordas éditeur
+Barbizon » and data.bnf.fr (only a homonymous doctor found).
+
+Outcome: Geneawiki (Tier 3) gives Céramano born Tielt 31 May 1831, died
+22 April 1909, and lists Pierre Bordas (Carcassonne 5 Jul 1913 - 5 Oct 2000)
+among deaths at Barbizon, which fits the booklet's « Vertefeuille » line.
+Row a5533690 now carries the DBNL URL and a `[needs-local]` tag for the
+library copy; row 1a893819 (Vertefeuille) notes the Bordas death and a
+`[needs-local: INSEE deaths file]` tag. No status change.
+
+Proposal: none yet; the published Sermain text can keep « 1831-1909 ».
+
+## Médaillon Millet & Rousseau
+
+Row: 1 (lead). Checked: CCFr (Bibliothèque municipale de Fontainebleau,
+Fonds Sensier suppl. 2, obj. 5: stamped copper plate « Henri Chapu, Théodore
+Rousseau et Jean-François Millet », before 1891, 43 x 60 mm); Google Arts &
+Culture record of the albumen print « Monument érigé à la mémoire de J.F.
+Millet et Th. Rousseau » (Musée Nicéphore Niépce, creator « Charles
+Bodmer », dated 1850/1870).
+Outcome: the Niépce date range is incompatible with an 1884 inauguration and
+the photographer is more likely Charles-Henry Bodmer, the painter's son.
+Notes appended to row 566c8558; the 19 April 1884 date still rests on the
+tourist leaflet. `[needs-local: Gallica Chapu Barbizon avril 1884]`.
+
+## La Bastide (52 rue du 23 Août)
+
+Row: 1 (lead). Search « Vitry-sur-Seine Barbizon cure d'air » returns only
+current Vitry holiday catalogues. Unchanged; the « Maire Maurice Thorez »
+problem stands as pass 5 left it.
+
+## Le Relais (16 rue Charles Jacque), Fernandel
+
+Row: 1 (lead). Two searches on Fernandel at Barbizon 1942-43: only film
+pages and a geocache on La Vache et le prisonnier. Unchanged.
+
+## Le Relais (2 av. du Général de Gaulle), 39, 52, 79 Grande Rue
+
+Rows: 1 each, all booklet-only (Hôtel Toulouse, Carol, épicerie 1985,
+blanchisserie). No web source can be expected for the last three; the
+Hôtel Toulouse would need the 1930s-50s press (Gallica). Unchanged.
+
+## Side find: Geneawiki « 77022 - Barbizon »
+
+Not a subject, but its Décès list (Tier 3, uncited) names several people our
+rows care about: Gassies (born 30 Oct 1862, died 23 Jan 1933 at Barbizon),
+Louis Renault, Chaigneau, Camille Pâris, Clarisse and Laure Henry, Rouveyre,
+Céramano, Bordas, Léo Marjane; its curés table (Fageon 1889, Thioux d. 1928,
+Le Bris d. 1952, Perrin 1967-2008) and mayors table (Comble 01/1904, then
+Lamirault, Binet, Tourteaux, Caron 1912-29, Marius Roger 1929-35, Pochard
+1935-43, Salmon 1943-44, Leroux, Creuze 1944-53, Marc Jacquet 1953-71,
+Leroux 1971-83, Avelange 1983-2001, Guenin, Marchal, Bedouelle, Douce,
+Taponat) are a useful checklist for a future pass, each line to be verified
+against état civil or the Journal officiel before use. Rouveyre (row
+0414d53f) noted; the Marius Roger row was not in tonight's list.
+
+## Not reached
+
+- Monument Farman (no new angle found; the Geneawiki line « inauguré en
+  1985 » is the only thing seen, left for the Farman rows' owner).
+- Villa des Artistes number and Grigorescu, Les Bosquets 2 vs 6: need the
+  cadastre or plaque photos, not web work.
+- Atelier Daubigny plaque orientation: on-site.
+- inventaire.iledefrance.fr dossier PDFs that surfaced for two Grande Rue
+  queries (ivr1120197701245, ivr1120197701237) sit behind a JavaScript
+  challenge: `[needs-local: https://inventaire.iledefrance.fr/illustration/pdf/833e3cce-d5c0-4fdd-b502-c6fe2c6a18a6/ivr1120197701245nuc4a.pdf]`.
+
+## Tasks filed
+
+None. The one published-text concern met tonight (Picasso at the Hôtel
+Bellevue) is already covered by task 44fc7fb6.
