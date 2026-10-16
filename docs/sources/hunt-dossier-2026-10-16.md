@@ -310,9 +310,11 @@ the civil record itself not seen.
 - Other Met Open Access Hunts listed by eclecticlight: *Italian Girl*
   1867, *Sand Bank with Willows, Magnolia* 1877, *The Bathers* 1877 (Met
   Open Access by policy; individual records not opened).
-- Self-portraits: an 1866 self-portrait is reproduced on aggregator
-  sites; holder and record not verified tonight. Not found: a museum
-  record for a Hunt self-portrait.
+- Self-portrait: *Self Portrait*, 1866, oil on canvas, 77.15 x 64.77 cm,
+  MFA Boston 97.63, Warren Collection, « purchased for $2,500 » from Mrs.
+  Eleanor Hunt Diederich in 1897. Tier 1, confirmed. No rights statement
+  on the page (artist d. 1879, so public domain; MFA image terms to
+  check). URL: https://mfaboston6.emuseum.com/objects/31088/self-portrait
 - Barbizon-subject work by Hunt with a museum record: MFA 13.455 *Sheep
   Shearing at Barbizon*, about 1852 (no rights statement shown on the
   page; the artist died 1879, so the work is public domain; the MFA's own
