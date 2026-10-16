@@ -1,7 +1,7 @@
 # Research sweep, 2026-10-16
 
 Standing job S2 (task 7820f08f). Branch `night/2026-10-16-research-sweep`.
-Pass 1, 03:38 to about 04:25 Paris (hard stop 05:05). Scope: `research_findings`
+Pass 1, 03:38 to about 04:15 Paris (hard stop 05:05). Scope: `research_findings`
 rows in `open` / `lead`, published-linked first, one subject at a time, starting
 with the two large subjects never swept before (Les Charmettes, 42 rows; Maison
 Diaz, 28 rows) and then the published-linked leftovers of 2026-10-15. Tier
@@ -52,8 +52,8 @@ Occupation, `cce38ca8` Trotsky), 12 note updates (`3c1094cf`, `cf9399d4`,
 0 other status changes, 0 tasks filed. One insert was refused once by the
 `method` check constraint (allowed values: `page_image`, `ocr`, `snippet`,
 `census`, `secondary`, `oral`, `archive`) and re-sent with `secondary`; no
-write timed out. Heartbeats at 03:40, 03:58, 04:08, 04:12 and 04:20 Paris.
-Pass ended about 04:25 Paris, well before the 05:05 hard stop, with the
+write timed out. Heartbeats at 03:40, 03:50, 04:02, 04:11 and 04:15 Paris.
+Pass ended about 04:15 Paris, well before the 05:05 hard stop, with the
 reachable-source angles exhausted for the subjects in scope.
 
 ---
