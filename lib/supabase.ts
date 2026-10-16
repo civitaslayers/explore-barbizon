@@ -390,6 +390,9 @@ export type LocationFunction = {
     layer: string;
     color: string | null;
   } | null;
+  // Same read-only i18n contract as LocationFull.translations below: base
+  // columns (label, description) are French; getLocalized() reads this for en.
+  translations?: Record<string, TranslationEntry> | null;
 };
 
 export type LocationFull = {
@@ -436,7 +439,7 @@ export async function getLocationFull(
       categories ( name, slug, layer, color ),
       location_functions (
         id, label, description, website, phone, opening_hours,
-        display_order, is_primary,
+        display_order, is_primary, translations,
         categories ( name, slug, layer, color )
       ),
       media ( url, display_order )
@@ -469,6 +472,7 @@ export async function getLocationFull(
       display_order: lf.display_order,
       is_primary: lf.is_primary,
       category: lf.categories ?? null,
+      translations: lf.translations ?? null,
     }));
   return {
     id: row.id,
