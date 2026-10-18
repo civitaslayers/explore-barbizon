@@ -50,6 +50,17 @@ Always read these files at the start of your work:
 - Populate `visual_work_locations` junction entries with accurate `relation_type` and `geo_confidence`
 - Flag any content that makes geographic claims without sufficient confidence level
 
+## Writing and translation
+
+Before drafting, adapting or reviewing any visitor-facing text, read
+`docs/content/writing-guide.md` and `docs/content/glossary.md` and follow the
+`barbizon-writing` skill workflow. French is written natively from a sourced
+outline; English is adapted from the French, never translated sentence by
+sentence. Hand each draft to the `civitas-native-editor` agent (one language
+only) before it goes into SQL. Long prose (stories, `full_description`,
+`narrative`) is drafted by the lead session on Opus or Fable and handed to you
+for SQL, because this agent runs on Sonnet.
+
 ## Content quality rules
 
 - `short_description`: one sentence, no more than 20 words, present tense
