@@ -1,27 +1,46 @@
--- Story subtitles lengthened to 110-160 characters (task 77e02c3f, DRAFT, not applied).
--- The meta description of a story page is its subtitle (pages/stories/[slug].tsx, dek),
--- so this also changes the visible dek under each story title.
--- source_hash is recomputed with the v_translation_health formula, md5(title|subtitle|body),
--- so the EN rows stay "current" rather than flipping to "stale".
--- Gate: Luigi approves, Claude Code executes via Supabase MCP. Verify with seo-audit.mjs after deploy.
+-- Story subtitles, 110-160 characters (task 77e02c3f). Approved 2026-10-18.
+-- Mode: CORRECTION (writing guide, "Two modes"). Starting point: Luigi's versions of
+-- 2026-10-18, lengthened only with details already in each story's own body; French and
+-- English native edits in correction mode; checked against the current rows and bodies.
+-- Nothing added for parity (the Grande Rue is in the English rooms-of-light subtitle and
+-- its English body, not in the French).
+-- The subtitle is also the meta description and the dek under the title (pages/stories/[slug].tsx).
+-- rooms-of-light also gets the French title « Des pièces baignées de lumière dans un village
+-- forestier » (Luigi's version); the English title is unchanged.
+-- Lengths FR 156 / 148 / 145, EN 157 / 139 / 156 (Python len). U+00A0 before the French colons.
+--
+-- source_hash is recomputed in the same statement with the v_translation_health formula,
+-- md5(title|subtitle|body), from the NEW French title and subtitle.
+--
+-- STATUS: approved by Luigi 2026-10-18 (review of PR #75); _meta.status = 'published'.
+-- Gate: Luigi approves, Claude Code executes via Supabase MCP. After deploy, re-run
+-- scripts/seo-audit.mjs (these three stories are its six current failures, FR and EN).
 
-with v(slug, fr, en) as (values
+with v(slug, fr_title, fr, en) as (values
   ('rooms-of-light',
-   $$Sur les intérieurs discrets et les ateliers de fortune qui ont façonné la manière de voir de Barbizon, de la maison de Millet aux fenêtres côté nord.$$,
-   $$On the quiet interiors and improvised studios that shaped Barbizon's way of looking, from Millet's house to the tall north-facing windows of the Grande Rue.$$),
+   $$Des pièces baignées de lumière dans un village forestier$$,
+   $$Sur les intérieurs paisibles et les ateliers improvisés qui ont façonné la manière de voir à Barbizon, de la maison de Millet aux hautes fenêtres côté nord.$$,
+   $$On the quiet interiors and makeshift studios that shaped how Barbizon learned to see, from Millet's house to the tall north-facing windows on the Grande Rue.$$),
   ('paths-to-the-forest',
-   $$Une courte cartographie des chemins qui mènent des rues pavées aux grès usés par le temps, sur les pas des peintres et des sentiers balisés par Denecourt.$$,
-   $$A short cartography of the routes that lead from stone streets to weathered rock, in the footsteps of the painters and along the trails Denecourt marked.$$),
+   null,
+   $$Des rues du village aux rochers de grès : les chemins qui mènent à la forêt, sur les pas des peintres et le long des sentiers balisés par Denecourt.$$,
+   $$A short map of the routes that lead from stone streets to weathered rock, in the painters' footsteps and along the trails Denecourt marked.$$),
   ('how-the-forest-became-a-picture',
-   $$Sur Corot, l'invention de la peinture en plein air, et ce que Barbizon a rendu possible : une attention patiente à un lieu précis, dans une lumière changeante.$$,
-   $$On Corot, the invention of painting outdoors, and what Barbizon made possible: a patient attention to one particular place, in light that keeps changing.$$)
+   null,
+   $$Corot, la peinture sur le motif et ce que Barbizon a rendu possible : regarder longuement un même lieu, sous une lumière qui ne cesse de changer.$$,
+   $$Corot, the practice of painting from the motif, and what Barbizon made possible: looking at one place for a long time, in a light that never stops changing.$$)
 )
 update stories s set
+  title = coalesce(v.fr_title, s.title),
   subtitle = v.fr,
   translations = jsonb_set(
     jsonb_set(s.translations, '{en,subtitle}', to_jsonb(v.en)),
-    '{en,_meta,source_hash}',
-    to_jsonb(md5(coalesce(s.title,'') || '|' || v.fr || '|' || coalesce(s.body,'')))),
+    '{en,_meta}',
+    coalesce(s.translations->'en'->'_meta', '{}'::jsonb) || jsonb_build_object(
+      'source_hash', md5(coalesce(v.fr_title, s.title, '') || '|' || v.fr || '|' || coalesce(s.body, '')),
+      'translated_at', now(),
+      'status', 'published')),
   updated_at = now()
 from v where s.slug = v.slug
-returning s.slug, length(s.subtitle) as fr_len, length(s.translations->'en'->>'subtitle') as en_len;
+returning s.slug, s.title, length(s.subtitle) as fr_len, length(s.translations->'en'->>'subtitle') as en_len,
+  s.translations->'en'->'_meta'->>'status' as en_status;
