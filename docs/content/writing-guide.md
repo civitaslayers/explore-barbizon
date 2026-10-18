@@ -23,7 +23,46 @@ French almost word for word. The French reads as a translation:
 Better models do not fix this on their own. The fix is the order of work:
 facts first, then each language written as a language, then a native read.
 
-## The rule
+## Two modes: correction and writing
+
+Most work on existing pages is **correction**: the facts are already settled and
+published, only the language is wrong. New pages and rewrites are **writing**.
+Pick the mode before starting and say which one in the task or PR.
+
+### Correction mode (default for any text already on the site)
+
+The goal is French and English that read as written by a native, with nothing
+else changed.
+
+- **Facts are frozen.** Every name, label, trade name, address, date, number,
+  price, opening hour, phone number and claim is copied exactly from the
+  current row. The source of truth is what is published, plus
+  `brain/decisions.md` and Luigi's settled place facts.
+- **Language only.** Fix calques, grammar, register, typography and word order.
+  Rephrase a sentence, never its content.
+- **Nothing added for parity.** If FR and EN carry different details, do not add
+  a detail to one language to match the other. List the difference as a fact
+  flag.
+- **No new questions to Luigi about facts.** Correction never asks whether a
+  name is registered, a claim is sourced or a detail is true. It also never
+  starts research.
+- **Fact flags do not block.** If a fact looks wrong or inconsistent (for
+  example L'Angélus at the Louvre instead of the musée d'Orsay), record it in a
+  separate "Fact flags" list in the report with the field and the quote. Leave
+  the text as it is. Luigi triages those flags later as their own tasks.
+- **One record at a time.** Never carry wording, details or facts from one place,
+  business or field into another. Two businesses at the same address stay two
+  separate texts.
+- **Keep length and structure.** Same number of sentences give or take one, same
+  field, same order of information unless word order alone requires a change.
+- **Text in the wrong language.** If a French field holds English, rewrite it in
+  French with exactly the same content. This is still correction.
+
+### Writing mode (new pages, new fields, rewrites Luigi asks for)
+
+Follow the full rule and workflow below.
+
+## The rule (writing mode)
 
 1. **Never translate sentence by sentence.** Each language is written from the
    fact outline. The other language may be consulted for facts only, never as a
@@ -63,7 +102,6 @@ pour des Français qui lisent sur leur propre patrimoine.
 | des pièces de lumière | des pièces baignées de lumière | « of light » ne se calque pas |
 | un village de forêt | un village forestier, un village en lisière de forêt | complément de nom anglais |
 | la manière de voir de Barbizon | la manière de voir à Barbizon, le regard des peintres de Barbizon | génitif anglais |
-| Sur X, Y et Z (sous-titre) | une phrase complète, ou un groupe nominal | calque du « On X, Y and Z » des essais anglais |
 | C'est la logique qui a façonné… | Toute la logique de Barbizon tient là : … | phrase clivée anglaise |
 | ateliers de fortune (pour « improvised studios ») | ateliers improvisés | sens différent |
 | faire sens | avoir du sens | anglicisme |
@@ -126,7 +164,11 @@ subject.
 
 The story subtitle is also the meta description and renders under the title.
 
-## Workflow
+## Workflow (writing mode)
+
+In correction mode, skip step 1 and the fact parity check of step 6 becomes a
+check that nothing changed: every name, number and claim matches the current row.
+
 
 1. **Outline**: list the claims with their sources (`research_findings` ids,
    Tier). Nothing unsourced goes in.
@@ -152,4 +194,5 @@ The story subtitle is also the meta description and renders under the title.
 - [ ] Same facts in every language; no added or lost claim.
 - [ ] Typography per language.
 - [ ] Length within the field rule.
-- [ ] No unsourced superlative or historical claim.
+- [ ] Writing mode: no unsourced superlative or historical claim.
+- [ ] Correction mode: every name, label, number and claim identical to the current row; fact doubts listed as flags, not edited.
