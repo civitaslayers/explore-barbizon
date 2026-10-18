@@ -1,4 +1,4 @@
--- Story subtitles, 110-160 characters (task 77e02c3f). DRAFT, not applied.
+-- Story subtitles, 110-160 characters (task 77e02c3f). Approved 2026-10-18.
 -- Mode: CORRECTION (writing guide, "Two modes"). Starting point: Luigi's versions of
 -- 2026-10-18, lengthened only with details already in each story's own body; French and
 -- English native edits in correction mode; checked against the current rows and bodies.
@@ -12,9 +12,7 @@
 -- source_hash is recomputed in the same statement with the v_translation_health formula,
 -- md5(title|subtitle|body), from the NEW French title and subtitle.
 --
--- STATUS: _meta.status is written as 'draft'. getLocalized() falls back to the French base
--- for a draft, so running this as is would show FRENCH on /en for these three stories.
--- On Luigi's approval, change the one 'draft' literal below to 'published', then run.
+-- STATUS: approved by Luigi 2026-10-18 (review of PR #75); _meta.status = 'published'.
 -- Gate: Luigi approves, Claude Code executes via Supabase MCP. After deploy, re-run
 -- scripts/seo-audit.mjs (these three stories are its six current failures, FR and EN).
 
@@ -41,7 +39,7 @@ update stories s set
     coalesce(s.translations->'en'->'_meta', '{}'::jsonb) || jsonb_build_object(
       'source_hash', md5(coalesce(v.fr_title, s.title, '') || '|' || v.fr || '|' || coalesce(s.body, '')),
       'translated_at', now(),
-      'status', 'draft')),
+      'status', 'published')),
   updated_at = now()
 from v where s.slug = v.slug
 returning s.slug, s.title, length(s.subtitle) as fr_len, length(s.translations->'en'->>'subtitle') as en_len,

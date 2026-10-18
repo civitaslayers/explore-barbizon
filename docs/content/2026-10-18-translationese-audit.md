@@ -92,8 +92,6 @@ Correction keeps the form already published until Luigi settles these.
 Triage task: "Triage fact flags from the translationese audit". Each flag gives the
 record, the field and the quote. None of them blocks a correction.
 
-**From the stories and Art & History locations**
-
 | # | Record | Field | Quote | Flag |
 |---|---|---|---|---|
 | FF1 | maison-millet | narrative | « l'œuvre qui a fini au Louvre » | L'Angélus has been at the musée d'Orsay since 1986; Louvre may be meant historically (1910 bequest) |
@@ -117,27 +115,6 @@ record, the field and the quote. None of them blocks a correction.
 | FF19 | a-day-in-barbizon | body | « C'est ce pour quoi le village a été fait. » | claim unclear (built for this rhythm?) |
 | FF20 | several | various | « le tableau le plus dérangeant de Millet » (the-gleaners subtitle), « l'ouverture la plus enthousiasmante de la rue », « L'adresse la plus établie de Barbizon », « la présence la plus discrètement décisive de la Grande Rue », « deux des plus grands peintres du XIXe siècle », « l'une des galeries les plus actives », « le témoignage le plus complet » | unsourced superlatives (voice rule); kept in correction |
 | FF21 | several | proposed rewrites in this report | the-gleaners #1 (adds « la plaine de Chailly »), where-to-stay #3 (cuts the claim), the-house-of-the-crime subtitle (drops Rousseau), medallion #1 (drops the superlative), villa-bernard (implies a 1930s timing), where-to-stay #2 (« plus économique ») | these rewrites change content; in correction use the language fix only and keep the claim |
-
-**From the location-functions correction (task 1a2205a7, current rows vs the 2026-10-15 approved text)**
-
-| # | Record | Field | Quote (current row) | Flag |
-|---|---|---|---|---|
-| FF22 | auberge-ganne · Musée de l'École de Barbizon | description | "Municipal museum since 1993" | the 2026-10-15 approved text says departmental museum since 2004, opened 1995 |
-| FF23 | auberge-ganne · Musée de l'École de Barbizon | description | "The most complete record of the movement that produced it." | unsourced superlative; absent from the 2026-10-15 approved text |
-| FF24 | maison-millet · Musée Millet | description | "since 1923" | set to 1922 in the correction (Luigi, 2026-10-18, to match the location body) |
-| FF25 | maison-millet · Musée Millet | description | "Open daily except Tuesday"; "and gallery L'Angélus" | the 2026-10-15 approved text has seasonal hours (also closed Wednesday November to March) and no « galerie L'Angélus » |
-| FF26 | ermitage-saint-antoine · L'Autre Nuit | description | "The latest address in the village" | ambiguous (newest or latest open); Luigi notes newer openings since; rendered as « l'adresse qui ferme le plus tard » |
-| FF27 | hotellerie-bas-breau · 4-star hotel and restaurant | label, description | "4-star", "2-hectare park" | open task d16ec0a9 |
-| FF28 | all 15 | label, description | English in the French base columns | the correction writes French in the base columns and English in `translations.en` |
-| FF29 | ermitage-saint-antoine · Coffee Shop | description | "Morning café open from 10h" | 10:00 is late for a « café du matin » |
-| FF30 | ermitage-saint-antoine · L'Autre Nuit; Restaurant gastronomique | description | "open after dinner service ends upstairs … until midnight"; "dinner 19h30–00h00" | dinner and the bar both end at midnight, so "after dinner" and "latest" may not fit together |
-| FF31 | lesquisse · Hotel and bar | description | "Nine rooms and suites … a Norwegian, a Hungarian, a Scot" | three nationalities for nine rooms: examples or the full list? |
-| FF32 | lesquisse · Musée de l'Esquisse | description | "Permanent collection on loan" | a permanent collection on loan reads as a contradiction (long-term loans would explain it) |
-| FF33 | lesquisse · Hotel and bar | description | "rooms with private garden access" | all rooms or some? |
-| FF34 | lesquisse · Hotel and bar | description | "a specific European Impressionist artist" | whether the Barbizon-linked Nordic or Scottish painters count as Impressionists |
-| FF35 | lesquisse · Musée de l'Esquisse | description | "including Museum Domburg (Netherlands), curated by Francisca van Vloten" | "curated by" can attach to the collection or to the Museum Domburg; Luigi says she curates L'Esquisse's exhibitions |
-| FF36 | maison-millet · Musée Millet | description | "gallery L'Angélus" | room name or the painting (glossary English title "The Angelus")? |
-| FF37 | auberge-ganne · Musée de l'École de Barbizon | description | "the movement that produced it" | unclear what "it" refers to (the inn, the collection); rendered « dont il est issu » |
 
 ## Ranking, worst first
 
