@@ -2,6 +2,12 @@
 
 ## 2026-10-18
 
+### Writing and translation: French written natively, other languages adapted, native read before publishing (Luigi, 2026-10-18)
+**Decision:** All visitor-facing copy follows `docs/content/writing-guide.md` and `docs/content/glossary.md`, through the `barbizon-writing` skill. Order of work: sourced fact outline, French drafted natively from it, native edit by the `civitas-native-editor` agent (French alone), English adapted from the edited French (never sentence by sentence), native edit of the English, fact parity check, then Luigi reads FR and EN in context before `_meta.status = 'published'`. Prose is drafted with Opus or Fable, not Sonnet. A new locale (it, zh, ja) needs a checked glossary column and a named native reviewer before any drafting.
+**Reason:** Luigi found the published French reads translated (« Des pièces de lumière dans un village de forêt », « la manière de voir de Barbizon »). The stories were composed in English and rendered into French word for word, despite the earlier decision that French is written natively. Calques of this kind run through all ten stories and likely many location texts, and would multiply with Mandarin.
+**Consequence:** Task 77e02c3f (story subtitles) and 1a2205a7 (15 location_functions) go back through this workflow before approval. A translationese audit ranks every published text so Luigi re-reads the worst first. `civitas-content-ops` reads the guide before drafting copy.
+**Migration risk:** none (process and docs only).
+
 ### Place card thumbnails: photo first, static map fallback (/places grid, PR #70)
 **Decision:** Every place card thumbnail renders the place's first photo (`media.url` by `display_order`, the `heroImage` that getPublishedLocations already loads) with the 800w/1600w webp pair, `object-cover`, lazy loading and the place name as alt text. The Mapbox Static map is only the fallback when a place has no photo, and the plain tinted block is the fallback when Mapbox is not configured.
 **Reason:** The /places grid always rendered the static map, so no grid card ever showed a photo even though the CuratedSection cards on the same page did. Luigi's call, 2026-10-18.
