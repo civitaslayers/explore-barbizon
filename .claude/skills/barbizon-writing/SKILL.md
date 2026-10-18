@@ -19,7 +19,8 @@ Read, in full:
 
 - **Correction** (default for anything already on the site, including
   translation fixes): facts are frozen. Copy every name, label, number, hour,
-  price, phone and claim exactly from the current row. Change only the
+  price, phone and claim exactly from the latest approved text (an approved
+  draft in `docs/content/*.sql` beats an older live row). Change only the
   language. Add nothing for parity. Ask Luigi no fact questions and start no
   research. Anything that looks factually wrong goes in a "Fact flags" list in
   the report and stays untouched in the text. Never move wording or details
@@ -29,7 +30,8 @@ Read, in full:
 
 ## Correction workflow
 
-1. Read the current FR and EN of the record (and only that record).
+1. Read the record's source of truth (and only that record): the latest
+   approved draft in `docs/content/*.sql` if one exists, else the current row.
 2. French native edit with `civitas-native-editor` in correction mode.
 3. English: adapt from the corrected French, keeping exactly the same content.
 4. English native edit, correction mode.

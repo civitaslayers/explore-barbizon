@@ -36,8 +36,11 @@ else changed.
 
 - **Facts are frozen.** Every name, label, trade name, address, date, number,
   price, opening hour, phone number and claim is copied exactly from the
-  current row. The source of truth is what is published, plus
-  `brain/decisions.md` and Luigi's settled place facts.
+  source of truth, in this order: (1) the latest text Luigi approved that is
+  not yet live (approved drafts in `docs/content/*.sql`, decisions in
+  `brain/decisions.md`); (2) otherwise the current published row. An approved
+  draft always wins over an older live row: never resurface facts Luigi has
+  already corrected.
 - **Language only.** Fix calques, grammar, register, typography and word order.
   Rephrase a sentence, never its content.
 - **Nothing added for parity.** If FR and EN carry different details, do not add
