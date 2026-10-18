@@ -15,7 +15,30 @@ Read, in full:
 1. `docs/content/writing-guide.md` (voice, calques, typography, field lengths, workflow)
 2. `docs/content/glossary.md` (exact forms for names, places, works)
 
-## Workflow
+## Pick the mode first
+
+- **Correction** (default for anything already on the site, including
+  translation fixes): facts are frozen. Copy every name, label, number, hour,
+  price, phone and claim exactly from the current row. Change only the
+  language. Add nothing for parity. Ask Luigi no fact questions and start no
+  research. Anything that looks factually wrong goes in a "Fact flags" list in
+  the report and stays untouched in the text. Never move wording or details
+  between records, even two businesses at one address.
+- **Writing** (new pages, new fields, rewrites Luigi explicitly asks for): the
+  full workflow below.
+
+## Correction workflow
+
+1. Read the current FR and EN of the record (and only that record).
+2. French native edit with `civitas-native-editor` in correction mode.
+3. English: adapt from the corrected French, keeping exactly the same content.
+4. English native edit, correction mode.
+5. Check against the current row: every name, label, number and claim
+   unchanged. Any drift is undone.
+6. Write as draft SQL, show Luigi FR and EN side by side with the fact flags
+   listed apart.
+
+## Writing workflow
 
 1. **Outline the facts.** List each claim with its source (`research_findings`
    id or document, Tier). Drop anything unsourced.
