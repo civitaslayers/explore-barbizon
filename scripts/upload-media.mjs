@@ -272,7 +272,10 @@ function listImageFiles(folderPath) {
 // Image pipeline
 // ---------------------------------------------------------------------------
 
-async function renderVariant(srcPath, width) {
+// Exported so scripts/upload-media.test.mjs can run the real pipeline on a
+// generated image and assert the EXIF-strip / sRGB guarantee against the
+// installed sharp version. No I/O beyond reading `srcPath`.
+export async function renderVariant(srcPath, width) {
   // .autoOrient() MUST precede .resize(): sharp strips EXIF (including the
   // Orientation tag) by default without applying it first. Skipping this
   // would ship portrait iPhone photos sideways. Do NOT call withMetadata()
