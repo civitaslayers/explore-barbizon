@@ -1,9 +1,14 @@
 # Translationese audit, French, 2026-10-18
 
 Read-only audit under the `barbizon-writing` skill ("Reviewing existing text").
-No database writes and no copy changes were made. Rewrites below are proposals only;
-each one still goes through the full workflow (outline, French draft, native edit,
-English adaptation, parity check, Luigi's read) before it reaches the database.
+No database writes and no copy changes were made. Rewrites below are proposals only.
+
+**Mode for the fixes: correction** (writing guide, "Two modes", PR #74). Facts are
+frozen: every name, number and claim stays as published, only the language changes.
+The audit's proposed rewrites were written before correction mode existed. Where one
+changes, drops or adds content (listed under "Fact flags" below), correction keeps the
+published claim and fixes only the language. Fact doubts never block a correction;
+they are collected in one list below and triaged separately.
 
 **Scope.** French base columns only, published rows only:
 - the 10 published stories (`title`, `subtitle`, `body`);
@@ -68,7 +73,9 @@ in practice unmet site-wide.
    XIXe siècle », « l'une des galeries les plus actives », « le témoignage le plus
    complet ».
 
-### Glossary gaps for Luigi to settle
+### Glossary gaps (non-blocking)
+
+Correction keeps the form already published until Luigi settles these.
 
 - Museum name: the texts say « musée départemental des Peintres de Barbizon »
   (likely the official name); the glossary has only « le musée de l'École de Barbizon ».
@@ -80,34 +87,57 @@ in practice unmet site-wide.
   unless the business spells it otherwise.
 - Robert Louis Stevenson and Jean-Jacques Rousseau are not in the glossary yet.
 
-### Fact questions raised by the editors (to check before any rewrite)
+## Fact flags (one list, for triage; the text is not changed for any of these)
 
-Under the 2026-10-13 rule, a claim is checked in two source families before it is
-changed or cut.
+Triage task: "Triage fact flags from the translationese audit". Each flag gives the
+record, the field and the quote. None of them blocks a correction.
 
-- **maison-millet:** « l'œuvre qui a fini au Louvre ». L'Angélus has been at the
-  musée d'Orsay since 1986. Is « Louvre » meant historically (the 1910 bequest)?
-- **galerie-atelier-drochon:** Robert Bateman is usually described as Canadian, not
-  American.
-- **galerie-frederic-got:** the narrative says « trois continents », but the listed
-  cities span two.
-- **parcours-des-mosaiques:** `full_description` says ceramic and about 1 km, while
-  `narrative` says Venetian glass and 870 m. Constable is listed among the École de
-  Barbizon painters. « itineraire bale » is probably « balisé ».
-- **the-house-of-the-crime:** the subtitle's bare « Rousseau » reads as Théodore on
-  this site but means Jean-Jacques (Les Charmettes). « rouvre » implies it was open
-  before.
-- **inn-paintings-dinner:** the subtitle says Ganne's sense « a fait naître… une
-  école », but the body says he founded no school.
-- **where-to-stay-barbizon:** the subtitle's « villa du XIXe siècle » matches no
-  address in the body. The disclosure names « Visit Barbizon », not ExploreBarbizon.
-- **medallion-millet-rousseau:** the medallion dates from 1884, after both men died,
-  so who « a choisi » to be associated?
-- **coz-ker:** the order of residents is unclear (François and Géraldine Millet up to
-  1921, « puis » Eiffel, who died in 1923).
-- **maison-charles-jacque:** whose granddaughter is Jeanne, Jacque's or Gassies's?
-- **chene-bodmer:** « près de quarante ans », but 1849 to 1893 is 44 years.
-  « Caravagio » may be a tree name or a misspelling.
+**From the stories and Art & History locations**
+
+| # | Record | Field | Quote | Flag |
+|---|---|---|---|---|
+| FF1 | maison-millet | narrative | « l'œuvre qui a fini au Louvre » | L'Angélus has been at the musée d'Orsay since 1986; Louvre may be meant historically (1910 bequest) |
+| FF2 | parcours-des-mosaiques | full_description vs narrative | « reproductions en ceramique », « environ 1 km » / « verre de Venise », « 870 mètres » | material and length disagree between the two fields (see also open task 27ab32d1, 19 vs 20 mosaics) |
+| FF3 | parcours-des-mosaiques | full_description | « Constable » in the École de Barbizon list; « placees aux endroits precis » | Constable is not a Barbizon painter; « exact spot » is unsourced (27ab32d1) |
+| FF4 | galerie-atelier-drochon | narrative | « peintres américains comme Robert Bateman » | Bateman is usually described as Canadian |
+| FF5 | galerie-frederic-got | narrative vs full_description | « trois continents » | the listed cities span two continents |
+| FF6 | the-house-of-the-crime | subtitle | « un nom emprunté à Rousseau », « rouvre » | bare « Rousseau » reads as Théodore on this site but means Jean-Jacques; « rouvre » implies it was open before |
+| FF7 | inn-paintings-dinner | subtitle vs body | « a fait naître, sans le vouloir, une école » | the body says Ganne founded no school |
+| FF8 | where-to-stay-barbizon | subtitle; body | « une villa du XIXe siècle »; « Visit Barbizon est réalisé par… » | no address in the body is described as a 19th-century villa; disclosure names « Visit Barbizon » |
+| FF9 | medallion-millet-rousseau | narrative | « ont choisi d'être associés dans la mémoire » | the medallion (1884) postdates both men |
+| FF10 | coz-ker | narrative | « François Millet … puis … Eiffel »; « elle y demeure encore en 1921 » | order of residents unclear (Eiffel died 1923) |
+| FF11 | maison-charles-jacque | narrative | « Jeanne, sa petite-fille » | Jacque's or Gassies's granddaughter? |
+| FF12 | chene-bodmer | narrative | « près de quarante ans »; « Caravagio » | 1849 to 1893 is 44 years; tree name or misspelling |
+| FF13 | dormoir-de-lantara | narrative | « jusqu'à vingt mille bêtes en une seule nuit » | the figure may be forest-wide (open task 4e848f3e) |
+| FF14 | manoir-saint-herem | narrative | « qui hébergea entre autres Pablo Picasso » | open task 44fc7fb6 |
+| FF15 | maison-diaz | narrative | « le peintre Paul Comble achète la maison, la peint » | « la peint »: painted a picture of it, or repainted it? |
+| FF16 | atelier-daubigny-plaque | narrative | « c'est lui qui l'engage … et il peindra des panneaux pour l'entrée de sa maison » | who painted whose panels (Corot or Daubigny)? |
+| FF17 | galerie-langelus | narrative | « dans le bâtiment même où beaucoup furent conçues » | which building is meant |
+| FF18 | galerie-41 | narrative | « bimensuel » | twice a month or every two months? |
+| FF19 | a-day-in-barbizon | body | « C'est ce pour quoi le village a été fait. » | claim unclear (built for this rhythm?) |
+| FF20 | several | various | « le tableau le plus dérangeant de Millet » (the-gleaners subtitle), « l'ouverture la plus enthousiasmante de la rue », « L'adresse la plus établie de Barbizon », « la présence la plus discrètement décisive de la Grande Rue », « deux des plus grands peintres du XIXe siècle », « l'une des galeries les plus actives », « le témoignage le plus complet » | unsourced superlatives (voice rule); kept in correction |
+| FF21 | several | proposed rewrites in this report | the-gleaners #1 (adds « la plaine de Chailly »), where-to-stay #3 (cuts the claim), the-house-of-the-crime subtitle (drops Rousseau), medallion #1 (drops the superlative), villa-bernard (implies a 1930s timing), where-to-stay #2 (« plus économique ») | these rewrites change content; in correction use the language fix only and keep the claim |
+
+**From the location-functions correction (task 1a2205a7, current rows vs the 2026-10-15 approved text)**
+
+| # | Record | Field | Quote (current row) | Flag |
+|---|---|---|---|---|
+| FF22 | auberge-ganne · Musée de l'École de Barbizon | description | "Municipal museum since 1993" | the 2026-10-15 approved text says departmental museum since 2004, opened 1995 |
+| FF23 | auberge-ganne · Musée de l'École de Barbizon | description | "The most complete record of the movement that produced it." | unsourced superlative; absent from the 2026-10-15 approved text |
+| FF24 | maison-millet · Musée Millet | description | "since 1923" | set to 1922 in the correction (Luigi, 2026-10-18, to match the location body) |
+| FF25 | maison-millet · Musée Millet | description | "Open daily except Tuesday"; "and gallery L'Angélus" | the 2026-10-15 approved text has seasonal hours (also closed Wednesday November to March) and no « galerie L'Angélus » |
+| FF26 | ermitage-saint-antoine · L'Autre Nuit | description | "The latest address in the village" | ambiguous (newest or latest open); Luigi notes newer openings since; rendered as « l'adresse qui ferme le plus tard » |
+| FF27 | hotellerie-bas-breau · 4-star hotel and restaurant | label, description | "4-star", "2-hectare park" | open task d16ec0a9 |
+| FF28 | all 15 | label, description | English in the French base columns | the correction writes French in the base columns and English in `translations.en` |
+| FF29 | ermitage-saint-antoine · Coffee Shop | description | "Morning café open from 10h" | 10:00 is late for a « café du matin » |
+| FF30 | ermitage-saint-antoine · L'Autre Nuit; Restaurant gastronomique | description | "open after dinner service ends upstairs … until midnight"; "dinner 19h30–00h00" | dinner and the bar both end at midnight, so "after dinner" and "latest" may not fit together |
+| FF31 | lesquisse · Hotel and bar | description | "Nine rooms and suites … a Norwegian, a Hungarian, a Scot" | three nationalities for nine rooms: examples or the full list? |
+| FF32 | lesquisse · Musée de l'Esquisse | description | "Permanent collection on loan" | a permanent collection on loan reads as a contradiction (long-term loans would explain it) |
+| FF33 | lesquisse · Hotel and bar | description | "rooms with private garden access" | all rooms or some? |
+| FF34 | lesquisse · Hotel and bar | description | "a specific European Impressionist artist" | whether the Barbizon-linked Nordic or Scottish painters count as Impressionists |
+| FF35 | lesquisse · Musée de l'Esquisse | description | "including Museum Domburg (Netherlands), curated by Francisca van Vloten" | "curated by" can attach to the collection or to the Museum Domburg; Luigi says she curates L'Esquisse's exhibitions |
+| FF36 | maison-millet · Musée Millet | description | "gallery L'Angélus" | room name or the painting (glossary English title "The Angelus")? |
+| FF37 | auberge-ganne · Musée de l'École de Barbizon | description | "the movement that produced it" | unclear what "it" refers to (the inn, the collection); rendered « dont il est issu » |
 
 ## Ranking, worst first
 
@@ -473,8 +503,8 @@ items are available on request; none needs more than a light pass.
 ## Next step
 
 A rewrite programme for every item scored 2 or 3 is filed as a task ("Rewrite
-programme: stories and locations scored 2-3 in the translationese audit"). Suggested
-order: the 13 English `full_description` rows and the 5 accentless ones first
-(French readers currently get English or broken text), then the stories, then the
-other score-2 locations. Each item goes through the full `barbizon-writing`
-workflow and the 2026-10-13 source-check rule before any claim is changed.
+programme: stories and locations scored 2-3 in the translationese audit"). It runs
+in correction mode: language only, facts frozen. Suggested order: the 13 English
+`full_description` rows and the 5 accentless ones first (French readers currently
+get English or broken text), then the stories, then the other score-2 locations.
+The fact flags above are triaged separately and never hold a correction back.
