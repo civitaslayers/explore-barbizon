@@ -1,5 +1,13 @@
 ---
 
+## 2026-10-18
+
+### Place card thumbnails: photo first, static map fallback (/places grid, PR #70)
+**Decision:** Every place card thumbnail renders the place's first photo (`media.url` by `display_order`, the `heroImage` that getPublishedLocations already loads) with the 800w/1600w webp pair, `object-cover`, lazy loading and the place name as alt text. The Mapbox Static map is only the fallback when a place has no photo, and the plain tinted block is the fallback when Mapbox is not configured.
+**Reason:** The /places grid always rendered the static map, so no grid card ever showed a photo even though the CuratedSection cards on the same page did. Luigi's call, 2026-10-18.
+**Consequence:** The gradient under the card text is slightly stronger on photo cards (from-ink/80 via-ink/30) so the cream text stays readable; map cards keep from-ink/75 via-ink/20. Supersedes the 2026-03-21 note that the Mapbox Static API is used for place card thumbnails.
+**Migration risk:** none; no page data method changed.
+
 ## 2026-10-13
 
 ### Published claims get a source check before they are cut (Luigi, 2026-10-13)
@@ -547,7 +555,7 @@ Deleted slugs: besharat-gallery, besharat-suites, la-folie-barbizon-heritage, mu
 
 ## 2026-03-21 — Mapbox is the spatial engine
 **Decision:** All map rendering, location pins, clustering, and trail display go through Mapbox GL JS.
-**Reason:** Best-in-class for custom map styling, layer control, and geo-narrative use cases. Mapbox Static API also used for place card thumbnails.
+**Reason:** Best-in-class for custom map styling, layer control, and geo-narrative use cases. Mapbox Static API also used for place card thumbnails. **Superseded in part (2026-10-18):** thumbnails are photo first, with the static map as the fallback only.
 **Context:** Needed a map layer for place discovery with custom styling.
 
 ---
