@@ -8,9 +8,11 @@ Last updated: 2026-10-18
 PR #71 (writing guide, glossary, `barbizon-writing` skill, `civitas-native-editor`
 agent; touches `.claude/**`, Luigi approved in the session) merged as `ea641f3`;
 PR #69 (morning report) merged as `d9f7ca2`. Story subtitles (77e02c3f) and the 15
-location functions (1a2205a7) were redone in CORRECTION mode (PR #74, merged
-`938812b`): from the current rows, facts frozen, language only, French and English
-native edits, drift check (only change: Maison Millet 1923 -> 1922, Luigi). Drafts are in
+location functions (1a2205a7) were redone in CORRECTION mode (PRs #74 and #76).
+Story subtitles APPLIED on production 2026-10-18 (Luigi approved), status published,
+v_translation_health current, md5 matches the file; 77e02c3f done. Location functions
+restarted from the approved 2026-10-15 text (language and typography only), status
+published, in PR #75, waiting for Luigi's approval before running. Drafts are in
 `docs/content/2026-10-18-story-meta-descriptions.sql` and
 `docs/content/2026-10-15-location-functions-fr.sql` on branch
 `claude/compassionate-goodall-5zlt5z`, `_meta.status = 'draft'`, both EXPLAIN-checked
@@ -19,7 +21,7 @@ so the literal must become 'published' on Luigi's approval before running.
 Translationese audit (read-only) of the 10 published stories and 36 Art & History
 locations: 27 of 46 score 2-3; 13 Art & History rows hold English in the French
 `full_description`. Report `docs/content/2026-10-18-translationese-audit.md`, PR #73;
-rewrite programme filed as task 2328ce3f (correction mode); fact flags FF1-FF32 to triage in task f1ed12ca. Ignored Build Step for `docs/**` only
+rewrite programme filed as task 2328ce3f (correction mode); fact flags FF1-FF21 to triage in task f1ed12ca. Ignored Build Step for `docs/**` only
 (`vercel.json` `ignoreCommand`; `brain/**` still builds) is PR #72, release-checker SHIP.
 
 **Earlier 2026-10-18 (day session): night docs merged, last high advisory closed, /places photos live.**
