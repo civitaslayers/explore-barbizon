@@ -20,9 +20,10 @@ map cards), merged as `b2b945e`, production `dpl_qo91XQ8nSno72Mvty1wCDfULEZSc`
 on production: 104 checks, 98 pass, 6 fail, the same six short story
 descriptions as before. Task table: 8abfda99 and 248023d7 closed, three
 null `execution_status` rows set to `todo`, 7a97ab91 (sharp) closed.
-At the gate for Luigi: the Éléphant `media.url` change plus re-upload
-(47ac0a0b; the /places card now shows its 404 photo instead of a map until
-then), the story subtitle SQL (77e02c3f,
+Éléphant de Barbizon photo fixed on Luigi's approval (47ac0a0b, done):
+`media.url` set to `elephant-de-barbizon-1600.webp`, then `upload-media.mjs
+--execute` uploaded the 1600w (1170 px, not upscaled) and 800w pair, both 200.
+At the gate for Luigi: the story subtitle SQL (77e02c3f,
 `docs/content/2026-10-18-story-meta-descriptions.sql`), the location_functions
 SQL with Maison Millet at 1922 (1a2205a7,
 `docs/content/2026-10-15-location-functions-fr.sql`), and the Ignored Build
@@ -511,6 +512,7 @@ as the human-readable window onto it.
 ---
 
 ## Last Completed
+- [media] Éléphant de Barbizon photo re-uploaded as the webp pair, `media.url` fixed (47ac0a0b, 2026-10-18).
 - [fix] /places grid cards photo first, static map fallback (PR #70, `b2b945e`, prod `dpl_qo91XQ8nSno72Mvty1wCDfULEZSc`, 2026-10-18).
 - [deps] sharp 0.35.5, last high-severity advisory closed (PR #47, `9292b3c`, 2026-10-18).
 - [docs] 19 night docs PRs #50 to #68 merged (2026-10-18).
@@ -530,10 +532,9 @@ as the human-readable window onto it.
 ## Blockers
 - Heritage Plaque batch (7 records) blocked pending a dedicated verification session
 - `pin_moves` and `product_events` both applied to production; no DB blocker
-- Éléphant de Barbizon photo returns 404 until Luigi approves the `media.url` change (47ac0a0b); the /places card shows a broken image meanwhile
 
 ## Next Tasks
-0. Gate items from 2026-10-18 (Luigi): Éléphant media url + re-upload (47ac0a0b), story subtitle SQL (77e02c3f), location_functions SQL (1a2205a7), Ignored Build Step proposal (V3)
+0. Gate items from 2026-10-18 (Luigi): story subtitle SQL (77e02c3f), location_functions SQL (1a2205a7), Ignored Build Step proposal (V3)
 1. Editorial prose French translation — homepage, about, history, plan-your-visit, HistoryTimeline (split off cc6e5703; needs native authorship, not a mechanical pass)
 2. Remaining French migration records (93 of 107 now have published English; ~14 still need translation + status stamp)
 3. Map popups render French short_description on /en/map — same bug class as 8ec7a8fb, different fix shape (imperative Mapbox rendering)
@@ -544,11 +545,10 @@ as the human-readable window onto it.
 8. Remove dead getLocationBySlug() (uses forbidden select("*")) (release-check finding, P5)
 
 ## Next Session Starting Point
-Start with Luigi's answers on the four 2026-10-18 gate items (see Status). If the Éléphant
-change is approved: run the `media.url` SQL, then `node scripts/upload-media.mjs --execute
---only=elephant-de-barbizon` (photo staged in `media-staging/elephant-de-barbizon/`), then
-confirm the 800w and 1600w urls return 200. After the story subtitle SQL, re-run
-`scripts/seo-audit.mjs` on production: the six remaining failures should clear.
+Start with Luigi's answers on the three remaining 2026-10-18 gate items (story subtitle SQL
+77e02c3f, location_functions SQL 1a2205a7, Ignored Build Step proposal 6ef52886). After the
+story subtitle SQL, re-run `scripts/seo-audit.mjs` on production: the six remaining failures
+should clear.
 
 ## Operational lessons (salvaged from the retired task-queue.md)
 
