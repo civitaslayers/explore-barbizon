@@ -97,7 +97,7 @@ function UnifiedPlaceArticle({
                         key={fn.id}
                         className={`inline-block rounded-full px-3 py-1 font-sans text-[11px] uppercase tracking-[0.14em] ${functionChipClasses(fn.category?.layer)}`}
                       >
-                        {fn.label}
+                        {getLocalized(fn, locale, "label") || fn.label}
                       </span>
                     ))}
                   </div>
@@ -131,7 +131,7 @@ function UnifiedPlaceArticle({
       ) : null}
 
       {place.functions.map((fn) => (
-        <FunctionSection key={fn.id} fn={fn} />
+        <FunctionSection key={fn.id} fn={fn} locale={locale} />
       ))}
 
       <LocationHoursSection hours={place.opening_hours} />
@@ -222,15 +222,26 @@ function practicalBlock(
   );
 }
 
-function FunctionSection({ fn }: { fn: LocationFunction }) {
+function FunctionSection({
+  fn,
+  locale,
+}: {
+  fn: LocationFunction;
+  locale: string;
+}) {
   const { t } = useTranslation("common");
+  // Base columns are French; en reads location_functions.translations via the
+  // same published predicate as every other surface (lib/getLocalized.ts).
+  const label = getLocalized(fn, locale, "label") || fn.label;
+  const description =
+    getLocalized(fn, locale, "description") || fn.description;
   return (
     <section className="border-t border-ink/10 pt-12 md:pt-14 lg:pt-16">
       <div className="editorial-measure">
-        <p className="eyebrow">{fn.label}</p>
-        {fn.description ? (
+        <p className="eyebrow">{label}</p>
+        {description ? (
           <div className="mt-6 space-y-5 text-sm leading-[1.72] text-ink/88 md:text-base md:leading-[1.75] xl:text-[1.0625rem] xl:leading-[1.72]">
-            <p>{fn.description}</p>
+            <p>{description}</p>
           </div>
         ) : null}
         {practicalBlock(fn, t)}
