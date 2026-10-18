@@ -48,7 +48,7 @@ search (unrelated person, « Jean Charles », b. 1923); searches for Sensier's
   independent of the commune. Getty: Jean-Charles Millet, grandson, with the
   painter Paul Cazot produced « some 40 fake Millet paintings and around 200
   fake Millet drawings », authenticated with the inherited JFM studio stamp and
-  certificates on family stationery; « Monsieur Douhin, a businessman, bought
+  certificates on family stationery; Douhin, a businessman, « bought
   Millet's old house in Barbizon and turned it into a museum » and bought
   drawings and fakes from him (incl. a second *Man with a Hoe*); trial 1935,
   « short prison terms » and fines; the London dealer David Croal Thomson
