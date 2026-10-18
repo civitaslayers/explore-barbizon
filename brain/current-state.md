@@ -11,8 +11,9 @@ PR #69 (morning report) merged as `d9f7ca2`. Story subtitles (77e02c3f) and the 
 location functions (1a2205a7) were redone in CORRECTION mode (PRs #74 and #76).
 Story subtitles APPLIED on production 2026-10-18 (Luigi approved), status published,
 v_translation_health current, md5 matches the file; 77e02c3f done. Location functions
-restarted from the approved 2026-10-15 text (language and typography only), status
-published, in PR #75, waiting for Luigi's approval before running. Drafts are in
+restarted from the approved 2026-10-15 text (language and typography only; L'Esquisse
+« Hôtel et bar » kept verbatim), APPLIED on production 2026-10-18, 15 of 15 rows md5-verified
+against the file and current in v_translation_health; 1a2205a7 done. PR #75 merged. Drafts are in
 `docs/content/2026-10-18-story-meta-descriptions.sql` and
 `docs/content/2026-10-15-location-functions-fr.sql` on branch
 `claude/compassionate-goodall-5zlt5z`, `_meta.status = 'draft'`, both EXPLAIN-checked
@@ -558,7 +559,8 @@ as the human-readable window onto it.
 - `pin_moves` and `product_events` both applied to production; no DB blocker
 
 ## Next Tasks
-0. Gate items (Luigi): PR #72 Ignored Build Step (6ef52886); PR #73 audit (docs only); story subtitle SQL 77e02c3f; location_functions SQL 1a2205a7 (also waits on the localization code change). Both SQL files: flip 'draft' to 'published' on approval, then run.
+0. Gate item (Luigi): PR #72 Ignored Build Step (6ef52886). 77e02c3f and 1a2205a7 are applied and done. Run scripts/seo-audit.mjs on production locally to confirm the six story description failures cleared.
+0a. Fact flags FF1-FF21 (task f1ed12ca).
 0b. Rewrite programme 2328ce3f: settle the audit's glossary gaps and fact questions, then batch 1 = the 13 English and 5 accentless French full_description rows.
 1. Editorial prose French translation — homepage, about, history, plan-your-visit, HistoryTimeline (split off cc6e5703; needs native authorship, not a mechanical pass)
 2. Remaining French migration records (93 of 107 now have published English; ~14 still need translation + status stamp)

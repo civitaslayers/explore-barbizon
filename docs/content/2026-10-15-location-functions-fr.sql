@@ -6,8 +6,10 @@
 -- U+00A0 before : and ; and inside times, prices and 2 hectares). Every label, fact, hour,
 -- price and phone number exactly as approved. French and English native edits in correction mode.
 -- PR #48 (localized function label/description) was merged on 2026-10-16, so nothing blocks this.
--- Status 'published'. claude.ai or Claude Code applies on Luigi's approval, one statement per
--- call. Verify with v_translation_health afterwards.
+-- Status 'published'. APPLIED on production 2026-10-18 by Claude Code on Luigi's approval,
+-- one statement per row; L'Esquisse « Hôtel et bar » kept at the exact 2026-10-15 wording
+-- (Luigi). Verified: md5 of all four fields matches this file for 15 of 15 rows,
+-- v_translation_health current for 15 of 15.
 
 with v(id, fl, fd, el, ed) as (values
   ('95e5e010-283e-4910-b531-0a9a14fb73c9'::uuid, $$Musée de l'École de Barbizon$$, $$Musée départemental depuis 2004, ouvert en 1995 dans l'ancienne auberge. Murs peints par les artistes, mobilier et objets de l'époque de l'auberge, collection permanente consacrée à l'École de Barbizon (1830-1870).$$, $$Musée de l'École de Barbizon$$, $$Opened in 1995 in the former inn; a departmental museum since 2004. Walls painted by the artists, furniture and objects from the days of the inn, and a permanent collection devoted to the Barbizon School (1830–1870).$$),
