@@ -319,7 +319,19 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({
               href={`/places/${place.slug}`}
               className="group relative block aspect-[4/3] overflow-hidden rounded-2xl bg-ink/10"
             >
-              {hasMapbox ? (
+              {place.heroImage ? (
+                /* Widest card per breakpoint: xl 3 cols = (70rem − 4rem px − 4rem gaps) / 3
+                   ≈ 21rem; md–xl 2 cols peaks ≈ 32rem at the 70rem container cap;
+                   mobile is full viewport width. */
+                <img
+                  src={heroImage800w(place.heroImage)}
+                  srcSet={`${heroImage800w(place.heroImage)} 800w, ${place.heroImage} 1600w`}
+                  sizes="(min-width: 1280px) 21rem, (min-width: 768px) 33rem, 100vw"
+                  alt={place.name}
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-soft group-hover:scale-105"
+                  loading="lazy"
+                />
+              ) : hasMapbox ? (
                 <img
                   src={staticMapUrl(place.longitude, place.latitude)}
                   alt={t("a11y.mapOf", { name: place.name })}
@@ -330,7 +342,11 @@ const PlacesIndexPage: NextPage<PlacesIndexProps> = ({
                 <div className="absolute inset-0 bg-ink/8" />
               )}
 
-              <div className="absolute inset-0 bg-gradient-to-t from-ink/75 via-ink/20 to-transparent" />
+              <div
+                className={`absolute inset-0 bg-gradient-to-t to-transparent ${
+                  place.heroImage ? "from-ink/80 via-ink/30" : "from-ink/75 via-ink/20"
+                }`}
+              />
 
               <div className="absolute bottom-0 left-0 right-0 p-5">
                 <span className="chip mb-2 inline-block">
