@@ -165,16 +165,26 @@
     "painters": {
       "eyebrow": "Les peintres",
       "title": "Ceux qui sont venus regarder.",
-      "millet": "S'installe à Barbizon en 1849 et y reste jusqu'à sa mort.",
+      "intro": "Entre 1830 et 1875, des centaines de peintres et de sculpteurs, français et étrangers, ont séjourné à Barbizon. En voici quelques-uns.",
+      "placeCta": "Voir le lieu →",
+      "corot": "Peint en forêt de Fontainebleau dès les années 1820, et ouvre la voie aux autres.",
       "rousseau": "S'installe à Barbizon en 1847. Figure de proue de l'école.",
-      "corot": "Peint en forêt de Fontainebleau dès les années 1820.",
-      "daubigny": "Connu pour ses paysages de rivière, peints sur l'Oise et la Seine."
+      "millet": "S'installe à Barbizon en 1849 et y reste jusqu'à sa mort.",
+      "diaz": "L'une des figures fondatrices de l'école. Une plaque rappelle son séjour sur la Grande Rue.",
+      "jacque": "Peintre et graveur, il arrive avec Millet en 1849. Il élève des volailles et plante les premières asperges du village.",
+      "daubigny": "Vient à Barbizon dès 1843, avant de se fixer à Auvers-sur-Oise. Une plaque signale la maison qu'il habita.",
+      "troyon": "Ami de Rousseau et de Dupré, il travaille avec eux à Barbizon dans les années 1840.",
+      "dupre": "Ami de Rousseau depuis les années 1830, il peint avec lui à Barbizon dans les années 1840.",
+      "barye": "Sculpteur animalier, il peint aussi les gorges de Franchard et d'Apremont à la fin des années 1840, aux côtés de Millet et de Díaz.",
+      "bodmer": "Peintre et graveur suisse, installé à Barbizon vers 1849. Le chêne qui porte son nom se dressait au Bas-Bréau.",
+      "hunt": "Peintre américain et ami de Millet, il acquiert Le Semeur de 1850, aujourd'hui au musée des Beaux-Arts de Boston.",
+      "monet": "En 1865, il peint le chêne Bodmer, dans la futaie du Bas-Bréau."
     },
     "sources": {
       "eyebrow": "Sources et provenance",
       "title": "D'où viennent ces informations.",
-      "p1": "Les contenus historiques de cette plateforme sont vérifiés auprès de sources institutionnelles : base Mérimée / POP, Archives départementales de Seine-et-Marne, Gallica / BnF, Musée départemental des peintres de Barbizon. Les recherches d'archives locales de grappilles.fr nourrissent de nombreux récits et sont créditées comme une contribution précieuse.",
-      "p2": "L'exactitude est un principe du projet. Une date, un nom ou un lieu n'est publié qu'une fois confirmé par au moins une source institutionnelle, ou par une connaissance locale directe. Les corrections sont les bienvenues : info@explorebarbizon.com.",
+      "p1": "Les contenus historiques de cette plateforme sont recoupés avec des sources institutionnelles et d'époque : base Mérimée / POP, Archives départementales de Seine-et-Marne (dont les recensements de Chailly-en-Bière), Gallica / BnF et la presse du XIXe siècle, la carte et les publications de la mairie de Barbizon, les notices des musées. Les recherches d'archives locales de grappilles.fr nourrissent de nombreux récits et sont créditées comme une contribution précieuse.",
+      "p2": "L'exactitude est un principe du projet. Une date, un nom ou un lieu est publié lorsqu'il a été recoupé avec au moins une source documentaire, ou avec une connaissance locale directe. Les vérifications se poursuivent page après page, et les corrections sont les bienvenues : info@explorebarbizon.com.",
       "grappillesCta": "Visiter grappilles.fr →",
       "p3": "La connaissance du village s'appuie aussi sur Barbizon, le Guide, le blog de Jean-Michel Mahenc, ancien président de l'Office de tourisme de Barbizon, consacré à la vie du village, à ses restaurants, ses boutiques et ses sentiers. Comme grappilles.fr, il sert de piste de recherche : ce que nous publions est recoupé avec les sources ci-dessus.",
       "guideCta": "Barbizon, le Guide →"
