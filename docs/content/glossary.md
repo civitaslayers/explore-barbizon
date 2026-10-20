@@ -1,6 +1,6 @@
 # Glossary (termbase)
 
-Last updated: 2026-10-18. Companion to `docs/content/writing-guide.md`.
+Last updated: 2026-10-20. Companion to `docs/content/writing-guide.md`.
 
 Use these forms exactly. Add a term before using a new one twice. French is the
 reference column. Columns marked "to confirm" have not been checked by a native
@@ -51,6 +51,10 @@ Rules:
 | Charles-François Daubigny | Charles-François Daubigny | 夏尔-弗朗索瓦·杜比尼 |
 | Constant Troyon | Constant Troyon | 康斯坦·特罗容 |
 | Karl Bodmer | Karl Bodmer | 卡尔·博德默 |
+| Jules Dupré | Jules Dupré | 朱尔·杜普雷 |
+| Antoine-Louis Barye | Antoine-Louis Barye | 安托万-路易·巴里 |
+| Félix Ziem | Félix Ziem | 费利克斯·齐姆 |
+| Claude Monet | Claude Monet | 克劳德·莫奈 |
 | Claude-François Denecourt | Claude-François Denecourt | 克洛德-弗朗索瓦·德讷库尔 |
 | William Morris Hunt | William Morris Hunt | 威廉·莫里斯·亨特 |
 | Gustave Eiffel | Gustave Eiffel | 古斯塔夫·埃菲尔 |

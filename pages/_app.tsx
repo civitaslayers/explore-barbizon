@@ -10,7 +10,7 @@ import { PageViewTracker } from "@/components/PageViewTracker";
 import nextI18NextConfig from "@/next-i18next.config";
 
 const DEFAULT_SITE_DESCRIPTION =
-  "Visit Barbizon — a curated cultural guide to the forest-edge village that inspired generations of artists.";
+  "Visit Barbizon: a curated cultural guide to the forest-edge village that inspired generations of artists.";
 
 const inter = localFont({
   src: "../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2",
