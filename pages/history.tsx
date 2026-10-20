@@ -3,36 +3,37 @@ import { useRouter } from "next/router";
 import type { SSRConfig } from "next-i18next/pages";
 import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
 import { useTranslation } from "next-i18next/pages";
+import Link from "next/link";
 import { SeoHead } from "@/components/SeoHead";
 import HistoryTimeline from "@/components/HistoryTimeline";
 import nextI18NextConfig from "@/next-i18next.config";
 
 type HistoryPageProps = SSRConfig;
 
-// name/dates are proper nouns + numerals — locale-independent, stay literal.
+// name/dates are proper nouns + numerals, locale-independent, stay literal.
 // noteKey points at pages:history.painters.<slug> for the one-sentence note.
-const ARTISTS = [
-  {
-    name: "Jean-François Millet",
-    dates: "1814–1875",
-    noteKey: "millet"
-  },
-  {
-    name: "Théodore Rousseau",
-    dates: "1812–1867",
-    noteKey: "rousseau"
-  },
-  {
-    name: "Camille Corot",
-    dates: "1796–1875",
-    noteKey: "corot"
-  },
-  {
-    name: "Charles-François Daubigny",
-    dates: "1817–1878",
-    noteKey: "daubigny"
-  }
-] as const;
+// placeSlug (optional) links the card to the artist's place page, so the
+// list funnels back into the atlas. Every note is backed by a row in
+// research_findings (2026-10-20 batch for Barye, Troyon, Dupré, scale).
+const ARTISTS: ReadonlyArray<{
+  name: string;
+  dates: string;
+  noteKey: string;
+  placeSlug?: string;
+}> = [
+  { name: "Camille Corot", dates: "1796–1875", noteKey: "corot" },
+  { name: "Théodore Rousseau", dates: "1812–1867", noteKey: "rousseau", placeSlug: "maison-de-rousseau" },
+  { name: "Jean-François Millet", dates: "1814–1875", noteKey: "millet", placeSlug: "maison-millet" },
+  { name: "Narcisse Díaz de la Peña", dates: "1807–1876", noteKey: "diaz", placeSlug: "maison-diaz" },
+  { name: "Charles Jacque", dates: "1813–1894", noteKey: "jacque", placeSlug: "maison-charles-jacque" },
+  { name: "Charles-François Daubigny", dates: "1817–1878", noteKey: "daubigny", placeSlug: "atelier-daubigny-plaque" },
+  { name: "Constant Troyon", dates: "1810–1865", noteKey: "troyon" },
+  { name: "Jules Dupré", dates: "1811–1889", noteKey: "dupre" },
+  { name: "Antoine-Louis Barye", dates: "1795–1875", noteKey: "barye" },
+  { name: "Karl Bodmer", dates: "1809–1893", noteKey: "bodmer", placeSlug: "chene-bodmer" },
+  { name: "William Morris Hunt", dates: "1824–1879", noteKey: "hunt" },
+  { name: "Claude Monet", dates: "1840–1926", noteKey: "monet", placeSlug: "chene-bodmer" }
+];
 
 const HistoryPage: NextPage<HistoryPageProps> = () => {
   const router = useRouter();
@@ -85,6 +86,9 @@ const HistoryPage: NextPage<HistoryPageProps> = () => {
           <header className="space-y-3 editorial-measure">
             <p className="eyebrow">{t("history.painters.eyebrow")}</p>
             <h2 className="heading-lg">{t("history.painters.title")}</h2>
+            <p className="text-sm leading-relaxed text-ink/80 md:text-base">
+              {t("history.painters.intro")}
+            </p>
           </header>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {ARTISTS.map((artist) => (
@@ -97,6 +101,14 @@ const HistoryPage: NextPage<HistoryPageProps> = () => {
                 <p className="text-sm text-ink/70">
                   {t(`history.painters.${artist.noteKey}`)}
                 </p>
+                {artist.placeSlug ? (
+                  <Link
+                    href={`/places/${artist.placeSlug}`}
+                    className="inline-block pt-2 text-xs text-ink/60 underline-offset-4 hover:underline"
+                  >
+                    {t("history.painters.placeCta")}
+                  </Link>
+                ) : null}
               </div>
             ))}
           </div>

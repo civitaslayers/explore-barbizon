@@ -252,17 +252,21 @@ const StoryPage: NextPage<StoryPageProps> = ({ story, related, hasEnglishVersion
 
         {story.cover_image_url ? (
           <figure>
-            <div className="aspect-[3/2] w-full overflow-hidden rounded-xl bg-surface-container-low">
-              <img
-                src={story.cover_image_url}
-                srcSet={`${heroImage800w(story.cover_image_url)} 800w, ${story.cover_image_url} 1600w`}
-                sizes="(min-width: 768px) 672px, (min-width: 640px) 608px, calc(100vw - 2rem)"
-                alt={coverAlt}
-                className="h-full w-full object-contain"
-                fetchPriority="high"
-                decoding="async"
-              />
-            </div>
+            {/* No fixed aspect box: covers come in mixed ratios (16:9 street
+                photos, portrait paintings). A 3:2 box with object-contain
+                letterboxed wide photos with empty bands above and below
+                (rooms-of-light, 2026-10-20). The image now sets its own
+                height; max-h keeps tall portraits within the viewport,
+                object-contain keeps paintings uncropped. */}
+            <img
+              src={story.cover_image_url}
+              srcSet={`${heroImage800w(story.cover_image_url)} 800w, ${story.cover_image_url} 1600w`}
+              sizes="(min-width: 768px) 672px, (min-width: 640px) 608px, calc(100vw - 2rem)"
+              alt={coverAlt}
+              className="mx-auto block h-auto max-h-[80vh] w-auto max-w-full rounded-xl object-contain"
+              fetchPriority="high"
+              decoding="async"
+            />
             {coverCredit ? (
               <figcaption className="mt-3 font-sans text-[11px] leading-relaxed text-ink/60">
                 {coverCredit}

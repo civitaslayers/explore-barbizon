@@ -165,16 +165,26 @@
     "painters": {
       "eyebrow": "The Painters",
       "title": "The people who came to look.",
-      "millet": "Settled in Barbizon in 1849. Stayed until his death.",
+      "intro": "Between 1830 and 1875, hundreds of painters and sculptors, French and foreign, stayed in Barbizon. Here are a few of them.",
+      "placeCta": "See the place →",
+      "corot": "Painted in the Fontainebleau forest from the 1820s, and showed the others the way.",
       "rousseau": "Settled permanently in 1847. De facto leader of the school.",
-      "corot": "Painted in the Fontainebleau forest from the 1820s.",
-      "daubigny": "Known for his river landscapes, painted on the Oise and the Seine."
+      "millet": "Settled in Barbizon in 1849. Stayed until his death.",
+      "diaz": "One of the founding figures of the school. A plaque on the Grande Rue recalls his time here.",
+      "jacque": "Painter and etcher, he arrived with Millet in 1849. He kept poultry and planted the village's first asparagus.",
+      "daubigny": "Came to Barbizon from 1843, before settling at Auvers-sur-Oise. A plaque marks the house he lived in.",
+      "troyon": "A friend of Rousseau and Dupré, he worked with them at Barbizon in the 1840s.",
+      "dupre": "Rousseau's friend from the 1830s, he painted alongside him at Barbizon in the 1840s.",
+      "barye": "An animal sculptor, he also painted the gorges of Franchard and Apremont in the late 1840s, alongside Millet and Díaz.",
+      "bodmer": "Swiss painter and etcher, settled in Barbizon around 1849. The oak that bears his name stood in the Bas-Bréau.",
+      "hunt": "American painter and friend of Millet, he bought the 1850 Sower, now in the Museum of Fine Arts, Boston.",
+      "monet": "In 1865 he painted the Bodmer oak, in the Bas-Bréau woods."
     },
     "sources": {
       "eyebrow": "Sources & Provenance",
       "title": "Where this comes from.",
-      "p1": "Historical content on this platform is checked against institutional sources: Base Mérimée / POP, the Archives de Seine-et-Marne, Gallica / BnF, and the Musée départemental des peintres de Barbizon. Local archival research by grappilles.fr informs many narratives and is credited as a valued contribution.",
-      "p2": "Factual accuracy is a core principle of this project. A date, name or place is only published once confirmed by at least one institutional source, or by direct local knowledge. Corrections are welcome: info@explorebarbizon.com.",
+      "p1": "Historical content on this platform is checked against institutional and period sources: Base Mérimée / POP, the Archives de Seine-et-Marne (including the Chailly-en-Bière censuses), Gallica / BnF and the nineteenth-century press, the Barbizon town hall's map and publications, and museum records. Local archival research by grappilles.fr informs many narratives and is credited as a valued contribution.",
+      "p2": "Factual accuracy is a core principle of this project. A date, name or place is published once it has been checked against at least one documentary source, or against direct local knowledge. Checking continues page by page, and corrections are welcome: info@explorebarbizon.com.",
       "grappillesCta": "Visit grappilles.fr →",
       "p3": "Local village knowledge is further informed by Barbizon, le Guide, a blog by Jean-Michel Mahenc, former president of the Barbizon Tourism Office, covering village life, restaurants, boutiques and trails. Like grappilles.fr, it is treated as a research lead: anything we publish is checked against the sources above.",
       "guideCta": "Barbizon, le Guide →"
