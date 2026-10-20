@@ -1,9 +1,27 @@
 # Current State
 
-Last updated: 2026-10-18
+Last updated: 2026-10-20
 
 ## Status
 
+**2026-10-20 (Claude Code, on PR #77 after Luigi's morning review with claude.ai): About rewrite and Ziem, not merged.**
+PR #77 (`fix/2026-10-20-morning-bugs`) already carried the story cover fix,
+the 12-artist /history painters list and the /history sources copy. Added on
+the same branch: Félix Ziem (1821–1911) after Bodmer on /history, with no
+place link; the /about page rewritten for the general public under the
+`barbizon-writing` workflow (French first, native edit, English adapted,
+native edit, both scored 1). It covers what the site is, the layered map, how
+it is made (visited on foot, photographs on site, sources on /history), Luigi
+Pérez as creator, contact at info@explorebarbizon.com, and a closing line on
+Civitas Layers. No gallery, paid placement, sponsorship or roadmap. Three
+decisions recorded in `brain/decisions.md` (2026-10-20). Checks: check:i18n
+pass, tsc clean, lint clean on the touched files, 300/300 tests, local build
+green. The night brief `docs/briefs/2026-10-20-night.md` queues the deep
+artist research (dossier only, no site change). Waiting for Luigi: copy review
+and merge of PR #77. Left to claude.ai: the tasks table, and the Barjole 800w
+re-upload, a human task on the iMac.
+
+---
 **2026-10-18 afternoon session (Claude Code, Luigi's plan): writing guide merged, copy redone through barbizon-writing, translationese audit, Ignored Build Step PR.**
 PR #71 (writing guide, glossary, `barbizon-writing` skill, `civitas-native-editor`
 agent; touches `.claude/**`, Luigi approved in the session) merged as `ea641f3`;
