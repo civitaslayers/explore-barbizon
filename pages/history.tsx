@@ -24,7 +24,7 @@ const ARTISTS: ReadonlyArray<{
   { name: "Camille Corot", dates: "1796–1875", noteKey: "corot" },
   { name: "Théodore Rousseau", dates: "1812–1867", noteKey: "rousseau", placeSlug: "maison-de-rousseau" },
   { name: "Jean-François Millet", dates: "1814–1875", noteKey: "millet", placeSlug: "maison-millet" },
-  { name: "Narcisse Diaz de la Peña", dates: "1807–1876", noteKey: "diaz", placeSlug: "maison-diaz" },
+  { name: "Narcisse Díaz de la Peña", dates: "1807–1876", noteKey: "diaz", placeSlug: "maison-diaz" },
   { name: "Charles Jacque", dates: "1813–1894", noteKey: "jacque", placeSlug: "maison-charles-jacque" },
   { name: "Charles-François Daubigny", dates: "1817–1878", noteKey: "daubigny", placeSlug: "atelier-daubigny-plaque" },
   { name: "Constant Troyon", dates: "1810–1865", noteKey: "troyon" },

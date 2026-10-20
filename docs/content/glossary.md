@@ -46,7 +46,7 @@ Rules:
 | Jean-François Millet | Jean-François Millet | 让-弗朗索瓦·米勒 |
 | Théodore Rousseau | Théodore Rousseau | 泰奥多尔·卢梭 |
 | Camille Corot | Camille Corot | 卡米耶·柯罗 |
-| Narcisse Diaz de la Peña | Narcisse Diaz de la Peña | 纳西斯·迪亚兹 |
+| Narcisse Díaz de la Peña | Narcisse Díaz de la Peña | 纳西斯·迪亚兹 |
 | Charles Jacque | Charles Jacque | 夏尔·雅克 |
 | Charles-François Daubigny | Charles-François Daubigny | 夏尔-弗朗索瓦·杜比尼 |
 | Constant Troyon | Constant Troyon | 康斯坦·特罗容 |
