@@ -1,5 +1,27 @@
 ---
 
+## 2026-10-20
+_Luigi's morning bug review with claude.ai, 2026-10-20 (PR #77)._
+
+### The About page names Luigi Pérez as the creator, not the gallery
+**Decision:** The About page (`/about`) names Luigi Pérez personally as the creator of Visit Barbizon. It does not mention Besharat Gallery.
+**Reason:** Luigi's call. The page speaks for the project and its author, for the general public.
+**Consequence:** The where-to-stay guide's transparency line (Luigi's decision of 2026-10-05, recorded in `brain/current-state.md`, not as an entry in this log) is unchanged.
+
+---
+
+### No public copy on paid placement, sponsorship or listing policy until monetisation is decided
+**Decision:** Public copy says nothing about paid placement, sponsorship or listing policy until monetisation is decided.
+**Reason:** Luigi's call: the business model is not decided, so the site makes no statement about it.
+**Consequence:** The About rewrite of 2026-10-20 leaves these topics out; any later copy on them waits for a monetisation decision in this log.
+
+---
+
+### Félix Ziem's presence in Barbizon is confirmed by a plaque
+**Decision:** Félix Ziem's presence in Barbizon is confirmed by a plaque photographed by Luigi (`research_findings` row, subject "Félix Ziem"). Ziem is added to the /history painters list (1821–1911, no place link).
+**Reason:** A photographed plaque on site is the source for the claim.
+**Consequence:** The /history note says only that he came to Barbizon and that a plaque recalls him.
+
 ## 2026-10-18
 
 ### Writing and translation: French written natively, other languages adapted, native read before publishing (Luigi, 2026-10-18)

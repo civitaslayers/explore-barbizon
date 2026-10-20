@@ -78,13 +78,17 @@
   "about": {
     "meta": {
       "title": "About — Visit Barbizon",
-      "description": "Visit Barbizon is a slow, editorial guide to a village on the edge of the Fontainebleau forest."
+      "description": "Visit Barbizon is a guide to the village, built around a map: places, stories and walks to explore at your own pace."
     },
-    "eyebrow": "About This Project",
-    "title": "A quiet atlas for a small village.",
-    "p1": "Visit Barbizon is a slow, editorial guide to a village on the edge of the Fontainebleau forest. It treats Barbizon less as a list of attractions and more as a field of relationships: studios and paths, weather and stone, rooms and routes.",
-    "p2": "The project is built as a cultural cartography rather than a checklist. Places are selected for the ways they frame light and movement; stories trace how artists and visitors have read this landscape over time.",
-    "p3": "Visit Barbizon is powered by Civitas Layers, a platform for layered, place-based narratives."
+    "eyebrow": "About",
+    "title": "Barbizon, map in hand",
+    "p1": "Visit Barbizon is a guide to the village, built around a map. It brings together places, stories and walks, from the village centre to the edge of the Forest of Fontainebleau.",
+    "p2": "Barbizon is where painters learned to look at the forest. The site shows the village one layer at a time: art and history; shops, restaurants and places to stay; the forest; practical information. Everything is on a single map, for you to explore at your own pace.",
+    "p3": "Every place has been visited on foot, and every photograph was taken on the spot. Historical details are checked against archives, and the sources are listed on the {{historyLink}} page. Everything is written in French and English.",
+    "historyLink": "History",
+    "p4": "Visit Barbizon was created by Luigi Pérez, who lives and works in Barbizon.",
+    "p5": "New places and stories are added over time. Spotted a mistake or have a suggestion? Write to {{email}}.",
+    "closing": "Visit Barbizon is powered by Civitas Layers."
   },
   "history": {
     "meta": {
@@ -178,7 +182,8 @@
       "barye": "An animal sculptor, he also painted the gorges of Franchard and Apremont in the late 1840s, alongside Millet and Díaz.",
       "bodmer": "Swiss painter and etcher, settled in Barbizon around 1849. The oak that bears his name stood in the Bas-Bréau.",
       "hunt": "American painter and friend of Millet, he bought the 1850 Sower, now in the Museum of Fine Arts, Boston.",
-      "monet": "In 1865 he painted the Bodmer oak, in the Bas-Bréau woods."
+      "monet": "In 1865 he painted the Bodmer oak, in the Bas-Bréau woods.",
+      "ziem": "Known for his views of Venice, he also came to Barbizon, where a plaque commemorates him."
     },
     "sources": {
       "eyebrow": "Sources & Provenance",
