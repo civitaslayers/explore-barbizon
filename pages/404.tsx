@@ -25,8 +25,8 @@ const NotFoundPage: NextPage<NotFoundPageProps> = () => {
       <SeoHead
         title={
           locale === "fr"
-            ? "Page introuvable — Visit Barbizon"
-            : "Page not found — Visit Barbizon"
+            ? "Page introuvable | Visit Barbizon"
+            : "Page not found | Visit Barbizon"
         }
         description={
           locale === "fr"

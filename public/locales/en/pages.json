@@ -1,7 +1,7 @@
 {
   "home": {
     "meta": {
-      "title": "Visit Barbizon — Cultural Cartography",
+      "title": "Visit Barbizon | Cultural Cartography",
       "description": "A cultural guide to Barbizon, the painters' village on the edge of the Fontainebleau forest: studios, museums, trails and places to eat and stay, on one map."
     },
     "hero": {
@@ -77,7 +77,7 @@
   },
   "about": {
     "meta": {
-      "title": "About — Visit Barbizon",
+      "title": "About | Visit Barbizon",
       "description": "Visit Barbizon is a guide to the village, built around a map: places, stories and walks to explore at your own pace."
     },
     "eyebrow": "About",
@@ -92,7 +92,7 @@
   },
   "history": {
     "meta": {
-      "title": "History — Visit Barbizon",
+      "title": "History | Visit Barbizon",
       "description": "Historical postcards, a visual timeline and the sources behind the project: two centuries in the painters' village."
     },
     "eyebrow": "Barbizon Through Time",
@@ -197,7 +197,7 @@
   },
   "plan": {
     "meta": {
-      "title": "Plan Your Visit — Visit Barbizon",
+      "title": "Plan Your Visit | Visit Barbizon",
       "description": "A simple framework for a day in Barbizon: start with the map, choose a few places, and follow a walking route."
     },
     "eyebrow": "Plan Your Visit",
@@ -219,7 +219,7 @@
   },
   "stories": {
     "meta": {
-      "title": "Stories — Visit Barbizon",
+      "title": "Stories | Visit Barbizon",
       "description": "Short essays on how Barbizon has been looked at: through studio windows, along forest paths, and in the quiet of small museums."
     },
     "eyebrow": "Editorial Notebook",

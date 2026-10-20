@@ -1,7 +1,7 @@
 {
   "home": {
     "meta": {
-      "title": "Visit Barbizon — Cartographie culturelle",
+      "title": "Visit Barbizon | Cartographie culturelle",
       "description": "Le guide culturel de Barbizon, village des peintres à l'orée de la forêt de Fontainebleau : ateliers, musées, sentiers et adresses, sur une seule carte."
     },
     "hero": {
@@ -77,7 +77,7 @@
   },
   "about": {
     "meta": {
-      "title": "À propos — Visit Barbizon",
+      "title": "À propos | Visit Barbizon",
       "description": "Visit Barbizon est un guide du village conçu autour d'une carte : des lieux, des récits et des promenades, à parcourir à son rythme."
     },
     "eyebrow": "À propos",
@@ -92,7 +92,7 @@
   },
   "history": {
     "meta": {
-      "title": "Histoire — Visit Barbizon",
+      "title": "Histoire | Visit Barbizon",
       "description": "Cartes postales anciennes, chronologie illustrée et sources du projet : deux siècles d'histoire du village des peintres."
     },
     "eyebrow": "Barbizon au fil du temps",
@@ -197,7 +197,7 @@
   },
   "plan": {
     "meta": {
-      "title": "Préparer sa visite — Visit Barbizon",
+      "title": "Préparer sa visite | Visit Barbizon",
       "description": "Une trame simple pour une journée à Barbizon : partir de la carte, choisir quelques lieux, suivre un itinéraire à pied."
     },
     "eyebrow": "Préparer sa visite",
@@ -219,7 +219,7 @@
   },
   "stories": {
     "meta": {
-      "title": "Récits — Visit Barbizon",
+      "title": "Récits | Visit Barbizon",
       "description": "De courts récits sur la façon dont Barbizon a été regardé : par les fenêtres des ateliers, le long des chemins de la forêt, dans le calme des petits musées."
     },
     "eyebrow": "Carnet éditorial",

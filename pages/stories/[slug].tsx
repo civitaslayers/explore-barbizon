@@ -213,7 +213,7 @@ const StoryPage: NextPage<StoryPageProps> = ({ story, related, hasEnglishVersion
   return (
     <>
       <SeoHead
-        title={buildTitle(title, [" — Stories — Visit Barbizon", " — Visit Barbizon", " — Barbizon"])}
+        title={buildTitle(title, [" | Stories | Visit Barbizon", " | Visit Barbizon", " | Barbizon"])}
         description={dek}
         path={`/stories/${story.slug}`}
         locale={locale}

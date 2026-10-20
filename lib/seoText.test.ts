@@ -24,8 +24,8 @@ import {
 const NBSP = " ";
 const ELLIPSIS = "…";
 
-const STORY = [" — Stories — Visit Barbizon", " — Visit Barbizon", " — Barbizon"];
-const TOUR = [" — Visit Barbizon", " — Barbizon"];
+const STORY = [" | Stories | Visit Barbizon", " | Visit Barbizon", " | Barbizon"];
+const TOUR = [" | Visit Barbizon", " | Barbizon"];
 
 function count(text: string, ch: string): number {
   return text.split(ch).length - 1;
@@ -176,40 +176,40 @@ test("T1: long story title falls back to the shortest suffix", () => {
   const base = "Des pièces de lumière dans un village de forêt";
   assert.equal(base.length, 46);
   const result = buildTitle(base, STORY);
-  assert.equal(result, "Des pièces de lumière dans un village de forêt — Barbizon");
+  assert.equal(result, "Des pièces de lumière dans un village de forêt | Barbizon");
   assert.equal(result.length, 57);
 });
 
 test("T2: short story title keeps the preferred suffix (unchanged from today)", () => {
   const result = buildTitle("The Gleaners", STORY);
-  assert.equal(result, "The Gleaners — Stories — Visit Barbizon");
+  assert.equal(result, "The Gleaners | Stories | Visit Barbizon");
   assert.equal(result.length, 39);
 });
 
 test("T3: tour title keeps the preferred suffix", () => {
   const result = buildTitle("Parcours des Mosaïques", TOUR);
-  assert.equal(result, "Parcours des Mosaïques — Visit Barbizon");
+  assert.equal(result, "Parcours des Mosaïques | Visit Barbizon");
   assert.equal(result.length, 39);
 });
 
 test("T4: a 53-char name with no fitting suffix is returned bare, never cut", () => {
   const base = "N".repeat(53);
-  assert.equal(buildTitle(base, [" — Barbizon"]), base);
+  assert.equal(buildTitle(base, [" | Barbizon"]), base);
 });
 
 test("T5: boundary — 49-char base + suffix is exactly 60 and kept", () => {
-  const result = buildTitle("N".repeat(49), [" — Barbizon"]);
+  const result = buildTitle("N".repeat(49), [" | Barbizon"]);
   assert.equal(result.length, 60);
-  assert.ok(result.endsWith(" — Barbizon"));
+  assert.ok(result.endsWith(" | Barbizon"));
 });
 
 test("T6: 50-char base + suffix would be 61 → bare base", () => {
   const base = "N".repeat(50);
-  assert.equal(buildTitle(base, [" — Barbizon"]), base);
+  assert.equal(buildTitle(base, [" | Barbizon"]), base);
 });
 
 test("T7: base is trimmed", () => {
-  assert.equal(buildTitle("  Auberge Ganne ", [" — Barbizon"]), "Auberge Ganne — Barbizon");
+  assert.equal(buildTitle("  Auberge Ganne ", [" | Barbizon"]), "Auberge Ganne | Barbizon");
 });
 
 test("T8: empty suffix list returns the base", () => {

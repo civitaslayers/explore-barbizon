@@ -335,7 +335,7 @@ const PlacePage: NextPage<PlacePageProps> = ({ place }) => {
 
   const name = getLocalized(place, locale, "name") || place.name;
   const title =
-    getLocalized(place, locale, "meta_title") || buildTitle(name, [" — Barbizon"]);
+    getLocalized(place, locale, "meta_title") || buildTitle(name, [" | Barbizon"]);
   const metaDescription =
     getLocalized(place, locale, "meta_description") ||
     getLocalized(place, locale, "short_description") ||
