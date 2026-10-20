@@ -2,6 +2,12 @@
 
 ## 2026-10-18
 
+### Vercel skips builds for docs-only commits; brain/ still builds (Luigi, 2026-10-18)
+**Decision:** `vercel.json` sets `ignoreCommand` so a deployment is skipped when nothing outside `docs/**` changed since the branch's last successful deployment (`VERCEL_GIT_PREVIOUS_SHA`). Option B of `docs/audits/2026-10-18-v3-ignored-build-step.md`, narrowed to `docs/**` only.
+**Reason:** The 19 night docs PRs of 2026-10-18 produced 19 production builds with no code change. `brain/**` is not excluded because `pages/api/tasks/suggest.ts` reads `brain/current-state.md` from the deployed build.
+**Consequence:** Docs-only PRs show the Vercel check as skipped, not green; the night PR merge rule accepts "skipped" for docs-only PRs. The command fails safe: an empty previous SHA, or one missing from Vercel's shallow clone, builds. A Dashboard Ignored Build Step setting, if ever added, is overridden by `vercel.json`.
+**Migration risk:** none (build config only; no page data method, locale routing or runtime config touched).
+
 ### Writing and translation: French written natively, other languages adapted, native read before publishing (Luigi, 2026-10-18)
 **Decision:** All visitor-facing copy follows `docs/content/writing-guide.md` and `docs/content/glossary.md`, through the `barbizon-writing` skill. Order of work: sourced fact outline, French drafted natively from it, native edit by the `civitas-native-editor` agent (French alone), English adapted from the edited French (never sentence by sentence), native edit of the English, fact parity check, then Luigi reads FR and EN in context before `_meta.status = 'published'`. Prose is drafted with Opus or Fable, not Sonnet. A new locale (it, zh, ja) needs a checked glossary column and a named native reviewer before any drafting.
 **Reason:** Luigi found the published French reads translated (« Des pièces de lumière dans un village de forêt », « la manière de voir de Barbizon »). The stories were composed in English and rendered into French word for word, despite the earlier decision that French is written natively. Calques of this kind run through all ten stories and likely many location texts, and would multiply with Mandarin.
