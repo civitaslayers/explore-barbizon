@@ -1,7 +1,7 @@
 {
   "home": {
     "meta": {
-      "title": "Visit Barbizon — Cartographie culturelle",
+      "title": "Visit Barbizon | Cartographie culturelle",
       "description": "Le guide culturel de Barbizon, village des peintres à l'orée de la forêt de Fontainebleau : ateliers, musées, sentiers et adresses, sur une seule carte."
     },
     "hero": {
@@ -77,18 +77,22 @@
   },
   "about": {
     "meta": {
-      "title": "À propos — Visit Barbizon",
-      "description": "Visit Barbizon est un guide éditorial, à lire sans hâte, consacré à un village à l'orée de la forêt de Fontainebleau."
+      "title": "À propos | Visit Barbizon",
+      "description": "Visit Barbizon est un guide du village conçu autour d'une carte : des lieux, des récits et des promenades, à parcourir à son rythme."
     },
-    "eyebrow": "À propos du projet",
-    "title": "Un atlas discret pour un petit village.",
-    "p1": "Visit Barbizon est un guide éditorial, à lire sans hâte, consacré à un village à l'orée de la forêt de Fontainebleau. Il aborde Barbizon moins comme une liste de curiosités que comme un réseau de relations : des ateliers et des chemins, le temps qu'il fait et la pierre, des pièces et des itinéraires.",
-    "p2": "Le projet se conçoit comme une cartographie culturelle plutôt que comme une liste à cocher. Les lieux sont choisis pour la manière dont ils cadrent la lumière et le mouvement ; les récits retracent la façon dont artistes et visiteurs ont lu ce paysage au fil du temps.",
-    "p3": "Visit Barbizon est propulsé par Civitas Layers, une plateforme de récits géolocalisés, construits par couches."
+    "eyebrow": "À propos",
+    "title": "Barbizon, une carte à la main",
+    "p1": "Visit Barbizon est un guide du village conçu autour d'une carte. On y trouve des lieux, des récits et des promenades, du cœur du bourg jusqu'à la lisière de la forêt de Fontainebleau.",
+    "p2": "C'est à Barbizon que des peintres ont appris à regarder la forêt. Le site propose de lire le village couche par couche : l'art et l'histoire, les commerces, les restaurants et les hébergements, la forêt, les informations pratiques. Tout figure sur la même carte, que chacun parcourt à son rythme.",
+    "p3": "Les lieux sont repérés sur le terrain, et nos photographies sont prises sur place. Les éléments historiques sont recoupés avec les archives ; les sources sont réunies sur la page {{historyLink}}. Les textes sont rédigés en français et en anglais.",
+    "historyLink": "Histoire",
+    "p4": "Visit Barbizon a été créé par Luigi Pérez, qui vit et travaille à Barbizon.",
+    "p5": "Le projet s'enrichit peu à peu de nouveaux lieux et de nouveaux récits. Une erreur, une suggestion ? Écrivez à {{email}}.",
+    "closing": "Visit Barbizon s'appuie sur Civitas Layers."
   },
   "history": {
     "meta": {
-      "title": "Histoire — Visit Barbizon",
+      "title": "Histoire | Visit Barbizon",
       "description": "Cartes postales anciennes, chronologie illustrée et sources du projet : deux siècles d'histoire du village des peintres."
     },
     "eyebrow": "Barbizon au fil du temps",
@@ -178,7 +182,8 @@
       "barye": "Sculpteur animalier, il peint aussi les gorges de Franchard et d'Apremont à la fin des années 1840, aux côtés de Millet et de Díaz.",
       "bodmer": "Peintre et graveur suisse, installé à Barbizon vers 1849. Le chêne qui porte son nom se dressait au Bas-Bréau.",
       "hunt": "Peintre américain et ami de Millet, il acquiert Le Semeur de 1850, aujourd'hui au musée des Beaux-Arts de Boston.",
-      "monet": "En 1865, il peint le chêne Bodmer, dans la futaie du Bas-Bréau."
+      "monet": "En 1865, il peint le chêne Bodmer, dans la futaie du Bas-Bréau.",
+      "ziem": "Célèbre pour ses vues de Venise, il vient aussi à Barbizon, où une plaque rappelle sa présence."
     },
     "sources": {
       "eyebrow": "Sources et provenance",
@@ -192,7 +197,7 @@
   },
   "plan": {
     "meta": {
-      "title": "Préparer sa visite — Visit Barbizon",
+      "title": "Préparer sa visite | Visit Barbizon",
       "description": "Une trame simple pour une journée à Barbizon : partir de la carte, choisir quelques lieux, suivre un itinéraire à pied."
     },
     "eyebrow": "Préparer sa visite",
@@ -214,7 +219,7 @@
   },
   "stories": {
     "meta": {
-      "title": "Récits — Visit Barbizon",
+      "title": "Récits | Visit Barbizon",
       "description": "De courts récits sur la façon dont Barbizon a été regardé : par les fenêtres des ateliers, le long des chemins de la forêt, dans le calme des petits musées."
     },
     "eyebrow": "Carnet éditorial",

@@ -20,7 +20,7 @@
     "places": "Places"
   },
   "map": {
-    "title": "Explore Map — Visit Barbizon",
+    "title": "Explore Map | Visit Barbizon",
     "layersAndSearch": "Layers & Search",
     "close": "Close",
     "search": "Search",
@@ -110,7 +110,7 @@
     "filterAll": "All",
     "whereToEat": "Where to eat",
     "whereToStay": "Where to stay",
-    "metaTitle": "Places of Barbizon — Visit Barbizon",
+    "metaTitle": "Places of Barbizon | Visit Barbizon",
     "metaDescription": "The directory of every place in Barbizon: artists' studios, historic inns, village shops, and the trails and climbing sites of the Fontainebleau forest.",
     "curatedUnavailable": "Selection temporarily unavailable."
   },
@@ -121,8 +121,8 @@
     "distance": "Distance",
     "stops": "Stops",
     "stopsHeading": "Places along the route",
-    "titleSuffix": " — Visit Barbizon",
-    "titleSuffixShort": " — Barbizon",
+    "titleSuffix": " | Visit Barbizon",
+    "titleSuffixShort": " | Barbizon",
     "descriptionFallback": "{{name}} — a walking tour of Barbizon."
   },
   "story": {

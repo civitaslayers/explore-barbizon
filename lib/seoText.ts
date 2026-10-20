@@ -25,7 +25,7 @@ const ELLIPSIS = "…"; // one UTF-16 unit
 // Dangling opener, dash, trailing punctuation, or (non-)breaking space left at
 // the end of a cut. The apostrophe is deliberately not stripped (French
 // elision `l'` can't end a token at a space boundary anyway).
-const TRAILING_JUNK = /[   ,;:.!?\-–—(«“"]+$/;
+const TRAILING_JUNK = /[   ,;:.!?\-–—(«“"|]+$/;
 
 const BALANCED_PAIRS: ReadonlyArray<readonly [string, string]> = [
   ["«", "»"],

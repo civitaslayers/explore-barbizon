@@ -1,4 +1,5 @@
 import type { GetStaticProps, NextPage } from "next";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import type { SSRConfig } from "next-i18next/pages";
 import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
@@ -8,10 +9,23 @@ import nextI18NextConfig from "@/next-i18next.config";
 
 type AboutPageProps = SSRConfig;
 
+const CONTACT_EMAIL = "info@explorebarbizon.com";
+
+// Mid-sentence links without a <Trans> helper (same pattern as
+// pages/plan-your-visit.tsx): interpolate a sentinel, split on it, render the
+// link between the two halves.
+const LINK_SENTINEL = "@@LINK@@";
+
+const linkClass = "underline underline-offset-4 hover:text-ink";
+
 const AboutPage: NextPage<AboutPageProps> = () => {
   const router = useRouter();
   const locale = router.locale ?? "fr";
   const { t } = useTranslation("pages");
+
+  const [p3Before, p3After] = t("about.p3", { historyLink: LINK_SENTINEL }).split(LINK_SENTINEL);
+  const [p5Before, p5After] = t("about.p5", { email: LINK_SENTINEL }).split(LINK_SENTINEL);
+
   return (
     <>
       <SeoHead
@@ -33,7 +47,22 @@ const AboutPage: NextPage<AboutPageProps> = () => {
         <div className="editorial-measure space-y-4 text-sm leading-relaxed text-ink/80 md:text-base">
           <p>{t("about.p1")}</p>
           <p>{t("about.p2")}</p>
-          <p>{t("about.p3")}</p>
+          <p>
+            {p3Before}
+            <Link href="/history" className={linkClass}>
+              {t("about.historyLink")}
+            </Link>
+            {p3After}
+          </p>
+          <p>{t("about.p4")}</p>
+          <p>
+            {p5Before}
+            <a href={`mailto:${CONTACT_EMAIL}`} className={linkClass}>
+              {CONTACT_EMAIL}
+            </a>
+            {p5After}
+          </p>
+          <p className="text-ink/60">{t("about.closing")}</p>
         </div>
       </section>
     </>
@@ -48,4 +77,3 @@ export const getStaticProps: GetStaticProps<AboutPageProps> = async ({
 };
 
 export default AboutPage;
-

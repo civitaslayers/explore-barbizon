@@ -31,6 +31,7 @@ const ARTISTS: ReadonlyArray<{
   { name: "Jules Dupré", dates: "1811–1889", noteKey: "dupre" },
   { name: "Antoine-Louis Barye", dates: "1795–1875", noteKey: "barye" },
   { name: "Karl Bodmer", dates: "1809–1893", noteKey: "bodmer", placeSlug: "chene-bodmer" },
+  { name: "Félix Ziem", dates: "1821–1911", noteKey: "ziem" },
   { name: "William Morris Hunt", dates: "1824–1879", noteKey: "hunt" },
   { name: "Claude Monet", dates: "1840–1926", noteKey: "monet", placeSlug: "chene-bodmer" }
 ];

@@ -20,7 +20,7 @@
     "places": "Lieux"
   },
   "map": {
-    "title": "Explorer la carte — Visit Barbizon",
+    "title": "Explorer la carte | Visit Barbizon",
     "layersAndSearch": "Filtres et recherche",
     "close": "Fermer",
     "search": "Recherche",
@@ -111,7 +111,7 @@
     "whereToEat": "Où manger",
     "whereToStay": "Où dormir",
     "curatedUnavailable": "Sélection temporairement indisponible.",
-    "metaTitle": "Lieux de Barbizon — Visit Barbizon",
+    "metaTitle": "Lieux de Barbizon | Visit Barbizon",
     "metaDescription": "Tous les lieux de Barbizon : ateliers d'artistes, auberges historiques, commerces du village, sentiers et sites d'escalade de la forêt de Fontainebleau."
   },
   "tour": {
@@ -121,8 +121,8 @@
     "distance": "Distance",
     "stops": "Étapes",
     "stopsHeading": "Les lieux du parcours",
-    "titleSuffix": " — Visit Barbizon",
-    "titleSuffixShort": " — Barbizon",
+    "titleSuffix": " | Visit Barbizon",
+    "titleSuffixShort": " | Barbizon",
     "descriptionFallback": "{{name}} — une promenade à pied à Barbizon."
   },
   "story": {
