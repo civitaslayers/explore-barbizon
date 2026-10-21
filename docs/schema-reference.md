@@ -454,7 +454,7 @@ claude.ai applies directly via MCP, which never passes the release checker.
 - `media` is location-scoped only — cannot attach images to tours, stories, or artists
 - `tours` now HAS an `is_published` flag (added 2026-07-13 with the i18n groundwork)
 - No unique constraints visible on most slug columns (may exist as indexes, not visible through information_schema) — `stories.slug` and `routes.slug` are the exception: both are explicitly UNIQUE (`stories_slug_unique`, and a unique constraint on `routes.slug`)
-- `story_locations` join table is **applied** (`migrations/create_story_locations.sql`); until seeded, story-page places fall back to `data/relatedStories.ts`
+- `story_locations` join table is **applied** (`migrations/create_story_locations.sql`) and seeded (6 rows on 2026-10-21); a story with no rows still has its places fall back to `data/relatedStories.ts`
 - `location_parking_distances` is **applied** (`migrations/create_location_parking_distances.sql`); until filled by `scripts/compute-parking-distances.mjs --execute` (Luigi's action), `fetchNearestParking` returns null and no "minutes from the car park" fact can render
 
 ---
