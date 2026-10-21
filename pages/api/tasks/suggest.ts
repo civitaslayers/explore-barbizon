@@ -42,6 +42,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: `Failed to load tasks: ${e instanceof Error ? e.message : e}` });
   }
 
+  // Local-dev only (403 above unless NODE_ENV=development): reads the
+  // developer's working-tree brain/current-state.md. Never runs on Vercel,
+  // and brain/ is in no deployed function trace, so scripts/vercel-ignore-build.sh
+  // skips builds for brain-only changes.
   const brainDir = path.join(process.cwd(), "brain");
   const currentState = readFileSafe(path.join(brainDir, "current-state.md"));
 
