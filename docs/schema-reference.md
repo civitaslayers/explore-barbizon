@@ -197,7 +197,7 @@ Note: `cover_credit`/`cover_alt` added 2026-10-05 — `cover_credit` is the arti
 
 ---
 
-### `story_locations` (pending apply: migrations/create_story_locations.sql)
+### `story_locations` (applied: migrations/create_story_locations.sql)
 
 | Column | Type | Nullable | Default |
 |---|---|---|---|
@@ -211,7 +211,7 @@ FKs: `story_id` → `stories.id` ON DELETE CASCADE, `location_id` → `locations
 
 ---
 
-### `location_parking_distances` (pending apply: migrations/create_location_parking_distances.sql)
+### `location_parking_distances` (applied: migrations/create_location_parking_distances.sql)
 
 | Column | Type | Nullable | Default |
 |---|---|---|---|
@@ -409,6 +409,43 @@ These override any default assumptions in queries, migrations, or AI-assisted se
 
 ---
 
+### Migration rule: explicit grants on every new public table (2026-10-20)
+
+From 2026-10-30 Supabase no longer gives new tables in `public` automatic
+Data API grants (anon, authenticated and service_role all lose them; existing
+tables keep theirs). So every `create table` in `public` is followed, **in the
+same migration file**, by an explicit grant decision. Copy
+`migrations/_TEMPLATE.sql`.
+
+Every new public table gets, in this order:
+
+1. `alter table public.<t> enable row level security;`
+2. `revoke all on table public.<t> from anon, authenticated, service_role;`
+   (the migration then means the same thing before and after 2026-10-30)
+3. One of:
+   - **Public-read** (content the site reads with the anon key):
+     `grant select on table public.<t> to anon, authenticated;` plus
+     `grant select, insert, update, delete on table public.<t> to service_role;`
+     plus a `for select to anon, authenticated` policy.
+   - **Internal** (logs, analytics, ops, editorial tooling): no grant to anon
+     or authenticated;
+     `grant select, insert, update, delete on table public.<t> to service_role;`
+     RLS on with no policy (or an explicit `using (false)` deny-all policy).
+     Same pattern as `page_views`. Read and write it only from `*.server.ts` or
+     `pages/api/**`; add it to `DENY_ALL_TABLES` in `lib/rlsBoundary.test.ts`.
+4. Policies match the grants: no grant without a policy for public-read, and
+   no anon/authenticated policy on an internal table.
+
+Never grant insert, update or delete to anon or authenticated unless the task
+plan states why. Use uuid primary keys; a serial column
+also needs `grant usage, select on sequence ... to service_role`.
+
+civitas-release-checker treats a migration that creates a public table
+without this grant decision as NO SHIP. The rule also binds DDL that
+claude.ai applies directly via MCP, which never passes the release checker.
+
+---
+
 ### Current Schema Gaps
 
 - No `artists` table
@@ -417,8 +454,8 @@ These override any default assumptions in queries, migrations, or AI-assisted se
 - `media` is location-scoped only — cannot attach images to tours, stories, or artists
 - `tours` now HAS an `is_published` flag (added 2026-07-13 with the i18n groundwork)
 - No unique constraints visible on most slug columns (may exist as indexes, not visible through information_schema) — `stories.slug` and `routes.slug` are the exception: both are explicitly UNIQUE (`stories_slug_unique`, and a unique constraint on `routes.slug`)
-- `story_locations` join table is written but **pending apply** (`migrations/create_story_locations.sql`); until applied and seeded, story-page places fall back to `data/relatedStories.ts`
-- `location_parking_distances` is written but **pending apply** (`migrations/create_location_parking_distances.sql`); until applied and filled by `scripts/compute-parking-distances.mjs --execute` (Luigi's action), `fetchNearestParking` returns null and no "minutes from the car park" fact can render
+- `story_locations` join table is **applied** (`migrations/create_story_locations.sql`); until seeded, story-page places fall back to `data/relatedStories.ts`
+- `location_parking_distances` is **applied** (`migrations/create_location_parking_distances.sql`); until filled by `scripts/compute-parking-distances.mjs --execute` (Luigi's action), `fetchNearestParking` returns null and no "minutes from the car park" fact can render
 
 ---
 
