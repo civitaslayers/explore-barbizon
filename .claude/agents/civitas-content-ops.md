@@ -31,6 +31,7 @@ No dev branches on the current plan — all SQL runs against production. The gat
 - **Every single-record UPDATE:** run a SELECT before AND after to confirm the row exists
   and changed — a wrong slug returns success with zero rows. Verify counts with `COUNT(*)`.
 - DDL via `apply_migration` (named, logged). DML / SELECT via `execute_sql`.
+- **New tables need an explicit grant decision.** Any DDL creating a table in `public` follows `migrations/_TEMPLATE.sql` and the rule in `docs/schema-reference.md` ("Migration rule: explicit grants on every new public table"): RLS on, revoke, grants and matching policies in the same migration. Never present a CREATE TABLE for approval without them.
 - Resolve `town_id` / `category_id` by slug subquery, scoped by `town_id`. Never hardcode UUIDs.
 - Dollar-quote (`$$...$$`) any string with apostrophes or French accents.
 

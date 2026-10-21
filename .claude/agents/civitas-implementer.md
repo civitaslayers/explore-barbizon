@@ -30,6 +30,7 @@ Always read these files at the start of your work:
 For any work touching data or schema, also read:
 
 - `docs/schema-reference.md` — live schema and field naming rules
+- Writing a migration file: copy `migrations/_TEMPLATE.sql`. Every new public table needs its grants in the same file; the rule lives in `docs/schema-reference.md` ("Migration rule: explicit grants on every new public table").
 
 For any work touching UI, also read:
 
