@@ -24,6 +24,14 @@ _Luigi's morning bug review with claude.ai, 2026-10-20 (PR #77)._
 
 ---
 
+### Vercel skips docs- and brain-only builds; previews compare with main; one night docs PR (task 985b6133, claude.ai 2026-10-20)
+**Decision:** The Ignored Build Step moves to `scripts/vercel-ignore-build.sh` (`vercel.json` runs it) and skips when nothing outside `docs/**` or `brain/**` changed. Preview builds compare HEAD with its merge base with `main`, fetched anonymously from GitHub, so a brand-new docs-only branch skips too. Production keeps `VERCEL_GIT_PREVIOUS_SHA`. Night docs output ships as one branch and one PR per night (`night/<date>-docs`, `docs/briefs/standing.md`); code jobs and S4 keep their own PRs. Supersedes the 2026-10-18 entry below.
+**Reason:** The free team is at 75% of the 10 GB Deployment Storage limit: 100 deployments between 2026-10-15 and 2026-10-20, mostly night docs branches. `VERCEL_GIT_PREVIOUS_SHA` is empty on a branch's first deployment, so every new docs branch built. The 2026-10-18 reason for keeping `brain/` was wrong: `pages/api/tasks/suggest.ts` returns 403 outside development and `brain/` is in no deployed function trace.
+**Consequence:** Docs- or brain-only PRs and merges show Vercel as skipped. Any missing variable, commit or network error ends in a build. If the repo goes private, previews fall back to the previous-SHA rule. No Supabase or GitHub fetch for `suggest.ts` (a deliberate deviation from the task spec: it is a local-dev tool reading the working tree). Hobby retention defaults to 30 days for every deployment state and is set per project under Settings → Security → Deployment Retention Policy (vercel.com/docs/deployment-retention); shortening it is Luigi's call. The scheduled night-loop routines still name one branch per job and need the same change on claude.ai.
+**Migration risk:** none (build config and docs only; no page data method, locale routing or runtime config touched).
+
+---
+
 ### Every new public table gets explicit grants in the same migration (task e342da15, claude.ai 2026-10-20)
 **Decision:** Every `create table` in `public` is followed, in the same migration, by: RLS enabled; `revoke all ... from anon, authenticated, service_role`; then either public-read grants (`select` to anon, authenticated) with a matching select policy, or internal grants (service_role only, like `page_views`). `service_role` is always granted explicitly (`select, insert, update, delete`). The pattern lives in `migrations/_TEMPLATE.sql`, and the rule in `docs/schema-reference.md` ("Migration rule: explicit grants on every new public table"). civitas-release-checker marks a migration that creates a public table without this grant decision NO SHIP.
 **Reason:** Supabase changelog 45329: from 2026-10-30 new public tables and sequences in existing projects no longer get automatic Data API grants for anon, authenticated or service_role. Today our `pg_default_acl` (owners postgres and supabase_admin) still grants ALL on new tables to all three roles, so RLS is the only barrier. The explicit revoke-then-grant makes a migration mean the same thing before and after the switch, and closes default anon write grants on new tables.
@@ -32,7 +40,7 @@ _Luigi's morning bug review with claude.ai, 2026-10-20 (PR #77)._
 
 ## 2026-10-18
 
-### Vercel skips builds for docs-only commits; brain/ still builds (Luigi, 2026-10-18)
+### Vercel skips builds for docs-only commits; brain/ still builds (Luigi, 2026-10-18) — superseded 2026-10-20, see above
 **Decision:** `vercel.json` sets `ignoreCommand` so a deployment is skipped when nothing outside `docs/**` changed since the branch's last successful deployment (`VERCEL_GIT_PREVIOUS_SHA`). Option B of `docs/audits/2026-10-18-v3-ignored-build-step.md`, narrowed to `docs/**` only.
 **Reason:** The 19 night docs PRs of 2026-10-18 produced 19 production builds with no code change. `brain/**` is not excluded because `pages/api/tasks/suggest.ts` reads `brain/current-state.md` from the deployed build.
 **Consequence:** Docs-only PRs show the Vercel check as skipped, not green; the night PR merge rule accepts "skipped" for docs-only PRs. The command fails safe: an empty previous SHA, or one missing from Vercel's shallow clone, builds. A Dashboard Ignored Build Step setting, if ever added, is overridden by `vercel.json`.

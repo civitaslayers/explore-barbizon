@@ -12,8 +12,26 @@ Read only the section you are running.
 
 Rules for all standing jobs:
 - Read-only on code: commit only new files under `docs/audits/` or
-  `docs/sources/`, on a fresh branch `night/<yyyy-mm-dd>-<job>` from
-  `origin/main`; push and open one PR per job. No code changes, ever.
+  `docs/sources/`. No code changes, ever.
+- One docs PR per night. Every docs-only output of the night (S1, S2
+  passes, S3, and any briefed job whose output is only files under
+  `docs/`) goes on ONE branch, `night/<yyyy-mm-dd>-docs`, and ONE PR, where
+  <yyyy-mm-dd> is the date the night run started (Europe/Paris), so a
+  resumed fallback run uses the same name. The first docs job creates the
+  branch from `origin/main`, pushes it, and opens the PR titled
+  `night <yyyy-mm-dd>: docs and research`. Every later job, and a resumed
+  run, fetches that branch, checks it out, adds its commits on top
+  (messages start with the job, e.g. `S2 pass 3: ...`), and pushes. Never
+  force-push: on a rejected push, fetch, rebase onto the remote branch,
+  push again. Each job adds one PR comment (`gh api .../issues/<n>/comments`)
+  naming the job, task id and file, and its `outputs` row points at that
+  PR. Find the PR with `gh api "repos/civitaslayers/explore-barbizon/pulls?head=civitaslayers:night/<date>-docs&state=all"`;
+  if it is already merged or closed, use `night/<date>-docs-2`.
+  A briefed job that changes anything outside `docs/` keeps its own branch
+  `night/<date>-<job>` and its own PR. This rule overrides older brief
+  wording about one branch per job.
+- Docs-only PRs show the Vercel check as skipped
+  (`scripts/vercel-ignore-build.sh`); skipped counts as passing for them.
 - Database writes allowed: `research_findings` (insert, and update of
   `status`/`method`/`source_*`/`quote`/`notes`/`updated_at` on rows you
   verified) and `tasks` (insert follow-ups, status writes on your own task).
@@ -145,7 +163,9 @@ or `pull` in the main checkout, and never touch its uncommitted files.
 6. Report `docs/audits/<date>-morning.md` (findings table as in S1, new /
    still open / fixed against the previous morning report), commit on
    branch `night/<date>-morning` in the worktree, push, open one PR via the
-   GitHub REST API (`gh api`, not GraphQL). File follow-up tasks for high and
+   GitHub REST API (`gh api`, not GraphQL). S4 keeps its own branch and PR: it runs on another machine while the
+   cloud run may still be pushing, and sharing the docs branch would race. Its
+   docs-only PR does not build. File follow-up tasks for high and
    medium findings under the shared rules. Then `git worktree remove` it.
 7. Status: on start `update tasks set execution_status = 'in_progress',
    updated_at = now()` on e791b48c; at the end set it back to `todo` and
