@@ -30,6 +30,14 @@ _Luigi's morning bug review with claude.ai, 2026-10-20 (PR #77)._
 **Consequence:** Docs- or brain-only PRs and merges show Vercel as skipped. Any missing variable, commit or network error ends in a build. If the repo goes private, previews fall back to the previous-SHA rule. No Supabase or GitHub fetch for `suggest.ts` (a deliberate deviation from the task spec: it is a local-dev tool reading the working tree). Hobby retention defaults to 30 days for every deployment state and is set per project under Settings → Security → Deployment Retention Policy (vercel.com/docs/deployment-retention); shortening it is Luigi's call. The scheduled night-loop routines still name one branch per job and need the same change on claude.ai.
 **Migration risk:** none (build config and docs only; no page data method, locale routing or runtime config touched).
 
+---
+
+### Every new public table gets explicit grants in the same migration (task e342da15, claude.ai 2026-10-20)
+**Decision:** Every `create table` in `public` is followed, in the same migration, by: RLS enabled; `revoke all ... from anon, authenticated, service_role`; then either public-read grants (`select` to anon, authenticated) with a matching select policy, or internal grants (service_role only, like `page_views`). `service_role` is always granted explicitly (`select, insert, update, delete`). The pattern lives in `migrations/_TEMPLATE.sql`, and the rule in `docs/schema-reference.md` ("Migration rule: explicit grants on every new public table"). civitas-release-checker marks a migration that creates a public table without this grant decision NO SHIP.
+**Reason:** Supabase changelog 45329: from 2026-10-30 new public tables and sequences in existing projects no longer get automatic Data API grants for anon, authenticated or service_role. Today our `pg_default_acl` (owners postgres and supabase_admin) still grants ALL on new tables to all three roles, so RLS is the only barrier. The explicit revoke-then-grant makes a migration mean the same thing before and after the switch, and closes default anon write grants on new tables.
+**Consequence:** A table created without grants after 2026-10-30 is invisible to supabase-js; app fallbacks (for example story_locations to `data/relatedStories.ts`) would hide this silently. Existing tables keep their current grants, which are wider than needed (anon holds write grants, gated only by RLS); tightening them is a separate task. New views and functions are not covered yet. The rule binds claude.ai's direct MCP DDL too, which never passes the release checker.
+**Migration risk:** none (template and docs; no live schema change).
+
 ## 2026-10-18
 
 ### Vercel skips builds for docs-only commits; brain/ still builds (Luigi, 2026-10-18) — superseded 2026-10-20, see above

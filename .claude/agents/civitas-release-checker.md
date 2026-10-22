@@ -105,6 +105,12 @@ this class:
   full audit can run against protected previews and the pre-merge gate becomes
   fully automated.
 
+### 10. Migration grants (NO SHIP)
+- List changed migrations: `git diff --name-only --diff-filter=AM origin/main...HEAD -- migrations/` (ignore `migrations/_TEMPLATE.sql`).
+- For each `create table` on a `public.` table in those files, the same file must contain: `enable row level security` for it; `revoke all on table public.<t> from anon, authenticated, service_role`; an explicit grant to `service_role`; and either (public-read) `grant select ... to anon, authenticated` plus a select policy for anon/authenticated, or (internal) no grant to anon/authenticated.
+- Any of these missing is a FAIL marked **NO SHIP**: the change must not be merged, whatever the other checks say. Rule: `docs/schema-reference.md`, "Migration rule: explicit grants on every new public table".
+- A grant of insert/update/delete/all to anon or authenticated is a WARNING unless the task plan justifies it.
+
 ## Output format
 
 Report as a checklist:
@@ -121,6 +127,7 @@ RELEASE CHECK — [date]
 ✅ Secret hygiene: clean
 ⚠️  Broken pages: /places/grande-rue returns 404
 ✅ SEO audit: 64 pass / 40 fail (expected pre-migration French-content length) / 2 warn
+✅ Migration grants: 1 new public table, explicit grants present
 ```
 
 Then list all failures and warnings with file paths and line numbers where applicable.
